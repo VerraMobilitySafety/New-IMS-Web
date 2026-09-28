@@ -333,7 +333,7 @@
 <main class="main">
 <section class="global-hero">
  <div class="hero-content"><div class="hero-kicker">Manage / Projects</div><h1>Implementation</h1><p>Manage non-BAU projects from handover through delivery and closure.</p><div class="hero-rule"></div></div>
- <div class="hero-tools"><input class="hero-search" placeholder="⌕   Search VERO..."><div class="avatar">DB</div></div>
+ <div class="hero-tools"><input class="hero-search" placeholder="⌕   Search VERO..."><div class="avatar" id="userAvatar" title="Signed in user • Click to sign out" onclick="signOut()" style="cursor:pointer">—</div></div>
 </section>
 <div class="project-content">
  <div class="project-toolbar">
@@ -360,7 +360,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.20</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.21</span></footer>
 </div></main></div>
 
 
@@ -400,6 +400,67 @@ const PROJECTS_API=API_BASE+'/projects';
 const PROJECT_REQUEST_API=id=>`${API_BASE}/projects/${id}/request`;
 const PROJECT_MILESTONES_API=id=>`${API_BASE}/projects/${id}/milestones`;
 
+const VERO_TOKEN_KEY='vero_session_token';
+const VERO_USER_KEY='vero_current_user';
+
+function getVeroToken(){return localStorage.getItem(VERO_TOKEN_KEY)||''}
+
+function clearVeroSession(){
+ localStorage.removeItem(VERO_TOKEN_KEY);
+ localStorage.removeItem(VERO_USER_KEY);
+}
+
+function redirectToLogin(){
+ clearVeroSession();
+ const returnTo=encodeURIComponent(location.pathname.split('/').pop()+location.search);
+ location.replace('login.html?return='+returnTo);
+}
+
+async function apiFetch(url,options={}){
+ const token=getVeroToken();
+ if(!token){redirectToLogin();throw new Error('Authentication required')}
+ const headers=new Headers(options.headers||{});
+ headers.set('Authorization','Bearer '+token);
+ if(!headers.has('Accept'))headers.set('Accept','application/json');
+ const response=await fetch(url,{...options,headers});
+ if(response.status===401){redirectToLogin();throw new Error('Authentication required')}
+ return response;
+}
+
+function paintSignedInUser(user){
+ try{localStorage.setItem(VERO_USER_KEY,JSON.stringify(user))}catch(e){}
+ const avatar=document.getElementById('userAvatar');
+ if(avatar){
+  const a=(user?.first_name||'').charAt(0),b=(user?.last_name||'').charAt(0);
+  avatar.textContent=(a+b).toUpperCase()||'U';
+  avatar.title=((user?.first_name||'')+' '+(user?.last_name||'')).trim()+' • Click to sign out';
+ }
+}
+
+async function requireAuth(){
+ const token=getVeroToken();
+ if(!token){redirectToLogin();return false}
+ try{
+  const r=await apiFetch(API_BASE+'/auth/me',{cache:'no-store'});
+  if(!r.ok)throw new Error('Unable to validate VERO session');
+  const d=await r.json();
+  paintSignedInUser(d.user);
+  return true;
+ }catch(e){
+  if(e.message!=='Authentication required')redirectToLogin();
+  return false;
+ }
+}
+
+async function signOut(){
+ const token=getVeroToken();
+ try{
+  if(token)await fetch(API_BASE+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+token}});
+ }catch(e){}
+ clearVeroSession();
+ location.replace('login.html');
+}
+
 let projects=[],currentFilter='all';
 let currentProject=null,currentRequest=null,currentMilestones=[];
 let requestStep=0;
@@ -421,7 +482,7 @@ function normalise(p){
 function stageClass(v){return v==='initiation'?'mobilisation':v==='completion'?'delivery':'planning'}
 async function loadProjects(){
  try{
-  const r=await fetch(PROJECTS_API,{headers:{Accept:'application/json'},cache:'no-store'});
+  const r=await apiFetch(PROJECTS_API,{headers:{Accept:'application/json'},cache:'no-store'});
   if(!r.ok)throw Error('API returned '+r.status);
   const d=await r.json(),rows=Array.isArray(d)?d:(d.projects||[]);
   projects=rows.map(normalise);render();kpis();
@@ -462,7 +523,7 @@ async function openProject(i){
  if(String(p.status).toLowerCase()==='draft'||p.stage==='New Project Request'){
   try{
    currentProject=p.raw;
-   const [rr,mr]=await Promise.all([fetch(PROJECT_REQUEST_API(p.raw.id),{cache:'no-store'}),fetch(PROJECT_MILESTONES_API(p.raw.id),{cache:'no-store'})]);
+   const [rr,mr]=await Promise.all([apiFetch(PROJECT_REQUEST_API(p.raw.id),{cache:'no-store'}),apiFetch(PROJECT_MILESTONES_API(p.raw.id),{cache:'no-store'})]);
    currentRequest=rr.ok?(await rr.json()).request||{}:{};
    currentMilestones=mr.ok?(await mr.json()).milestones||[]:[];
    requestStep=0;
@@ -514,7 +575,7 @@ async function saveMilestones(){
  const existingIds=new Set(currentMilestones.map(x=>String(x.id)));
  for(const r of rows){
   if(r.existing_id&&existingIds.has(String(r.existing_id)))continue;
-  const res=await fetch(PROJECT_MILESTONES_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({milestone_type:r.type,milestone_name:r.milestone_name,target_date:r.target_date,owner:currentProject.project_owner})});
+  const res=await apiFetch(PROJECT_MILESTONES_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({milestone_type:r.type,milestone_name:r.milestone_name,target_date:r.target_date,owner:currentProject.project_owner})});
   if(!res.ok){const d=await res.json().catch(()=>({}));throw new Error(d.message||'Unable to save milestone')}
  }
 }
@@ -524,7 +585,7 @@ async function ensureProject(payload){
  const type=(payload.request_type||'').trim()||'Not Set';
  const customer=(payload.client_name||'').trim()||null;
  const owner=(payload.account_manager||'').trim()||payload.requested_by||null;
- const res=await fetch(PROJECTS_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+ const res=await apiFetch(PROJECTS_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
   project_name:title,project_type:type,customer:customer,project_owner:owner,status:'Draft',
   start_date:payload.contract_start_date||null,target_end_date:payload.contract_expiry_date||null,
   description:payload.project_description||payload.scope_of_works||null
@@ -543,11 +604,11 @@ async function saveRequest(e){
  try{
   await ensureProject(payload);
   payload.requested_by=payload.requested_by||currentProject.project_owner||payload.account_manager||null;
-  const res=await fetch(PROJECT_REQUEST_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const res=await apiFetch(PROJECT_REQUEST_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   const data=await res.json().catch(()=>({}));
   if(!res.ok)throw new Error(data.message||('Request API returned '+res.status));
   await saveMilestones();
-  const [rr,mr]=await Promise.all([fetch(PROJECT_REQUEST_API(currentProject.id),{cache:'no-store'}),fetch(PROJECT_MILESTONES_API(currentProject.id),{cache:'no-store'})]);
+  const [rr,mr]=await Promise.all([apiFetch(PROJECT_REQUEST_API(currentProject.id),{cache:'no-store'}),apiFetch(PROJECT_MILESTONES_API(currentProject.id),{cache:'no-store'})]);
   if(!rr.ok)throw new Error('Request saved, but VERO could not reload it.');
   currentRequest=(await rr.json()).request;if(mr.ok)currentMilestones=(await mr.json()).milestones||[];
   if(ok){ok.textContent=intent==='Submitted'?'New Project Request submitted successfully.':'Draft saved successfully.';ok.style.display='block'}
@@ -565,6 +626,8 @@ async function saveRequest(e){
 
 function closeSetup(){document.getElementById('setupPanel').classList.remove('show');document.body.style.overflow=''}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSetup();closeProject()}});
-loadProjects();
+document.addEventListener('DOMContentLoaded',async()=>{
+ if(await requireAuth())await loadProjects();
+});
 </script>
 </body></html>
