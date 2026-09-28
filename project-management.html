@@ -278,7 +278,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.12</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.13</span></footer>
 </div></main></div>
 
 
@@ -381,6 +381,9 @@ function newProject(){
  const body=document.querySelector('#setupPanel .setup-body');
  body.insertAdjacentHTML('afterbegin','<div class="request-shell" style="padding-bottom:0"><div class="new-request-banner"><b>New Project Request</b> — a VERO project record will be created the first time you save this request.</div></div>');
 }
+function val(name,fallback=''){const v=currentRequest?.[name];return v===null||v===undefined?fallback:v}
+function checked(name,value){return String(val(name,''))===String(value)?'checked':''}
+function boolChecked(name,value){const v=currentRequest?.[name];return v===value?'checked':''}
 function choice(name,value,label,kind='radio'){return `<div class="choice"><input type="${kind}" id="${name}_${value.replace(/[^a-z0-9]/gi,'_')}" name="${name}" value="${esc(value)}" ${checked(name,value)}><label for="${name}_${value.replace(/[^a-z0-9]/gi,'_')}">${esc(label)}</label></div>`}
 function yesno(name){return `<div class="yesno"><div class="choice"><input type="radio" id="${name}_yes" name="${name}" value="true" ${boolChecked(name,true)}><label for="${name}_yes">Yes</label></div><div class="choice"><input type="radio" id="${name}_no" name="${name}" value="false" ${boolChecked(name,false)}><label for="${name}_no">No</label></div></div>`}
 function input(label,name,type='text',extra=''){return `<div class="form-field"><label>${label}</label><input name="${name}" type="${type}" value="${esc(val(name,''))}" ${extra}></div>`}
