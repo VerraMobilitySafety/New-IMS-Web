@@ -24,7 +24,6 @@
 .tasks{padding:4px 20px 16px}.task{padding:14px 0;border-bottom:1px solid var(--line);display:flex;gap:11px}.task:last-child{border-bottom:0}.dot{width:9px;height:9px;border-radius:50%;background:var(--green);margin-top:5px;flex:none}.dot.red{background:var(--red)}.task b{font-size:13px}.task small{display:block;color:var(--grey);margin-top:3px}
 .empty{padding:22px 20px;color:var(--grey);font-size:13px}.footer{margin-top:25px;border-top:1px solid var(--line);padding-top:15px;color:var(--grey);font-size:11px;display:flex;justify-content:space-between}
 
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-field{display:flex;flex-direction:column;gap:6px}.form-field.full{grid-column:1/-1}.form-field label{font-size:11px;font-weight:800;color:#625d59;text-transform:uppercase;letter-spacing:.5px}.form-field input,.form-field select,.form-field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px 12px;font:inherit;background:#fff;color:var(--charcoal)}.form-field textarea{min-height:110px;resize:vertical}.form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}.form-message{font-size:12px;color:var(--red);margin-top:12px}.btn.secondary{background:#eeeae6;color:var(--charcoal)}
 .modal-back{position:fixed;inset:0;background:rgba(35,32,29,.48);display:none;z-index:20}.modal-back.show{display:flex;justify-content:flex-end}.drawer{width:min(620px,92vw);height:100%;background:#fff;box-shadow:-15px 0 35px rgba(0,0,0,.2);overflow:auto}.drawer-head{background:var(--charcoal);color:#fff;padding:24px;position:sticky;top:0;z-index:2}.drawer-head .close{float:right;background:transparent;border:0;color:#fff;font-size:25px;cursor:pointer}.drawer-head h2{margin:5px 0;font-size:24px}.drawer-head small{color:#ddd}.drawer-body{padding:22px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.detail{background:#f8f7f6;border-radius:8px;padding:12px}.detail label{display:block;color:var(--grey);font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}.detail strong{font-size:13px}.section{margin-top:22px}.section h3{font-size:14px;margin:0 0 10px}.timeline{border-left:2px solid var(--line);padding-left:16px}.event{margin-bottom:16px}.event b{font-size:12px}.event small{display:block;color:var(--grey);margin-top:3px}.drawer-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
 .viewer{position:fixed;inset:0;background:#f1f0ee;display:none;z-index:30}.viewer.show{display:flex;flex-direction:column}.viewer-top{height:64px;background:var(--charcoal);color:#fff;display:flex;align-items:center;gap:18px;padding:0 20px}.viewer-top h2{font-size:16px;margin:0}.viewer-top small{color:#ddd}.viewer-top .spacer{flex:1}.viewer-btn{background:#fff;color:var(--charcoal);border:0;border-radius:7px;padding:9px 12px;font-weight:800;cursor:pointer}.viewer-main{display:grid;grid-template-columns:245px 1fr;min-height:0;flex:1}.toc{background:#fff;border-right:1px solid var(--line);padding:20px;overflow:auto}.toc h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--grey)}.toc a{display:block;padding:8px 5px;color:var(--charcoal);text-decoration:none;font-size:12px;border-radius:5px}.toc a:hover{background:#f0f2ed}.paper-wrap{overflow:auto;padding:35px}.paper{background:#fff;max-width:800px;margin:auto;padding:60px 70px;min-height:1100px;box-shadow:0 4px 20px rgba(0,0,0,.12);font-family:Georgia,serif;line-height:1.65}.paper h1{font-size:30px}.paper h2{font-size:20px;margin-top:35px}.paper .control{font-family:Arial,sans-serif;font-size:11px;color:var(--grey);border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:30px}.uncontrolled{font-family:Arial,sans-serif;background:#fff3f3;border:1px solid #e8bcbc;color:#8f2929;padding:9px;text-align:center;font-size:10px;font-weight:800;margin-bottom:20px}
 @media(max-width:1050px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
@@ -235,39 +234,9 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.9</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.10</span></footer>
 </div></main></div>
 
-
-<div id="newProjectModal" class="modal-back" onclick="if(event.target===this)closeNewProject()">
- <div class="drawer">
-  <div class="drawer-head">
-   <button class="close" onclick="closeNewProject()">×</button>
-   <small>IMPLEMENTATION PROJECT</small>
-   <h2>New Project</h2>
-   <small>Create a new non-BAU project in VERO.</small>
-  </div>
-  <div class="drawer-body">
-   <form id="newProjectForm" onsubmit="saveNewProject(event)">
-    <div class="form-grid">
-     <div class="form-field full"><label>Project Name</label><input id="npName" required placeholder="e.g. New IMS Implementation"></div>
-     <div class="form-field"><label>Project Type</label><select id="npType" required><option value="Non-BAU">Non-BAU</option><option value="BAU">BAU</option></select></div>
-     <div class="form-field"><label>Status</label><select id="npStatus" required><option>Initiation</option><option selected>In Progress</option><option>On Hold</option><option>Completed</option></select></div>
-     <div class="form-field"><label>Customer</label><input id="npCustomer" placeholder="Internal or customer name"></div>
-     <div class="form-field"><label>Project Owner</label><input id="npOwner" required value="Douglas Bleasel"></div>
-     <div class="form-field"><label>Start Date</label><input id="npStart" type="date"></div>
-     <div class="form-field"><label>Target End Date</label><input id="npEnd" type="date"></div>
-     <div class="form-field full"><label>Description</label><textarea id="npDescription" placeholder="Purpose, scope or a short project summary"></textarea></div>
-    </div>
-    <div id="newProjectMessage" class="form-message"></div>
-    <div class="form-actions">
-     <button type="button" class="btn secondary" onclick="closeNewProject()">Cancel</button>
-     <button id="saveProjectBtn" type="submit" class="btn green">Create Project</button>
-    </div>
-   </form>
-  </div>
- </div>
-</div>
 
 <div id="projectModal" class="modal-back" onclick="if(event.target===this)closeProject()">
  <div class="drawer">
@@ -318,37 +287,7 @@ function render(){
  applyFilters();
 }
 function kpis(){document.getElementById('lifeAll').textContent=projects.length;document.getElementById('lifeInitiation').textContent=projects.filter(p=>p.stageKey==='initiation').length;document.getElementById('lifeExecution').textContent=projects.filter(p=>p.stageKey==='execution').length;document.getElementById('lifeCompletion').textContent=projects.filter(p=>p.stageKey==='completion').length}
-function newProject(){document.getElementById('newProjectModal').classList.add('show')}
-function closeNewProject(){document.getElementById('newProjectModal').classList.remove('show')}
-async function saveNewProject(e){
- e.preventDefault();
- let btn=document.getElementById('saveProjectBtn'),msg=document.getElementById('newProjectMessage');
- btn.disabled=true;btn.textContent='Saving…';msg.textContent='';
- let payload={
-  project_name:document.getElementById('npName').value.trim(),
-  project_type:document.getElementById('npType').value,
-  customer:document.getElementById('npCustomer').value.trim(),
-  project_owner:document.getElementById('npOwner').value.trim(),
-  status:document.getElementById('npStatus').value,
-  start_date:document.getElementById('npStart').value||null,
-  target_end_date:document.getElementById('npEnd').value||null,
-  description:document.getElementById('npDescription').value.trim()
- };
- try{
-  let r=await fetch(PROJECTS_API,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(payload)});
-  if(!r.ok)throw Error('API returned '+r.status);
-  document.getElementById('newProjectForm').reset();
-  closeNewProject();
-  await loadProjects();
- }catch(err){
-  console.error(err);
-  msg.textContent='Unable to save project. Check the browser console and API settings.';
- }finally{
-  btn.disabled=false;btn.textContent='Create Project';
- }
-}
-function filterProjects(btn,filter){currentFilter=filter;document.querySelectorAll('.lifecycle-card').forEach(x=>x.classList.remove('active'));btn.classList.add('active');applyFilters()}
-function applyFilters(){let q=(document.getElementById('projectSearch').value||'').toLowerCase().trim(),shown=0;document.querySelectorAll('.project-row').forEach(r=>{let show=(currentFilter==='all'||r.dataset.stage===currentFilter)&&(!q||r.dataset.search.includes(q));r.style.display=show?'':'none';if(show)shown++});document.getElementById('projectCount').textContent=shown+' project'+(shown===1?'':'s')+' shown'}
+function newProject(){window.open('https://www.cognitoforms.com/VerraMobility/SalesHandoverChecklist','_blank','noopener')}
 function openProject(i){let p=projects[i];if(p)window.location.href='project-workspace.html?project='+encodeURIComponent(p.code||p.name)}
 function closeProject(){document.getElementById('projectModal').classList.remove('show')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeProject()});loadProjects();
