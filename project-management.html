@@ -278,6 +278,22 @@
 #requestForm.request-shell{margin:0!important;padding:18px 18px 105px!important}
 #requestForm .request-steps{margin:0 0 20px!important;padding-top:0!important}
 
+
+/* v1.20 — real fixed wizard footer + visible save state */
+.request-sticky{
+ position:fixed!important;
+ right:18px!important;
+ bottom:0!important;
+ width:calc(min(980px,96vw) - 36px)!important;
+ z-index:120!important;
+ margin:0!important;
+ padding:14px 0 16px!important;
+ background:#fff!important;
+ border-top:1px solid var(--line)!important;
+ box-shadow:0 -10px 24px rgba(61,57,53,.08)!important;
+}
+.request-save-note{min-width:260px!important}
+
 </style></head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -344,7 +360,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.19</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.20</span></footer>
 </div></main></div>
 
 
@@ -504,10 +520,8 @@ async function saveMilestones(){
 }
 async function ensureProject(payload){
  if(currentProject?.id)return currentProject;
- const title=(payload.project_title||'').trim();
- const type=(payload.request_type||'').trim();
- if(!title)throw new Error('Title is required before the request can be saved.');
- if(!type)throw new Error('Type of Contract / Project Request is required before the request can be saved.');
+ const title=(payload.project_title||'').trim()||'Untitled Project Request';
+ const type=(payload.request_type||'').trim()||'Not Set';
  const customer=(payload.client_name||'').trim()||null;
  const owner=(payload.account_manager||'').trim()||payload.requested_by||null;
  const res=await fetch(PROJECTS_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
@@ -523,8 +537,9 @@ async function ensureProject(payload){
 async function saveRequest(e){
  e.preventDefault();
  const intent=e.submitter?.value||'Draft',payload=formDataObject();payload.request_status=intent;
- const er=document.getElementById('requestSaveError'),ok=document.getElementById('requestSaveSuccess');
+ const er=document.getElementById('requestSaveError'),ok=document.getElementById('requestSaveSuccess'),note=document.getElementById('saveNote');
  if(er)er.style.display='none';if(ok)ok.style.display='none';
+ if(note)note.textContent='Saving draft to VERO…';
  try{
   await ensureProject(payload);
   payload.requested_by=payload.requested_by||currentProject.project_owner||payload.account_manager||null;
@@ -536,10 +551,16 @@ async function saveRequest(e){
   if(!rr.ok)throw new Error('Request saved, but VERO could not reload it.');
   currentRequest=(await rr.json()).request;if(mr.ok)currentMilestones=(await mr.json()).milestones||[];
   if(ok){ok.textContent=intent==='Submitted'?'New Project Request submitted successfully.':'Draft saved successfully.';ok.style.display='block'}
+  if(note)note.textContent=intent==='Submitted'?'Request submitted successfully.':'Draft saved to VERO • Project ID '+currentProject.id;
   await loadProjects();
   if(intent==='Submitted'){currentProject.status='Submitted';setTimeout(()=>{closeSetup();window.location.href='project-workspace.html?id='+encodeURIComponent(currentProject.id)},900)}
   else{renderMilestoneEditors();document.getElementById('saveNote').textContent='Draft saved to VERO • Project ID '+currentProject.id}
- }catch(x){if(er){er.style.display='block';er.textContent='Unable to save the New Project Request. '+x.message}else alert(x.message)}
+ }catch(x){
+  console.error(x);
+  if(note)note.textContent='Save failed — '+x.message;
+  if(er){er.style.display='block';er.textContent='Unable to save the New Project Request. '+x.message}
+  else alert('Unable to save the New Project Request. '+x.message);
+ }
 }
 
 function closeSetup(){document.getElementById('setupPanel').classList.remove('show');document.body.style.overflow=''}
