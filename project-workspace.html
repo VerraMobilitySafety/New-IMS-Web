@@ -311,21 +311,23 @@
  <section id="assurance" class="ws-view"><div class="empty-state"><b>Project Assurance</b><br><br>Audits, inspections, project gates and assurance activities linked to this project will appear here.</div></section>
  <section id="updates" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Updates</h2><span>Chronological project log</span></div><div class="tasks"><div class="task"><span class="dot"></span><div><b>18 Sep 2026 — Mobilisation commenced</b><small>Initial governance, risk and compliance review underway.</small></div></div><div class="task"><span class="dot"></span><div><b>15 Sep 2026 — Sales Handover received</b><small>Project record and document folder created automatically.</small></div></div></div></div></section>
 
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Project Workspace • v1.5</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Project Workspace • v1.6</span></footer>
 </div></main></div>
 
 <div id="setupPanel" class="setup-backdrop" onclick="if(event.target===this)closeSetup()">
  <section class="setup-frame">
   <div class="setup-head"><div><small>VERO • Project Workflow</small><h2>Project Setup Checklist</h2></div><button class="setup-close" onclick="closeSetup()">×</button></div>
-  <div class="setup-body"><iframe id="setupIframe" title="Project Setup Checklist"></iframe></div>
-  <div class="setup-foot">Project-specific checklist • Cognito Forms</div>
+  <div class="setup-body"></div>
+  <div class="setup-foot">VERO-native project workflow</div>
  </section>
 </div>
 
 <script>
 function showTab(id,btn){document.querySelectorAll('.ws-view').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.ws-tab').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');}
 
-const PROJECTS_API='/api/projects';
+const API_BASE='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+const PROJECTS_API=API_BASE+'/projects';
+const PROJECT_REQUEST_API=id=>`${API_BASE}/projects/${id}/request`;
 let currentProject=null;
 const val=v=>v&&typeof v==='object'?(v.Value||v.DisplayName||v.Url||v.Description||''):(v??'');
 const first=(o,names)=>{for(const n of names){if(o && o[n]!==undefined && o[n]!==null && o[n]!=='')return o[n]}return ''};
@@ -336,95 +338,61 @@ const person=v=>{if(!v)return '—';if(Array.isArray(v))return v.map(person).joi
 const hyperlink=v=>{if(!v)return '';if(typeof v==='string')return v;if(typeof v==='object')return v.Url||v.url||v.Value||v.value||'';return ''};
 const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
 
-function findProjectSetupLink(p){
- return hyperlink(first(p,[
-  'Project_x0020_Setup_x0020_Checkl',
-  'ProjectSetupChecklist','Project_x0020_Setup_x0020_Checklist',
-  'ProjectSetupChecklistLink','Project_x0020_Setup_x0020_Checklist_x0020_Link'
- ]));
-}
-
+function money(v){if(v===null||v===undefined||v==='')return '—';const n=Number(v);return Number.isNaN(n)?String(v):new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(n)}
 function renderProject(p){
  currentProject=p;
- const name=text(first(p,['Title','ProjectName','Project_x0020_Name']));
- const code=text(first(p,['ProjectCode','ProjectNumber','Project_x0020_Code']));
- const customer=text(first(p,['CustomerName','Customer']));
- const pm=person(first(p,['ProjectManager','Project_x0020_Manager']));
- const jurisdiction=text(first(p,['Jurisdiction']));
- const type=text(first(p,['ProjectType','BAUorProject']));
- const rawStatus=first(p,['Status']);
- const status=rawStatus?text(rawStatus):'—';
- const stage=text(first(p,['Stage','Stage0']));
- const dev=text(first(p,['DevelopmentStage','Development_x0020_Stage']));
- const responsible=person(first(p,['NextStepResponsible','Next_x0020_Step_x0020_Responsible']));
- const progress=pct(first(p,['Completion_x0020_Status','CompletionStatus','Progress']));
- const update=text(first(p,['ProjectStatus','ProjectUpdate','Project_x0020_Status']));
- const updateDate=fmtDate(first(p,['ProjectUpdateDate','Modified']));
- const start=fmtDate(first(p,['ContractStartDate','Contract_x0020_Start']));
- const end=fmtDate(first(p,['ContractEndDate','Contract_x0020_End']));
-
- setText('heroName',name);
- setText('heroCustomer','Customer: '+customer);
- setText('projectCode','Project Code • '+code);
- setText('pm',pm);
- setText('jurisdiction',jurisdiction);
- setText('projectType',type);
- setText('healthPill','● '+status);
- setText('liveStatus',status);
- setText('liveNextStep',dev);
- setText('liveResponsible',responsible);
- setText('progressKpi',progress);
- setText('stageKpi',stage);
- setText('overviewStatus',status);
- setText('overviewDevStage',dev);
- setText('overviewProgress',progress);
- setText('contractStart',start);
- setText('contractEnd',end);
- setText('overviewCustomer',customer);
- setText('updateDate',updateDate);
- setText('projectUpdate',update==='—'?'No project update recorded.':update);
-
- const action=document.getElementById('nextAction');
- const setupUrl=findProjectSetupLink(p);
- const needsSetup=/setup checklist/i.test(dev);
- if(needsSetup && setupUrl){
-   action.innerHTML='<button type="button" onclick="openSetup()">Complete Project Setup →</button>';
- }else if(needsSetup){
-   action.innerHTML='<div class="live-note">Setup checklist link has not yet been saved to this project.</div>';
- }else{
-   action.innerHTML='';
- }
+ setText('heroName',p.project_name||'Untitled Project');setText('heroCustomer','Customer: '+text(p.customer));setText('projectCode','Project ID • '+p.id);
+ setText('pm',text(p.project_owner));setText('jurisdiction','—');setText('projectType',text(p.project_type));setText('createdVia','VERO');
+ setText('healthPill','● '+text(p.status));setText('liveStatus',text(p.status));setText('progressKpi','—');setText('overviewStatus',text(p.status));
+ setText('overviewProgress','—');setText('contractStart',fmtDate(p.start_date));setText('contractEnd',fmtDate(p.target_end_date));
+ setText('overviewCustomer',text(p.customer));setText('updateDate','—');setText('projectUpdate',p.description||'No project update recorded.');
 }
-
+function renderRequest(r){
+ window.currentRequest=r;const s=r.request_status||'Draft';
+ setText('liveStage','New Project Request');setText('overviewDevStage','New Project Request');
+ setText('liveNextStep',s==='Submitted'?'Project Setup':'Complete New Project Request');setText('liveResponsible',r.requested_by||currentProject?.project_owner||'—');
+ if(r.contract_start_date)setText('contractStart',fmtDate(r.contract_start_date));if(r.contract_expiry_date)setText('contractEnd',fmtDate(r.contract_expiry_date));
+ document.getElementById('nextAction').innerHTML=s==='Submitted'?'<div class="live-note">New Project Request submitted. Project Setup is the next workflow stage.</div>':'<button type="button" onclick="openRequest()">Complete New Project Request →</button>';
+ const m=document.querySelectorAll('#commercial .metric strong');if(m[0])m[0].textContent=money(r.baseline_revenue);if(m[2])m[2].textContent=money(r.baseline_cost);
+}
+function renderNoRequest(){
+ window.currentRequest=null;setText('liveStage','New Project Request');setText('overviewDevStage','New Project Request');setText('liveNextStep','Start New Project Request');
+ setText('liveResponsible',currentProject?.project_owner||'—');document.getElementById('nextAction').innerHTML='<button type="button" onclick="openRequest()">Start New Project Request →</button>';
+}
 async function loadProject(){
- const params=new URLSearchParams(location.search);
- const code=params.get('project');
- const err=document.getElementById('loadError');
- if(!code){err.style.display='block';err.textContent='No project code was supplied in the URL.';return}
+ const id=new URLSearchParams(location.search).get('id')||new URLSearchParams(location.search).get('project'),err=document.getElementById('loadError');
+ if(!id){err.style.display='block';err.textContent='No project ID was supplied in the URL.';return}
  try{
-   const res=await fetch(PROJECTS_API,{cache:'no-store'});
-   if(!res.ok)throw new Error('Projects API returned '+res.status);
-   const data=await res.json();
-   const rows=Array.isArray(data)?data:(data.value||[]);
-   const p=rows.find(x=>String(first(x,['ProjectCode','ProjectNumber'])).toLowerCase()===code.toLowerCase());
-   if(!p)throw new Error('Project '+code+' was not found in the live Projects Register.');
-   renderProject(p);
- }catch(e){
-   err.style.display='block';err.textContent='Unable to load this project from VERO. '+e.message;
- }
+  const res=await fetch(PROJECTS_API,{cache:'no-store'});if(!res.ok)throw new Error('Projects API returned '+res.status);
+  const data=await res.json(),rows=Array.isArray(data)?data:(data.projects||[]),p=rows.find(x=>String(x.id)===String(id));
+  if(!p)throw new Error('Project '+id+' was not found in the VERO Projects Register.');renderProject(p);
+  const rr=await fetch(PROJECT_REQUEST_API(p.id),{cache:'no-store'});if(rr.status===404){renderNoRequest();return}if(!rr.ok)throw new Error('New Project Request API returned '+rr.status);
+  renderRequest((await rr.json()).request);
+ }catch(e){err.style.display='block';err.textContent='Unable to load this project from VERO. '+e.message}
 }
-
-function openSetup(){
- const url=findProjectSetupLink(currentProject);
- if(!url)return;
- document.getElementById('setupIframe').src=url;
- document.getElementById('setupPanel').classList.add('show');
- document.body.style.overflow='hidden';
+const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function field(l,v){return `<div class="detail"><label>${l}</label><strong>${esc(text(v))}</strong></div>`}
+function openRequest(){
+ const r=window.currentRequest||{},body=document.querySelector('#setupPanel .setup-body');document.querySelector('#setupPanel .setup-head h2').textContent='New Project Request';document.querySelector('#setupPanel .setup-foot').textContent='VERO-native project workflow • PostgreSQL record';
+ body.innerHTML=`<div class="drawer-body"><div class="detail-grid">${field('Request Status',r.request_status||'Not Started')}${field('Requested By',r.requested_by||currentProject?.project_owner)}${field('Customer Contact',r.customer_contact_name)}${field('Customer Email',r.customer_contact_email)}${field('Customer Phone',r.customer_contact_phone)}${field('Contract Number',r.contract_number)}${field('Purchase Order',r.purchase_order_number)}${field('Contract Start',fmtDate(r.contract_start_date))}${field('Contract Expiry',fmtDate(r.contract_expiry_date))}${field('Baseline Revenue',money(r.baseline_revenue))}${field('Baseline Cost',money(r.baseline_cost))}${field('Submitted',r.submitted_at?fmtDate(r.submitted_at):'Not submitted')}</div><div class="section"><h3>Scope</h3><div class="detail"><strong>${esc(text(r.scope_description))}</strong></div></div><div class="section"><h3>Assumptions</h3><div class="detail"><strong>${esc(text(r.assumptions_summary))}</strong></div></div><div class="drawer-actions"><button class="btn green" type="button" onclick="editRequest()">Edit Request</button><button class="btn outline" type="button" onclick="closeSetup()">Close</button></div></div>`;
+ document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';
 }
-function closeSetup(){
- document.getElementById('setupPanel').classList.remove('show');
- document.body.style.overflow='';
+function inp(l,n,v='',t='text'){return `<div class="detail"><label>${l}</label><input name="${n}" type="${t}" value="${esc(v)}" style="width:100%;border:1px solid #d7d3d0;border-radius:7px;padding:10px;font:500 11px Montserrat"></div>`}
+function area(l,n,v=''){return `<div class="section"><h3>${l}</h3><textarea name="${n}" rows="4" style="width:100%;border:1px solid #d7d3d0;border-radius:7px;padding:10px;font:500 11px Montserrat">${esc(v)}</textarea></div>`}
+function editRequest(){
+ const r=window.currentRequest||{},body=document.querySelector('#setupPanel .setup-body');
+ body.innerHTML=`<form id="requestForm" class="drawer-body" onsubmit="saveRequest(event)"><div class="detail-grid">${inp('Requested By','requested_by',r.requested_by||currentProject?.project_owner)}${inp('Customer Contact','customer_contact_name',r.customer_contact_name)}${inp('Customer Email','customer_contact_email',r.customer_contact_email,'email')}${inp('Customer Phone','customer_contact_phone',r.customer_contact_phone)}${inp('Customer Address','customer_address',r.customer_address)}${inp('Contract Number','contract_number',r.contract_number)}${inp('Purchase Order','purchase_order_number',r.purchase_order_number)}${inp('Contract Start','contract_start_date',r.contract_start_date,'date')}${inp('Contract Expiry','contract_expiry_date',r.contract_expiry_date,'date')}${inp('Baseline Revenue','baseline_revenue',r.baseline_revenue,'number')}${inp('Baseline Cost','baseline_cost',r.baseline_cost,'number')}</div>${area('Scope','scope_description',r.scope_description)}${area('Assumptions','assumptions_summary',r.assumptions_summary)}${area('Delivery Requirements','delivery_requirements',r.delivery_requirements)}${area('Installation Requirements','installation_requirements',r.installation_requirements)}${area('Commissioning Requirements','commissioning_requirements',r.commissioning_requirements)}${area('Training Requirements','training_requirements',r.training_requirements)}${area('Warranty Requirements','warranty_requirements',r.warranty_requirements)}${area('Spare Parts Requirements','spare_parts_requirements',r.spare_parts_requirements)}${area('Documentation Requirements','documentation_requirements',r.documentation_requirements)}<div id="requestSaveError" class="load-error"></div><div class="drawer-actions"><button class="btn green" type="submit" value="Draft">Save Draft</button><button class="btn dark" type="submit" value="Submitted">Submit Request</button><button class="btn outline" type="button" onclick="openRequest()">Cancel</button></div></form>`;
 }
+async function saveRequest(e){
+ e.preventDefault();const form=e.currentTarget,intent=e.submitter?.value||'Draft',fd=new FormData(form),payload=Object.fromEntries(fd.entries());payload.request_status=intent;
+ for(const k of ['baseline_revenue','baseline_cost'])payload[k]=payload[k]===''?null:Number(payload[k]);for(const k of ['contract_start_date','contract_expiry_date'])if(payload[k]==='')payload[k]=null;
+ const er=document.getElementById('requestSaveError');er.style.display='none';
+ try{
+  const res=await fetch(PROJECT_REQUEST_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}),data=await res.json();if(!res.ok)throw new Error(data.message||('API returned '+res.status));
+  const rr=await fetch(PROJECT_REQUEST_API(currentProject.id),{cache:'no-store'});if(!rr.ok)throw new Error('Request saved, but VERO could not reload it.');renderRequest((await rr.json()).request);openRequest();
+ }catch(x){er.style.display='block';er.textContent='Unable to save the New Project Request. '+x.message}
+}
+function closeSetup(){document.getElementById('setupPanel').classList.remove('show');document.body.style.overflow=''}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSetup()});
 loadProject();
 </script></body></html>
