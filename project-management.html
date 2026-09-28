@@ -234,9 +234,27 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.10</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.11</span></footer>
 </div></main></div>
 
+
+<div id="cognitoProjectModal" class="modal-back" onclick="if(event.target===this)closeCognitoProject()">
+ <div class="drawer" style="width:min(820px,94vw);">
+  <div class="drawer-head">
+   <button class="close" onclick="closeCognitoProject()">×</button>
+   <small>PROJECT CREATION</small>
+   <h2>Sales Handover Checklist</h2>
+  </div>
+  <div class="drawer-body" style="padding:0;overflow:hidden;">
+   <iframe
+    src="https://www.cognitoforms.com/VerraMobility/SalesHandoverChecklist"
+    title="Sales Handover Checklist"
+    style="width:100%;height:72vh;border:0;display:block;background:#fff;"
+    loading="lazy">
+   </iframe>
+  </div>
+ </div>
+</div>
 
 <div id="projectModal" class="modal-back" onclick="if(event.target===this)closeProject()">
  <div class="drawer">
@@ -287,7 +305,8 @@ function render(){
  applyFilters();
 }
 function kpis(){document.getElementById('lifeAll').textContent=projects.length;document.getElementById('lifeInitiation').textContent=projects.filter(p=>p.stageKey==='initiation').length;document.getElementById('lifeExecution').textContent=projects.filter(p=>p.stageKey==='execution').length;document.getElementById('lifeCompletion').textContent=projects.filter(p=>p.stageKey==='completion').length}
-function newProject(){window.open('https://www.cognitoforms.com/VerraMobility/SalesHandoverChecklist','_blank','noopener')}
+function newProject(){document.getElementById('cognitoProjectModal').classList.add('show')}
+function closeCognitoProject(){document.getElementById('cognitoProjectModal').classList.remove('show')}
 function openProject(i){let p=projects[i];if(p)window.location.href='project-workspace.html?project='+encodeURIComponent(p.code||p.name)}
 function closeProject(){document.getElementById('projectModal').classList.remove('show')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeProject()});loadProjects();
