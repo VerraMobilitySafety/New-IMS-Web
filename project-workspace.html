@@ -336,7 +336,7 @@
  <section id="assurance" class="ws-view"><div class="empty-state"><b>Project Assurance</b><br><br>Audits, inspections, project gates and assurance activities linked to this project will appear here.</div></section>
  <section id="updates" class="ws-view"><div class="empty-state"><b>No live project updates yet.</b><br><br>Workflow and project history will appear here.</div></section>
 
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Project Workspace • v1.8</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Project Workspace • v1.9</span></footer>
 </div></main></div>
 
 <div id="setupPanel" class="setup-backdrop" onclick="if(event.target===this)closeSetup()">
@@ -354,6 +354,55 @@ const API_BASE='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsi
 const PROJECTS_API=API_BASE+'/projects';
 const PROJECT_REQUEST_API=id=>`${API_BASE}/projects/${id}/request`;
 const PROJECT_MILESTONES_API=id=>`${API_BASE}/projects/${id}/milestones`;
+const VERO_TOKEN_KEY='vero_session_token';
+const VERO_USER_KEY='vero_current_user';
+
+function getVeroToken(){return localStorage.getItem(VERO_TOKEN_KEY)||''}
+function clearVeroSession(){localStorage.removeItem(VERO_TOKEN_KEY);localStorage.removeItem(VERO_USER_KEY)}
+function redirectToLogin(){location.href='login.html'}
+async function apiFetch(url,options={}){
+  const token=getVeroToken();
+  if(!token){clearVeroSession();redirectToLogin();throw new Error('Authentication required')}
+  const headers=new Headers(options.headers||{});
+  headers.set('Authorization','Bearer '+token);
+  if(!headers.has('Accept'))headers.set('Accept','application/json');
+  const res=await fetch(url,{...options,headers});
+  if(res.status===401){clearVeroSession();redirectToLogin();throw new Error('Session expired')}
+  return res;
+}
+function userInitials(user){
+  const a=(user?.first_name||'').trim(),b=(user?.last_name||'').trim();
+  return ((a[0]||'')+(b[0]||'')).toUpperCase()||'U';
+}
+async function requireAuth(){
+  const token=getVeroToken();
+  if(!token){redirectToLogin();return false}
+  try{
+    const res=await apiFetch(API_BASE+'/auth/me',{cache:'no-store'});
+    if(!res.ok)throw new Error('Unable to validate session');
+    const data=await res.json();
+    const user=data.user||data;
+    localStorage.setItem(VERO_USER_KEY,JSON.stringify(user));
+    const avatar=document.querySelector('.hero-tools .avatar');
+    if(avatar){
+      avatar.textContent=userInitials(user);
+      avatar.title='Sign out';
+      avatar.style.cursor='pointer';
+      avatar.onclick=signOut;
+    }
+    return true;
+  }catch(e){
+    clearVeroSession();
+    redirectToLogin();
+    return false;
+  }
+}
+async function signOut(){
+  try{await apiFetch(API_BASE+'/auth/logout',{method:'POST'})}catch(e){}
+  clearVeroSession();
+  redirectToLogin();
+}
+
 let currentProject=null,currentRequest=null,currentMilestones=[];
 let requestStep=0;
 const requestStepNames=['Administration','Client','System & Scope','Contract & Budget','Milestones','Delivery & Installation','Warranty & Handover','Review & Submit'];
@@ -367,7 +416,7 @@ function totalCost(r){return ['labour_cost_budget','materials_cost_budget','trav
 function renderRequest(r){currentRequest=r;const st=r.request_status||'Draft';setText('liveStage','New Project Request');setText('overviewDevStage','New Project Request');setText('liveNextStep',st==='Submitted'?'Project Setup':'Complete New Project Request');setText('liveResponsible',r.requested_by||r.account_manager||currentProject?.project_owner||'—');if(r.contract_start_date)setText('contractStart',fmtDate(r.contract_start_date));if(r.contract_expiry_date)setText('contractEnd',fmtDate(r.contract_expiry_date));document.getElementById('nextAction').innerHTML=st==='Submitted'?'<div class="live-note">New Project Request submitted. Project Setup is the next workflow stage.</div>':'<button type="button" onclick="openRequest()">Complete New Project Request →</button>';const metrics=document.querySelectorAll('#commercial .metric strong');const rev=Number(r.revenue)||0,cost=totalCost(r);if(metrics[0])metrics[0].textContent=money(rev||null);if(metrics[2])metrics[2].textContent=money(cost||null);const margin=document.getElementById('baselineMargin');if(margin)margin.textContent=rev>0?(((rev-cost)/rev)*100).toFixed(1)+'%':'—';renderMilestoneOverview();}
 function renderNoRequest(){currentRequest=null;setText('liveStage','New Project Request');setText('overviewDevStage','New Project Request');setText('liveNextStep','Start New Project Request');setText('liveResponsible',currentProject?.project_owner||'—');document.getElementById('nextAction').innerHTML='<button type="button" onclick="openRequest()">Start New Project Request →</button>';}
 function renderMilestoneOverview(){const panel=document.querySelector('#overview .overview-grid .panel:nth-child(2)');if(!panel)return;const upcoming=currentMilestones.slice().sort((a,b)=>(a.target_date||'9999').localeCompare(b.target_date||'9999')).slice(0,5);panel.innerHTML='<div class="panel-head"><h2>Upcoming Milestones</h2><span>Project milestones</span></div>'+(upcoming.length?`<div class="milestones">${upcoming.map(m=>`<div class="milestone"><i></i><div><b>${esc(m.milestone_name)}</b><small>${esc(m.milestone_type||'Milestone')}</small></div><time>${esc(fmtDate(m.target_date))}</time></div>`).join('')}</div>`:'<div class="empty-state" style="margin:18px"><b>No live milestones connected yet.</b><br><br>Milestones linked to this project will appear here.</div>');}
-async function loadProject(){const id=new URLSearchParams(location.search).get('id')||new URLSearchParams(location.search).get('project'),err=document.getElementById('loadError');if(!id){err.style.display='block';err.textContent='No project ID was supplied in the URL.';return}try{const res=await fetch(PROJECTS_API,{cache:'no-store'});if(!res.ok)throw new Error('Projects API returned '+res.status);const data=await res.json(),rows=Array.isArray(data)?data:(data.projects||[]),p=rows.find(x=>String(x.id)===String(id));if(!p)throw new Error('Project '+id+' was not found in the VERO Projects Register.');renderProject(p);const [rr,mr]=await Promise.all([fetch(PROJECT_REQUEST_API(p.id),{cache:'no-store'}),fetch(PROJECT_MILESTONES_API(p.id),{cache:'no-store'})]);if(mr.ok)currentMilestones=(await mr.json()).milestones||[];if(rr.status===404){renderNoRequest();renderMilestoneOverview();return}if(!rr.ok)throw new Error('New Project Request API returned '+rr.status);renderRequest((await rr.json()).request);}catch(e){err.style.display='block';err.textContent='Unable to load this project from VERO. '+e.message}}
+async function loadProject(){const id=new URLSearchParams(location.search).get('id')||new URLSearchParams(location.search).get('project'),err=document.getElementById('loadError');if(!id){err.style.display='block';err.textContent='No project ID was supplied in the URL.';return}try{const res=await apiFetch(PROJECTS_API,{cache:'no-store'});if(!res.ok)throw new Error('Projects API returned '+res.status);const data=await res.json(),rows=Array.isArray(data)?data:(data.projects||[]),p=rows.find(x=>String(x.id)===String(id));if(!p)throw new Error('Project '+id+' was not found in the VERO Projects Register.');renderProject(p);const [rr,mr]=await Promise.all([apiFetch(PROJECT_REQUEST_API(p.id),{cache:'no-store'}),apiFetch(PROJECT_MILESTONES_API(p.id),{cache:'no-store'})]);if(mr.ok)currentMilestones=(await mr.json()).milestones||[];if(rr.status===404){renderNoRequest();renderMilestoneOverview();return}if(!rr.ok)throw new Error('New Project Request API returned '+rr.status);renderRequest((await rr.json()).request);}catch(e){err.style.display='block';err.textContent='Unable to load this project from VERO. '+e.message}}
 function field(l,v){return `<div class="detail"><label>${esc(l)}</label><strong>${esc(text(v))}</strong></div>`}
 function openRequest(){editRequest();document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';}
 function val(name,def=''){const v=currentRequest?.[name];return v===null||v===undefined?def:v}
@@ -399,9 +448,12 @@ function updateBudget(){const f=document.getElementById('requestForm');if(!f)ret
 function formDataObject(){const f=document.getElementById('requestForm'),fd=new FormData(f),p=Object.fromEntries(fd.entries());['contract_po_received','system_productised','delivery_dates_confirmed','subcontractors_approved','civil_electrical_services','installation_commissioning_services'].forEach(k=>{p[k]=fd.has(k)?fd.get(k)==='true':null});['handover_contract','handover_schedule','handover_tender_response','handover_pricing','handover_contract_details'].forEach(k=>p[k]=fd.has(k));['revenue','labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget','approved_margin','quantity_of_systems','warranty_period_months'].forEach(k=>p[k]=p[k]===''||p[k]===undefined?null:Number(p[k]));['request_date','contract_start_date','contract_expiry_date'].forEach(k=>{if(p[k]==='')p[k]=null});p.requested_by=currentRequest?.requested_by||currentProject?.project_owner||p.account_manager||null;return p;}
 function reviewItem(l,v){return `<div class="review-item"><label>${esc(l)}</label><strong>${esc(text(v))}</strong></div>`}
 function buildRequestReview(){const p=formDataObject(),cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(p[k])||0),0),rev=Number(p.revenue)||0;const ms=[...document.querySelectorAll('.repeat-block')].map(x=>({type:x.dataset.milestoneType,date:x.querySelector('.ms-date').value,name:x.querySelector('.ms-name').value})).filter(x=>x.name);document.getElementById('requestReview').innerHTML=`<div class="review-section"><h4>Administration</h4><div class="review-grid">${reviewItem('Title',p.project_title)}${reviewItem('Type',p.request_type)}${reviewItem('Account Manager',p.account_manager)}${reviewItem('Project Number',p.project_number)}</div></div><div class="review-section"><h4>Client</h4><div class="review-grid">${reviewItem('Client',p.client_name)}${reviewItem('Reference',p.client_reference)}${reviewItem('Contact',[p.client_contact_first_name,p.client_contact_last_name].filter(Boolean).join(' '))}${reviewItem('Phone',p.client_contact_phone)}</div></div><div class="review-section"><h4>Scope</h4><div class="review-grid">${reviewItem('Scope of Works',p.scope_of_works)}${reviewItem('Assumptions',p.system_assumptions)}</div></div><div class="review-section"><h4>Commercial</h4><div class="review-grid">${reviewItem('Revenue',money(rev||null))}${reviewItem('Total Cost',money(cost||null))}${reviewItem('Calculated Margin',rev>0?(((rev-cost)/rev)*100).toFixed(1)+'%':'—')}${reviewItem('Approved Margin',p.approved_margin===null?'—':p.approved_margin+'%')}</div></div><div class="review-section"><h4>Milestones</h4>${ms.length?ms.map(x=>`<div class="review-milestone"><b>${esc(x.type)}</b> • ${esc(fmtDate(x.date))}<br>${esc(x.name)}</div>`).join(''):'<div class="live-note">No milestones entered.</div>'}</div><div class="review-section"><h4>Delivery & Handover</h4><div class="review-grid">${reviewItem('Quantity of Systems',p.quantity_of_systems)}${reviewItem('Warranty',p.warranty_type)}${reviewItem('Spares',p.spares_type)}${reviewItem('Training',p.training_type)}</div></div>`;}
-async function saveMilestones(){const rows=[...document.querySelectorAll('.repeat-block')].map(x=>({existing_id:x.dataset.existingId,type:x.dataset.milestoneType,target_date:x.querySelector('.ms-date').value||null,milestone_name:x.querySelector('.ms-name').value.trim()})).filter(x=>x.milestone_name);const existingIds=new Set(currentMilestones.map(x=>String(x.id)));for(const r of rows){if(r.existing_id&&existingIds.has(String(r.existing_id)))continue;const res=await fetch(PROJECT_MILESTONES_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({milestone_type:r.type,milestone_name:r.milestone_name,target_date:r.target_date,owner:currentProject.project_owner})});if(!res.ok){const d=await res.json().catch(()=>({}));throw new Error(d.message||'Unable to save milestone');}}}
-async function saveRequest(e){e.preventDefault();const intent=e.submitter?.value||'Draft',payload=formDataObject();payload.request_status=intent;const er=document.getElementById('requestSaveError'),ok=document.getElementById('requestSaveSuccess');er.style.display='none';ok.style.display='none';try{const res=await fetch(PROJECT_REQUEST_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}),data=await res.json();if(!res.ok)throw new Error(data.message||('API returned '+res.status));await saveMilestones();const [rr,mr]=await Promise.all([fetch(PROJECT_REQUEST_API(currentProject.id),{cache:'no-store'}),fetch(PROJECT_MILESTONES_API(currentProject.id),{cache:'no-store'})]);if(!rr.ok)throw new Error('Request saved, but VERO could not reload it.');currentRequest=(await rr.json()).request;if(mr.ok)currentMilestones=(await mr.json()).milestones||[];renderRequest(currentRequest);ok.textContent=intent==='Submitted'?'New Project Request submitted successfully.':'Draft saved successfully.';ok.style.display='block';if(intent==='Submitted'){setTimeout(closeSetup,900)}else{renderMilestoneEditors();}}catch(x){er.style.display='block';er.textContent='Unable to save the New Project Request. '+x.message}}
+async function saveMilestones(){const rows=[...document.querySelectorAll('.repeat-block')].map(x=>({existing_id:x.dataset.existingId,type:x.dataset.milestoneType,target_date:x.querySelector('.ms-date').value||null,milestone_name:x.querySelector('.ms-name').value.trim()})).filter(x=>x.milestone_name);const existingIds=new Set(currentMilestones.map(x=>String(x.id)));for(const r of rows){if(r.existing_id&&existingIds.has(String(r.existing_id)))continue;const res=await apiFetch(PROJECT_MILESTONES_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({milestone_type:r.type,milestone_name:r.milestone_name,target_date:r.target_date,owner:currentProject.project_owner})});if(!res.ok){const d=await res.json().catch(()=>({}));throw new Error(d.message||'Unable to save milestone');}}}
+async function saveRequest(e){e.preventDefault();const intent=e.submitter?.value||'Draft',payload=formDataObject();payload.request_status=intent;const er=document.getElementById('requestSaveError'),ok=document.getElementById('requestSaveSuccess');er.style.display='none';ok.style.display='none';try{const res=await apiFetch(PROJECT_REQUEST_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}),data=await res.json();if(!res.ok)throw new Error(data.message||('API returned '+res.status));await saveMilestones();const [rr,mr]=await Promise.all([apiFetch(PROJECT_REQUEST_API(currentProject.id),{cache:'no-store'}),apiFetch(PROJECT_MILESTONES_API(currentProject.id),{cache:'no-store'})]);if(!rr.ok)throw new Error('Request saved, but VERO could not reload it.');currentRequest=(await rr.json()).request;if(mr.ok)currentMilestones=(await mr.json()).milestones||[];renderRequest(currentRequest);ok.textContent=intent==='Submitted'?'New Project Request submitted successfully.':'Draft saved successfully.';ok.style.display='block';if(intent==='Submitted'){setTimeout(closeSetup,900)}else{renderMilestoneEditors();}}catch(x){er.style.display='block';er.textContent='Unable to save the New Project Request. '+x.message}}
 function closeSetup(){document.getElementById('setupPanel').classList.remove('show');document.body.style.overflow=''}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSetup()});
-loadProject();
+(async function startWorkspace(){
+  const authenticated=await requireAuth();
+  if(authenticated)await loadProject();
+})();
 </script></body></html>
