@@ -8,20 +8,18 @@
 *{box-sizing:border-box} body{margin:0;font-family:Montserrat,Verdana,Arial,sans-serif;background:#252321;color:var(--ink);min-height:100vh}
 .page{min-height:100vh;display:grid;grid-template-columns:minmax(340px,42%) 1fr}
 .left{padding:44px 56px;display:flex;flex-direction:column;background:#252321;color:#fff;position:relative;overflow:hidden}
-.brand{display:flex;align-items:center;gap:13px;position:relative;z-index:2} .brand img{width:135px;max-height:58px;object-fit:contain}
-.divider{width:1px;height:31px;background:rgba(255,255,255,.4)} .vero{color:var(--green);font-size:20px;font-weight:800;letter-spacing:1.8px}
-.message{margin:auto 0;max-width:500px;position:relative;z-index:2} .message small{color:var(--green);font-weight:800;letter-spacing:1.6px}
-.message h1{font-size:45px;line-height:1.08;margin:13px 0} .message p{color:#d6d1cd;line-height:1.7;font-size:14px}
-.rule{height:4px;width:68px;background:var(--green);margin-top:24px}
-.chev{position:absolute;opacity:.08;width:360px;right:-120px;bottom:-50px}
-.foot{font-size:10px;color:#9f9994;position:relative;z-index:2}
-.right{background:var(--bg);display:grid;place-items:center;padding:35px}
+.brand{display:flex;align-items:center;gap:13px;position:relative;z-index:2}.brand img{width:135px;max-height:58px;object-fit:contain}
+.divider{width:1px;height:31px;background:rgba(255,255,255,.4)}.vero{color:var(--green);font-size:20px;font-weight:800;letter-spacing:1.8px}
+.message{margin:auto 0;max-width:500px;position:relative;z-index:2}.message small{color:var(--green);font-weight:800;letter-spacing:1.6px}
+.message h1{font-size:45px;line-height:1.08;margin:13px 0}.message p{color:#d6d1cd;line-height:1.7;font-size:14px}
+.rule{height:4px;width:68px;background:var(--green);margin-top:24px}.chev{position:absolute;opacity:.08;width:360px;right:-120px;bottom:-50px}
+.foot{font-size:10px;color:#9f9994;position:relative;z-index:2}.right{background:var(--bg);display:grid;place-items:center;padding:35px}
 .card{width:min(470px,100%);background:#fff;border:1px solid var(--line);border-radius:14px;padding:36px;box-shadow:0 12px 40px rgba(0,0,0,.08)}
-.kicker{font-size:9px;color:var(--grey);text-transform:uppercase;letter-spacing:1.4px;font-weight:800} h2{font-size:28px;margin:8px 0 8px} .sub{font-size:12px;color:#6d6763;line-height:1.6;margin-bottom:25px}
-label{display:block;font-size:10px;font-weight:800;color:#625d59;margin:14px 0 6px} input{width:100%;border:1px solid #d8d4d1;border-radius:8px;padding:13px;font:500 12px Montserrat}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px} button{width:100%;border:0;border-radius:8px;background:var(--green);color:var(--charcoal);font-weight:800;padding:13px;margin-top:20px;cursor:pointer;font-family:Montserrat}
-.error{display:none;margin-top:15px;padding:11px;border-radius:7px;background:#fbe4e4;color:#8f2929;font-size:11px} .note{font-size:9px;color:var(--grey);margin-top:15px;line-height:1.5}
-#bootstrapView{display:none}
+.kicker{font-size:9px;color:var(--grey);text-transform:uppercase;letter-spacing:1.4px;font-weight:800}h2{font-size:28px;margin:8px 0 8px}.sub{font-size:12px;color:#6d6763;line-height:1.6;margin-bottom:25px}
+label{display:block;font-size:10px;font-weight:800;color:#625d59;margin:14px 0 6px}input{width:100%;border:1px solid #d8d4d1;border-radius:8px;padding:13px;font:500 12px Montserrat}
+button{width:100%;border:0;border-radius:8px;background:var(--green);color:var(--charcoal);font-weight:800;padding:13px;margin-top:20px;cursor:pointer;font-family:Montserrat}
+.error{display:none;margin-top:15px;padding:11px;border-radius:7px;background:#fbe4e4;color:#8f2929;font-size:11px}
+.access-note{margin-top:20px;padding-top:18px;border-top:1px solid var(--line);font-size:10px;color:#6d6763;line-height:1.6}.access-note b{color:var(--charcoal)}
 @media(max-width:850px){.page{grid-template-columns:1fr}.left{min-height:260px;padding:30px}.message{margin:45px 0}.message h1{font-size:34px}.right{padding:25px}}
 </style></head><body>
 <div class="page"><section class="left">
@@ -32,33 +30,72 @@ label{display:block;font-size:10px;font-weight:800;color:#625d59;margin:14px 0 6
 <div class="card" id="loginView"><div class="kicker">VERO ACCESS</div><h2>Sign in</h2><div class="sub">Use your VERO work account to continue.</div>
 <form id="loginForm"><label>Work email</label><input id="email" type="email" autocomplete="username" required>
 <label>Password</label><input id="password" type="password" autocomplete="current-password" required>
-<button type="submit">Sign in to VERO</button></form><div class="error" id="loginError"></div></div>
-<div class="card" id="bootstrapView"><div class="kicker">INITIAL VERO SETUP</div><h2>Create Administrator</h2><div class="sub">Create the first VERO account. This setup closes automatically once the Administrator exists.</div>
-<form id="bootstrapForm"><div class="grid"><div><label>First name</label><input id="firstName" required></div><div><label>Last name</label><input id="lastName" required></div></div>
-<label>Work email</label><input id="adminEmail" type="email" autocomplete="username" required>
-<label>Password</label><input id="adminPassword" type="password" autocomplete="new-password" minlength="12" required>
-<div class="note">Minimum 12 characters. Your password is sent directly to the VERO authentication API and stored only as a salted hash.</div>
-<button type="submit">Create Administrator</button></form><div class="error" id="bootstrapError"></div></div>
+<button type="submit">Sign in to VERO</button></form><div class="error" id="loginError"></div>
+<div class="access-note"><b>Need access to VERO?</b><br>Contact your VERO Administrator. Accounts can only be created by an authorised Administrator.</div>
+</div>
 </section></div>
 <script>
 const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
 const TOKEN_KEY='vero_session_token';
 const USER_KEY='vero_current_user';
-const showError=(id,msg)=>{const e=document.getElementById(id);e.textContent=msg;e.style.display='block'};
-const saveSession=d=>{localStorage.setItem(TOKEN_KEY,d.token);localStorage.setItem(USER_KEY,JSON.stringify(d.user));location.href='index.html'};
-async function login(email,password){
- const r=await fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
- const d=await r.json().catch(()=>({})); if(!r.ok)throw new Error(d.message||'Unable to sign in'); return d;
+
+const showError=(msg)=>{
+ const e=document.getElementById('loginError');
+ e.textContent=msg;
+ e.style.display='block';
+};
+
+function destination(){
+ const params=new URLSearchParams(location.search);
+ const requested=params.get('return');
+ if(!requested)return 'index.html';
+ // Only permit a local VERO page, never an external redirect.
+ if(/^[a-zA-Z0-9._-]+\.html(?:\?.*)?$/.test(requested))return requested;
+ return 'index.html';
 }
-document.getElementById('loginForm').addEventListener('submit',async e=>{e.preventDefault();try{saveSession(await login(email.value,password.value))}catch(err){
- if(err.message==='Invalid email or password'){document.getElementById('loginView').style.display='none';document.getElementById('bootstrapView').style.display='block';adminEmail.value=email.value;showError('bootstrapError','No VERO account was found. If this is the first setup, create the Administrator account below.');}
- else showError('loginError',err.message)
-}});
-document.getElementById('bootstrapForm').addEventListener('submit',async e=>{e.preventDefault();try{
- const payload={first_name:firstName.value,last_name:lastName.value,email:adminEmail.value,password:adminPassword.value};
- const r=await fetch(API+'/auth/bootstrap',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
- const d=await r.json().catch(()=>({})); if(!r.ok)throw new Error(d.message||'Unable to create Administrator');
- saveSession(await login(payload.email,payload.password));
-}catch(err){showError('bootstrapError',err.message)}});
-(async()=>{const t=localStorage.getItem(TOKEN_KEY);if(!t)return;try{const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t}});if(r.ok)location.href='index.html';else{localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(USER_KEY)}}catch(e){}})();
+
+const saveSession=d=>{
+ localStorage.setItem(TOKEN_KEY,d.token);
+ localStorage.setItem(USER_KEY,JSON.stringify(d.user));
+ location.replace(destination());
+};
+
+async function login(email,password){
+ const r=await fetch(API+'/auth/login',{
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({email,password})
+ });
+ const d=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(d.message||'Unable to sign in');
+ return d;
+}
+
+document.getElementById('loginForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ document.getElementById('loginError').style.display='none';
+ try{
+  saveSession(await login(
+   document.getElementById('email').value,
+   document.getElementById('password').value
+  ));
+ }catch(err){
+  showError(err.message==='Invalid email or password'
+   ? 'Invalid email or password. If you need access to VERO, contact your VERO Administrator.'
+   : err.message);
+ }
+});
+
+(async()=>{
+ const t=localStorage.getItem(TOKEN_KEY);
+ if(!t)return;
+ try{
+  const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t}});
+  if(r.ok)location.replace(destination());
+  else{
+   localStorage.removeItem(TOKEN_KEY);
+   localStorage.removeItem(USER_KEY);
+  }
+ }catch(e){}
+})();
 </script></body></html>
