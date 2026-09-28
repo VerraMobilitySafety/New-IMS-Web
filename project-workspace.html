@@ -199,6 +199,22 @@
 .load-error{background:#fff3f3;border:1px solid #e8bcbc;color:#8f2929;padding:12px 14px;border-radius:8px;margin-bottom:14px;font-size:11px;display:none}
 @media(max-width:900px){.workflow-strip{grid-template-columns:1fr 1fr}}
 
+
+/* PROJECT WORKSPACE v1.7 — native New Project Request */
+.request-steps{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.request-step{border:1px solid var(--line);background:#fff;border-radius:16px;padding:7px 10px;font:800 9px Montserrat;color:var(--grey);cursor:pointer}
+.request-step.active{background:var(--charcoal);border-color:var(--charcoal);color:#fff}
+.request-page{display:none}.request-page.active{display:block}
+.request-page h3{font-size:16px;margin:0 0 5px}.request-page .intro{font-size:10px;color:var(--grey);margin:0 0 18px;line-height:1.55}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-field{margin-bottom:12px}.form-field.full{grid-column:1/-1}
+.form-field label{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.7px;color:var(--grey);font-weight:800;margin-bottom:6px}
+.form-field input,.form-field textarea{width:100%;border:1px solid #d7d3d0;border-radius:8px;padding:11px 12px;font:500 11px Montserrat;background:#fff}
+.form-field textarea{resize:vertical;min-height:90px}
+.request-nav{display:flex;justify-content:space-between;gap:8px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+.request-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.request-summary .detail{min-height:70px}
+@media(max-width:700px){.form-grid,.request-summary{grid-template-columns:1fr}}
 </style></head>
 <body><div class="app"><aside class="sidebar">
 <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -255,9 +271,9 @@
  <div class="ws-tabs">
   <button class="ws-tab active" onclick="showTab('overview',this)">Overview</button>
   <button class="ws-tab" onclick="showTab('commercial',this)">Commercial</button>
-  <button class="ws-tab" onclick="showTab('actions',this)">Actions <span class="status overdue">7</span></button>
-  <button class="ws-tab" onclick="showTab('risks',this)">Risks <span class="status review">4</span></button>
-  <button class="ws-tab" onclick="showTab('compliance',this)">Compliance <span class="status approval">12</span></button>
+  <button class="ws-tab" onclick="showTab('actions',this)">Actions</button>
+  <button class="ws-tab" onclick="showTab('risks',this)">Risks</button>
+  <button class="ws-tab" onclick="showTab('compliance',this)">Compliance</button>
   <button class="ws-tab" onclick="showTab('documents',this)">Documents</button>
   <button class="ws-tab" onclick="showTab('assurance',this)">Assurance</button>
   <button class="ws-tab" onclick="showTab('updates',this)">Updates</button>
@@ -282,36 +298,27 @@
  </section>
 
  <section id="commercial" class="ws-view"><div class="commercial-grid">
-  <div class="metric"><label>Baseline Sales Order</label><strong>$1.20m</strong><small>Original baseline</small></div>
-  <div class="metric"><label>Current Revenue</label><strong>$1.26m</strong><small>+$60k since baseline</small></div>
-  <div class="metric"><label>Baseline Cost</label><strong>$840k</strong><small>Original baseline</small></div>
-  <div class="metric"><label>Current Planned Cost</label><strong>$895k</strong><small>+$55k since baseline</small></div>
-  <div class="metric"><label>Original Margin</label><strong>30.0%</strong><small>At baseline</small></div>
-  <div class="metric"><label>Current Planned Margin</label><strong>29.0%</strong><small>-1.0 pt since baseline</small></div>
-  <div class="metric"><label>Planned Cost This Month</label><strong>$128k</strong><small>Current month</small></div>
-  <div class="metric"><label>ETC</label><strong>$612k</strong><small>Estimate to complete</small></div>
+  <div class="metric"><label>Baseline Revenue</label><strong>—</strong><small>New Project Request</small></div>
+  <div class="metric"><label>Current Revenue</label><strong>—</strong><small>Not connected yet</small></div>
+  <div class="metric"><label>Baseline Cost</label><strong>—</strong><small>New Project Request</small></div>
+  <div class="metric"><label>Current Planned Cost</label><strong>—</strong><small>Not connected yet</small></div>
+  <div class="metric"><label>Original Margin</label><strong id="baselineMargin">—</strong><small>Calculated from baseline</small></div>
+  <div class="metric"><label>Current Planned Margin</label><strong>—</strong><small>Not connected yet</small></div>
+  <div class="metric"><label>Planned Cost This Month</label><strong>—</strong><small>Not connected yet</small></div>
+  <div class="metric"><label>ETC</label><strong>—</strong><small>Not connected yet</small></div>
  </div></section>
 
- <section id="actions" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Actions</h2><span>Linked to My Actions</span></div><table class="table"><thead><tr><th>Action</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead><tbody>
- <tr><td><b>Confirm mobilisation governance</b><div class="meta">Project initiation</div></td><td>James Wilson</td><td>25 Sep</td><td><span class="status overdue">Overdue</span></td></tr>
- <tr><td><b>Validate contractual compliance requirements</b><div class="meta">Compliance review</div></td><td>Project Team</td><td>30 Sep</td><td><span class="status review">Open</span></td></tr>
- </tbody></table></div></section>
+ <section id="actions" class="ws-view"><div class="empty-state"><b>No live project actions yet.</b><br><br>Workflow actions assigned to this project will appear here.</div></section>
 
- <section id="risks" class="ws-view"><div class="panel register-table"><div class="panel-head"><h2>Project Risks</h2><span>Project Number linked Risk Register</span></div><table class="table"><thead><tr><th>Risk</th><th>Owner</th><th>Inherent</th><th>Residual</th><th>Status</th></tr></thead><tbody>
- <tr><td><b>Delivery schedule may not support committed customer dates</b><div class="meta">Generated from Sales Handover and subject to assessment.</div></td><td>Project Manager</td><td><span class="risk-badge high">High</span></td><td><span class="risk-badge mod">Moderate</span></td><td><span class="status review">To Be Assessed</span></td></tr>
- <tr><td><b>Third-party dependencies may delay mobilisation</b><div class="meta">Subcontractor / supplier dependency.</div></td><td>Project Manager</td><td><span class="risk-badge high">High</span></td><td><span class="risk-badge mod">Moderate</span></td><td><span class="status review">To Be Assessed</span></td></tr>
- </tbody></table></div></section>
+ <section id="risks" class="ws-view"><div class="empty-state"><b>No live project risks connected yet.</b><br><br>Risks linked to this project will appear here.</div></section>
 
- <section id="compliance" class="ws-view"><div class="panel register-table"><div class="panel-head"><h2>Contractual Compliance</h2><span>AI extracted • human review required where flagged</span></div><table class="table"><thead><tr><th>Requirement</th><th>Owner</th><th>Reference</th><th>Status</th></tr></thead><tbody>
- <tr><td><b>Provide customer reporting in accordance with contract requirements</b><div class="meta">Evidence: periodic customer report</div></td><td>Project Manager</td><td>Clause 8.2</td><td><span class="status review">Not Assessed</span></td></tr>
- <tr><td><b>Maintain required project records for the contract term</b><div class="meta">Evidence: controlled project records</div></td><td>Project Team</td><td>Clause 11</td><td><span class="status review">Not Assessed</span></td></tr>
- </tbody></table></div></section>
+ <section id="compliance" class="ws-view"><div class="empty-state"><b>No live compliance requirements connected yet.</b><br><br>Contractual and project compliance requirements will appear here.</div></section>
 
- <section id="documents" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Documents</h2><span>Controlled records</span></div><table class="table"><thead><tr><th>Document</th><th>Type</th><th>Status</th></tr></thead><tbody><tr><td><b>Master Services Agreement.pdf</b><div class="meta">Stored in the project folder created at handover.</div></td><td>Master Agreement</td><td><span class="status current">Current</span></td></tr></tbody></table></div></section>
+ <section id="documents" class="ws-view"><div class="empty-state"><b>No live project documents connected yet.</b><br><br>Controlled project records will appear here.</div></section>
  <section id="assurance" class="ws-view"><div class="empty-state"><b>Project Assurance</b><br><br>Audits, inspections, project gates and assurance activities linked to this project will appear here.</div></section>
- <section id="updates" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Updates</h2><span>Chronological project log</span></div><div class="tasks"><div class="task"><span class="dot"></span><div><b>18 Sep 2026 — Mobilisation commenced</b><small>Initial governance, risk and compliance review underway.</small></div></div><div class="task"><span class="dot"></span><div><b>15 Sep 2026 — Sales Handover received</b><small>Project record and document folder created automatically.</small></div></div></div></div></section>
+ <section id="updates" class="ws-view"><div class="empty-state"><b>No live project updates yet.</b><br><br>Workflow and project history will appear here.</div></section>
 
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Project Workspace • v1.6</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Project Workspace • v1.7</span></footer>
 </div></main></div>
 
 <div id="setupPanel" class="setup-backdrop" onclick="if(event.target===this)closeSetup()">
@@ -354,6 +361,8 @@ function renderRequest(r){
  if(r.contract_start_date)setText('contractStart',fmtDate(r.contract_start_date));if(r.contract_expiry_date)setText('contractEnd',fmtDate(r.contract_expiry_date));
  document.getElementById('nextAction').innerHTML=s==='Submitted'?'<div class="live-note">New Project Request submitted. Project Setup is the next workflow stage.</div>':'<button type="button" onclick="openRequest()">Complete New Project Request →</button>';
  const m=document.querySelectorAll('#commercial .metric strong');if(m[0])m[0].textContent=money(r.baseline_revenue);if(m[2])m[2].textContent=money(r.baseline_cost);
+ const rev=Number(r.baseline_revenue),cost=Number(r.baseline_cost),margin=document.getElementById('baselineMargin');
+ if(margin)margin.textContent=rev>0?(((rev-cost)/rev)*100).toFixed(1)+'%':'—';
 }
 function renderNoRequest(){
  window.currentRequest=null;setText('liveStage','New Project Request');setText('overviewDevStage','New Project Request');setText('liveNextStep','Start New Project Request');
@@ -379,9 +388,100 @@ function openRequest(){
 }
 function inp(l,n,v='',t='text'){return `<div class="detail"><label>${l}</label><input name="${n}" type="${t}" value="${esc(v)}" style="width:100%;border:1px solid #d7d3d0;border-radius:7px;padding:10px;font:500 11px Montserrat"></div>`}
 function area(l,n,v=''){return `<div class="section"><h3>${l}</h3><textarea name="${n}" rows="4" style="width:100%;border:1px solid #d7d3d0;border-radius:7px;padding:10px;font:500 11px Montserrat">${esc(v)}</textarea></div>`}
+let requestStep=0;
+const requestStepNames=['Project','Customer','Scope','Contract & Budget','Delivery','Review'];
+
 function editRequest(){
  const r=window.currentRequest||{},body=document.querySelector('#setupPanel .setup-body');
- body.innerHTML=`<form id="requestForm" class="drawer-body" onsubmit="saveRequest(event)"><div class="detail-grid">${inp('Requested By','requested_by',r.requested_by||currentProject?.project_owner)}${inp('Customer Contact','customer_contact_name',r.customer_contact_name)}${inp('Customer Email','customer_contact_email',r.customer_contact_email,'email')}${inp('Customer Phone','customer_contact_phone',r.customer_contact_phone)}${inp('Customer Address','customer_address',r.customer_address)}${inp('Contract Number','contract_number',r.contract_number)}${inp('Purchase Order','purchase_order_number',r.purchase_order_number)}${inp('Contract Start','contract_start_date',r.contract_start_date,'date')}${inp('Contract Expiry','contract_expiry_date',r.contract_expiry_date,'date')}${inp('Baseline Revenue','baseline_revenue',r.baseline_revenue,'number')}${inp('Baseline Cost','baseline_cost',r.baseline_cost,'number')}</div>${area('Scope','scope_description',r.scope_description)}${area('Assumptions','assumptions_summary',r.assumptions_summary)}${area('Delivery Requirements','delivery_requirements',r.delivery_requirements)}${area('Installation Requirements','installation_requirements',r.installation_requirements)}${area('Commissioning Requirements','commissioning_requirements',r.commissioning_requirements)}${area('Training Requirements','training_requirements',r.training_requirements)}${area('Warranty Requirements','warranty_requirements',r.warranty_requirements)}${area('Spare Parts Requirements','spare_parts_requirements',r.spare_parts_requirements)}${area('Documentation Requirements','documentation_requirements',r.documentation_requirements)}<div id="requestSaveError" class="load-error"></div><div class="drawer-actions"><button class="btn green" type="submit" value="Draft">Save Draft</button><button class="btn dark" type="submit" value="Submitted">Submit Request</button><button class="btn outline" type="button" onclick="openRequest()">Cancel</button></div></form>`;
+ document.querySelector('#setupPanel .setup-head h2').textContent='New Project Request';
+ body.innerHTML=`<form id="requestForm" class="drawer-body" onsubmit="saveRequest(event)">
+  <div class="request-steps">${requestStepNames.map((x,i)=>`<button class="request-step ${i===0?'active':''}" type="button" onclick="goRequestStep(${i})">${i+1}. ${x}</button>`).join('')}</div>
+
+  <section class="request-page active" data-step="0">
+   <h3>Project</h3><p class="intro">Core ownership and project information. The master project record is already linked as Project ${currentProject.id}.</p>
+   <div class="form-grid">
+    <div class="form-field"><label>Project Name</label><input value="${esc(currentProject.project_name)}" disabled></div>
+    <div class="form-field"><label>Project Type</label><input value="${esc(currentProject.project_type)}" disabled></div>
+    <div class="form-field"><label>Customer</label><input value="${esc(currentProject.customer)}" disabled></div>
+    <div class="form-field"><label>Requested By</label><input name="requested_by" value="${esc(r.requested_by||currentProject.project_owner)}"></div>
+   </div>
+  </section>
+
+  <section class="request-page" data-step="1">
+   <h3>Customer</h3><p class="intro">Primary customer contact and delivery address information for the project handover.</p>
+   <div class="form-grid">
+    <div class="form-field"><label>Customer Contact</label><input name="customer_contact_name" value="${esc(r.customer_contact_name)}"></div>
+    <div class="form-field"><label>Customer Email</label><input name="customer_contact_email" type="email" value="${esc(r.customer_contact_email)}"></div>
+    <div class="form-field"><label>Customer Phone</label><input name="customer_contact_phone" value="${esc(r.customer_contact_phone)}"></div>
+    <div class="form-field full"><label>Customer Address</label><textarea name="customer_address">${esc(r.customer_address)}</textarea></div>
+   </div>
+  </section>
+
+  <section class="request-page" data-step="2">
+   <h3>Scope & Assumptions</h3><p class="intro">Define what is being delivered and the assumptions the project is being established against.</p>
+   <div class="form-field"><label>Scope Description</label><textarea name="scope_description">${esc(r.scope_description)}</textarea></div>
+   <div class="form-field"><label>Assumptions Summary</label><textarea name="assumptions_summary">${esc(r.assumptions_summary)}</textarea></div>
+  </section>
+
+  <section class="request-page" data-step="3">
+   <h3>Contract & Budget</h3><p class="intro">Commercial baseline and key contract dates captured at project request.</p>
+   <div class="form-grid">
+    <div class="form-field"><label>Contract Number</label><input name="contract_number" value="${esc(r.contract_number)}"></div>
+    <div class="form-field"><label>Purchase Order Number</label><input name="purchase_order_number" value="${esc(r.purchase_order_number)}"></div>
+    <div class="form-field"><label>Contract Start</label><input name="contract_start_date" type="date" value="${esc(r.contract_start_date)}"></div>
+    <div class="form-field"><label>Contract Expiry</label><input name="contract_expiry_date" type="date" value="${esc(r.contract_expiry_date)}"></div>
+    <div class="form-field"><label>Baseline Revenue (AUD)</label><input name="baseline_revenue" type="number" step="0.01" value="${esc(r.baseline_revenue)}"></div>
+    <div class="form-field"><label>Baseline Cost (AUD)</label><input name="baseline_cost" type="number" step="0.01" value="${esc(r.baseline_cost)}"></div>
+   </div>
+  </section>
+
+  <section class="request-page" data-step="4">
+   <h3>Delivery</h3><p class="intro">Capture the operational requirements that need to be handed from the request into project setup and delivery.</p>
+   <div class="form-field"><label>Delivery Requirements</label><textarea name="delivery_requirements">${esc(r.delivery_requirements)}</textarea></div>
+   <div class="form-field"><label>Installation Requirements</label><textarea name="installation_requirements">${esc(r.installation_requirements)}</textarea></div>
+   <div class="form-field"><label>Commissioning Requirements</label><textarea name="commissioning_requirements">${esc(r.commissioning_requirements)}</textarea></div>
+   <div class="form-field"><label>Training Requirements</label><textarea name="training_requirements">${esc(r.training_requirements)}</textarea></div>
+   <div class="form-field"><label>Warranty Requirements</label><textarea name="warranty_requirements">${esc(r.warranty_requirements)}</textarea></div>
+   <div class="form-field"><label>Spare Parts Requirements</label><textarea name="spare_parts_requirements">${esc(r.spare_parts_requirements)}</textarea></div>
+   <div class="form-field"><label>Documentation Requirements</label><textarea name="documentation_requirements">${esc(r.documentation_requirements)}</textarea></div>
+  </section>
+
+  <section class="request-page" data-step="5">
+   <h3>Review & Submit</h3><p class="intro">Review the request before submitting it into the Project Setup stage. You can still save it as a draft.</p>
+   <div id="requestReview" class="request-summary"></div>
+   <div id="requestSaveError" class="load-error" style="margin-top:16px"></div>
+   <div class="drawer-actions">
+    <button class="btn green" type="submit" value="Draft">Save Draft</button>
+    <button class="btn dark" type="submit" value="Submitted">Submit Request</button>
+   </div>
+  </section>
+
+  <div class="request-nav">
+   <button class="btn outline" id="requestPrev" type="button" onclick="changeRequestStep(-1)" style="visibility:hidden">← Previous</button>
+   <button class="btn green" id="requestNext" type="button" onclick="changeRequestStep(1)">Next →</button>
+  </div>
+ </form>`;
+ requestStep=0;updateRequestStep();
+}
+function goRequestStep(i){requestStep=Math.max(0,Math.min(requestStepNames.length-1,i));updateRequestStep()}
+function changeRequestStep(d){goRequestStep(requestStep+d)}
+function updateRequestStep(){
+ document.querySelectorAll('.request-page').forEach((x,i)=>x.classList.toggle('active',i===requestStep));
+ document.querySelectorAll('.request-step').forEach((x,i)=>x.classList.toggle('active',i===requestStep));
+ const prev=document.getElementById('requestPrev'),next=document.getElementById('requestNext');
+ if(prev)prev.style.visibility=requestStep===0?'hidden':'visible';if(next)next.style.visibility=requestStep===requestStepNames.length-1?'hidden':'visible';
+ if(requestStep===requestStepNames.length-1)buildRequestReview();
+}
+function buildRequestReview(){
+ const f=document.getElementById('requestForm'),box=document.getElementById('requestReview');if(!f||!box)return;
+ const d=Object.fromEntries(new FormData(f).entries());
+ box.innerHTML=[
+  ['Project',currentProject.project_name],['Customer',currentProject.customer],['Requested By',d.requested_by],
+  ['Customer Contact',d.customer_contact_name],['Contract',d.contract_number],['Purchase Order',d.purchase_order_number],
+  ['Contract Start',fmtDate(d.contract_start_date)],['Contract Expiry',fmtDate(d.contract_expiry_date)],
+  ['Baseline Revenue',money(d.baseline_revenue)],['Baseline Cost',money(d.baseline_cost)],
+  ['Scope',d.scope_description],['Delivery',d.delivery_requirements]
+ ].map(x=>field(x[0],x[1])).join('');
 }
 async function saveRequest(e){
  e.preventDefault();const form=e.currentTarget,intent=e.submitter?.value||'Draft',fd=new FormData(form),payload=Object.fromEntries(fd.entries());payload.request_status=intent;
