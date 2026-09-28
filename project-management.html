@@ -168,6 +168,50 @@
 @media(max-width:900px){.lifecycle-grid{grid-template-columns:repeat(2,1fr)}}
 
 @media(max-width:850px){.project-toolbar{align-items:flex-start;flex-direction:column}.project-tools{width:100%}.project-search{flex:1}.project-table{min-width:760px}.panel.project-list{overflow:auto}}
+/* PROJECT WORKSPACE v1.7 — native New Project Request */
+.request-steps{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.request-step{border:1px solid var(--line);background:#fff;border-radius:16px;padding:7px 10px;font:800 9px Montserrat;color:var(--grey);cursor:pointer}
+.request-step.active{background:var(--charcoal);border-color:var(--charcoal);color:#fff}
+.request-page{display:none}.request-page.active{display:block}
+.request-page h3{font-size:16px;margin:0 0 5px}.request-page .intro{font-size:10px;color:var(--grey);margin:0 0 18px;line-height:1.55}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-field{margin-bottom:12px}.form-field.full{grid-column:1/-1}
+.form-field label{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.7px;color:var(--grey);font-weight:800;margin-bottom:6px}
+.form-field input,.form-field textarea{width:100%;border:1px solid #d7d3d0;border-radius:8px;padding:11px 12px;font:500 11px Montserrat;background:#fff}
+.form-field textarea{resize:vertical;min-height:90px}
+.request-nav{display:flex;justify-content:space-between;gap:8px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+.request-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.request-summary .detail{min-height:70px}
+@media(max-width:700px){.form-grid,.request-summary{grid-template-columns:1fr}}
+
+/* PROJECT WORKSPACE v1.8 — full native New Project Request */
+.request-shell{padding:22px 24px 90px}
+.request-steps{position:sticky;top:0;z-index:5;background:#fff;padding:4px 0 14px;margin:0 0 20px;border-bottom:1px solid var(--line)}
+.request-step.done{background:#eef4dc;border-color:#d8e4af;color:#52641c}
+.request-page h3{font-size:17px}.request-page h4{font-size:12px;margin:20px 0 10px}
+.form-field select{width:100%;border:1px solid #d7d3d0;border-radius:8px;padding:11px 12px;font:500 11px Montserrat;background:#fff}
+.choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.choice-grid.five{grid-template-columns:repeat(2,minmax(0,1fr))}
+.choice{position:relative}.choice input{position:absolute;opacity:0;pointer-events:none}.choice label{display:flex;align-items:center;min-height:48px;border:1px solid #d7d3d0;border-radius:9px;padding:11px 12px;font-size:10px;font-weight:700;cursor:pointer;background:#fff;text-transform:none;letter-spacing:0;color:var(--charcoal);margin:0}.choice input:checked+label{border-color:var(--green);box-shadow:inset 0 0 0 2px var(--green);background:#f5f8ea}
+.yesno{display:flex;gap:8px}.yesno .choice{flex:1}
+.address-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.address-grid .wide{grid-column:1/-1}
+.inline-check{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:700;margin:2px 0 12px}.inline-check input{accent-color:#8ca52f}
+.budget-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 16px}.budget-box{background:#f8f7f6;border-radius:9px;padding:13px}.budget-box label{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.7px;color:var(--grey);font-weight:800}.budget-box strong{display:block;font-size:17px;margin-top:6px}
+.repeat-block{border:1px solid var(--line);border-radius:10px;padding:13px;margin-bottom:10px;background:#faf9f8}.repeat-row{display:grid;grid-template-columns:150px 1fr auto;gap:9px;align-items:end}.repeat-remove{border:0;background:#eeeae8;border-radius:7px;padding:10px 11px;cursor:pointer;font-weight:800}.add-row{border:1px dashed #bbb5b0;background:#fff;border-radius:8px;padding:10px 12px;font:800 10px Montserrat;cursor:pointer}
+.request-sticky{position:sticky;bottom:0;z-index:6;background:rgba(255,255,255,.97);border-top:1px solid var(--line);box-shadow:0 -8px 18px rgba(61,57,53,.06);padding:12px 0 0;margin-top:22px;display:flex;justify-content:space-between;gap:10px}.request-sticky .right{display:flex;gap:8px;margin-left:auto}.request-save-note{font-size:9px;color:var(--grey);align-self:center}
+.review-section{margin-bottom:14px}.review-section h4{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--grey);margin:0 0 8px}.review-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.review-item{background:#f8f7f6;border-radius:8px;padding:10px}.review-item label{display:block;font-size:8px;text-transform:uppercase;color:var(--grey);font-weight:800;margin-bottom:4px}.review-item strong{font-size:10px;white-space:pre-wrap}.review-milestone{padding:9px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;font-size:10px}
+.req-error{display:none;background:#fff3f3;border:1px solid #e8bcbc;color:#8f2929;padding:10px 12px;border-radius:8px;font-size:10px;margin:12px 0}.req-success{display:none;background:#f1f6df;border:1px solid #d8e4af;color:#52641c;padding:10px 12px;border-radius:8px;font-size:10px;margin:12px 0}
+@media(max-width:700px){.choice-grid,.choice-grid.five,.address-grid,.budget-summary,.review-grid{grid-template-columns:1fr}.repeat-row{grid-template-columns:1fr}.request-sticky{flex-wrap:wrap}}
+
+/* IMPLEMENTATION v1.12 — native New Project Request */
+.setup-backdrop{position:fixed;inset:0;background:rgba(35,32,29,.52);display:none;z-index:60}
+.setup-backdrop.show{display:flex;justify-content:flex-end}
+.setup-frame{width:min(980px,96vw);height:100%;background:#fff;box-shadow:-16px 0 40px rgba(0,0,0,.22);display:flex;flex-direction:column}
+.setup-head{background:var(--charcoal);color:#fff;padding:18px 22px;display:flex;align-items:center;gap:15px}
+.setup-head div{flex:1}.setup-head small{color:var(--green);font-weight:800;letter-spacing:1px;text-transform:uppercase}
+.setup-head h2{margin:4px 0 0;font-size:19px}.setup-close{border:0;background:transparent;color:#fff;font-size:27px;cursor:pointer}
+.setup-body{flex:1;min-height:0;overflow:auto}.setup-foot{padding:10px 18px;border-top:1px solid var(--line);font-size:9px;color:var(--grey)}
+.new-request-banner{background:#f1f6df;border:1px solid #d8e4af;border-radius:9px;padding:11px 13px;font-size:10px;color:#52641c;margin-bottom:16px}
+
 </style></head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -234,26 +278,16 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.11</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.12</span></footer>
 </div></main></div>
 
 
-<div id="cognitoProjectModal" class="modal-back" onclick="if(event.target===this)closeCognitoProject()">
- <div class="drawer" style="width:min(820px,94vw);">
-  <div class="drawer-head">
-   <button class="close" onclick="closeCognitoProject()">×</button>
-   <small>PROJECT CREATION</small>
-   <h2>Sales Handover Checklist</h2>
-  </div>
-  <div class="drawer-body" style="padding:0;overflow:hidden;">
-   <iframe
-    src="https://www.cognitoforms.com/VerraMobility/SalesHandoverChecklist"
-    title="Sales Handover Checklist"
-    style="width:100%;height:72vh;border:0;display:block;background:#fff;"
-    loading="lazy">
-   </iframe>
-  </div>
- </div>
+<div id="setupPanel" class="setup-backdrop" onclick="if(event.target===this)closeSetup()">
+ <section class="setup-frame">
+  <div class="setup-head"><div><small>VERO • Project Workflow</small><h2>New Project Request</h2></div><button class="setup-close" onclick="closeSetup()">×</button></div>
+  <div class="setup-body"></div>
+  <div class="setup-foot">VERO-native project workflow • PostgreSQL record</div>
+ </section>
 </div>
 
 <div id="projectModal" class="modal-back" onclick="if(event.target===this)closeProject()">
@@ -277,37 +311,153 @@
  </div>
 </div>
 
+
 <script>
-const PROJECTS_API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/projects';
+const API_BASE='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+const PROJECTS_API=API_BASE+'/projects';
+const PROJECT_REQUEST_API=id=>`${API_BASE}/projects/${id}/request`;
+const PROJECT_MILESTONES_API=id=>`${API_BASE}/projects/${id}/milestones`;
+
 let projects=[],currentFilter='all';
-const val=v=>v&&typeof v==='object'?(v.Value||v.DisplayName||''):(v??'');
+let currentProject=null,currentRequest=null,currentMilestones=[];
+let requestStep=0;
+const requestStepNames=['Administration','Client','System & Scope','Contract & Budget','Milestones','Delivery & Installation','Warranty & Handover','Review & Submit'];
+
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function date(v){if(!v)return '—';let d=new Date(v.length===10?v+'T00:00:00':v);return isNaN(d)?v:new Intl.DateTimeFormat('en-AU',{day:'2-digit',month:'short',year:'numeric'}).format(d)}
-function pct(v){if(v===null||v===undefined||v==='')return null;let n=Number(v);return isNaN(n)?null:Math.max(0,Math.min(100,n<=1?n*100:n))}
-function lifecycleKey(v,status){let s=(String(v||'')+' '+String(status||'')).toLowerCase();if(/complete|completed|closed|closeout|close-out|handover complete/.test(s))return'completion';if(/sales handover|setup|approval|approve|finance|leadership|initiat|mobilis|mobiliz|planning|pm assigned/.test(s))return'initiation';return'execution'}
+const text=v=>v===null||v===undefined||v===''?'—':String(v);
+const fmtDate=v=>{if(!v)return '—';const d=new Date(String(v).length===10?v+'T00:00:00':v);return isNaN(d)?String(v):d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'})};
+const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
+function money(v){if(v===null||v===undefined||v==='')return '—';const n=Number(v);return Number.isNaN(n)?String(v):new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(n)}
+function normalise(p){
+ const status=p.status||'Not Set';
+ const s=status.toLowerCase();
+ const life=s.includes('complete')?'completion':s.includes('progress')?'execution':'initiation';
+ return {raw:p,name:p.project_name||'Untitled Project',code:p.project_type||'',owner:p.project_owner||'Unassigned',customer:p.customer||'',stage:status,stageKey:life,due:p.target_end_date||'',description:p.description||''};
+}
 function stageClass(v){return v==='initiation'?'mobilisation':v==='completion'?'delivery':'planning'}
-function health(raw){let s=String(raw||'').toLowerCase();if(s==='green'||s.includes('track'))return['On Track',''];if(s==='red'||s.includes('risk'))return['At Risk','red'];if(s==='amber'||s==='yellow'||s.includes('attention'))return['Attention','amber'];if(s.includes('hold'))return['On Hold','grey'];return[raw||'Not Set',raw?'':'grey']}
-function normalise(p){let status=p.status||'Not Set',h=health(status),life=status.toLowerCase().includes('complete')?'completion':status.toLowerCase().includes('progress')?'execution':'initiation';return{raw:p,name:p.project_name||'Untitled Project',code:p.project_type||'',owner:p.project_owner||'Unassigned',customer:p.customer||'',stage:status,stageKey:life,due:p.target_end_date||'',health:h[0],healthClass:h[1],progress:null,description:p.description||'',jurisdiction:''}}
-async function loadProjects(){try{let r=await fetch(PROJECTS_API,{headers:{Accept:'application/json'}});if(!r.ok)throw Error('API returned '+r.status);let d=await r.json(),rows=Array.isArray(d)?d:Array.isArray(d.projects)?d.projects:Array.isArray(d.value)?d.value:Array.isArray(d.body)?d.body:[];projects=rows.map(normalise);render();kpis()}catch(e){console.error(e);document.getElementById('projectTableBody').innerHTML='<tr><td colspan="6" class="empty"><b>Unable to load live projects.</b><br>Check the browser console and Azure Function CORS settings.</td></tr>';document.getElementById('projectCount').textContent='Live data unavailable'}}
+async function loadProjects(){
+ try{
+  const r=await fetch(PROJECTS_API,{headers:{Accept:'application/json'},cache:'no-store'});
+  if(!r.ok)throw Error('API returned '+r.status);
+  const d=await r.json(),rows=Array.isArray(d)?d:(d.projects||[]);
+  projects=rows.map(normalise);render();kpis();
+ }catch(e){
+  console.error(e);
+  document.getElementById('projectTableBody').innerHTML='<tr><td colspan="6" class="empty"><b>Unable to load live projects.</b><br>Check the browser console and Azure Function CORS settings.</td></tr>';
+  document.getElementById('projectCount').textContent='Live data unavailable';
+ }
+}
 function render(){
- let body=document.getElementById('projectTableBody');
+ const body=document.getElementById('projectTableBody');
  body.innerHTML=projects.map((p,i)=>{
-  let search=[p.name,p.code,p.owner,p.customer,p.stage,p.description].join(' ').toLowerCase();
+  const search=[p.name,p.code,p.owner,p.customer,p.stage,p.description].join(' ').toLowerCase();
   return `<tr class="data project-row" data-stage="${esc(p.stageKey)}" data-search="${esc(search)}" onclick="openProject(${i})">
    <td><div class="project-name">${esc(p.name)}</div><div class="meta">${esc(p.description||'')}</div></td>
-   <td>${esc(p.code||'—')}</td>
-   <td>${esc(p.customer||'—')}</td>
-   <td>${esc(p.owner)}</td>
-   <td><span class="stage ${stageClass(p.stageKey)}">${esc(p.stage)}</span></td>
-   <td>${esc(date(p.due))}</td>
+   <td>${esc(p.code||'—')}</td><td>${esc(p.customer||'—')}</td><td>${esc(p.owner)}</td>
+   <td><span class="stage ${stageClass(p.stageKey)}">${esc(p.stage)}</span></td><td>${esc(fmtDate(p.due))}</td>
   </tr>`;
  }).join('')||'<tr><td colspan="6" class="empty">No projects returned by the Projects API.</td></tr>';
  applyFilters();
 }
-function kpis(){document.getElementById('lifeAll').textContent=projects.length;document.getElementById('lifeInitiation').textContent=projects.filter(p=>p.stageKey==='initiation').length;document.getElementById('lifeExecution').textContent=projects.filter(p=>p.stageKey==='execution').length;document.getElementById('lifeCompletion').textContent=projects.filter(p=>p.stageKey==='completion').length}
-function newProject(){document.getElementById('cognitoProjectModal').classList.add('show')}
-function closeCognitoProject(){document.getElementById('cognitoProjectModal').classList.remove('show')}
-function openProject(i){let p=projects[i];if(p)window.location.href='project-workspace.html?project='+encodeURIComponent(p.code||p.name)}
-function closeProject(){document.getElementById('projectModal').classList.remove('show')}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeProject()});loadProjects();
-</script></body></html>
+function kpis(){
+ document.getElementById('lifeAll').textContent=projects.length;
+ document.getElementById('lifeInitiation').textContent=projects.filter(p=>p.stageKey==='initiation').length;
+ document.getElementById('lifeExecution').textContent=projects.filter(p=>p.stageKey==='execution').length;
+ document.getElementById('lifeCompletion').textContent=projects.filter(p=>p.stageKey==='completion').length;
+}
+function filterProjects(btn,key){currentFilter=key;document.querySelectorAll('.lifecycle-card').forEach(x=>x.classList.remove('active'));btn.classList.add('active');applyFilters()}
+function applyFilters(){
+ const q=(document.getElementById('projectSearch')?.value||'').trim().toLowerCase();let shown=0;
+ document.querySelectorAll('.project-row').forEach(row=>{const okStage=currentFilter==='all'||row.dataset.stage===currentFilter,okSearch=!q||row.dataset.search.includes(q),show=okStage&&okSearch;row.style.display=show?'':'none';if(show)shown++});
+ document.getElementById('projectCount').textContent=`${shown} project${shown===1?'':'s'}`;
+}
+function openProject(i){const p=projects[i];if(p?.raw?.id)window.location.href='project-workspace.html?id='+encodeURIComponent(p.raw.id)}
+function closeProject(){document.getElementById('projectModal')?.classList.remove('show')}
+
+function newProject(){
+ currentProject=null;currentRequest={};currentMilestones=[];requestStep=0;
+ document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';
+ editRequest();
+ const body=document.querySelector('#setupPanel .setup-body');
+ body.insertAdjacentHTML('afterbegin','<div class="request-shell" style="padding-bottom:0"><div class="new-request-banner"><b>New Project Request</b> — a VERO project record will be created the first time you save this request.</div></div>');
+}
+function choice(name,value,label,kind='radio'){return `<div class="choice"><input type="${kind}" id="${name}_${value.replace(/[^a-z0-9]/gi,'_')}" name="${name}" value="${esc(value)}" ${checked(name,value)}><label for="${name}_${value.replace(/[^a-z0-9]/gi,'_')}">${esc(label)}</label></div>`}
+function yesno(name){return `<div class="yesno"><div class="choice"><input type="radio" id="${name}_yes" name="${name}" value="true" ${boolChecked(name,true)}><label for="${name}_yes">Yes</label></div><div class="choice"><input type="radio" id="${name}_no" name="${name}" value="false" ${boolChecked(name,false)}><label for="${name}_no">No</label></div></div>`}
+function input(label,name,type='text',extra=''){return `<div class="form-field"><label>${label}</label><input name="${name}" type="${type}" value="${esc(val(name,''))}" ${extra}></div>`}
+function textarea(label,name){return `<div class="form-field full"><label>${label}</label><textarea name="${name}">${esc(val(name,''))}</textarea></div>`}
+function address(prefix,title){return `<h4>${title}</h4><div class="address-grid"><div class="form-field wide"><label>Address Line 1</label><input name="${prefix}_address_line_1" value="${esc(val(prefix+'_address_line_1',''))}"></div><div class="form-field wide"><label>Address Line 2</label><input name="${prefix}_address_line_2" value="${esc(val(prefix+'_address_line_2',''))}"></div><div class="form-field"><label>City</label><input name="${prefix}_city" value="${esc(val(prefix+'_city',''))}"></div><div class="form-field"><label>State / Province / Region</label><input name="${prefix}_state_region" value="${esc(val(prefix+'_state_region',''))}"></div><div class="form-field"><label>Postal / Zip Code</label><input name="${prefix}_postcode" value="${esc(val(prefix+'_postcode',''))}"></div><div class="form-field"><label>Country</label><input name="${prefix}_country" value="${esc(val(prefix+'_country','Australia'))}"></div></div>`}
+function editRequest(){const body=document.querySelector('#setupPanel .setup-body');document.querySelector('#setupPanel .setup-head h2').textContent='New Project Request';document.querySelector('#setupPanel .setup-foot').textContent='VERO-native project workflow • PostgreSQL record';body.innerHTML=`<form id="requestForm" class="request-shell" onsubmit="saveRequest(event)"><div class="request-steps">${requestStepNames.map((x,i)=>`<button class="request-step ${i===0?'active':''}" type="button" onclick="goRequestStep(${i})">${i+1}. ${x}</button>`).join('')}</div>
+<section class="request-page active" data-step="0"><h3>Administration Details</h3><p class="intro">Identify the request, its owner and the type of project being handed into VERO.</p><div class="form-grid">${input('Date','request_date','date')}${input('Account Manager','account_manager')}${input('Bid / Quote Number','bid_quote_number')}${input('Title','project_title')}${input('Project Number','project_number')}${textarea('Project Description','project_description')}<div class="form-field full"><label>Type of Contract / Project Request</label><div class="choice-grid five">${['Camera Install and Commission','Product Type Approval','New Product Type','Supply of Camera System(s)','Software Development'].map(x=>choice('request_type',x,x)).join('')}</div></div><div class="form-field full"><label>Has a Contract / PO Been Received?</label>${yesno('contract_po_received')}</div></div></section>
+<section class="request-page" data-step="1"><h3>Client Details</h3><p class="intro">Customer, billing, delivery and primary contact details.</p><div class="form-grid">${input('Client Name','client_name')}${input('Client Reference','client_reference')}</div>${address('billing','Billing Address')}<label class="inline-check"><input type="checkbox" id="sameAddress" onchange="copyBillingAddress(this.checked)"> Product delivery address is the same as billing</label>${address('delivery','Product Delivery Address')}<h4>Client Contact</h4><div class="form-grid">${input('First Name','client_contact_first_name')}${input('Last Name','client_contact_last_name')}${input('Phone','client_contact_phone')}${textarea('Comments / Background / Special Requirements','client_background_requirements')}</div></section>
+<section class="request-page" data-step="2"><h3>System & Scope</h3><p class="intro">Define the contracted scope and the technical assumptions that shape delivery.</p><div class="form-grid">${input('Master Contract URL / Reference','master_contract_url','url')}${textarea('Scope of Works','scope_of_works')}${textarea('Assumptions','system_assumptions')}<div class="form-field full"><label>Has the System Been Productised?</label>${yesno('system_productised')}</div>${textarea('What Engineering Development Demand Requests Relate to this Project (if any)?','engineering_demand_requests')}</div><div class="live-note">Document upload will be connected to VERO Documents; this field currently stores the contract reference/link.</div></section>
+<section class="request-page" data-step="3"><h3>Contract & Budget Details</h3><p class="intro">Capture the commercial baseline. Total cost and calculated margin update automatically.</p><div class="form-grid">${input('Contract Start Date','contract_start_date','date')}${input('Contract Expiry Date','contract_expiry_date','date')}${input('Revenue (AUD)','revenue','number','step="0.01" oninput="updateBudget()"')}${input('Labour Cost Budget','labour_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Materials Cost Budget','materials_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Travel Cost Budget','travel_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Sub Contractor Cost Budget','subcontractor_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Other Cost Budget','other_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Other Cost Explanation','other_cost_explanation')}${input('Approved Margin (%)','approved_margin','number','step="0.001"')}</div><div class="budget-summary"><div class="budget-box"><label>Revenue</label><strong id="budgetRevenue">—</strong></div><div class="budget-box"><label>Total Cost Budget</label><strong id="budgetTotal">—</strong></div><div class="budget-box"><label>Calculated Margin</label><strong id="budgetMargin">—</strong></div></div></section>
+<section class="request-page" data-step="4"><h3>Milestones</h3><p class="intro">Add as many contractual and customer-expected milestones as required.</p><h4>Contract Milestones</h4><div id="contractMilestones"></div><button type="button" class="add-row" onclick="addMilestone('Contract')">+ Add Contract Milestone</button><h4>Customer Expected Milestones</h4><div id="customerMilestones"></div><button type="button" class="add-row" onclick="addMilestone('Customer Expected')">+ Add Customer Expected Milestone</button><div class="form-grid" style="margin-top:20px"><div class="form-field full"><label>Has Procurement, Production and Engineering Confirmed the Delivery Dates are Achievable?</label>${yesno('delivery_dates_confirmed')}</div><div class="form-field full"><label>Are all Sub Contractors Approved for use by Verra Mobility and Customer?</label>${yesno('subcontractors_approved')}</div></div></section>
+<section class="request-page" data-step="5"><h3>Delivery & Installation</h3><p class="intro">Define the physical delivery and implementation obligations.</p><div class="form-grid">${input('Quantity of Systems','quantity_of_systems','number','min="0"')}<div class="form-field full"><label>Is Verra Mobility Providing Civil / Electrical Works Services?</label>${yesno('civil_electrical_services')}</div><div class="form-field full"><label>Is Verra Mobility Providing Installation and Commissioning Services?</label>${yesno('installation_commissioning_services')}</div>${textarea('Comments','delivery_comments')}</div></section>
+<section class="request-page" data-step="6"><h3>Warranty & Handover</h3><p class="intro">Capture warranty, spares, training and the documentation that must be handed over.</p><div class="form-grid">${input('Warranty Period (Months)','warranty_period_months','number','min="0"')}<div class="form-field"><label>Warranty Type</label><div class="choice-grid">${['Return to Base','On Site','Other'].map(x=>choice('warranty_type',x,x)).join('')}</div></div>${textarea('Warranty Comments','warranty_comments')}<div class="form-field full"><label>Spares</label><div class="choice-grid">${['All Inclusive','As Required','Agreed Quantity'].map(x=>choice('spares_type',x,x)).join('')}</div></div>${textarea('Spares Comments','spares_comments')}<div class="form-field full"><label>Training</label><div class="choice-grid">${['Included','Agreed Quantity','Needs to be Quoted','Not Required'].map(x=>choice('training_type',x,x)).join('')}</div></div>${textarea('Training Comments','training_comments')}<div class="form-field full"><label>Documentation to be Handed Over</label><div class="choice-grid">${[['handover_contract','Contract'],['handover_schedule','Schedule'],['handover_tender_response','Tender Response'],['handover_pricing','Pricing'],['handover_contract_details','Contract Details']].map(([n,l])=>`<div class="choice"><input type="checkbox" id="${n}" name="${n}" ${val(n,false)?'checked':''}><label for="${n}">${l}</label></div>`).join('')}</div></div></div></section>
+<section class="request-page" data-step="7"><h3>Review & Submit</h3><p class="intro">Review the request before moving it into Project Setup. Save Draft remains available until you submit.</p><div id="requestReview"></div><div id="requestSaveError" class="req-error"></div><div id="requestSaveSuccess" class="req-success"></div></section>
+<div class="request-sticky"><button class="btn outline" id="requestPrev" type="button" onclick="changeRequestStep(-1)" style="visibility:hidden">← Previous</button><span class="request-save-note" id="saveNote">Draft changes are saved to VERO when you choose Save Draft.</span><div class="right"><button class="btn outline" type="submit" value="Draft">Save Draft</button><button class="btn green" id="requestNext" type="button" onclick="changeRequestStep(1)">Next →</button><button class="btn dark" id="requestSubmit" type="submit" value="Submitted" style="display:none">Submit Request</button></div></div></form>`;requestStep=0;renderMilestoneEditors();updateRequestStep();updateBudget();}
+function copyBillingAddress(on){if(!on)return;['address_line_1','address_line_2','city','state_region','postcode','country'].forEach(k=>{const a=document.querySelector(`[name="billing_${k}"]`),b=document.querySelector(`[name="delivery_${k}"]`);if(a&&b)b.value=a.value});}
+function renderMilestoneEditors(){const groups={'Contract':'contractMilestones','Customer Expected':'customerMilestones'};Object.entries(groups).forEach(([type,id])=>{const box=document.getElementById(id);if(!box)return;const rows=currentMilestones.filter(m=>m.milestone_type===type);box.innerHTML=rows.map((m,i)=>milestoneRow(type,m,i)).join('')||'<div class="live-note">No milestones added yet.</div>';});}
+function milestoneRow(type,m={},i=Date.now()){return `<div class="repeat-block" data-milestone-type="${esc(type)}" data-existing-id="${esc(m.id||'')}"><div class="repeat-row"><div class="form-field"><label>Date</label><input class="ms-date" type="date" value="${esc(m.target_date||'')}"></div><div class="form-field"><label>${type==='Contract'?'Contract Milestone':'Customer Expected Milestone'}</label><input class="ms-name" value="${esc(m.milestone_name||'')}"></div><button type="button" class="repeat-remove" onclick="this.closest('.repeat-block').remove()">×</button></div></div>`}
+function addMilestone(type){const id=type==='Contract'?'contractMilestones':'customerMilestones',box=document.getElementById(id);if(box.querySelector('.live-note'))box.innerHTML='';box.insertAdjacentHTML('beforeend',milestoneRow(type));}
+function goRequestStep(i){requestStep=Math.max(0,Math.min(requestStepNames.length-1,i));updateRequestStep()}
+function changeRequestStep(d){goRequestStep(requestStep+d)}
+function updateRequestStep(){document.querySelectorAll('.request-page').forEach((x,i)=>x.classList.toggle('active',i===requestStep));document.querySelectorAll('.request-step').forEach((x,i)=>{x.classList.toggle('active',i===requestStep);x.classList.toggle('done',i<requestStep)});const prev=document.getElementById('requestPrev'),next=document.getElementById('requestNext'),submit=document.getElementById('requestSubmit');if(prev)prev.style.visibility=requestStep===0?'hidden':'visible';if(next)next.style.display=requestStep===requestStepNames.length-1?'none':'inline-block';if(submit)submit.style.display=requestStep===requestStepNames.length-1?'inline-block':'none';if(requestStep===3)updateBudget();if(requestStep===7)buildRequestReview();const body=document.querySelector('#setupPanel .setup-body');if(body)body.scrollTop=0;}
+function updateBudget(){const f=document.getElementById('requestForm');if(!f)return;const n=x=>Number(f.elements[x]?.value)||0,rev=n('revenue'),cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+n(k),0);setText('budgetRevenue',money(rev||null));setText('budgetTotal',money(cost||null));setText('budgetMargin',rev>0?(((rev-cost)/rev)*100).toFixed(1)+'%':'—');}
+function formDataObject(){const f=document.getElementById('requestForm'),fd=new FormData(f),p=Object.fromEntries(fd.entries());['contract_po_received','system_productised','delivery_dates_confirmed','subcontractors_approved','civil_electrical_services','installation_commissioning_services'].forEach(k=>{p[k]=fd.has(k)?fd.get(k)==='true':null});['handover_contract','handover_schedule','handover_tender_response','handover_pricing','handover_contract_details'].forEach(k=>p[k]=fd.has(k));['revenue','labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget','approved_margin','quantity_of_systems','warranty_period_months'].forEach(k=>p[k]=p[k]===''||p[k]===undefined?null:Number(p[k]));['request_date','contract_start_date','contract_expiry_date'].forEach(k=>{if(p[k]==='')p[k]=null});p.requested_by=currentRequest?.requested_by||currentProject?.project_owner||p.account_manager||null;return p;}
+function reviewItem(l,v){return `<div class="review-item"><label>${esc(l)}</label><strong>${esc(text(v))}</strong></div>`}
+function buildRequestReview(){const p=formDataObject(),cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(p[k])||0),0),rev=Number(p.revenue)||0;const ms=[...document.querySelectorAll('.repeat-block')].map(x=>({type:x.dataset.milestoneType,date:x.querySelector('.ms-date').value,name:x.querySelector('.ms-name').value})).filter(x=>x.name);document.getElementById('requestReview').innerHTML=`<div class="review-section"><h4>Administration</h4><div class="review-grid">${reviewItem('Title',p.project_title)}${reviewItem('Type',p.request_type)}${reviewItem('Account Manager',p.account_manager)}${reviewItem('Project Number',p.project_number)}</div></div><div class="review-section"><h4>Client</h4><div class="review-grid">${reviewItem('Client',p.client_name)}${reviewItem('Reference',p.client_reference)}${reviewItem('Contact',[p.client_contact_first_name,p.client_contact_last_name].filter(Boolean).join(' '))}${reviewItem('Phone',p.client_contact_phone)}</div></div><div class="review-section"><h4>Scope</h4><div class="review-grid">${reviewItem('Scope of Works',p.scope_of_works)}${reviewItem('Assumptions',p.system_assumptions)}</div></div><div class="review-section"><h4>Commercial</h4><div class="review-grid">${reviewItem('Revenue',money(rev||null))}${reviewItem('Total Cost',money(cost||null))}${reviewItem('Calculated Margin',rev>0?(((rev-cost)/rev)*100).toFixed(1)+'%':'—')}${reviewItem('Approved Margin',p.approved_margin===null?'—':p.approved_margin+'%')}</div></div><div class="review-section"><h4>Milestones</h4>${ms.length?ms.map(x=>`<div class="review-milestone"><b>${esc(x.type)}</b> • ${esc(fmtDate(x.date))}<br>${esc(x.name)}</div>`).join(''):'<div class="live-note">No milestones entered.</div>'}</div><div class="review-section"><h4>Delivery & Handover</h4><div class="review-grid">${reviewItem('Quantity of Systems',p.quantity_of_systems)}${reviewItem('Warranty',p.warranty_type)}${reviewItem('Spares',p.spares_type)}${reviewItem('Training',p.training_type)}</div></div>`;}
+async function saveMilestones(){
+ const rows=[...document.querySelectorAll('.repeat-block')].map(x=>({existing_id:x.dataset.existingId,type:x.dataset.milestoneType,target_date:x.querySelector('.ms-date').value||null,milestone_name:x.querySelector('.ms-name').value.trim()})).filter(x=>x.milestone_name);
+ const existingIds=new Set(currentMilestones.map(x=>String(x.id)));
+ for(const r of rows){
+  if(r.existing_id&&existingIds.has(String(r.existing_id)))continue;
+  const res=await fetch(PROJECT_MILESTONES_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({milestone_type:r.type,milestone_name:r.milestone_name,target_date:r.target_date,owner:currentProject.project_owner})});
+  if(!res.ok){const d=await res.json().catch(()=>({}));throw new Error(d.message||'Unable to save milestone')}
+ }
+}
+async function ensureProject(payload){
+ if(currentProject?.id)return currentProject;
+ const title=(payload.project_title||'').trim();
+ const type=(payload.request_type||'').trim();
+ if(!title)throw new Error('Title is required before the request can be saved.');
+ if(!type)throw new Error('Type of Contract / Project Request is required before the request can be saved.');
+ const customer=(payload.client_name||'').trim()||null;
+ const owner=(payload.account_manager||'').trim()||payload.requested_by||null;
+ const res=await fetch(PROJECTS_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+  project_name:title,project_type:type,customer:customer,project_owner:owner,status:'Planning',
+  start_date:payload.contract_start_date||null,target_end_date:payload.contract_expiry_date||null,
+  description:payload.project_description||payload.scope_of_works||null
+ })});
+ const data=await res.json().catch(()=>({}));
+ if(!res.ok)throw new Error(data.message||('Unable to create project. API returned '+res.status));
+ currentProject=data.project;
+ return currentProject;
+}
+async function saveRequest(e){
+ e.preventDefault();
+ const intent=e.submitter?.value||'Draft',payload=formDataObject();payload.request_status=intent;
+ const er=document.getElementById('requestSaveError'),ok=document.getElementById('requestSaveSuccess');
+ if(er)er.style.display='none';if(ok)ok.style.display='none';
+ try{
+  await ensureProject(payload);
+  payload.requested_by=payload.requested_by||currentProject.project_owner||payload.account_manager||null;
+  const res=await fetch(PROJECT_REQUEST_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(data.message||('Request API returned '+res.status));
+  await saveMilestones();
+  const [rr,mr]=await Promise.all([fetch(PROJECT_REQUEST_API(currentProject.id),{cache:'no-store'}),fetch(PROJECT_MILESTONES_API(currentProject.id),{cache:'no-store'})]);
+  if(!rr.ok)throw new Error('Request saved, but VERO could not reload it.');
+  currentRequest=(await rr.json()).request;if(mr.ok)currentMilestones=(await mr.json()).milestones||[];
+  if(ok){ok.textContent=intent==='Submitted'?'New Project Request submitted successfully.':'Draft saved successfully.';ok.style.display='block'}
+  await loadProjects();
+  if(intent==='Submitted'){setTimeout(()=>{closeSetup();window.location.href='project-workspace.html?id='+encodeURIComponent(currentProject.id)},900)}
+  else{renderMilestoneEditors();document.getElementById('saveNote').textContent='Draft saved to VERO • Project ID '+currentProject.id}
+ }catch(x){if(er){er.style.display='block';er.textContent='Unable to save the New Project Request. '+x.message}else alert(x.message)}
+}
+
+function closeSetup(){document.getElementById('setupPanel').classList.remove('show');document.body.style.overflow=''}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSetup();closeProject()}});
+loadProjects();
+</script>
+</body></html>
