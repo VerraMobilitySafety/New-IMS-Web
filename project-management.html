@@ -138,7 +138,7 @@
 .project-tab.active{background:var(--charcoal);color:#fff;border-color:var(--charcoal)}
 .project-tools{display:flex;gap:8px;align-items:center}
 .project-search{width:240px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px 12px;font:500 11px Montserrat}
-.project-table .health{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800}
+.project-table{min-width:980px}.project-table .health{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800}
 .health-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
 .health-dot.amber{background:var(--amber)} .health-dot.red{background:var(--red)} .health-dot.grey{background:var(--grey)}
 .progress{height:7px;background:#ece9e6;border-radius:6px;overflow:hidden;width:100px}
@@ -339,12 +339,12 @@
   <div class="panel project-list">
    <div class="panel-head"><div><h2>Implementation Register</h2><span id="projectCount">Loading projects…</span></div><span>Click a project to open</span></div>
    <table class="table project-table">
-    <thead><tr><th>Project</th><th>Type</th><th>Customer</th><th>Project Owner</th><th>Status</th><th>Target End</th></tr></thead>
-    <tbody id="projectTableBody"><tr><td colspan="6" class="empty">Loading live projects from VERO…</td></tr></tbody>
+    <thead><tr><th>Project</th><th>Type</th><th>Customer</th><th>Project Owner</th><th>Status</th><th>Stage</th><th>Next Step</th></tr></thead>
+    <tbody id="projectTableBody"><tr><td colspan="7" class="empty">Loading live projects from VERO…</td></tr></tbody>
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.18</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.19</span></footer>
 </div></main></div>
 
 
@@ -398,7 +398,9 @@ function normalise(p){
  const status=p.status||'Not Set';
  const s=status.toLowerCase();
  const life=s.includes('complete')?'completion':s.includes('progress')?'execution':'initiation';
- return {raw:p,name:p.project_name||'Untitled Project',code:p.project_type||'',owner:p.project_owner||'Unassigned',customer:p.customer||'',stage:status,stageKey:life,due:p.target_end_date||'',description:p.description||''};
+ const workflowStage=p.workflow_stage||(s==='draft'?'New Project Request':s==='submitted'?'Project Setup':s==='planning'?'New Project Request':'Project Delivery');
+ const nextStep=p.next_step||(workflowStage==='New Project Request'?'Complete New Project Request':workflowStage==='Project Setup'?'Complete Project Setup':'Open Project Workspace');
+ return {raw:p,name:p.project_name||'Untitled Project',code:p.project_type||'',owner:p.project_owner||'Unassigned',customer:p.customer||'',status,stage:workflowStage,nextStep,stageKey:life,due:p.target_end_date||'',description:p.description||''};
 }
 function stageClass(v){return v==='initiation'?'mobilisation':v==='completion'?'delivery':'planning'}
 async function loadProjects(){
@@ -409,7 +411,7 @@ async function loadProjects(){
   projects=rows.map(normalise);render();kpis();
  }catch(e){
   console.error(e);
-  document.getElementById('projectTableBody').innerHTML='<tr><td colspan="6" class="empty"><b>Unable to load live projects.</b><br>Check the browser console and Azure Function CORS settings.</td></tr>';
+  document.getElementById('projectTableBody').innerHTML='<tr><td colspan="7" class="empty"><b>Unable to load live projects.</b><br>Check the browser console and Azure Function CORS settings.</td></tr>';
   document.getElementById('projectCount').textContent='Live data unavailable';
  }
 }
@@ -420,9 +422,11 @@ function render(){
   return `<tr class="data project-row" data-stage="${esc(p.stageKey)}" data-search="${esc(search)}" onclick="openProject(${i})">
    <td><div class="project-name">${esc(p.name)}</div><div class="meta">${esc(p.description||'')}</div></td>
    <td>${esc(p.code||'—')}</td><td>${esc(p.customer||'—')}</td><td>${esc(p.owner)}</td>
-   <td><span class="stage ${stageClass(p.stageKey)}">${esc(p.stage)}</span></td><td>${esc(fmtDate(p.due))}</td>
+   <td><span class="status ${String(p.status).toLowerCase()==='draft'?'draft':'current'}">${esc(p.status)}</span></td>
+   <td><span class="stage ${stageClass(p.stageKey)}">${esc(p.stage)}</span></td>
+   <td><b style="font-size:10px">${esc(p.nextStep)}</b></td>
   </tr>`;
- }).join('')||'<tr><td colspan="6" class="empty">No projects returned by the Projects API.</td></tr>';
+ }).join('')||'<tr><td colspan="7" class="empty">No projects returned by the Projects API.</td></tr>';
  applyFilters();
 }
 function kpis(){
@@ -437,7 +441,21 @@ function applyFilters(){
  document.querySelectorAll('.project-row').forEach(row=>{const okStage=currentFilter==='all'||row.dataset.stage===currentFilter,okSearch=!q||row.dataset.search.includes(q),show=okStage&&okSearch;row.style.display=show?'':'none';if(show)shown++});
  document.getElementById('projectCount').textContent=`${shown} project${shown===1?'':'s'}`;
 }
-function openProject(i){const p=projects[i];if(p?.raw?.id)window.location.href='project-workspace.html?id='+encodeURIComponent(p.raw.id)}
+async function openProject(i){
+ const p=projects[i];if(!p?.raw?.id)return;
+ if(String(p.status).toLowerCase()==='draft'||p.stage==='New Project Request'){
+  try{
+   currentProject=p.raw;
+   const [rr,mr]=await Promise.all([fetch(PROJECT_REQUEST_API(p.raw.id),{cache:'no-store'}),fetch(PROJECT_MILESTONES_API(p.raw.id),{cache:'no-store'})]);
+   currentRequest=rr.ok?(await rr.json()).request||{}:{};
+   currentMilestones=mr.ok?(await mr.json()).milestones||[]:[];
+   requestStep=0;
+   document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';editRequest();
+   return;
+  }catch(e){console.error(e);alert('VERO could not reopen this draft request.');return}
+ }
+ window.location.href='project-workspace.html?id='+encodeURIComponent(p.raw.id);
+}
 function closeProject(){document.getElementById('projectModal')?.classList.remove('show')}
 
 function newProject(){
@@ -493,7 +511,7 @@ async function ensureProject(payload){
  const customer=(payload.client_name||'').trim()||null;
  const owner=(payload.account_manager||'').trim()||payload.requested_by||null;
  const res=await fetch(PROJECTS_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-  project_name:title,project_type:type,customer:customer,project_owner:owner,status:'Planning',
+  project_name:title,project_type:type,customer:customer,project_owner:owner,status:'Draft',
   start_date:payload.contract_start_date||null,target_end_date:payload.contract_expiry_date||null,
   description:payload.project_description||payload.scope_of_works||null
  })});
@@ -519,7 +537,7 @@ async function saveRequest(e){
   currentRequest=(await rr.json()).request;if(mr.ok)currentMilestones=(await mr.json()).milestones||[];
   if(ok){ok.textContent=intent==='Submitted'?'New Project Request submitted successfully.':'Draft saved successfully.';ok.style.display='block'}
   await loadProjects();
-  if(intent==='Submitted'){setTimeout(()=>{closeSetup();window.location.href='project-workspace.html?id='+encodeURIComponent(currentProject.id)},900)}
+  if(intent==='Submitted'){currentProject.status='Submitted';setTimeout(()=>{closeSetup();window.location.href='project-workspace.html?id='+encodeURIComponent(currentProject.id)},900)}
   else{renderMilestoneEditors();document.getElementById('saveNote').textContent='Draft saved to VERO • Project ID '+currentProject.id}
  }catch(x){if(er){er.style.display='block';er.textContent='Unable to save the New Project Request. '+x.message}else alert(x.message)}
 }
