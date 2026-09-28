@@ -247,6 +247,21 @@
  .request-nav{right:2vw!important;width:calc(96vw - 4vw)!important}
 }
 
+
+/* v1.16 — remove wizard top gap and keep controls fixed */
+.setup-body{display:block!important;overflow-y:auto!important;padding:0!important}
+.request-shell{min-height:0!important;padding:24px 18px 105px!important}
+.request-nav{
+ position:fixed!important;
+ right:18px!important;
+ bottom:0!important;
+ width:calc(min(980px,96vw) - 36px)!important;
+ z-index:100!important;
+ margin:0!important;
+ padding:14px 0 16px!important;
+ background:#fff!important;
+}
+
 </style></head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -313,7 +328,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.15</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.16</span></footer>
 </div></main></div>
 
 
