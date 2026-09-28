@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>VERRA | VERO — Project Workspace</title><style>
+:root{
+ --charcoal:#3D3935; --green:#A9C23F; --grey:#857874; --teal:#1D8296;
+ --purple:#464E7E; --bg:#F7F8F7; --white:#fff; --line:#E5E1DE;
+ --ink:#292725; --red:#C94A4A; --amber:#D49B35;
+}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Montserrat,Verdana,Arial,sans-serif}
+.app{display:flex;min-height:100vh}.sidebar{width:260px;position:fixed;inset:0 auto 0 0;background:#252321;color:#fff;padding:22px 24px;overflow:hidden}
+.sidebar:after{content:none}.chev{position:absolute;z-index:1;opacity:.13;pointer-events:none}.chev.c1{width:110px;right:-32px;top:150px}.chev.c2{width:70px;left:14px;top:48%}.chev.c3{width:145px;right:-42px;bottom:65px}
+.brand,.nav,.side-foot{position:relative;z-index:2}.brand{margin-bottom:28px;height:82px;display:flex;align-items:flex-start;gap:12px}.brand img{width:126px;max-height:56px;object-fit:contain;object-position:left top}.vero-lockup{display:flex;align-items:center;gap:11px;height:56px;font-weight:800;letter-spacing:1.8px;color:#fff;font-size:18px}.vero-divider{width:1px;height:28px;background:rgba(255,255,255,.42)}.vero-name{color:var(--green)}
+.nav{display:block}.nav-section{margin:0 0 16px}.nav-label{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#9f9994;margin:0 0 6px 14px}.nav a{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:7px;border-left:3px solid transparent;color:#f7f7f6;text-decoration:none;font-size:12px}.nav a:hover,.nav a.active{background:rgba(255,255,255,.08);border-left-color:var(--green)}.nav a.placeholder{opacity:.72;cursor:default}.nav a.placeholder:hover{background:rgba(255,255,255,.04);border-left-color:transparent}.ico{width:20px;text-align:center;font-size:15px}.side-foot{position:absolute;left:24px;bottom:24px;font-size:11px;line-height:1.7;color:#e4e1de}
+.main{margin-left:260px;width:calc(100% - 260px);padding:30px 48px 35px}.top{display:flex;justify-content:space-between;align-items:center;gap:20px}.crumb{font-size:12px;color:var(--grey);letter-spacing:1.4px;text-transform:uppercase}.top-right{display:flex;align-items:center;gap:14px}.search{width:310px;background:#fff;border:1px solid var(--line);border-radius:26px;padding:12px 17px;color:#777}.avatar{width:38px;height:38px;border-radius:50%;background:var(--charcoal);color:#fff;display:grid;place-items:center;font-weight:800}
+.hero{margin:28px 0 24px}.hero h1{font-size:40px;margin:6px 0 8px}.hero p{margin:0;color:#68625e;font-size:17px}.rule{height:4px;width:70px;background:var(--green);margin:15px 0}
+.actions{display:flex;gap:12px;flex-wrap:wrap}.btn{border:0;border-radius:8px;padding:12px 16px;font-weight:800;cursor:pointer;font-size:13px}.btn.green{background:var(--green);color:var(--charcoal)}.btn.dark{background:var(--charcoal);color:#fff}.btn.outline{background:#fff;border:1px solid var(--line);color:var(--charcoal)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 3px 10px rgba(61,57,53,.05)}.kpi b{font-size:30px}.kpi span{display:block;color:var(--grey);font-size:12px;margin-top:5px}.kpi.green{border-top:4px solid var(--green)}.kpi.teal{border-top:4px solid var(--teal)}.kpi.red{border-top:4px solid var(--red)}.kpi.purple{border-top:4px solid var(--purple)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px}.panel{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 3px 10px rgba(61,57,53,.05);overflow:hidden}.panel-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}.panel-head h2{font-size:18px;margin:0}.panel-head span{font-size:12px;color:var(--grey)}
+.table{width:100%;border-collapse:collapse}.table th{text-align:left;background:#faf9f8;color:var(--grey);font-size:11px;text-transform:uppercase;letter-spacing:.7px;padding:12px 15px}.table td{padding:15px;border-top:1px solid var(--line);font-size:13px}.table tr.data{cursor:pointer}.table tr.data:hover{background:#fbfcfa}.docno{font-weight:800;color:var(--charcoal)}.title{font-weight:700}.meta{font-size:11px;color:var(--grey);margin-top:3px}.status{display:inline-flex;padding:5px 8px;border-radius:14px;font-size:10px;font-weight:800}.current{background:#eaf3d0;color:#52641c}.review{background:#fff0d9;color:#7d5815}.overdue{background:#fbe4e4;color:#8f2929}.approval{background:#e9e9f4;color:#3e4677}.draft{background:#eeeae8;color:#625b57}
+.ai{margin:18px;background:linear-gradient(145deg,#3D3935,#292725);color:#fff;border-radius:12px;padding:20px}.ai .label{font-size:11px;letter-spacing:1.5px;color:var(--green);font-weight:800}.ai h3{margin:8px 0;font-size:19px}.ai p{font-size:13px;color:#ddd8d4;line-height:1.5}.ai input{width:100%;border:0;border-radius:8px;padding:12px;margin:7px 0 10px;font-size:13px}.ai button{background:var(--green);border:0;border-radius:8px;padding:11px 14px;font-weight:800;cursor:pointer}
+.tasks{padding:4px 20px 16px}.task{padding:14px 0;border-bottom:1px solid var(--line);display:flex;gap:11px}.task:last-child{border-bottom:0}.dot{width:9px;height:9px;border-radius:50%;background:var(--green);margin-top:5px;flex:none}.dot.red{background:var(--red)}.task b{font-size:13px}.task small{display:block;color:var(--grey);margin-top:3px}
+.empty{padding:22px 20px;color:var(--grey);font-size:13px}.footer{margin-top:25px;border-top:1px solid var(--line);padding-top:15px;color:var(--grey);font-size:11px;display:flex;justify-content:space-between}
+.modal-back{position:fixed;inset:0;background:rgba(35,32,29,.48);display:none;z-index:20}.modal-back.show{display:flex;justify-content:flex-end}.drawer{width:min(620px,92vw);height:100%;background:#fff;box-shadow:-15px 0 35px rgba(0,0,0,.2);overflow:auto}.drawer-head{background:var(--charcoal);color:#fff;padding:24px;position:sticky;top:0;z-index:2}.drawer-head .close{float:right;background:transparent;border:0;color:#fff;font-size:25px;cursor:pointer}.drawer-head h2{margin:5px 0;font-size:24px}.drawer-head small{color:#ddd}.drawer-body{padding:22px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.detail{background:#f8f7f6;border-radius:8px;padding:12px}.detail label{display:block;color:var(--grey);font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}.detail strong{font-size:13px}.section{margin-top:22px}.section h3{font-size:14px;margin:0 0 10px}.timeline{border-left:2px solid var(--line);padding-left:16px}.event{margin-bottom:16px}.event b{font-size:12px}.event small{display:block;color:var(--grey);margin-top:3px}.drawer-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.viewer{position:fixed;inset:0;background:#f1f0ee;display:none;z-index:30}.viewer.show{display:flex;flex-direction:column}.viewer-top{height:64px;background:var(--charcoal);color:#fff;display:flex;align-items:center;gap:18px;padding:0 20px}.viewer-top h2{font-size:16px;margin:0}.viewer-top small{color:#ddd}.viewer-top .spacer{flex:1}.viewer-btn{background:#fff;color:var(--charcoal);border:0;border-radius:7px;padding:9px 12px;font-weight:800;cursor:pointer}.viewer-main{display:grid;grid-template-columns:245px 1fr;min-height:0;flex:1}.toc{background:#fff;border-right:1px solid var(--line);padding:20px;overflow:auto}.toc h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--grey)}.toc a{display:block;padding:8px 5px;color:var(--charcoal);text-decoration:none;font-size:12px;border-radius:5px}.toc a:hover{background:#f0f2ed}.paper-wrap{overflow:auto;padding:35px}.paper{background:#fff;max-width:800px;margin:auto;padding:60px 70px;min-height:1100px;box-shadow:0 4px 20px rgba(0,0,0,.12);font-family:Georgia,serif;line-height:1.65}.paper h1{font-size:30px}.paper h2{font-size:20px;margin-top:35px}.paper .control{font-family:Arial,sans-serif;font-size:11px;color:var(--grey);border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:30px}.uncontrolled{font-family:Arial,sans-serif;background:#fff3f3;border:1px solid #e8bcbc;color:#8f2929;padding:9px;text-align:center;font-size:10px;font-weight:800;margin-bottom:20px}
+@media(max-width:1050px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+@media(max-width:720px){.sidebar{width:82px;padding:28px 12px}.brand .gov,.brand .tag,.nav a span:not(.ico),.side-foot{display:none}.main{margin-left:82px;width:calc(100% - 82px);padding:24px}.top-right .search{width:200px}.viewer-main{grid-template-columns:1fr}.toc{display:none}.paper{padding:35px}.detail-grid{grid-template-columns:1fr}}
+
+.viewer .viewer-copy-overlay{
+  position:absolute !important;
+  inset:62px 0 0 0 !important;
+  z-index:999 !important;
+  display:none !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:24px !important;
+  background:rgba(25,24,22,.56) !important;
+}
+.viewer .viewer-copy-overlay.show{display:flex !important}
+.viewer .viewer-copy-card{
+  position:relative !important;
+  width:min(520px,calc(100vw - 48px)) !important;
+  max-height:calc(100vh - 115px) !important;
+  overflow:auto !important;
+  background:#fff !important;
+  border-radius:12px !important;
+  box-shadow:0 22px 65px rgba(0,0,0,.35) !important;
+  color:var(--ink) !important;
+}
+.viewer .copy-head{
+  position:relative !important;
+  background:var(--black) !important;
+  color:#fff !important;
+  padding:22px 24px 20px !important;
+  border-radius:12px 12px 0 0 !important;
+}
+.viewer .copy-head small{font-size:9px;letter-spacing:1px;color:#d8d4d1}
+.viewer .copy-head h2{margin:5px 0 4px;font-size:22px}
+.viewer .copy-head p{margin:0;color:#ddd8d4;font-size:11px}
+.viewer .copy-close{
+  position:absolute;right:16px;top:13px;border:0;background:transparent;
+  color:#fff;font-size:25px;cursor:pointer
+}
+.viewer .copy-body{padding:22px 24px 24px !important}
+.viewer .copy-doc{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:17px}
+.viewer .copy-doc div{background:#f7f6f5;border-radius:8px;padding:11px}
+.viewer .copy-doc span,.viewer .copy-label{
+  display:block;font-size:8px;font-weight:800;letter-spacing:.7px;
+  text-transform:uppercase;color:var(--grey);margin-bottom:5px
+}
+.viewer .copy-doc strong{font-size:10px}
+.viewer .copy-email{
+  width:100% !important;border:1px solid #d7d3d0 !important;border-radius:7px !important;
+  padding:11px 12px !important;font-size:11px !important;margin-bottom:14px !important
+}
+.viewer .copy-warning{
+  background:#fff7e7;border:1px solid #ead5a9;border-radius:8px;
+  padding:12px;font-size:10px;line-height:1.55;color:#665538
+}
+.viewer .copy-explain{font-size:10px;line-height:1.55;color:#625d59}
+.viewer .copy-actions{display:flex;gap:8px;margin-top:17px}
+.viewer .copy-audit{font-size:8px;color:var(--grey);line-height:1.5;margin:15px 0 0}
+
+
+.viewer-top .copy-toolbar-btn{
+  background:var(--green)!important;color:#262421!important;
+  border:0!important;border-radius:7px!important;padding:9px 13px!important;
+  font-weight:800!important;cursor:pointer!important;white-space:nowrap!important;
+}
+
+/* HOME v1.3 — canonical Document Management v1.5 shell */
+.main{padding-top:0!important}
+.global-hero{
+ position:relative;height:245px;margin:0 -28px 18px;overflow:hidden;
+ background-image:linear-gradient(90deg,rgba(9,49,63,.58) 0%,rgba(9,49,63,.25) 48%,rgba(9,49,63,.08) 100%),url("verra-governance-header.png");
+ background-size:cover;background-position:center;
+}
+.hero-content{position:absolute;left:48px;top:50%;transform:translateY(-50%);color:#fff;z-index:2}
+.hero-kicker{font-size:10px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase;margin-bottom:12px}
+.hero-content h1{font-size:32px;line-height:1.08;margin:0 0 8px;font-weight:800;letter-spacing:-.4px}
+.hero-content p{font-size:15px;margin:0;color:rgba(255,255,255,.94)}
+.hero-rule{width:64px;height:4px;background:var(--green);margin-top:20px}
+.hero-tools{position:absolute;right:28px;top:22px;display:flex;align-items:center;gap:12px;z-index:3}
+.hero-search{width:280px;background:#fff;border:1px solid rgba(255,255,255,.7);border-radius:9px;padding:11px 14px;font-size:11px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.hero-tools .avatar{background:#302e2b;color:#fff;border:2px solid rgba(255,255,255,.8)}
+.home-content{padding-top:0}
+.home-modules{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:17px}
+.home-module{background:#fff;border:1px solid var(--line);border-radius:11px;box-shadow:0 3px 12px rgba(61,57,53,.035);padding:20px;cursor:pointer;min-height:180px;position:relative;overflow:hidden}
+.home-module:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green)}
+.home-module.risk:before{background:var(--teal)}.home-module.compliance:before{background:var(--purple)}
+.module-icon{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:21px;background:#edf4d8;margin-bottom:17px}
+.home-module.risk .module-icon{background:#e1f1f4;color:var(--teal)}.home-module.compliance .module-icon{background:#e9eaf1;color:var(--purple)}
+.home-module h3{margin:0 0 7px;font-size:18px}.home-module p{margin:0 0 18px;font-size:11px;line-height:1.55;color:#6e6864}.home-module strong{font-size:10px;text-transform:uppercase;letter-spacing:.55px}
+.home-bottom{display:grid;grid-template-columns:1.35fr .75fr;gap:16px}
+.home-actions{padding:0 20px}.home-action{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);align-items:center;cursor:pointer}.home-action:last-child{border-bottom:0}
+.action-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}.action-dot.red{background:#c94f4f}.action-dot.teal{background:var(--teal)}.action-dot.gold{background:#dba21f}
+.home-action b{font-size:11px}.home-action small{display:block;font-size:9px;color:#77706c;margin-top:4px}.home-action .go{margin-left:auto;font-size:19px}
+.home-ai{padding:20px}.home-ai .ai-title{display:flex;align-items:center;gap:8px}.home-ai h3{font-size:18px;margin:0}.home-ai p{font-size:11px;color:#6e6864;line-height:1.55}
+.home-ai-box{border:1px solid #d8d4d1;border-radius:8px;display:flex;overflow:hidden;margin:14px 0 9px}.home-ai-box input{border:0;outline:0;flex:1;padding:11px;font-size:11px}.home-ai-box button{border:0;background:var(--green);padding:0 15px;font-weight:800;cursor:pointer}
+.ai-note{font-size:8px;color:#68751f;font-weight:800}
+.quick-q{display:flex;flex-wrap:wrap;gap:6px;margin-top:15px}.quick-q button{border:1px solid #ddd9d5;background:#fff;border-radius:15px;padding:6px 9px;font-size:8px;cursor:pointer}
+@media(max-width:1000px){.home-modules,.home-bottom{grid-template-columns:1fr}.hero-search{width:210px}}
+
+/* LOCKED GLOBAL HEADER CONTROLS */
+.hero-tools{position:absolute!important;right:28px!important;top:22px!important;display:flex!important;align-items:center!important;gap:12px!important;z-index:3!important}
+.hero-search{box-sizing:border-box!important;width:280px!important;height:44px!important;background:#fff!important;border:1px solid rgba(255,255,255,.7)!important;border-radius:10px!important;padding:0 14px!important;font-size:11px!important;line-height:44px!important;font-family:Montserrat,Verdana,sans-serif!important;box-shadow:0 2px 10px rgba(0,0,0,.1)!important}
+.hero-tools .avatar{box-sizing:border-box!important;width:36px!important;height:36px!important;min-width:36px!important;border-radius:50%!important;display:grid!important;place-items:center!important;background:#302e2b!important;color:#fff!important;border:2px solid rgba(255,255,255,.8)!important;font-size:11px!important;font-weight:800!important}
+
+
+/* PROJECT MANAGEMENT v1.0 */
+.project-content{padding-top:0}
+.project-toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:20px 0 16px}
+.project-tabs{display:flex;gap:7px;flex-wrap:wrap}
+.project-tab{border:1px solid var(--line);background:#fff;border-radius:18px;padding:8px 12px;font:700 10px Montserrat;cursor:pointer;color:var(--charcoal)}
+.project-tab.active{background:var(--charcoal);color:#fff;border-color:var(--charcoal)}
+.project-tools{display:flex;gap:8px;align-items:center}
+.project-search{width:240px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px 12px;font:500 11px Montserrat}
+.project-table .health{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800}
+.health-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.health-dot.amber{background:var(--amber)} .health-dot.red{background:var(--red)} .health-dot.grey{background:var(--grey)}
+.progress{height:7px;background:#ece9e6;border-radius:6px;overflow:hidden;width:100px}
+.progress i{display:block;height:100%;background:var(--green);border-radius:6px}
+.project-name{font-weight:800;color:var(--charcoal)}
+.stage{display:inline-flex;padding:5px 8px;border-radius:14px;font-size:9px;font-weight:800;background:#eeeae8;color:#625b57}
+.stage.mobilisation{background:#e1f1f4;color:#166273}.stage.delivery{background:#eaf3d0;color:#52641c}.stage.planning{background:#e9e9f4;color:#3e4677}.stage.hold{background:#fff0d9;color:#7d5815}
+.project-side-card{padding:18px 20px;border-bottom:1px solid var(--line)}
+.project-side-card:last-child{border-bottom:0}
+.project-side-card h4{margin:0 0 7px;font-size:12px}.project-side-card p{margin:0;color:#716b67;font-size:10px;line-height:1.55}
+.project-side-card strong{display:block;font-size:22px;margin-bottom:3px}
+.project-link{color:var(--charcoal);font-weight:800;text-decoration:none;font-size:10px}
+.project-link:hover{text-decoration:underline}
+.new-project-note{font-size:9px;color:#77706c;margin-top:7px}
+.project-drawer-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 18px}
+.project-drawer-tabs span{font-size:9px;font-weight:800;padding:7px 9px;border-radius:14px;background:#f1efed}
+.nav-sub{padding-left:17px!important;font-size:11px!important}
+.nav-parent{font-weight:700}
+@media(max-width:850px){.project-toolbar{align-items:flex-start;flex-direction:column}.project-tools{width:100%}.project-search{flex:1}.project-table{min-width:760px}.panel.project-list{overflow:auto}}
+
+/* PROJECT WORKSPACE v1.0 */
+.workspace-hero{position:relative;height:245px;margin:0 -28px 0;overflow:hidden;background-image:linear-gradient(90deg,rgba(9,49,63,.72) 0%,rgba(9,49,63,.38) 55%,rgba(9,49,63,.12) 100%),url("verra-governance-header.png");background-size:cover;background-position:center}
+.workspace-content{padding-top:0}
+.workspace-head{background:#fff;border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;padding:18px 22px;display:flex;justify-content:space-between;gap:18px;align-items:center;box-shadow:0 3px 10px rgba(61,57,53,.04)}
+.project-id{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--grey);font-weight:800}
+.project-meta{display:flex;gap:18px;flex-wrap:wrap;margin-top:8px}.project-meta span{font-size:10px;color:#6b6561}.project-meta b{color:var(--charcoal)}
+.health-pill{display:inline-flex;align-items:center;gap:7px;border-radius:16px;padding:8px 11px;background:#eaf3d0;color:#52641c;font-size:10px;font-weight:800}
+.ws-tabs{display:flex;gap:4px;overflow:auto;margin:18px 0 16px;border-bottom:1px solid var(--line)}
+.ws-tab{border:0;background:transparent;padding:11px 14px 12px;font:800 10px Montserrat;color:#706a66;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+.ws-tab.active{color:var(--charcoal);border-bottom-color:var(--green)}
+.ws-view{display:none}.ws-view.active{display:block}
+.overview-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:18px}
+.info-card{background:#f8f7f6;border-radius:9px;padding:13px}.info-card label{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.7px;color:var(--grey);font-weight:800;margin-bottom:6px}.info-card strong{font-size:11px}
+.update-box{padding:18px}.update-box p{font-size:11px;line-height:1.65;color:#625d59;margin:0}
+.milestones{padding:5px 18px 18px}.milestone{display:grid;grid-template-columns:18px 1fr auto;gap:10px;padding:13px 0;border-bottom:1px solid var(--line);align-items:start}.milestone:last-child{border-bottom:0}.milestone i{width:10px;height:10px;border-radius:50%;background:var(--green);margin-top:3px}.milestone i.amber{background:var(--amber)}.milestone b{font-size:11px}.milestone small{display:block;font-size:9px;color:var(--grey);margin-top:4px}.milestone time{font-size:9px;font-weight:800;color:var(--grey)}
+.commercial-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.metric{background:#fff;border:1px solid var(--line);border-radius:11px;padding:17px}.metric label{display:block;font-size:8px;text-transform:uppercase;color:var(--grey);letter-spacing:.65px;font-weight:800}.metric strong{display:block;font-size:22px;margin-top:8px}.metric small{font-size:9px;color:var(--grey)}
+.register-table{margin-top:14px}.register-table td{vertical-align:top}.risk-badge{display:inline-flex;padding:5px 8px;border-radius:13px;font-size:9px;font-weight:800}.risk-badge.high{background:#fde9db;color:#994d17}.risk-badge.mod{background:#e4eff8;color:#275f88}.risk-badge.sig{background:#fbe4e4;color:#8f2929}
+.empty-state{background:#fff;border:1px dashed #cbc5c1;border-radius:11px;padding:38px;text-align:center;color:var(--grey);font-size:11px}
+.back-link{color:#fff;text-decoration:none;font-size:10px;font-weight:800;display:inline-block;margin-bottom:10px}
+@media(max-width:1000px){.overview-grid{grid-template-columns:1fr}.commercial-grid{grid-template-columns:repeat(2,1fr)}.info-grid{grid-template-columns:1fr 1fr}}
+
+/* PROJECT WORKSPACE v1.1 — live master project record */
+.workflow-strip{display:grid!important;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 16px!important;visibility:visible!important;opacity:1!important}
+.workflow-card{background:#fff;border:1px solid var(--line);border-radius:11px;padding:16px;min-height:92px}
+.workflow-card label{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.7px;color:var(--grey);font-weight:800;margin-bottom:7px}
+.workflow-card strong{font-size:12px;line-height:1.45}
+.workflow-card.next{border-left:4px solid var(--green)}
+.next-action{margin-top:10px}
+.next-action button{border:0;background:var(--green);color:var(--charcoal);border-radius:7px;padding:9px 11px;font:800 10px Montserrat;cursor:pointer}
+.live-note{font-size:9px;color:var(--grey);margin-top:7px}
+.setup-backdrop{position:fixed;inset:0;background:rgba(35,32,29,.52);display:none;z-index:60}
+.setup-backdrop.show{display:flex;justify-content:flex-end}
+.setup-frame{width:min(920px,96vw);height:100%;background:#fff;box-shadow:-16px 0 40px rgba(0,0,0,.22);display:flex;flex-direction:column}
+.setup-head{background:var(--charcoal);color:#fff;padding:18px 22px;display:flex;align-items:center;gap:15px}
+.setup-head div{flex:1}.setup-head small{color:var(--green);font-weight:800;letter-spacing:1px;text-transform:uppercase}.setup-head h2{margin:4px 0 0;font-size:19px}
+.setup-close{border:0;background:transparent;color:#fff;font-size:27px;cursor:pointer}
+.setup-body{flex:1;min-height:0}.setup-body iframe{width:100%;height:100%;border:0;background:#fff}
+.setup-foot{padding:10px 18px;border-top:1px solid var(--line);font-size:9px;color:var(--grey)}
+.load-error{background:#fff3f3;border:1px solid #e8bcbc;color:#8f2929;padding:12px 14px;border-radius:8px;margin-bottom:14px;font-size:11px;display:none}
+@media(max-width:900px){.workflow-strip{grid-template-columns:1fr 1fr}}
+
+</style></head>
+<body><div class="app"><aside class="sidebar">
+<div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
+<img class="chev c1" src="verra-chevron.png" alt=""><img class="chev c2" src="verra-chevron.png" alt=""><img class="chev c3" src="verra-chevron.png" alt="">
+<nav class="nav">
+  <div class="nav-section">
+    <a href="index.html"><span class="ico">⌂</span><span>Home</span></a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">My Work</div>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">✓</span><span>My Actions</span></a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Manage</div>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">⌖</span><span>Sites</span></a>
+    <a class="nav-parent active" href="project-management.html"><span class="ico">▦</span><span>Projects</span></a>
+    <a class="nav-sub placeholder" href="#" onclick="return false"><span class="ico">•</span><span>Maintenance</span></a>
+    <a class="nav-sub active" href="project-management.html"><span class="ico">•</span><span>Implementation</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">✚</span><span>Safety</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">◆</span><span>Quality</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">♻</span><span>Environment</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Insurance</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">↻</span><span>Business Continuity</span></a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Governance</div>
+    <a href="documents.html"><span class="ico">▱</span><span>Documents</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">▥</span><span>Risks</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Compliance</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">◎</span><span>Assurance</span></a>
+  </div>
+</nav>
+<div class="side-foot">VERRA | VERO • v2.5<br>Prototype environment</div>
+</aside><main class="main">
+<section class="workspace-hero">
+ <div class="hero-content"><a class="back-link" href="project-management.html">‹ Back to Implementation</a><div class="hero-kicker">Project Workspace</div><h1 id="heroName">Customer Implementation — Project Atlas</h1><p id="heroCustomer">Customer: Example Customer</p><div class="hero-rule"></div></div>
+ <div class="hero-tools"><input class="hero-search" placeholder="⌕   Search VERO..."><div class="avatar">DB</div></div>
+</section>
+<div class="workspace-content">
+ <section class="workspace-head">
+  <div><div class="project-id" id="projectCode">Project Code • PRJ-2026-014</div><div class="project-meta"><span>Project Manager: <b id="pm">James Wilson</b></span><span>Jurisdiction: <b id="jurisdiction">Australia</b></span><span>Type: <b id="projectType">Customer Implementation</b></span><span>Created via: <b id="createdVia">Sales Handover</b></span></div></div>
+  <div class="health-pill" id="healthPill">● —</div>
+ </section>
+
+ <section class="workflow-strip" aria-label="Project workflow status">
+  <div class="workflow-card"><label>Status</label><strong id="liveStatus">—</strong></div>
+  <div class="workflow-card"><label>Development Stage</label><strong id="liveStage">—</strong></div>
+  <div class="workflow-card next"><label>Next Step</label><strong id="liveNextStep">—</strong><div class="next-action" id="nextAction"></div></div>
+  <div class="workflow-card"><label>Responsible</label><strong id="liveResponsible">—</strong></div>
+ </section>
+
+ <div id="loadError" class="load-error"></div>
+
+ <div class="ws-tabs">
+  <button class="ws-tab active" onclick="showTab('overview',this)">Overview</button>
+  <button class="ws-tab" onclick="showTab('commercial',this)">Commercial</button>
+  <button class="ws-tab" onclick="showTab('actions',this)">Actions <span class="status overdue">7</span></button>
+  <button class="ws-tab" onclick="showTab('risks',this)">Risks <span class="status review">4</span></button>
+  <button class="ws-tab" onclick="showTab('compliance',this)">Compliance <span class="status approval">12</span></button>
+  <button class="ws-tab" onclick="showTab('documents',this)">Documents</button>
+  <button class="ws-tab" onclick="showTab('assurance',this)">Assurance</button>
+  <button class="ws-tab" onclick="showTab('updates',this)">Updates</button>
+ </div>
+
+ <section id="overview" class="ws-view active">
+  <div class="kpis">
+   <div class="kpi green"><b id="progressKpi">—</b><span>Project progress</span></div>
+   <div class="kpi red"><b>—</b><span>Overdue actions</span></div>
+   <div class="kpi purple"><b>—</b><span>Compliance requirements</span></div>
+  </div>
+  <div class="overview-grid">
+   <div class="panel"><div class="panel-head"><h2>Project Overview</h2><span>Master project record</span></div>
+    <div class="info-grid">
+     <div class="info-card"><label>Status</label><strong id="overviewStatus">—</strong></div><div class="info-card"><label>Development Stage</label><strong id="overviewDevStage">—</strong></div><div class="info-card"><label>Completion Status</label><strong id="overviewProgress">—</strong></div>
+     <div class="info-card"><label>Contract Start</label><strong id="contractStart">—</strong></div><div class="info-card"><label>Contract End</label><strong id="contractEnd">—</strong></div><div class="info-card"><label>Customer</label><strong id="overviewCustomer">—</strong></div>
+    </div>
+    <div class="panel-head"><h2>Latest Project Update</h2><span id="updateDate">—</span></div><div class="update-box"><p id="projectUpdate">No project update recorded.</p></div>
+   </div>
+   <div class="panel"><div class="panel-head"><h2>Upcoming Milestones</h2><span>Next 30 days</span></div><div class="empty-state" style="margin:18px"><b>No live milestones connected yet.</b><br><br>Milestones linked to this project will appear here.</div></div>
+  </div>
+ </section>
+
+ <section id="commercial" class="ws-view"><div class="commercial-grid">
+  <div class="metric"><label>Baseline Sales Order</label><strong>$1.20m</strong><small>Original baseline</small></div>
+  <div class="metric"><label>Current Revenue</label><strong>$1.26m</strong><small>+$60k since baseline</small></div>
+  <div class="metric"><label>Baseline Cost</label><strong>$840k</strong><small>Original baseline</small></div>
+  <div class="metric"><label>Current Planned Cost</label><strong>$895k</strong><small>+$55k since baseline</small></div>
+  <div class="metric"><label>Original Margin</label><strong>30.0%</strong><small>At baseline</small></div>
+  <div class="metric"><label>Current Planned Margin</label><strong>29.0%</strong><small>-1.0 pt since baseline</small></div>
+  <div class="metric"><label>Planned Cost This Month</label><strong>$128k</strong><small>Current month</small></div>
+  <div class="metric"><label>ETC</label><strong>$612k</strong><small>Estimate to complete</small></div>
+ </div></section>
+
+ <section id="actions" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Actions</h2><span>Linked to My Actions</span></div><table class="table"><thead><tr><th>Action</th><th>Owner</th><th>Due</th><th>Status</th></tr></thead><tbody>
+ <tr><td><b>Confirm mobilisation governance</b><div class="meta">Project initiation</div></td><td>James Wilson</td><td>25 Sep</td><td><span class="status overdue">Overdue</span></td></tr>
+ <tr><td><b>Validate contractual compliance requirements</b><div class="meta">Compliance review</div></td><td>Project Team</td><td>30 Sep</td><td><span class="status review">Open</span></td></tr>
+ </tbody></table></div></section>
+
+ <section id="risks" class="ws-view"><div class="panel register-table"><div class="panel-head"><h2>Project Risks</h2><span>Project Number linked Risk Register</span></div><table class="table"><thead><tr><th>Risk</th><th>Owner</th><th>Inherent</th><th>Residual</th><th>Status</th></tr></thead><tbody>
+ <tr><td><b>Delivery schedule may not support committed customer dates</b><div class="meta">Generated from Sales Handover and subject to assessment.</div></td><td>Project Manager</td><td><span class="risk-badge high">High</span></td><td><span class="risk-badge mod">Moderate</span></td><td><span class="status review">To Be Assessed</span></td></tr>
+ <tr><td><b>Third-party dependencies may delay mobilisation</b><div class="meta">Subcontractor / supplier dependency.</div></td><td>Project Manager</td><td><span class="risk-badge high">High</span></td><td><span class="risk-badge mod">Moderate</span></td><td><span class="status review">To Be Assessed</span></td></tr>
+ </tbody></table></div></section>
+
+ <section id="compliance" class="ws-view"><div class="panel register-table"><div class="panel-head"><h2>Contractual Compliance</h2><span>AI extracted • human review required where flagged</span></div><table class="table"><thead><tr><th>Requirement</th><th>Owner</th><th>Reference</th><th>Status</th></tr></thead><tbody>
+ <tr><td><b>Provide customer reporting in accordance with contract requirements</b><div class="meta">Evidence: periodic customer report</div></td><td>Project Manager</td><td>Clause 8.2</td><td><span class="status review">Not Assessed</span></td></tr>
+ <tr><td><b>Maintain required project records for the contract term</b><div class="meta">Evidence: controlled project records</div></td><td>Project Team</td><td>Clause 11</td><td><span class="status review">Not Assessed</span></td></tr>
+ </tbody></table></div></section>
+
+ <section id="documents" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Documents</h2><span>Controlled records</span></div><table class="table"><thead><tr><th>Document</th><th>Type</th><th>Status</th></tr></thead><tbody><tr><td><b>Master Services Agreement.pdf</b><div class="meta">Stored in the project folder created at handover.</div></td><td>Master Agreement</td><td><span class="status current">Current</span></td></tr></tbody></table></div></section>
+ <section id="assurance" class="ws-view"><div class="empty-state"><b>Project Assurance</b><br><br>Audits, inspections, project gates and assurance activities linked to this project will appear here.</div></section>
+ <section id="updates" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Updates</h2><span>Chronological project log</span></div><div class="tasks"><div class="task"><span class="dot"></span><div><b>18 Sep 2026 — Mobilisation commenced</b><small>Initial governance, risk and compliance review underway.</small></div></div><div class="task"><span class="dot"></span><div><b>15 Sep 2026 — Sales Handover received</b><small>Project record and document folder created automatically.</small></div></div></div></div></section>
+
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Project Workspace • v1.5</span></footer>
+</div></main></div>
+
+<div id="setupPanel" class="setup-backdrop" onclick="if(event.target===this)closeSetup()">
+ <section class="setup-frame">
+  <div class="setup-head"><div><small>VERO • Project Workflow</small><h2>Project Setup Checklist</h2></div><button class="setup-close" onclick="closeSetup()">×</button></div>
+  <div class="setup-body"><iframe id="setupIframe" title="Project Setup Checklist"></iframe></div>
+  <div class="setup-foot">Project-specific checklist • Cognito Forms</div>
+ </section>
+</div>
+
+<script>
+function showTab(id,btn){document.querySelectorAll('.ws-view').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.ws-tab').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');}
+
+const PROJECTS_API='/api/projects';
+let currentProject=null;
+const val=v=>v&&typeof v==='object'?(v.Value||v.DisplayName||v.Url||v.Description||''):(v??'');
+const first=(o,names)=>{for(const n of names){if(o && o[n]!==undefined && o[n]!==null && o[n]!=='')return o[n]}return ''};
+const fmtDate=v=>{if(!v)return '—';const d=new Date(v);return isNaN(d)?String(v):d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'})};
+const pct=v=>{if(v===null||v===undefined||v==='')return '—';let n=Number(v);if(Number.isNaN(n))return String(v);if(n<=1)n*=100;return Math.round(n)+'%'};
+const text=v=>{const x=val(v);return x===null||x===undefined||x===''?'—':String(x)};
+const person=v=>{if(!v)return '—';if(Array.isArray(v))return v.map(person).join(', ');if(typeof v==='object')return v.DisplayName||v.Title||v.Email||v.Value||'—';return String(v)};
+const hyperlink=v=>{if(!v)return '';if(typeof v==='string')return v;if(typeof v==='object')return v.Url||v.url||v.Value||v.value||'';return ''};
+const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
+
+function findProjectSetupLink(p){
+ return hyperlink(first(p,[
+  'Project_x0020_Setup_x0020_Checkl',
+  'ProjectSetupChecklist','Project_x0020_Setup_x0020_Checklist',
+  'ProjectSetupChecklistLink','Project_x0020_Setup_x0020_Checklist_x0020_Link'
+ ]));
+}
+
+function renderProject(p){
+ currentProject=p;
+ const name=text(first(p,['Title','ProjectName','Project_x0020_Name']));
+ const code=text(first(p,['ProjectCode','ProjectNumber','Project_x0020_Code']));
+ const customer=text(first(p,['CustomerName','Customer']));
+ const pm=person(first(p,['ProjectManager','Project_x0020_Manager']));
+ const jurisdiction=text(first(p,['Jurisdiction']));
+ const type=text(first(p,['ProjectType','BAUorProject']));
+ const rawStatus=first(p,['Status']);
+ const status=rawStatus?text(rawStatus):'—';
+ const stage=text(first(p,['Stage','Stage0']));
+ const dev=text(first(p,['DevelopmentStage','Development_x0020_Stage']));
+ const responsible=person(first(p,['NextStepResponsible','Next_x0020_Step_x0020_Responsible']));
+ const progress=pct(first(p,['Completion_x0020_Status','CompletionStatus','Progress']));
+ const update=text(first(p,['ProjectStatus','ProjectUpdate','Project_x0020_Status']));
+ const updateDate=fmtDate(first(p,['ProjectUpdateDate','Modified']));
+ const start=fmtDate(first(p,['ContractStartDate','Contract_x0020_Start']));
+ const end=fmtDate(first(p,['ContractEndDate','Contract_x0020_End']));
+
+ setText('heroName',name);
+ setText('heroCustomer','Customer: '+customer);
+ setText('projectCode','Project Code • '+code);
+ setText('pm',pm);
+ setText('jurisdiction',jurisdiction);
+ setText('projectType',type);
+ setText('healthPill','● '+status);
+ setText('liveStatus',status);
+ setText('liveNextStep',dev);
+ setText('liveResponsible',responsible);
+ setText('progressKpi',progress);
+ setText('stageKpi',stage);
+ setText('overviewStatus',status);
+ setText('overviewDevStage',dev);
+ setText('overviewProgress',progress);
+ setText('contractStart',start);
+ setText('contractEnd',end);
+ setText('overviewCustomer',customer);
+ setText('updateDate',updateDate);
+ setText('projectUpdate',update==='—'?'No project update recorded.':update);
+
+ const action=document.getElementById('nextAction');
+ const setupUrl=findProjectSetupLink(p);
+ const needsSetup=/setup checklist/i.test(dev);
+ if(needsSetup && setupUrl){
+   action.innerHTML='<button type="button" onclick="openSetup()">Complete Project Setup →</button>';
+ }else if(needsSetup){
+   action.innerHTML='<div class="live-note">Setup checklist link has not yet been saved to this project.</div>';
+ }else{
+   action.innerHTML='';
+ }
+}
+
+async function loadProject(){
+ const params=new URLSearchParams(location.search);
+ const code=params.get('project');
+ const err=document.getElementById('loadError');
+ if(!code){err.style.display='block';err.textContent='No project code was supplied in the URL.';return}
+ try{
+   const res=await fetch(PROJECTS_API,{cache:'no-store'});
+   if(!res.ok)throw new Error('Projects API returned '+res.status);
+   const data=await res.json();
+   const rows=Array.isArray(data)?data:(data.value||[]);
+   const p=rows.find(x=>String(first(x,['ProjectCode','ProjectNumber'])).toLowerCase()===code.toLowerCase());
+   if(!p)throw new Error('Project '+code+' was not found in the live Projects Register.');
+   renderProject(p);
+ }catch(e){
+   err.style.display='block';err.textContent='Unable to load this project from VERO. '+e.message;
+ }
+}
+
+function openSetup(){
+ const url=findProjectSetupLink(currentProject);
+ if(!url)return;
+ document.getElementById('setupIframe').src=url;
+ document.getElementById('setupPanel').classList.add('show');
+ document.body.style.overflow='hidden';
+}
+function closeSetup(){
+ document.getElementById('setupPanel').classList.remove('show');
+ document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSetup()});
+loadProject();
+</script></body></html>

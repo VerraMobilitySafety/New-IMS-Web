@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>VERRA | VERO — Implementation</title><style>
+:root{
+ --charcoal:#3D3935; --green:#A9C23F; --grey:#857874; --teal:#1D8296;
+ --purple:#464E7E; --bg:#F7F8F7; --white:#fff; --line:#E5E1DE;
+ --ink:#292725; --red:#C94A4A; --amber:#D49B35;
+}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Montserrat,Verdana,Arial,sans-serif}
+.app{display:flex;min-height:100vh}.sidebar{width:260px;position:fixed;inset:0 auto 0 0;background:#252321;color:#fff;padding:22px 24px;overflow:hidden}
+.sidebar:after{content:none}.chev{position:absolute;z-index:1;opacity:.13;pointer-events:none}.chev.c1{width:110px;right:-32px;top:150px}.chev.c2{width:70px;left:14px;top:48%}.chev.c3{width:145px;right:-42px;bottom:65px}
+.brand,.nav,.side-foot{position:relative;z-index:2}.brand{margin-bottom:28px;height:82px;display:flex;align-items:flex-start;gap:12px}.brand img{width:126px;max-height:56px;object-fit:contain;object-position:left top}.vero-lockup{display:flex;align-items:center;gap:11px;height:56px;font-weight:800;letter-spacing:1.8px;color:#fff;font-size:18px}.vero-divider{width:1px;height:28px;background:rgba(255,255,255,.42)}.vero-name{color:var(--green)}
+.nav{display:block}.nav-section{margin:0 0 16px}.nav-label{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#9f9994;margin:0 0 6px 14px}.nav a{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:7px;border-left:3px solid transparent;color:#f7f7f6;text-decoration:none;font-size:12px}.nav a:hover,.nav a.active{background:rgba(255,255,255,.08);border-left-color:var(--green)}.nav a.placeholder{opacity:.72;cursor:default}.nav a.placeholder:hover{background:rgba(255,255,255,.04);border-left-color:transparent}.ico{width:20px;text-align:center;font-size:15px}.side-foot{position:absolute;left:24px;bottom:24px;font-size:11px;line-height:1.7;color:#e4e1de}
+.main{margin-left:260px;width:calc(100% - 260px);padding:30px 48px 35px}.top{display:flex;justify-content:space-between;align-items:center;gap:20px}.crumb{font-size:12px;color:var(--grey);letter-spacing:1.4px;text-transform:uppercase}.top-right{display:flex;align-items:center;gap:14px}.search{width:310px;background:#fff;border:1px solid var(--line);border-radius:26px;padding:12px 17px;color:#777}.avatar{width:38px;height:38px;border-radius:50%;background:var(--charcoal);color:#fff;display:grid;place-items:center;font-weight:800}
+.hero{margin:28px 0 24px}.hero h1{font-size:40px;margin:6px 0 8px}.hero p{margin:0;color:#68625e;font-size:17px}.rule{height:4px;width:70px;background:var(--green);margin:15px 0}
+.actions{display:flex;gap:12px;flex-wrap:wrap}.btn{border:0;border-radius:8px;padding:12px 16px;font-weight:800;cursor:pointer;font-size:13px}.btn.green{background:var(--green);color:var(--charcoal)}.btn.dark{background:var(--charcoal);color:#fff}.btn.outline{background:#fff;border:1px solid var(--line);color:var(--charcoal)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 3px 10px rgba(61,57,53,.05)}.kpi b{font-size:30px}.kpi span{display:block;color:var(--grey);font-size:12px;margin-top:5px}.kpi.green{border-top:4px solid var(--green)}.kpi.teal{border-top:4px solid var(--teal)}.kpi.red{border-top:4px solid var(--red)}.kpi.purple{border-top:4px solid var(--purple)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px}.panel{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 3px 10px rgba(61,57,53,.05);overflow:hidden}.panel-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}.panel-head h2{font-size:18px;margin:0}.panel-head span{font-size:12px;color:var(--grey)}
+.table{width:100%;border-collapse:collapse}.table th{text-align:left;background:#faf9f8;color:var(--grey);font-size:11px;text-transform:uppercase;letter-spacing:.7px;padding:12px 15px}.table td{padding:15px;border-top:1px solid var(--line);font-size:13px}.table tr.data{cursor:pointer}.table tr.data:hover{background:#fbfcfa}.docno{font-weight:800;color:var(--charcoal)}.title{font-weight:700}.meta{font-size:11px;color:var(--grey);margin-top:3px}.status{display:inline-flex;padding:5px 8px;border-radius:14px;font-size:10px;font-weight:800}.current{background:#eaf3d0;color:#52641c}.review{background:#fff0d9;color:#7d5815}.overdue{background:#fbe4e4;color:#8f2929}.approval{background:#e9e9f4;color:#3e4677}.draft{background:#eeeae8;color:#625b57}
+.ai{margin:18px;background:linear-gradient(145deg,#3D3935,#292725);color:#fff;border-radius:12px;padding:20px}.ai .label{font-size:11px;letter-spacing:1.5px;color:var(--green);font-weight:800}.ai h3{margin:8px 0;font-size:19px}.ai p{font-size:13px;color:#ddd8d4;line-height:1.5}.ai input{width:100%;border:0;border-radius:8px;padding:12px;margin:7px 0 10px;font-size:13px}.ai button{background:var(--green);border:0;border-radius:8px;padding:11px 14px;font-weight:800;cursor:pointer}
+.tasks{padding:4px 20px 16px}.task{padding:14px 0;border-bottom:1px solid var(--line);display:flex;gap:11px}.task:last-child{border-bottom:0}.dot{width:9px;height:9px;border-radius:50%;background:var(--green);margin-top:5px;flex:none}.dot.red{background:var(--red)}.task b{font-size:13px}.task small{display:block;color:var(--grey);margin-top:3px}
+.empty{padding:22px 20px;color:var(--grey);font-size:13px}.footer{margin-top:25px;border-top:1px solid var(--line);padding-top:15px;color:var(--grey);font-size:11px;display:flex;justify-content:space-between}
+.modal-back{position:fixed;inset:0;background:rgba(35,32,29,.48);display:none;z-index:20}.modal-back.show{display:flex;justify-content:flex-end}.drawer{width:min(620px,92vw);height:100%;background:#fff;box-shadow:-15px 0 35px rgba(0,0,0,.2);overflow:auto}.drawer-head{background:var(--charcoal);color:#fff;padding:24px;position:sticky;top:0;z-index:2}.drawer-head .close{float:right;background:transparent;border:0;color:#fff;font-size:25px;cursor:pointer}.drawer-head h2{margin:5px 0;font-size:24px}.drawer-head small{color:#ddd}.drawer-body{padding:22px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.detail{background:#f8f7f6;border-radius:8px;padding:12px}.detail label{display:block;color:var(--grey);font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}.detail strong{font-size:13px}.section{margin-top:22px}.section h3{font-size:14px;margin:0 0 10px}.timeline{border-left:2px solid var(--line);padding-left:16px}.event{margin-bottom:16px}.event b{font-size:12px}.event small{display:block;color:var(--grey);margin-top:3px}.drawer-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.viewer{position:fixed;inset:0;background:#f1f0ee;display:none;z-index:30}.viewer.show{display:flex;flex-direction:column}.viewer-top{height:64px;background:var(--charcoal);color:#fff;display:flex;align-items:center;gap:18px;padding:0 20px}.viewer-top h2{font-size:16px;margin:0}.viewer-top small{color:#ddd}.viewer-top .spacer{flex:1}.viewer-btn{background:#fff;color:var(--charcoal);border:0;border-radius:7px;padding:9px 12px;font-weight:800;cursor:pointer}.viewer-main{display:grid;grid-template-columns:245px 1fr;min-height:0;flex:1}.toc{background:#fff;border-right:1px solid var(--line);padding:20px;overflow:auto}.toc h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--grey)}.toc a{display:block;padding:8px 5px;color:var(--charcoal);text-decoration:none;font-size:12px;border-radius:5px}.toc a:hover{background:#f0f2ed}.paper-wrap{overflow:auto;padding:35px}.paper{background:#fff;max-width:800px;margin:auto;padding:60px 70px;min-height:1100px;box-shadow:0 4px 20px rgba(0,0,0,.12);font-family:Georgia,serif;line-height:1.65}.paper h1{font-size:30px}.paper h2{font-size:20px;margin-top:35px}.paper .control{font-family:Arial,sans-serif;font-size:11px;color:var(--grey);border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:30px}.uncontrolled{font-family:Arial,sans-serif;background:#fff3f3;border:1px solid #e8bcbc;color:#8f2929;padding:9px;text-align:center;font-size:10px;font-weight:800;margin-bottom:20px}
+@media(max-width:1050px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+@media(max-width:720px){.sidebar{width:82px;padding:28px 12px}.brand .gov,.brand .tag,.nav a span:not(.ico),.side-foot{display:none}.main{margin-left:82px;width:calc(100% - 82px);padding:24px}.top-right .search{width:200px}.viewer-main{grid-template-columns:1fr}.toc{display:none}.paper{padding:35px}.detail-grid{grid-template-columns:1fr}}
+
+.viewer .viewer-copy-overlay{
+  position:absolute !important;
+  inset:62px 0 0 0 !important;
+  z-index:999 !important;
+  display:none !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:24px !important;
+  background:rgba(25,24,22,.56) !important;
+}
+.viewer .viewer-copy-overlay.show{display:flex !important}
+.viewer .viewer-copy-card{
+  position:relative !important;
+  width:min(520px,calc(100vw - 48px)) !important;
+  max-height:calc(100vh - 115px) !important;
+  overflow:auto !important;
+  background:#fff !important;
+  border-radius:12px !important;
+  box-shadow:0 22px 65px rgba(0,0,0,.35) !important;
+  color:var(--ink) !important;
+}
+.viewer .copy-head{
+  position:relative !important;
+  background:var(--black) !important;
+  color:#fff !important;
+  padding:22px 24px 20px !important;
+  border-radius:12px 12px 0 0 !important;
+}
+.viewer .copy-head small{font-size:9px;letter-spacing:1px;color:#d8d4d1}
+.viewer .copy-head h2{margin:5px 0 4px;font-size:22px}
+.viewer .copy-head p{margin:0;color:#ddd8d4;font-size:11px}
+.viewer .copy-close{
+  position:absolute;right:16px;top:13px;border:0;background:transparent;
+  color:#fff;font-size:25px;cursor:pointer
+}
+.viewer .copy-body{padding:22px 24px 24px !important}
+.viewer .copy-doc{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:17px}
+.viewer .copy-doc div{background:#f7f6f5;border-radius:8px;padding:11px}
+.viewer .copy-doc span,.viewer .copy-label{
+  display:block;font-size:8px;font-weight:800;letter-spacing:.7px;
+  text-transform:uppercase;color:var(--grey);margin-bottom:5px
+}
+.viewer .copy-doc strong{font-size:10px}
+.viewer .copy-email{
+  width:100% !important;border:1px solid #d7d3d0 !important;border-radius:7px !important;
+  padding:11px 12px !important;font-size:11px !important;margin-bottom:14px !important
+}
+.viewer .copy-warning{
+  background:#fff7e7;border:1px solid #ead5a9;border-radius:8px;
+  padding:12px;font-size:10px;line-height:1.55;color:#665538
+}
+.viewer .copy-explain{font-size:10px;line-height:1.55;color:#625d59}
+.viewer .copy-actions{display:flex;gap:8px;margin-top:17px}
+.viewer .copy-audit{font-size:8px;color:var(--grey);line-height:1.5;margin:15px 0 0}
+
+
+.viewer-top .copy-toolbar-btn{
+  background:var(--green)!important;color:#262421!important;
+  border:0!important;border-radius:7px!important;padding:9px 13px!important;
+  font-weight:800!important;cursor:pointer!important;white-space:nowrap!important;
+}
+
+/* HOME v1.3 — canonical Document Management v1.5 shell */
+.main{padding-top:0!important}
+.global-hero{
+ position:relative;height:245px;margin:0 -28px 18px;overflow:hidden;
+ background-image:linear-gradient(90deg,rgba(9,49,63,.58) 0%,rgba(9,49,63,.25) 48%,rgba(9,49,63,.08) 100%),url("verra-governance-header.png");
+ background-size:cover;background-position:center;
+}
+.hero-content{position:absolute;left:48px;top:50%;transform:translateY(-50%);color:#fff;z-index:2}
+.hero-kicker{font-size:10px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase;margin-bottom:12px}
+.hero-content h1{font-size:32px;line-height:1.08;margin:0 0 8px;font-weight:800;letter-spacing:-.4px}
+.hero-content p{font-size:15px;margin:0;color:rgba(255,255,255,.94)}
+.hero-rule{width:64px;height:4px;background:var(--green);margin-top:20px}
+.hero-tools{position:absolute;right:28px;top:22px;display:flex;align-items:center;gap:12px;z-index:3}
+.hero-search{width:280px;background:#fff;border:1px solid rgba(255,255,255,.7);border-radius:9px;padding:11px 14px;font-size:11px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.hero-tools .avatar{background:#302e2b;color:#fff;border:2px solid rgba(255,255,255,.8)}
+.home-content{padding-top:0}
+.home-modules{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:17px}
+.home-module{background:#fff;border:1px solid var(--line);border-radius:11px;box-shadow:0 3px 12px rgba(61,57,53,.035);padding:20px;cursor:pointer;min-height:180px;position:relative;overflow:hidden}
+.home-module:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green)}
+.home-module.risk:before{background:var(--teal)}.home-module.compliance:before{background:var(--purple)}
+.module-icon{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:21px;background:#edf4d8;margin-bottom:17px}
+.home-module.risk .module-icon{background:#e1f1f4;color:var(--teal)}.home-module.compliance .module-icon{background:#e9eaf1;color:var(--purple)}
+.home-module h3{margin:0 0 7px;font-size:18px}.home-module p{margin:0 0 18px;font-size:11px;line-height:1.55;color:#6e6864}.home-module strong{font-size:10px;text-transform:uppercase;letter-spacing:.55px}
+.home-bottom{display:grid;grid-template-columns:1.35fr .75fr;gap:16px}
+.home-actions{padding:0 20px}.home-action{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);align-items:center;cursor:pointer}.home-action:last-child{border-bottom:0}
+.action-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}.action-dot.red{background:#c94f4f}.action-dot.teal{background:var(--teal)}.action-dot.gold{background:#dba21f}
+.home-action b{font-size:11px}.home-action small{display:block;font-size:9px;color:#77706c;margin-top:4px}.home-action .go{margin-left:auto;font-size:19px}
+.home-ai{padding:20px}.home-ai .ai-title{display:flex;align-items:center;gap:8px}.home-ai h3{font-size:18px;margin:0}.home-ai p{font-size:11px;color:#6e6864;line-height:1.55}
+.home-ai-box{border:1px solid #d8d4d1;border-radius:8px;display:flex;overflow:hidden;margin:14px 0 9px}.home-ai-box input{border:0;outline:0;flex:1;padding:11px;font-size:11px}.home-ai-box button{border:0;background:var(--green);padding:0 15px;font-weight:800;cursor:pointer}
+.ai-note{font-size:8px;color:#68751f;font-weight:800}
+.quick-q{display:flex;flex-wrap:wrap;gap:6px;margin-top:15px}.quick-q button{border:1px solid #ddd9d5;background:#fff;border-radius:15px;padding:6px 9px;font-size:8px;cursor:pointer}
+@media(max-width:1000px){.home-modules,.home-bottom{grid-template-columns:1fr}.hero-search{width:210px}}
+
+/* LOCKED GLOBAL HEADER CONTROLS */
+.hero-tools{position:absolute!important;right:28px!important;top:22px!important;display:flex!important;align-items:center!important;gap:12px!important;z-index:3!important}
+.hero-search{box-sizing:border-box!important;width:280px!important;height:44px!important;background:#fff!important;border:1px solid rgba(255,255,255,.7)!important;border-radius:10px!important;padding:0 14px!important;font-size:11px!important;line-height:44px!important;font-family:Montserrat,Verdana,sans-serif!important;box-shadow:0 2px 10px rgba(0,0,0,.1)!important}
+.hero-tools .avatar{box-sizing:border-box!important;width:36px!important;height:36px!important;min-width:36px!important;border-radius:50%!important;display:grid!important;place-items:center!important;background:#302e2b!important;color:#fff!important;border:2px solid rgba(255,255,255,.8)!important;font-size:11px!important;font-weight:800!important}
+
+
+/* PROJECT MANAGEMENT v1.0 */
+.project-content{padding-top:0}
+.project-toolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:20px 0 16px}
+.project-tabs{display:flex;gap:7px;flex-wrap:wrap}
+.project-tab{border:1px solid var(--line);background:#fff;border-radius:18px;padding:8px 12px;font:700 10px Montserrat;cursor:pointer;color:var(--charcoal)}
+.project-tab.active{background:var(--charcoal);color:#fff;border-color:var(--charcoal)}
+.project-tools{display:flex;gap:8px;align-items:center}
+.project-search{width:240px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px 12px;font:500 11px Montserrat}
+.project-table .health{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800}
+.health-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.health-dot.amber{background:var(--amber)} .health-dot.red{background:var(--red)} .health-dot.grey{background:var(--grey)}
+.progress{height:7px;background:#ece9e6;border-radius:6px;overflow:hidden;width:100px}
+.progress i{display:block;height:100%;background:var(--green);border-radius:6px}
+.project-name{font-weight:800;color:var(--charcoal)}
+.stage{display:inline-flex;padding:5px 8px;border-radius:14px;font-size:9px;font-weight:800;background:#eeeae8;color:#625b57}
+.stage.mobilisation{background:#e1f1f4;color:#166273}.stage.delivery{background:#eaf3d0;color:#52641c}.stage.planning{background:#e9e9f4;color:#3e4677}.stage.hold{background:#fff0d9;color:#7d5815}
+.project-side-card{padding:18px 20px;border-bottom:1px solid var(--line)}
+.project-side-card:last-child{border-bottom:0}
+.project-side-card h4{margin:0 0 7px;font-size:12px}.project-side-card p{margin:0;color:#716b67;font-size:10px;line-height:1.55}
+.project-side-card strong{display:block;font-size:22px;margin-bottom:3px}
+.project-link{color:var(--charcoal);font-weight:800;text-decoration:none;font-size:10px}
+.project-link:hover{text-decoration:underline}
+.new-project-note{font-size:9px;color:#77706c;margin-top:7px}
+.project-drawer-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 18px}
+.project-drawer-tabs span{font-size:9px;font-weight:800;padding:7px 9px;border-radius:14px;background:#f1efed}
+.nav-sub{padding-left:17px!important;font-size:11px!important}
+.nav-parent{font-weight:700}
+
+/* IMPLEMENTATION LIFECYCLE CARDS */
+.lifecycle-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:20px 0 18px}
+.lifecycle-card{border:1px solid var(--line);border-top:4px solid var(--lime);background:#fff;border-radius:12px;padding:18px 20px;text-align:left;cursor:pointer;box-shadow:0 3px 10px rgba(61,57,53,.04);font-family:Montserrat,Verdana,sans-serif;transition:.15s ease}
+.lifecycle-card:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(61,57,53,.08)}
+.lifecycle-card.active{background:var(--charcoal);color:#fff;border-color:var(--charcoal);border-top-color:var(--lime)}
+.lifecycle-card b{display:block;font-size:22px;margin-bottom:5px}.lifecycle-card span{font-size:10px;font-weight:700;opacity:.72}
+.project-content>.grid{display:block}.project-list{width:100%}
+@media(max-width:900px){.lifecycle-grid{grid-template-columns:repeat(2,1fr)}}
+
+@media(max-width:850px){.project-toolbar{align-items:flex-start;flex-direction:column}.project-tools{width:100%}.project-search{flex:1}.project-table{min-width:760px}.panel.project-list{overflow:auto}}
+</style></head>
+<body><div class="app"><aside class="sidebar">
+ <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
+ <img class="chev c1" src="verra-chevron.png" alt=""><img class="chev c2" src="verra-chevron.png" alt=""><img class="chev c3" src="verra-chevron.png" alt="">
+ 
+<nav class="nav">
+  <div class="nav-section">
+    <a href="index.html"><span class="ico">⌂</span><span>Home</span></a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">My Work</div>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">✓</span><span>My Actions</span></a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Manage</div>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">⌖</span><span>Sites</span></a>
+    <a class="nav-parent active" href="project-management.html"><span class="ico">▦</span><span>Projects</span></a>
+    <a class="nav-sub placeholder" href="#" onclick="return false"><span class="ico">•</span><span>Maintenance</span></a>
+    <a class="nav-sub active" href="project-management.html"><span class="ico">•</span><span>Implementation</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">✚</span><span>Safety</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">◆</span><span>Quality</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">♻</span><span>Environment</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Insurance</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">↻</span><span>Business Continuity</span></a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Governance</div>
+    <a href="documents.html"><span class="ico">▱</span><span>Documents</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">▥</span><span>Risks</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Compliance</span></a>
+    <a class="placeholder" href="#" onclick="return false"><span class="ico">◎</span><span>Assurance</span></a>
+  </div>
+</nav>
+
+ <div class="side-foot">VERRA | VERO • v2.5<br>Prototype environment</div>
+</aside>
+<main class="main">
+<section class="global-hero">
+ <div class="hero-content"><div class="hero-kicker">Manage / Projects</div><h1>Implementation</h1><p>Manage non-BAU projects from handover through delivery and closure.</p><div class="hero-rule"></div></div>
+ <div class="hero-tools"><input class="hero-search" placeholder="⌕   Search VERO..."><div class="avatar">DB</div></div>
+</section>
+<div class="project-content">
+ <div class="project-toolbar">
+  <div></div>
+  <div class="project-tools">
+   <input id="projectSearch" class="project-search" placeholder="Search projects..." oninput="applyFilters()">
+   <button class="btn green" onclick="newProject()">+ New Project</button>
+  </div>
+ </div>
+
+ <section class="lifecycle-grid">
+  <button class="lifecycle-card active" data-filter="all" onclick="filterProjects(this,'all')"><b id="lifeAll">—</b><span>All Projects</span></button>
+  <button class="lifecycle-card" data-filter="initiation" onclick="filterProjects(this,'initiation')"><b id="lifeInitiation">—</b><span>Initiation</span></button>
+  <button class="lifecycle-card" data-filter="execution" onclick="filterProjects(this,'execution')"><b id="lifeExecution">—</b><span>Execution</span></button>
+  <button class="lifecycle-card" data-filter="completion" onclick="filterProjects(this,'completion')"><b id="lifeCompletion">—</b><span>Completion</span></button>
+ </section>
+
+ <section class="grid">
+  <div class="panel project-list">
+   <div class="panel-head"><div><h2>Implementation Register</h2><span id="projectCount">Loading projects…</span></div><span>Click a project to open</span></div>
+   <table class="table project-table">
+    <thead><tr><th>Project</th><th>Project Manager</th><th>Development Stage</th><th>Contract End</th><th>Status</th><th>Progress</th></tr></thead>
+    <tbody id="projectTableBody"><tr><td colspan="6" class="empty">Loading live projects from VERO…</td></tr></tbody>
+   </table>
+  </div>
+ </section>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.8</span></footer>
+</div></main></div>
+
+<div id="projectModal" class="modal-back" onclick="if(event.target===this)closeProject()">
+ <div class="drawer">
+  <div class="drawer-head"><button class="close" onclick="closeProject()">×</button><small>NON-BAU PROJECT</small><h2 id="drawerName">Project</h2><small id="drawerStatus"></small></div>
+  <div class="drawer-body">
+   <div class="project-drawer-tabs"><span>Overview</span><span>Plan</span><span>Actions</span><span>Risks</span><span>Documents</span><span>Governance</span><span>Updates</span></div>
+   <div class="detail-grid">
+    <div class="detail"><label>Project Owner</label><strong id="drawerOwner"></strong></div>
+    <div class="detail"><label>Target Date</label><strong id="drawerDue"></strong></div>
+    <div class="detail"><label>Stage</label><strong id="drawerStage"></strong></div>
+    <div class="detail"><label>Progress</label><strong id="drawerProgress"></strong></div>
+   </div>
+   <div class="section"><h3>Purpose / Scope</h3><p id="drawerDesc" style="font-size:12px;line-height:1.65;color:#625d59"></p></div>
+   <div class="section"><h3>Project Governance</h3><div class="tasks">
+    <div class="task"><span class="dot"></span><div><b>Project actions</b><small>Linked to the central My Actions register.</small></div></div>
+    <div class="task"><span class="dot"></span><div><b>Project risks</b><small>Linked to the central Risk Management register.</small></div></div>
+    <div class="task"><span class="dot"></span><div><b>Documents and assurance</b><small>Project records remain governed through VERO.</small></div></div>
+   </div></div>
+  </div>
+ </div>
+</div>
+
+<script>
+const PROJECTS_API='/api/projects';
+let projects=[],currentFilter='all';
+const val=v=>v&&typeof v==='object'?(v.Value||v.DisplayName||''):(v??'');
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function date(v){if(!v)return '—';let d=new Date(v.length===10?v+'T00:00:00':v);return isNaN(d)?v:new Intl.DateTimeFormat('en-AU',{day:'2-digit',month:'short',year:'numeric'}).format(d)}
+function pct(v){if(v===null||v===undefined||v==='')return null;let n=Number(v);return isNaN(n)?null:Math.max(0,Math.min(100,n<=1?n*100:n))}
+function lifecycleKey(v,status){let s=(String(v||'')+' '+String(status||'')).toLowerCase();if(/complete|completed|closed|closeout|close-out|handover complete/.test(s))return'completion';if(/sales handover|setup|approval|approve|finance|leadership|initiat|mobilis|mobiliz|planning|pm assigned/.test(s))return'initiation';return'execution'}
+function stageClass(v){return v==='initiation'?'mobilisation':v==='completion'?'delivery':'planning'}
+function health(raw){let s=String(raw||'').toLowerCase();if(s==='green'||s.includes('track'))return['On Track',''];if(s==='red'||s.includes('risk'))return['At Risk','red'];if(s==='amber'||s==='yellow'||s.includes('attention'))return['Attention','amber'];if(s.includes('hold'))return['On Hold','grey'];return[raw||'Not Set',raw?'':'grey']}
+function normalise(p){let dev=val(p.DevelopmentStage)||'Not Set',rawStatus=val(p.Status)||p.ProjectStatus||'',h=health(rawStatus),life=lifecycleKey(dev,rawStatus);return{raw:p,name:p.Title||p.ProjectCode||'Untitled Project',code:p.ProjectCode||'',owner:p.ProjectManager?.DisplayName||'Unassigned',customer:p.CustomerName||'',stage:dev,stageKey:life,due:p.ContractEndDate||p.Contract_x002f_POExpiry||'',health:h[0],healthClass:h[1],progress:pct(p.Completion_x0020_Status),description:p.ProjectStatus||dev||p.CustomerName||'',jurisdiction:p.Jurisdiction||''}}
+async function loadProjects(){try{let r=await fetch(PROJECTS_API,{headers:{Accept:'application/json'}});if(!r.ok)throw Error('API returned '+r.status);let d=await r.json(),rows=Array.isArray(d)?d:Array.isArray(d.value)?d.value:Array.isArray(d.body)?d.body:[];projects=rows.map(normalise);render();kpis()}catch(e){console.error(e);document.getElementById('projectTableBody').innerHTML='<tr><td colspan="6" class="empty"><b>Unable to load live projects.</b><br>Check the browser console and Azure Function CORS settings.</td></tr>';document.getElementById('projectCount').textContent='Live data unavailable'}}
+function render(){let body=document.getElementById('projectTableBody');body.innerHTML=projects.map((p,i)=>{let pc=p.progress===null?'—':Math.round(p.progress)+'%',pw=p.progress??0,meta=[p.code,p.customer].filter(Boolean).join(' • '),search=[p.name,p.code,p.owner,p.customer,p.stage,p.health,p.jurisdiction].join(' ').toLowerCase();return`<tr class="data project-row" data-stage="${esc(p.stageKey)}" data-search="${esc(search)}" onclick="openProject(${i})"><td><div class="project-name">${esc(p.name)}</div><div class="meta">${esc(meta||p.description)}</div></td><td>${esc(p.owner)}</td><td><span class="stage ${stageClass(p.stageKey)}">${esc(p.stage)}</span></td><td>${esc(date(p.due))}</td><td><span class="health"><i class="health-dot ${p.healthClass}"></i>${esc(p.health)}</span></td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress"><i style="width:${pw}%"></i></div><span class="meta">${pc}</span></div></td></tr>`}).join('')||'<tr><td colspan="6" class="empty">No projects returned by the Projects API.</td></tr>';applyFilters()}
+function kpis(){document.getElementById('lifeAll').textContent=projects.length;document.getElementById('lifeInitiation').textContent=projects.filter(p=>p.stageKey==='initiation').length;document.getElementById('lifeExecution').textContent=projects.filter(p=>p.stageKey==='execution').length;document.getElementById('lifeCompletion').textContent=projects.filter(p=>p.stageKey==='completion').length}
+function newProject(){window.open('https://www.cognitoforms.com/VerraMobility/SalesHandoverChecklist','_blank','noopener')}
+function filterProjects(btn,filter){currentFilter=filter;document.querySelectorAll('.lifecycle-card').forEach(x=>x.classList.remove('active'));btn.classList.add('active');applyFilters()}
+function applyFilters(){let q=(document.getElementById('projectSearch').value||'').toLowerCase().trim(),shown=0;document.querySelectorAll('.project-row').forEach(r=>{let show=(currentFilter==='all'||r.dataset.stage===currentFilter)&&(!q||r.dataset.search.includes(q));r.style.display=show?'':'none';if(show)shown++});document.getElementById('projectCount').textContent=shown+' project'+(shown===1?'':'s')+' shown'}
+function openProject(i){let p=projects[i];if(p)window.location.href='project-workspace.html?project='+encodeURIComponent(p.code||p.name)}
+function closeProject(){document.getElementById('projectModal').classList.remove('show')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeProject()});loadProjects();
+</script></body></html>

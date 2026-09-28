@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verra Governance — Document Management</title>
+<style>
+:root{
+ --charcoal:#3D3935; --green:#A9C23F; --grey:#857874; --teal:#1D8296;
+ --purple:#464E7E; --bg:#F7F8F7; --white:#fff; --line:#E5E1DE;
+ --ink:#292725; --red:#C94A4A; --amber:#D49B35;
+}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Montserrat,Verdana,Arial,sans-serif}
+.app{display:flex;min-height:100vh}.sidebar{width:260px;position:fixed;inset:0 auto 0 0;background:#252321;color:#fff;padding:22px 24px;overflow:hidden}
+.sidebar:after{content:none}.chev{position:absolute;z-index:1;opacity:.13;pointer-events:none}.chev.c1{width:110px;right:-32px;top:150px}.chev.c2{width:70px;left:14px;top:48%}.chev.c3{width:145px;right:-42px;bottom:65px}
+.brand,.nav,.side-foot{position:relative;z-index:2}.brand{margin-bottom:28px;height:82px;display:flex;align-items:flex-start}.brand img{width:190px;max-height:74px;object-fit:contain;object-position:left top}
+.nav{display:grid;gap:12px}.nav a{display:flex;align-items:center;gap:13px;padding:15px;border-radius:8px;border-left:4px solid transparent;color:#f7f7f6;text-decoration:none;font-size:15px}.nav a:hover,.nav a.active{background:rgba(255,255,255,.08);border-left-color:var(--green)}.ico{width:25px;text-align:center;font-size:19px}.side-foot{position:absolute;left:24px;bottom:24px;font-size:11px;line-height:1.7;color:#e4e1de}
+.main{margin-left:260px;width:calc(100% - 260px);padding:30px 48px 35px}.top{display:flex;justify-content:space-between;align-items:center;gap:20px}.crumb{font-size:12px;color:var(--grey);letter-spacing:1.4px;text-transform:uppercase}.top-right{display:flex;align-items:center;gap:14px}.search{width:310px;background:#fff;border:1px solid var(--line);border-radius:26px;padding:12px 17px;color:#777}.avatar{width:38px;height:38px;border-radius:50%;background:var(--charcoal);color:#fff;display:grid;place-items:center;font-weight:800}
+.hero{margin:28px 0 24px}.hero h1{font-size:40px;margin:6px 0 8px}.hero p{margin:0;color:#68625e;font-size:17px}.rule{height:4px;width:70px;background:var(--green);margin:15px 0}
+.actions{display:flex;gap:12px;flex-wrap:wrap}.btn{border:0;border-radius:8px;padding:12px 16px;font-weight:800;cursor:pointer;font-size:13px}.btn.green{background:var(--green);color:var(--charcoal)}.btn.dark{background:var(--charcoal);color:#fff}.btn.outline{background:#fff;border:1px solid var(--line);color:var(--charcoal)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 3px 10px rgba(61,57,53,.05)}.kpi b{font-size:30px}.kpi span{display:block;color:var(--grey);font-size:12px;margin-top:5px}.kpi.green{border-top:4px solid var(--green)}.kpi.teal{border-top:4px solid var(--teal)}.kpi.red{border-top:4px solid var(--red)}.kpi.purple{border-top:4px solid var(--purple)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px}.panel{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 3px 10px rgba(61,57,53,.05);overflow:hidden}.panel-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}.panel-head h2{font-size:18px;margin:0}.panel-head span{font-size:12px;color:var(--grey)}
+.table{width:100%;border-collapse:collapse}.table th{text-align:left;background:#faf9f8;color:var(--grey);font-size:11px;text-transform:uppercase;letter-spacing:.7px;padding:12px 15px}.table td{padding:15px;border-top:1px solid var(--line);font-size:13px}.table tr.data{cursor:pointer}.table tr.data:hover{background:#fbfcfa}.docno{font-weight:800;color:var(--charcoal)}.title{font-weight:700}.meta{font-size:11px;color:var(--grey);margin-top:3px}.status{display:inline-flex;padding:5px 8px;border-radius:14px;font-size:10px;font-weight:800}.current{background:#eaf3d0;color:#52641c}.review{background:#fff0d9;color:#7d5815}.overdue{background:#fbe4e4;color:#8f2929}.approval{background:#e9e9f4;color:#3e4677}.draft{background:#eeeae8;color:#625b57}
+.ai{margin:18px;background:linear-gradient(145deg,#3D3935,#292725);color:#fff;border-radius:12px;padding:20px}.ai .label{font-size:11px;letter-spacing:1.5px;color:var(--green);font-weight:800}.ai h3{margin:8px 0;font-size:19px}.ai p{font-size:13px;color:#ddd8d4;line-height:1.5}.ai input{width:100%;border:0;border-radius:8px;padding:12px;margin:7px 0 10px;font-size:13px}.ai button{background:var(--green);border:0;border-radius:8px;padding:11px 14px;font-weight:800;cursor:pointer}
+.tasks{padding:4px 20px 16px}.task{padding:14px 0;border-bottom:1px solid var(--line);display:flex;gap:11px}.task:last-child{border-bottom:0}.dot{width:9px;height:9px;border-radius:50%;background:var(--green);margin-top:5px;flex:none}.dot.red{background:var(--red)}.task b{font-size:13px}.task small{display:block;color:var(--grey);margin-top:3px}
+.empty{padding:22px 20px;color:var(--grey);font-size:13px}.footer{margin-top:25px;border-top:1px solid var(--line);padding-top:15px;color:var(--grey);font-size:11px;display:flex;justify-content:space-between}
+.modal-back{position:fixed;inset:0;background:rgba(35,32,29,.48);display:none;z-index:20}.modal-back.show{display:flex;justify-content:flex-end}.drawer{width:min(620px,92vw);height:100%;background:#fff;box-shadow:-15px 0 35px rgba(0,0,0,.2);overflow:auto}.drawer-head{background:var(--charcoal);color:#fff;padding:24px;position:sticky;top:0;z-index:2}.drawer-head .close{float:right;background:transparent;border:0;color:#fff;font-size:25px;cursor:pointer}.drawer-head h2{margin:5px 0;font-size:24px}.drawer-head small{color:#ddd}.drawer-body{padding:22px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.detail{background:#f8f7f6;border-radius:8px;padding:12px}.detail label{display:block;color:var(--grey);font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}.detail strong{font-size:13px}.section{margin-top:22px}.section h3{font-size:14px;margin:0 0 10px}.timeline{border-left:2px solid var(--line);padding-left:16px}.event{margin-bottom:16px}.event b{font-size:12px}.event small{display:block;color:var(--grey);margin-top:3px}.drawer-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.viewer{position:fixed;inset:0;background:#f1f0ee;display:none;z-index:30}.viewer.show{display:flex;flex-direction:column}.viewer-top{height:64px;background:var(--charcoal);color:#fff;display:flex;align-items:center;gap:18px;padding:0 20px}.viewer-top h2{font-size:16px;margin:0}.viewer-top small{color:#ddd}.viewer-top .spacer{flex:1}.viewer-btn{background:#fff;color:var(--charcoal);border:0;border-radius:7px;padding:9px 12px;font-weight:800;cursor:pointer}.viewer-main{display:grid;grid-template-columns:245px 1fr;min-height:0;flex:1}.toc{background:#fff;border-right:1px solid var(--line);padding:20px;overflow:auto}.toc h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--grey)}.toc a{display:block;padding:8px 5px;color:var(--charcoal);text-decoration:none;font-size:12px;border-radius:5px}.toc a:hover{background:#f0f2ed}.paper-wrap{overflow:auto;padding:35px}.paper{background:#fff;max-width:800px;margin:auto;padding:60px 70px;min-height:1100px;box-shadow:0 4px 20px rgba(0,0,0,.12);font-family:Georgia,serif;line-height:1.65}.paper h1{font-size:30px}.paper h2{font-size:20px;margin-top:35px}.paper .control{font-family:Arial,sans-serif;font-size:11px;color:var(--grey);border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:30px}.uncontrolled{font-family:Arial,sans-serif;background:#fff3f3;border:1px solid #e8bcbc;color:#8f2929;padding:9px;text-align:center;font-size:10px;font-weight:800;margin-bottom:20px}
+@media(max-width:1050px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+@media(max-width:720px){.sidebar{width:82px;padding:28px 12px}.brand .gov,.brand .tag,.nav a span:not(.ico),.side-foot{display:none}.main{margin-left:82px;width:calc(100% - 82px);padding:24px}.top-right .search{width:200px}.viewer-main{grid-template-columns:1fr}.toc{display:none}.paper{padding:35px}.detail-grid{grid-template-columns:1fr}}
+
+.viewer .viewer-copy-overlay{
+  position:absolute !important;
+  inset:62px 0 0 0 !important;
+  z-index:999 !important;
+  display:none !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:24px !important;
+  background:rgba(25,24,22,.56) !important;
+}
+.viewer .viewer-copy-overlay.show{display:flex !important}
+.viewer .viewer-copy-card{
+  position:relative !important;
+  width:min(520px,calc(100vw - 48px)) !important;
+  max-height:calc(100vh - 115px) !important;
+  overflow:auto !important;
+  background:#fff !important;
+  border-radius:12px !important;
+  box-shadow:0 22px 65px rgba(0,0,0,.35) !important;
+  color:var(--ink) !important;
+}
+.viewer .copy-head{
+  position:relative !important;
+  background:var(--black) !important;
+  color:#fff !important;
+  padding:22px 24px 20px !important;
+  border-radius:12px 12px 0 0 !important;
+}
+.viewer .copy-head small{font-size:9px;letter-spacing:1px;color:#d8d4d1}
+.viewer .copy-head h2{margin:5px 0 4px;font-size:22px}
+.viewer .copy-head p{margin:0;color:#ddd8d4;font-size:11px}
+.viewer .copy-close{
+  position:absolute;right:16px;top:13px;border:0;background:transparent;
+  color:#fff;font-size:25px;cursor:pointer
+}
+.viewer .copy-body{padding:22px 24px 24px !important}
+.viewer .copy-doc{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:17px}
+.viewer .copy-doc div{background:#f7f6f5;border-radius:8px;padding:11px}
+.viewer .copy-doc span,.viewer .copy-label{
+  display:block;font-size:8px;font-weight:800;letter-spacing:.7px;
+  text-transform:uppercase;color:var(--grey);margin-bottom:5px
+}
+.viewer .copy-doc strong{font-size:10px}
+.viewer .copy-email{
+  width:100% !important;border:1px solid #d7d3d0 !important;border-radius:7px !important;
+  padding:11px 12px !important;font-size:11px !important;margin-bottom:14px !important
+}
+.viewer .copy-warning{
+  background:#fff7e7;border:1px solid #ead5a9;border-radius:8px;
+  padding:12px;font-size:10px;line-height:1.55;color:#665538
+}
+.viewer .copy-explain{font-size:10px;line-height:1.55;color:#625d59}
+.viewer .copy-actions{display:flex;gap:8px;margin-top:17px}
+.viewer .copy-audit{font-size:8px;color:var(--grey);line-height:1.5;margin:15px 0 0}
+
+
+.viewer-top .copy-toolbar-btn{
+  background:var(--green)!important;color:#262421!important;
+  border:0!important;border-radius:7px!important;padding:9px 13px!important;
+  font-weight:800!important;cursor:pointer!important;white-space:nowrap!important;
+}
+
+/* v1.6 SHARED GOVERNANCE HEADER — Document Management v1.5 functionality retained */
+.main{padding-top:0!important}
+.global-hero{
+ position:relative;height:245px;margin:0 -28px 18px;overflow:hidden;
+ background-image:linear-gradient(90deg,rgba(9,49,63,.58) 0%,rgba(9,49,63,.25) 48%,rgba(9,49,63,.08) 100%),url("verra-governance-header.png");
+ background-size:cover;background-position:center;
+}
+.hero-content{position:absolute;left:48px;top:50%;transform:translateY(-50%);color:#fff;z-index:2}
+.hero-kicker{font-size:10px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase;margin-bottom:12px}
+.hero-content h1{font-size:32px;line-height:1.08;margin:0 0 8px;font-weight:800;letter-spacing:-.4px}
+.hero-content p{font-size:15px;margin:0;color:rgba(255,255,255,.94)}
+.hero-rule{width:64px;height:4px;background:var(--green);margin-top:20px}
+.hero-tools{position:absolute;right:28px;top:22px;display:flex;align-items:center;gap:12px;z-index:3}
+.hero-search{width:280px;background:#fff;border:1px solid rgba(255,255,255,.7);border-radius:9px;padding:11px 14px;font-size:11px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.hero-tools .avatar{background:#302e2b;color:#fff;border:2px solid rgba(255,255,255,.8)}
+/* Old header is replaced by the standard shared hero */
+.main > .top{display:none!important}
+/* Old page title block is redundant under the hero */
+.main > .page-head{display:none!important}
+
+
+/* LOCKED GLOBAL HEADER CONTROLS */
+.hero-tools{position:absolute!important;right:28px!important;top:22px!important;display:flex!important;align-items:center!important;gap:12px!important;z-index:3!important}
+.hero-search{box-sizing:border-box!important;width:280px!important;height:44px!important;background:#fff!important;border:1px solid rgba(255,255,255,.7)!important;border-radius:10px!important;padding:0 14px!important;font-size:11px!important;line-height:44px!important;font-family:Montserrat,Verdana,sans-serif!important;box-shadow:0 2px 10px rgba(0,0,0,.1)!important}
+.hero-tools .avatar{box-sizing:border-box!important;width:36px!important;height:36px!important;min-width:36px!important;border-radius:50%!important;display:grid!important;place-items:center!important;background:#302e2b!important;color:#fff!important;border:2px solid rgba(255,255,255,.8)!important;font-size:11px!important;font-weight:800!important}
+
+
+.pdf-frame-wrap{position:absolute;inset:64px 0 0 0;background:#f1f0ee;display:flex;justify-content:center;align-items:stretch}
+.pdf-frame{width:100%;height:100%;border:0;background:#fff}
+
+/* v1.9 shared VERO navigation */
+.sidebar{overflow-y:auto!important;scrollbar-width:thin}.vero-nav{display:block!important}.vero-nav .nav-section{margin:16px 0 5px;padding:0 15px;color:#aaa5a1;font-size:9px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}.vero-nav a{min-height:39px;padding:9px 12px!important;margin:1px 0;font-size:12px!important}.vero-nav .ico{width:22px!important;font-size:15px!important}.nav-toggle{width:100%;min-height:39px;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border:0;border-left:4px solid transparent;border-radius:8px;background:transparent;color:#f7f7f6;font:12px Montserrat,Verdana,Arial,sans-serif;cursor:pointer}.nav-toggle:hover{background:rgba(255,255,255,.08)}.nav-toggle-main{display:flex;align-items:center;gap:13px}.nav-caret{font-size:15px;transition:.18s}.nav-group.open .nav-caret{transform:rotate(180deg)}.nav-sub{display:none;padding:2px 0 4px 43px}.nav-group.open .nav-sub{display:block}.vero-nav .nav-sub a{display:block;min-height:auto;padding:7px 9px!important;border-left:0!important;color:#d8d5d2;font-size:11px!important}.vero-nav .nav-sub a:hover{color:#fff;background:rgba(255,255,255,.07)}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+ <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"></div>
+ <img class="chev c1" src="verra-chevron.png" alt=""><img class="chev c2" src="verra-chevron.png" alt=""><img class="chev c3" src="verra-chevron.png" alt="">
+ <nav class="nav vero-nav">
+  <a href="index.html"><span class="ico">⌂</span><span>Home</span></a>
+  <div class="nav-section">My Work</div>
+  <a href="#" onclick="return false"><span class="ico">✓</span><span>My Actions</span></a>
+  <div class="nav-section">Manage</div>
+  <a href="sites.html"><span class="ico">⌖</span><span>Sites</span></a>
+  <div class="nav-group">
+   <button class="nav-toggle" type="button" onclick="toggleProjectsNav(this)" aria-expanded="false"><span class="nav-toggle-main"><span class="ico">▦</span><span>Projects</span></span><span class="nav-caret">⌄</span></button>
+   <div class="nav-sub"><a href="#" onclick="return false">Maintenance</a><a href="project-management.html">Implementation</a></div>
+  </div>
+  <a href="#" onclick="return false"><span class="ico">✚</span><span>Safety</span></a>
+  <a href="#" onclick="return false"><span class="ico">◆</span><span>Quality</span></a>
+  <a href="#" onclick="return false"><span class="ico">♧</span><span>Environment</span></a>
+  <a href="#" onclick="return false"><span class="ico">◉</span><span>Insurance</span></a>
+  <a href="#" onclick="return false"><span class="ico">↻</span><span>Business Continuity</span></a>
+  <div class="nav-section">Governance</div>
+  <a class="active" href="documents.html"><span class="ico">▱</span><span>Documents</span></a>
+  <a href="risk.html"><span class="ico">▥</span><span>Risks</span></a>
+  <a href="#" onclick="return false"><span class="ico">◇</span><span>Compliance</span></a>
+  <a href="#" onclick="return false"><span class="ico">◎</span><span>Assurance</span></a>
+ </nav>
+ <div class="side-foot">Verra Mobility • v1.9<br>Prototype environment</div>
+</aside>
+
+<main class="main">
+
+<section class="global-hero">
+  <div class="hero-content">
+    <div class="hero-kicker">Governance / Document Management</div>
+    <h1>Document Management</h1>
+    <p>Find, control and govern Verra's current controlled documents.</p>
+    <div class="hero-rule"></div>
+  </div>
+  <div class="hero-tools">
+    <input class="hero-search" placeholder="⌕   Search controlled documents...">
+    <div class="avatar">DB</div>
+  </div>
+</section>
+
+ <div class="top">
+  <div class="crumb">Governance / Document Management</div>
+  <div class="top-right"><div class="search">⌕ &nbsp; Search controlled documents...</div><div class="avatar">DB</div></div>
+ </div>
+
+ <section class="hero">
+  <h1>Document Management</h1>
+  <div class="rule"></div>
+  <p>Find, control and govern Verra's current controlled documents.</p>
+ </section>
+
+ <div class="actions">
+  <button class="btn green" onclick="openRequest()">＋ Request New Document</button>
+  <button class="btn outline" onclick="openChange()">↗ Request Document Change</button>
+  <button class="btn dark" onclick="openControlledPdf()">View Controlled Document</button>
+ </div>
+
+ <section class="kpis">
+  <div class="kpi green"><b id="currentCount">—</b><span>Current controlled documents</span></div>
+  <div class="kpi teal"><b>4</b><span>My actions</span></div>
+  <div class="kpi red"><b id="overdueCount">—</b><span>Overdue reviews</span></div>
+  <div class="kpi purple"><b id="approvalCount">—</b><span>Awaiting approval</span></div>
+ </section>
+
+ <div class="grid">
+  <section class="panel">
+   <div class="panel-head"><h2>Find a controlled document</h2><span>Current documents</span></div>
+   <table class="table">
+    <thead><tr><th>Document</th><th>Type</th><th>Owner</th><th>Version</th><th>Status</th><th>Review</th></tr></thead>
+    <tbody id="documentsBody">
+      <tr><td colspan="6" class="empty">Loading documents from SharePoint…</td></tr>
+     </tbody>
+   </table>
+  </section>
+
+  <aside>
+   <div class="ai">
+    <div class="label">✦ GOVERNANCE AI</div>
+    <h3>Ask about current documents</h3>
+    <p>Search and answer questions using only current, approved controlled documents.</p>
+    <input id="aiQuestion" placeholder="e.g. What are our requirements for working near traffic?">
+    <button onclick="askAI()">Ask Governance AI →</button>
+   </div>
+   <section class="panel">
+    <div class="panel-head"><h2>My Actions</h2><span>4 outstanding</span></div>
+    <div class="tasks">
+     <div class="task"><span class="dot red"></span><div><b>Review required</b><small>Document and Records Management Procedure</small></div></div>
+     <div class="task"><span class="dot"></span><div><b>Review requested changes</b><small>Working at Heights Procedure</small></div></div>
+     <div class="task"><span class="dot"></span><div><b>Acknowledge new version</b><small>Incident Management Procedure</small></div></div>
+     <div class="task"><span class="dot"></span><div><b>Approval required</b><small>Contractor Management Procedure</small></div></div>
+    </div>
+   </section>
+  </aside>
+ </div>
+
+ <div class="footer"><span>Controlled documents • Current versions only for employees</span><span>Verra Governance • Document Management • v1.9</span></div>
+</main>
+</div>
+
+<div id="drawerBack" class="modal-back" onclick="if(event.target===this)closeDrawer()"><div class="drawer">
+ <div class="drawer-head"><button class="close" onclick="closeDrawer()">×</button><small id="dNo"></small><h2 id="dTitle"></h2><small id="dStatus"></small></div>
+ <div class="drawer-body">
+  <div class="detail-grid">
+   <div class="detail"><label>Document Type</label><strong id="dType"></strong></div><div class="detail"><label>Version</label><strong id="dVersion"></strong></div>
+   <div class="detail"><label>Owner</label><strong id="dOwner"></strong></div><div class="detail"><label>Author</label><strong id="dAuthor">—</strong></div>
+   <div class="detail"><label>Effective Date</label><strong id="dEffective">—</strong></div><div class="detail"><label>Next Review</label><strong id="dReview"></strong></div>
+  </div>
+  <div class="section"><h3>Purpose</h3><p id="dPurpose" style="font-size:13px;color:#625d59"></p></div>
+  <div class="section"><h3>What changed?</h3><div style="background:#f2f5e8;padding:13px;border-radius:8px;font-size:13px"><span id="dChangeSummary">No change summary recorded.</span></div></div>
+  <div class="section"><h3>Governance</h3><div class="detail-grid"><div class="detail"><label>Approval</label><strong>✓ Approved and controlled</strong></div><div class="detail"><label>Reviewers</label><strong>Authorised governance view</strong></div></div></div>
+  <div class="drawer-actions"><button class="btn green" onclick="openSelectedDocument()">View Controlled Document</button><button class="btn outline" onclick="alert('Review workflow will open here.')">View History</button></div>
+  <div class="section"><h3>Version history</h3><div class="timeline"><div class="event"><b>v4.0 — Current</b><small>Published 16 Sep 2026</small></div><div class="event"><b>v3.1 — Superseded</b><small>Published 03 Feb 2026</small></div><div class="event"><b>v3.0 — Superseded</b><small>Published 01 Jul 2025</small></div></div></div>
+ </div>
+</div></div>
+
+<div id="requestBack" class="modal-back" onclick="if(event.target===this)closeRequest()"><div class="drawer">
+ <div class="drawer-head"><button class="close" onclick="closeRequest()">×</button><small>DOCUMENT CONTROL</small><h2 id="requestTitle">Request New Document</h2><small>Submit directly to the Document Controller.</small></div>
+ <div class="drawer-body">
+  <div class="detail"><label>Proposed purpose</label><textarea id="reqText" style="width:100%;min-height:100px;border:1px solid var(--line);border-radius:7px;padding:10px;font:13px Arial" placeholder="Briefly explain what the document is required for."></textarea></div>
+  <div class="detail" style="margin-top:12px"><label>Requested by</label><strong>Current user</strong></div>
+  <div class="drawer-actions"><button class="btn green" onclick="submitRequest()">Submit Request</button><button class="btn outline" onclick="closeRequest()">Cancel</button></div>
+ </div>
+</div></div>
+
+
+<div id="viewer" class="viewer">
+
+  <div id="copyRequest" class="viewer-copy-overlay" onclick="if(event.target===this)closeCopyRequest()">
+    <div class="viewer-copy-card">
+      <div class="copy-head">
+        <button class="copy-close" onclick="closeCopyRequest()">×</button>
+        <small>CONTROLLED DOCUMENT</small>
+        <h2>Request a Copy</h2>
+        <p>Receive an emailed PDF copy of the current version.</p>
+      </div>
+      <div class="copy-body">
+        <div class="copy-doc">
+          <div><span>Document</span><strong>IMS.03.00.PRO.01 — Risk Management Procedure</strong></div>
+          <div><span>Version</span><strong>4.0 · Current</strong></div>
+        </div>
+        <label class="copy-label" for="copyEmail">Email address</label>
+        <input id="copyEmail" class="copy-email" type="email" placeholder="name@company.com">
+        <div class="copy-warning">
+          <strong>UNCONTROLLED COPY</strong><br>
+          The emailed PDF is not the controlled source. Always verify the current approved version in Verra Governance before use.
+        </div>
+        <p class="copy-explain">The PDF will be marked <strong>UNCONTROLLED COPY</strong> and include the document number, version and generation date.</p>
+        <div class="copy-actions">
+          <button class="btn green" onclick="sendCopy()">Send Copy</button>
+          <button class="btn outline" onclick="closeCopyRequest()">Cancel</button>
+        </div>
+        <p class="copy-audit">The audit trail will record the document, version, requester, recipient email address and date/time.</p>
+      </div>
+    </div>
+  </div>
+
+ <div class="viewer-top"><button class="viewer-btn" onclick="closeViewer()">← Close</button><div><h2>IMS.03.00.PRO.01 — Risk Management Procedure</h2><small>Version 4.0 • CURRENT • Approved and Controlled ✓</small></div><div class="spacer"></div><input id="findText" oninput="findInDoc()" placeholder="Search document..." style="padding:9px;border-radius:7px;border:0;width:190px"><button class="viewer-btn copy-toolbar-btn" onclick="openCopyRequest()">Request a Copy</button><span class="viewer-btn" style="background:var(--green)">View only</span></div>
+ <div class="viewer-main" style="display:block;position:relative;">
+   <div class="pdf-frame-wrap">
+    <iframe id="pdfFrame" class="pdf-frame" title="Controlled document PDF"></iframe>
+   </div>
+  </div>
+ </div>
+ <script>
+const DOCUMENTS_API="/api/controlled-documents";const CONTROLLED_PDF_API="/api/controlled-document";
+let liveDocuments=[];
+let selectedDocument=null;
+
+function esc(value){
+ return String(value ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+function fmtDate(value){
+ if(!value) return '—';
+ const d=new Date(value);
+ return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'});
+}
+function statusClass(status){
+ const s=(status||'').toLowerCase();
+ if(s==='current') return 'current';
+ if(s.includes('review')) return 'review';
+ if(s.includes('approval') || s.includes('approved')) return 'approval';
+ if(s.includes('draft')) return 'draft';
+ if(s.includes('overdue')) return 'overdue';
+ return 'draft';
+}
+function displayStatus(status){
+ return status || 'Draft';
+}
+function documentTypeShort(type){
+ const map={'Procedure':'PRO','Policy':'POL','Standard':'STD','Work Instruction':'WI','Management Plan':'MP','Form':'FRM','Template':'TMP','Guideline':'GUI'};
+ return map[type] || type || '—';
+}
+function openDocById(id){
+ const d=liveDocuments.find(x=>String(x.id)===String(id));
+ if(!d) return;
+ selectedDocument=d;
+ document.getElementById('dNo').textContent=d.documentNumber||'—';
+ document.getElementById('dTitle').textContent=d.documentTitle||d.fileName||'Untitled document';
+ document.getElementById('dType').textContent=d.documentType||'—';
+ document.getElementById('dOwner').textContent=d.documentOwner||'—';
+ document.getElementById('dAuthor').textContent=d.documentAuthor||'—';
+ document.getElementById('dVersion').textContent=d.controlledVersion||'—';
+ document.getElementById('dStatus').textContent=displayStatus(d.workflowStatus);
+ document.getElementById('dReview').textContent=fmtDate(d.nextReviewDate);
+ document.getElementById('dEffective').textContent=fmtDate(d.effectiveDate);
+ document.getElementById('dChangeSummary').textContent=d.changeSummary||'No change summary recorded.';
+ document.getElementById('dPurpose').textContent='Controlled document record sourced live from the SharePoint Document Masters library.';
+ document.getElementById('drawerBack').classList.add('show');
+}
+function renderDocuments(){
+ const body=document.getElementById('documentsBody');
+ if(!liveDocuments.length){
+   body.innerHTML='<tr><td colspan="6" class="empty">No documents were returned from SharePoint.</td></tr>';
+   return;
+ }
+ body.innerHTML=liveDocuments.map(d=>`
+  <tr class="data" onclick="openDocById('${esc(d.id)}')">
+   <td><div class="docno">${esc(d.documentNumber||'—')}</div><div class="title">${esc(d.documentTitle||d.fileName||'Untitled document')}</div><div class="meta">${esc(d.changeSummary||'Live document record from SharePoint Document Masters.')}</div></td>
+   <td>${esc(documentTypeShort(d.documentType))}</td>
+   <td>${esc(d.documentOwner||'—')}</td>
+   <td>${esc(d.controlledVersion||'—')}</td>
+   <td><span class="status ${statusClass(d.workflowStatus)}">${esc(displayStatus(d.workflowStatus))}</span></td>
+   <td>${esc(fmtDate(d.nextReviewDate))}</td>
+  </tr>`).join('');
+}
+function updateKpis(){
+ const now=new Date();
+ const current=liveDocuments.filter(d=>(d.workflowStatus||'').toLowerCase()==='current').length;
+ const overdue=liveDocuments.filter(d=>d.nextReviewDate && new Date(d.nextReviewDate)<now && (d.workflowStatus||'').toLowerCase()!=='withdrawn').length;
+ const approvals=liveDocuments.filter(d=>['awaiting approval','approved – pending publication','approved - pending publication'].includes((d.workflowStatus||'').toLowerCase())).length;
+ document.getElementById('currentCount').textContent=current;
+ document.getElementById('overdueCount').textContent=overdue;
+ document.getElementById('approvalCount').textContent=approvals;
+}
+async function loadDocuments(){
+ const body=document.getElementById('documentsBody');
+ try{
+  const response=await fetch(DOCUMENTS_API,{headers:{'Accept':'application/json'}});
+  if(!response.ok) throw new Error(`API returned ${response.status}`);
+  const data=await response.json();
+  const rows=Array.isArray(data)?data:(Array.isArray(data.documents)?data.documents:[]);
+  liveDocuments=rows.map((r,index)=>{
+   if(r.documentNumber||r.documentTitle||r.fileName) return {...r,workflowStatus:r.workflowStatus||'Current'};
+   const fileName=r['{FilenameWithExtension}']||r['{Name}']||'Untitled document';
+   const baseName=fileName.replace(/\.pdf$/i,'');
+   const m=baseName.match(/^([A-Z0-9]+(?:\.[A-Z0-9]+)+)\s+(.+)$/i);
+   return {id:r.ID??r.ItemInternalId??index,documentNumber:m?m[1]:'—',documentTitle:m?m[2]:baseName,documentType:'Procedure',documentOwner:(r.Editor&&r.Editor.DisplayName)||'Governance',documentAuthor:(r.Author&&r.Author.DisplayName)||'—',workflowStatus:'Current',controlledVersion:r['{VersionNumber}']||'—',effectiveDate:r.Created||null,nextReviewDate:null,changeSummary:'Current approved controlled PDF from SharePoint.',fileName:fileName,webUrl:r['{Link}']||null};
+  });
+  renderDocuments(); updateKpis();
+ }catch(err){
+  console.error('Unable to load Governance documents',err);
+  body.innerHTML='<tr><td colspan="6" class="empty">Unable to load controlled documents from SharePoint. Please refresh or contact Governance.</td></tr>';
+  document.getElementById('currentCount').textContent='—';
+  document.getElementById('overdueCount').textContent='—';
+  document.getElementById('approvalCount').textContent='—';
+ }
+}
+
+function openSelectedDocument(){
+ if(!selectedDocument) {
+   alert('Select a document first.');
+   return;
+ }
+ const status=(selectedDocument.workflowStatus||'').toLowerCase();
+ const isCurrent=status==='current';
+ if(!isCurrent && selectedDocument.webUrl){
+   window.open(selectedDocument.webUrl,'_blank','noopener,noreferrer');
+   return;
+ }
+ if(isCurrent){
+   const frame=document.getElementById('pdfFrame');
+   frame.src=CONTROLLED_PDF_API;
+   document.getElementById('viewer').classList.add('show');
+   closeDrawer();
+   return;
+ }
+ alert('No controlled PDF is available for this document yet.');
+}
+function openControlledPdf(){ const frame=document.getElementById('pdfFrame'); frame.src=CONTROLLED_PDF_API; document.getElementById('viewer').classList.add('show'); }
+function closeDrawer(){document.getElementById('drawerBack').classList.remove('show')}
+function openViewer(){document.getElementById('viewer').classList.add('show')}
+function closeViewer(){document.getElementById('viewer').classList.remove('show');document.getElementById('pdfFrame').src=''}
+function openRequest(){document.getElementById('requestTitle').textContent='Request New Document';document.getElementById('reqText').value='';document.getElementById('requestBack').classList.add('show')}
+function openChange(){document.getElementById('requestTitle').textContent='Request Document Change';document.getElementById('reqText').value='';document.getElementById('requestBack').classList.add('show')}
+function closeRequest(){document.getElementById('requestBack').classList.remove('show')}
+function submitRequest(){alert('Prototype: request submitted to the Document Controller.');closeRequest()}
+function openCopyRequest(){
+ var v=document.getElementById('viewer');
+ var m=document.getElementById('copyRequest');
+ v.classList.add('show');
+ document.getElementById('copyEmail').value='';
+ m.classList.add('show');
+}
+function closeCopyRequest(){document.getElementById('copyRequest').classList.remove('show')}
+function sendCopy(){
+ const email=document.getElementById('copyEmail').value.trim();
+ if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert('Enter a valid email address.');
+ alert('Prototype: an UNCONTROLLED COPY of the Current document would now be generated as PDF and emailed to '+email+'. The transaction would also be written to the audit trail.');
+ closeCopyRequest();
+}
+function askAI(){let q=document.getElementById('aiQuestion').value.trim();if(!q){alert('Enter a question first.');return}alert('Prototype AI response:\n\nThis will search only Current, approved controlled documents and provide source references.\n\nQuestion: '+q)}
+function findInDoc(){let q=document.getElementById('findText').value.trim().toLowerCase();document.querySelectorAll('#paper mark').forEach(m=>m.replaceWith(m.textContent));if(!q)return;let walker=document.createTreeWalker(document.getElementById('paper'),NodeFilter.SHOW_TEXT);let nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);nodes.forEach(n=>{let t=n.textContent,idx=t.toLowerCase().indexOf(q);if(idx>=0&&!n.parentElement.closest('.control')){let frag=document.createDocumentFragment();frag.append(t.slice(0,idx));let mark=document.createElement('mark');mark.textContent=t.slice(idx,idx+q.length);frag.append(mark);frag.append(t.slice(idx+q.length));n.replaceWith(frag)}})}
+document.addEventListener('DOMContentLoaded',loadDocuments);
+</script>
+<script>function toggleProjectsNav(button){const g=button.closest('.nav-group');const o=g.classList.toggle('open');button.setAttribute('aria-expanded',o?'true':'false')}</script></body></html>
