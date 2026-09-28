@@ -171,7 +171,7 @@
 <main class="main">
 <section class="global-hero">
  <div class="hero-content"><h1 id="timeGreeting">Good morning, Douglas</h1><div class="hero-rule"></div></div>
- <div class="hero-tools"><input class="hero-search" placeholder="⌕   Search VERO..."><div class="avatar">DB</div></div>
+ <div class="hero-tools"><input class="hero-search" placeholder="⌕   Search VERO..."><div class="avatar" id="userAvatar" title="Signed in user" onclick="signOut()" style="cursor:pointer">—</div></div>
 </section>
 <div class="home-content">
 
@@ -188,7 +188,7 @@
   <div class="quick-q"><button onclick="setQ(this)">Show current WHS policies</button><button onclick="setQ(this)">What are our high risks?</button><button onclick="setQ(this)">When is the next document review?</button><button onclick="setQ(this)">What compliance evidence is due?</button></div>
  </div></div>
 </section>
-<footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Home • v2.5</span></footer>
+<footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Home • v2.6</span></footer>
 </div></main></div>
 <script>
 function updateGreeting(){
@@ -201,7 +201,7 @@ function toggleNavGroup(id){
  const group=document.getElementById(id);
  if(group) group.classList.toggle('open');
 }
-document.addEventListener('DOMContentLoaded',updateGreeting);
+document.addEventListener('DOMContentLoaded',()=>{updateGreeting();requireAuth();});
 function askAI(){let q=document.getElementById('homeAI').value.trim();if(!q)return alert('Enter a question first.');alert('Prototype: VERO AI will route this question to the appropriate governance source.');}
 function setQ(b){document.getElementById('homeAI').value=b.textContent;document.getElementById('homeAI').focus();}
 </script></body></html>
