@@ -272,6 +272,12 @@
 }
 .request-steps{margin-top:16px!important}
 
+
+/* v1.18 — compact wizard: form begins directly below header */
+.setup-body{padding:0!important}
+#requestForm.request-shell{margin:0!important;padding:18px 18px 105px!important}
+#requestForm .request-steps{margin:0 0 20px!important;padding-top:0!important}
+
 </style></head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -338,7 +344,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.17</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.18</span></footer>
 </div></main></div>
 
 
@@ -438,8 +444,7 @@ function newProject(){
  currentProject=null;currentRequest={};currentMilestones=[];requestStep=0;
  document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';
  editRequest();
- const body=document.querySelector('#setupPanel .setup-body');
- body.insertAdjacentHTML('afterbegin','<div class="request-shell" style="padding-bottom:0"><div class="new-request-banner"><b>New Project Request</b> — a VERO project record will be created the first time you save this request.</div></div>');
+
 }
 function val(name,fallback=''){const v=currentRequest?.[name];return v===null||v===undefined?fallback:v}
 function checked(name,value){return String(val(name,''))===String(value)?'checked':''}
