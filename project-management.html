@@ -303,6 +303,11 @@
 .request-save-note{min-width:260px!important}
 
 
+/* OWNER-ONLY NEXT STEP ACTION */
+.next-step-action{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:7px;background:var(--green);color:var(--charcoal);padding:8px 10px;font:800 9px Montserrat,Verdana,Arial,sans-serif;cursor:pointer;text-decoration:none;line-height:1.2}
+.next-step-action:hover{filter:brightness(.96)}
+.next-step-text{font-size:10px;font-weight:700;color:var(--charcoal)}
+
 /* VERO GLOBAL ACCOUNT MENU */
 .vero-account{position:relative;z-index:50}
 .vero-account-trigger{display:flex;align-items:center;gap:9px;border:0;background:transparent;padding:0;cursor:pointer;font-family:inherit;color:inherit}
@@ -388,7 +393,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.26</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.27</span></footer>
 </div></main></div>
 
 
@@ -509,9 +514,18 @@ function normalise(p){
  const workflowStage=p.current_stage||p.workflow_stage||(s==='draft'?'New Project Request':s==='submitted'?'Project Setup':s==='planning'?'New Project Request':'Project Delivery');
  const nextStep=p.next_step||(workflowStage==='New Project Request'?'Complete New Project Request':workflowStage==='Project Setup'?'Complete Project Setup':'Open Project Workspace');
  const actionRequiredBy=p.action_required_by||(s==='draft'?p.project_initiator:null)||'—';
- return {raw:p,name:p.project_name||'Untitled Project',code:p.project_type||'',owner:p.project_owner||'Unassigned',actionRequiredBy,customer:p.customer||'',status,stage:workflowStage,nextStep,stageKey:life,due:p.target_end_date||'',description:p.description||''};
+ const actionRequiredByUserId=p.action_required_by_user_id??null;
+  return {raw:p,actionRequiredByUserId,name:p.project_name||'Untitled Project',code:p.project_type||'',owner:p.project_owner||'Unassigned',actionRequiredBy,customer:p.customer||'',status,stage:workflowStage,nextStep,stageKey:life,due:p.target_end_date||'',description:p.description||''};
 }
 function stageClass(v){return v==='initiation'?'mobilisation':v==='completion'?'delivery':'planning'}
+function ownsProjectAction(p){
+ const ownerId=Number(p?.actionRequiredByUserId),me=Number(signedInUser?.id);
+ return Number.isFinite(ownerId)&&Number.isFinite(me)&&ownerId===me;
+}
+function nextStepCell(p,i){
+ if(ownsProjectAction(p))return `<button type="button" class="next-step-action" onclick="event.stopPropagation();openProject(${i})">${esc(p.nextStep)} →</button>`;
+ return `<span class="next-step-text">${esc(p.nextStep)}</span>`;
+}
 async function loadProjects(){
  try{
   const r=await apiFetch(PROJECTS_API,{headers:{Accept:'application/json'},cache:'no-store'});
@@ -533,7 +547,7 @@ function render(){
    <td>${esc(p.customer||'—')}</td><td><b>${esc(p.actionRequiredBy)}</b></td>
    <td><span class="status ${String(p.status).toLowerCase()==='draft'?'draft':'current'}">${esc(p.status)}</span></td>
    <td><span class="stage ${stageClass(p.stageKey)}">${esc(p.stage)}</span></td>
-   <td><b style="font-size:10px">${esc(p.nextStep)}</b></td>
+   <td>${nextStepCell(p,i)}</td>
   </tr>`;
  }).join('')||'<tr><td colspan="6" class="empty">No projects returned by the Projects API.</td></tr>';
  applyFilters();
@@ -617,7 +631,7 @@ function editRequest(){const body=document.querySelector('#setupPanel .setup-bod
 <section class="request-page" data-step="4"><h3>Milestones</h3><p class="intro">Add as many contractual and customer-expected milestones as required.</p><h4>Contract Milestones</h4><div id="contractMilestones"></div><button type="button" class="add-row" onclick="addMilestone('Contract')">+ Add Contract Milestone</button><h4>Customer Expected Milestones</h4><div id="customerMilestones"></div><button type="button" class="add-row" onclick="addMilestone('Customer Expected')">+ Add Customer Expected Milestone</button><div class="form-grid" style="margin-top:20px"><div class="form-field full"><label>Has Procurement, Production and Engineering Confirmed the Delivery Dates are Achievable?</label>${yesno('delivery_dates_confirmed')}</div><div class="form-field full"><label>Are all Sub Contractors Approved for use by Verra Mobility and Customer?</label>${yesno('subcontractors_approved')}</div></div></section>
 <section class="request-page" data-step="5"><h3>Delivery & Installation</h3><p class="intro">Define the physical delivery and implementation obligations.</p><div class="form-grid">${input('Quantity of Systems','quantity_of_systems','number','min="0"')}<div class="form-field full"><label>Is Verra Mobility Providing Civil / Electrical Works Services?</label>${yesno('civil_electrical_services')}</div><div class="form-field full"><label>Is Verra Mobility Providing Installation and Commissioning Services?</label>${yesno('installation_commissioning_services')}</div>${textarea('Comments','delivery_comments')}</div></section>
 <section class="request-page" data-step="6"><h3>Warranty & Handover</h3><p class="intro">Capture warranty, spares, training and the documentation that must be handed over.</p><div class="form-grid">${input('Warranty Period (Months)','warranty_period_months','number','min="0"')}<div class="form-field"><label>Warranty Type</label><div class="choice-grid">${['Return to Base','On Site','Other'].map(x=>choice('warranty_type',x,x)).join('')}</div></div>${textarea('Warranty Comments','warranty_comments')}<div class="form-field full"><label>Spares</label><div class="choice-grid">${['All Inclusive','As Required','Agreed Quantity'].map(x=>choice('spares_type',x,x)).join('')}</div></div>${textarea('Spares Comments','spares_comments')}<div class="form-field full"><label>Training</label><div class="choice-grid">${['Included','Agreed Quantity','Needs to be Quoted','Not Required'].map(x=>choice('training_type',x,x)).join('')}</div></div>${textarea('Training Comments','training_comments')}<div class="form-field full"><label>Documentation to be Handed Over</label><div class="choice-grid">${[['handover_contract','Contract'],['handover_schedule','Schedule'],['handover_tender_response','Tender Response'],['handover_pricing','Pricing'],['handover_contract_details','Contract Details']].map(([n,l])=>`<div class="choice"><input type="checkbox" id="${n}" name="${n}" ${val(n,false)?'checked':''}><label for="${n}">${l}</label></div>`).join('')}</div></div></div></section>
-<section class="request-page" data-step="7"><h3>Review & Submit</h3><p class="intro">Review the request before moving it into Project Setup. Save Draft remains available until you submit.</p><div id="requestReview"></div><div id="requestSaveError" class="req-error"></div><div id="requestSaveSuccess" class="req-success"></div></section>
+<section class="request-page" data-step="7"><h3>Review & Submit</h3><p class="intro">Review the request before submitting it for Project Approval. Save Draft remains available until you submit.</p><div id="requestReview"></div><div id="requestSaveError" class="req-error"></div><div id="requestSaveSuccess" class="req-success"></div></section>
 <div class="request-sticky"><button class="btn outline" id="requestPrev" type="button" onclick="changeRequestStep(-1)" style="visibility:hidden">← Previous</button><span class="request-save-note" id="saveNote">Draft changes are saved to VERO when you choose Save Draft.</span><div class="right"><button class="btn outline" type="submit" value="Draft">Save Draft</button><button class="btn green" id="requestNext" type="button" onclick="changeRequestStep(1)">Next →</button><button class="btn dark" id="requestSubmit" type="submit" value="Submitted" style="display:none">Submit Request</button></div></div></form>`;requestStep=0;renderMilestoneEditors();updateRequestStep();updateBudget();}
 function copyBillingAddress(on){if(!on)return;['address_line_1','address_line_2','city','state_region','postcode','country'].forEach(k=>{const a=document.querySelector(`[name="billing_${k}"]`),b=document.querySelector(`[name="delivery_${k}"]`);if(a&&b)b.value=a.value});}
 function renderMilestoneEditors(){const groups={'Contract':'contractMilestones','Customer Expected':'customerMilestones'};Object.entries(groups).forEach(([type,id])=>{const box=document.getElementById(id);if(!box)return;const rows=currentMilestones.filter(m=>m.milestone_type===type);box.innerHTML=rows.map((m,i)=>milestoneRow(type,m,i)).join('')||'<div class="live-note">No milestones added yet.</div>';});}
