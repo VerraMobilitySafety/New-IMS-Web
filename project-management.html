@@ -427,7 +427,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.39</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.40</span></footer>
 </div></main></div>
 
 
@@ -720,7 +720,37 @@ ${input('Quantity of Systems','quantity_of_systems','number','min="0"')}
 <div class="form-grid">${textarea('Scope of Works','scope_of_works')}${textarea('Assumptions','system_assumptions')}${textarea('Expected Outcome / Deliverable','internal_expected_outcome')}</div>
 </div>
 </section>
-<section class="request-page" data-step="3"><h3>Contract & Budget Details</h3><p class="intro">Capture the commercial baseline. Total cost and calculated margin update automatically.</p><div class="form-grid">${input('Contract Start Date','contract_start_date','date')}${input('Contract Expiry Date','contract_expiry_date','date')}${input('Revenue (AUD)','revenue','number','step="0.01" oninput="updateBudget()"')}${input('Labour Cost Budget','labour_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Materials Cost Budget','materials_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Travel Cost Budget','travel_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Sub Contractor Cost Budget','subcontractor_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Other Cost Budget','other_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Other Cost Explanation','other_cost_explanation')}${input('Approved Margin (%)','approved_margin','number','step="0.001"')}</div><div class="budget-summary"><div class="budget-box"><label>Revenue</label><strong id="budgetRevenue">—</strong></div><div class="budget-box"><label>Total Cost Budget</label><strong id="budgetTotal">—</strong></div><div class="budget-box"><label>Calculated Margin</label><strong id="budgetMargin">—</strong></div></div></section>
+<section class="request-page" data-step="3">
+<div id="externalBudgetStage">
+<h3>Contract & Budget</h3><p class="intro">Capture the approved commercial baseline for the project.</p>
+<div class="form-grid">
+${input('Contract Start Date','contract_start_date','date')}
+${input('Contract Expiry Date','contract_expiry_date','date')}
+${input('Revenue (AUD)','revenue','number','min="0" step="0.01" oninput="updateBudget()"')}
+${input('Labour Cost Budget','labour_cost_budget','number','min="0" step="0.01" oninput="updateBudget()"')}
+${input('Materials Cost Budget','materials_cost_budget','number','min="0" step="0.01" oninput="updateBudget()"')}
+${input('Travel Cost Budget','travel_cost_budget','number','min="0" step="0.01" oninput="updateBudget()"')}
+${input('Subcontractor Cost Budget','subcontractor_cost_budget','number','min="0" step="0.01" oninput="updateBudget()"')}
+${input('Other Cost Budget','other_cost_budget','number','min="0" step="0.01" oninput="updateBudget()"')}
+<div class="form-field full" id="otherCostExplanationWrap" style="display:none"><label>Other Cost Explanation</label><input name="other_cost_explanation" value="${esc(val('other_cost_explanation',''))}"></div>
+${input('Approved Margin (%)','approved_margin','number','step="0.01" oninput="updateBudget()"')}
+</div>
+<div class="budget-summary"><div class="budget-box"><label>Revenue</label><strong id="budgetRevenue">—</strong></div><div class="budget-box"><label>Total Cost Budget</label><strong id="budgetTotal">—</strong></div><div class="budget-box"><label>Calculated Margin</label><strong id="budgetMargin">—</strong></div><div class="budget-box"><label>Margin Variance</label><strong id="budgetVariance">—</strong></div></div>
+</div>
+<div id="internalBudgetStage" style="display:none">
+<h3>Budget</h3><p class="intro">Capture the approved internal budget and planned project costs.</p>
+<div class="form-grid">
+${input('Approved Budget (AUD)','internal_approved_budget','number','min="0" step="0.01" oninput="updateBudget()"')}
+${input('Labour Cost Budget','labour_cost_budget','number','min="0" step="0.01" oninput="updateBudget()"')}
+${input('Materials Cost Budget','materials_cost_budget','number','min="0" step="0.01" oninput="updateBudget()"')}
+${input('Travel Cost Budget','travel_cost_budget','number','min="0" step="0.01" oninput="updateBudget()"')}
+${input('Subcontractor Cost Budget','subcontractor_cost_budget','number','min="0" step="0.01" oninput="updateBudget()"')}
+${input('Other Cost Budget','other_cost_budget','number','min="0" step="0.01" oninput="updateBudget()"')}
+<div class="form-field full" id="internalOtherCostExplanationWrap" style="display:none"><label>Other Cost Explanation</label><input name="other_cost_explanation_internal" value="${esc(val('other_cost_explanation',''))}"></div>
+</div>
+<div class="budget-summary"><div class="budget-box"><label>Approved Budget</label><strong id="internalApprovedBudget">—</strong></div><div class="budget-box"><label>Total Planned Cost</label><strong id="internalPlannedCost">—</strong></div><div class="budget-box"><label>Budget Variance</label><strong id="internalBudgetVariance">—</strong></div></div>
+</div>
+</section>
 <section class="request-page" data-step="4"><h3>Milestones</h3><p class="intro">Add as many contractual and customer-expected milestones as required.</p><h4>Contract Milestones</h4><div id="contractMilestones"></div><button type="button" class="add-row" onclick="addMilestone('Contract')">+ Add Contract Milestone</button><h4>Customer Expected Milestones</h4><div id="customerMilestones"></div><button type="button" class="add-row" onclick="addMilestone('Customer Expected')">+ Add Customer Expected Milestone</button><div class="form-grid" style="margin-top:20px"><div class="form-field full"><label>Has Procurement, Production and Engineering Confirmed the Delivery Dates are Achievable?</label>${yesno('delivery_dates_confirmed')}</div><div class="form-field full"><label>Are all Sub Contractors Approved for use by Verra Mobility and Customer?</label>${yesno('subcontractors_approved')}</div></div></section>
 <section class="request-page" data-step="5"><h3>Delivery & Installation</h3><p class="intro">Define the physical delivery and implementation obligations.</p><div class="form-grid">${input('Quantity of Systems','quantity_of_systems','number','min="0"')}<div class="form-field full"><label>Is Verra Mobility Providing Civil / Electrical Works Services?</label>${yesno('civil_electrical_services')}</div><div class="form-field full"><label>Is Verra Mobility Providing Installation and Commissioning Services?</label>${yesno('installation_commissioning_services')}</div>${textarea('Comments','delivery_comments')}</div></section>
 <section class="request-page" data-step="6"><h3>Warranty & Handover</h3><p class="intro">Capture warranty, spares, training and the documentation that must be handed over.</p><div class="form-grid">${input('Warranty Period (Months)','warranty_period_months','number','min="0"')}<div class="form-field"><label>Warranty Type</label><div class="choice-grid">${['Return to Base','On Site','Other'].map(x=>choice('warranty_type',x,x)).join('')}</div></div>${textarea('Warranty Comments','warranty_comments')}<div class="form-field full"><label>Spares</label><div class="choice-grid">${['All Inclusive','As Required','Agreed Quantity'].map(x=>choice('spares_type',x,x)).join('')}</div></div>${textarea('Spares Comments','spares_comments')}<div class="form-field full"><label>Training</label><div class="choice-grid">${['Included','Agreed Quantity','Needs to be Quoted','Not Required'].map(x=>choice('training_type',x,x)).join('')}</div></div>${textarea('Training Comments','training_comments')}<div class="form-field full"><label>Documentation to be Handed Over</label><div class="choice-grid">${[['handover_contract','Contract'],['handover_schedule','Schedule'],['handover_tender_response','Tender Response'],['handover_pricing','Pricing'],['handover_contract_details','Contract Details']].map(([n,l])=>`<div class="choice"><input type="checkbox" id="${n}" name="${n}" ${val(n,false)?'checked':''}><label for="${n}">${l}</label></div>`).join('')}</div></div></div></section>
@@ -744,6 +774,9 @@ function updateRequestTypeLayout(){
  const extScope=document.getElementById('externalScopeStage'),intScope=document.getElementById('internalScopeStage');
  if(extScope)extScope.style.display=internal?'none':'block';
  if(intScope)intScope.style.display=internal?'block':'none';
+ const extBudget=document.getElementById('externalBudgetStage'),intBudget=document.getElementById('internalBudgetStage');
+ if(extBudget)extBudget.style.display=internal?'none':'block';
+ if(intBudget)intBudget.style.display=internal?'block':'none';
  const steps=document.querySelectorAll('.request-step');
  if(steps[1])steps[1].textContent='2. '+(internal?'Internal Stakeholders':'Client');
  if(steps[2])steps[2].textContent='3. '+(internal?'Scope':'System & Scope');
@@ -759,10 +792,25 @@ function addMilestone(type){const id=type==='Contract'?'contractMilestones':'cus
 function goRequestStep(i){requestStep=Math.max(0,Math.min(requestStepNames.length-1,i));updateRequestStep()}
 function changeRequestStep(d){goRequestStep(requestStep+d)}
 function updateRequestStep(){document.querySelectorAll('.request-page').forEach((x,i)=>x.classList.toggle('active',i===requestStep));document.querySelectorAll('.request-step').forEach((x,i)=>{x.classList.toggle('active',i===requestStep);x.classList.toggle('done',i<requestStep)});const prev=document.getElementById('requestPrev'),next=document.getElementById('requestNext'),submit=document.getElementById('requestSubmit');if(prev)prev.style.visibility=requestStep===0?'hidden':'visible';if(next)next.style.display=requestStep===requestStepNames.length-1?'none':'inline-block';if(submit)submit.style.display=requestStep===requestStepNames.length-1?'inline-block':'none';if(requestStep===3)updateBudget();if(requestStep===7)buildRequestReview();const body=document.querySelector('#setupPanel .setup-body');if(body)body.scrollTop=0;}
-function updateBudget(){const f=document.getElementById('requestForm');if(!f)return;const n=x=>Number(f.elements[x]?.value)||0,rev=n('revenue'),cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+n(k),0);setText('budgetRevenue',money(rev||null));setText('budgetTotal',money(cost||null));setText('budgetMargin',rev>0?(((rev-cost)/rev)*100).toFixed(1)+'%':'—');}
+function updateBudget(){
+ const f=document.getElementById('requestForm');if(!f)return;
+ const n=x=>Number(f.elements[x]?.value)||0;
+ const cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+n(k),0);
+ const rev=n('revenue'),approvedMargin=n('approved_margin'),calcMargin=rev>0?((rev-cost)/rev)*100:null;
+ setText('budgetRevenue',money(rev||null));setText('budgetTotal',money(cost||null));setText('budgetMargin',calcMargin===null?'—':calcMargin.toFixed(1)+'%');
+ setText('budgetVariance',calcMargin===null?'—':(calcMargin-approvedMargin).toFixed(1)+' pp');
+ const approvedBudget=n('internal_approved_budget');
+ setText('internalApprovedBudget',money(approvedBudget||null));setText('internalPlannedCost',money(cost||null));setText('internalBudgetVariance',money(approvedBudget-cost));
+ const other=n('other_cost_budget');
+ const extOther=document.getElementById('otherCostExplanationWrap'),intOther=document.getElementById('internalOtherCostExplanationWrap');
+ if(extOther)extOther.style.display=other>0?'block':'none';if(intOther)intOther.style.display=other>0?'block':'none';
+}
 function formDataObject(){const f=document.getElementById('requestForm'),fd=new FormData(f),p=Object.fromEntries(fd.entries());p.account_manager=projectInitiatorName();['contract_po_received','delivery_dates_confirmed','subcontractors_approved'].forEach(k=>{p[k]=fd.has(k)?fd.get(k)==='true':null});
  ['system_productised','civil_electrical_services','installation_commissioning_services'].forEach(k=>{const v=fd.get(k);p[k]=v==='true'?true:v==='false'?false:v==='na'?'na':null});
- const eng=fd.get('engineering_development_required'); if(eng!=='true')p.engineering_demand_requests=null;['handover_contract','handover_schedule','handover_tender_response','handover_pricing','handover_contract_details'].forEach(k=>p[k]=fd.has(k));['revenue','labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget','approved_margin','quantity_of_systems','warranty_period_months'].forEach(k=>p[k]=p[k]===''||p[k]===undefined?null:Number(p[k]));['request_date','contract_start_date','contract_expiry_date'].forEach(k=>{if(p[k]==='')p[k]=null});p.requested_by=signedInUserName();return p;}
+ const eng=fd.get('engineering_development_required'); if(eng!=='true')p.engineering_demand_requests=null;['handover_contract','handover_schedule','handover_tender_response','handover_pricing','handover_contract_details'].forEach(k=>p[k]=fd.has(k));['revenue','internal_approved_budget','labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget','approved_margin','quantity_of_systems','warranty_period_months'].forEach(k=>p[k]=p[k]===''||p[k]===undefined?null:Number(p[k]));if(p.request_type==='Internal Project'){p.other_cost_explanation=p.other_cost_explanation_internal||null;p.revenue=null;p.approved_margin=null;p.contract_start_date=null;p.contract_expiry_date=null}
+ else p.internal_approved_budget=null;
+ delete p.other_cost_explanation_internal;
+ ['request_date','contract_start_date','contract_expiry_date'].forEach(k=>{if(p[k]==='')p[k]=null});p.requested_by=signedInUserName();return p;}
 function reviewItem(l,v){return `<div class="review-item"><label>${esc(l)}</label><strong>${esc(text(v))}</strong></div>`}
 function buildRequestReview(){const p=formDataObject(),cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(p[k])||0),0),rev=Number(p.revenue)||0;const ms=[...document.querySelectorAll('.repeat-block')].map(x=>({type:x.dataset.milestoneType,date:x.querySelector('.ms-date').value,name:x.querySelector('.ms-name').value})).filter(x=>x.name);document.getElementById('requestReview').innerHTML=`<div class="review-section"><h4>Administration</h4><div class="review-grid">${reviewItem('Project Initiator / Account Manager',projectInitiatorName())}${reviewItem('VERO Project Code',currentProject?.project_code||'Assigned on first save')}${reviewItem('Request Date',fmtDate(p.request_date))}${reviewItem('Project Title',p.project_title)}${reviewItem('Project Type',p.request_type)}${reviewItem('Bid / Quote Number',p.bid_quote_number)}</div></div>${p.request_type==='Internal Project'?`<div class="review-section"><h4>Internal Stakeholders</h4><div class="review-grid">${reviewItem('Business Area',p.internal_business_area)}${reviewItem('Project Sponsor',p.internal_project_sponsor)}${reviewItem('Primary Stakeholder',p.internal_primary_stakeholder)}${reviewItem('Business Need / Background',p.internal_business_need)}</div></div>`:`<div class="review-section"><h4>Client</h4><div class="review-grid">${reviewItem('Client',p.client_name)}${reviewItem('Reference',p.client_reference)}${reviewItem('Contact',[p.client_contact_first_name,p.client_contact_last_name].filter(Boolean).join(' '))}${reviewItem('Phone',p.client_contact_phone)}${reviewItem('Email',p.client_contact_email)}</div></div>`}<div class="review-section"><h4>Scope</h4><div class="review-grid">${reviewItem('Scope of Works',p.scope_of_works)}${reviewItem('Assumptions',p.system_assumptions)}</div></div><div class="review-section"><h4>Commercial</h4><div class="review-grid">${reviewItem('Revenue',money(rev||null))}${reviewItem('Total Cost',money(cost||null))}${reviewItem('Calculated Margin',rev>0?(((rev-cost)/rev)*100).toFixed(1)+'%':'—')}${reviewItem('Approved Margin',p.approved_margin===null?'—':p.approved_margin+'%')}</div></div><div class="review-section"><h4>Milestones</h4>${ms.length?ms.map(x=>`<div class="review-milestone"><b>${esc(x.type)}</b> • ${esc(fmtDate(x.date))}<br>${esc(x.name)}</div>`).join(''):'<div class="live-note">No milestones entered.</div>'}</div><div class="review-section"><h4>Delivery & Handover</h4><div class="review-grid">${reviewItem('Quantity of Systems',p.quantity_of_systems)}${reviewItem('Warranty',p.warranty_type)}${reviewItem('Spares',p.spares_type)}${reviewItem('Training',p.training_type)}</div></div>`;}
 async function saveMilestones(){
