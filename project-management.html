@@ -395,7 +395,7 @@
   </div>
 </nav>
 
- <div class="side-foot">VERRA | VERO • v2.6<br>Prototype environment</div>
+ <div class="side-foot">VERRA | VERO • v2.7<br>Prototype environment</div>
 </aside>
 <main class="main">
 <section class="global-hero">
@@ -427,7 +427,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.29</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.30</span></footer>
 </div></main></div>
 
 
@@ -468,6 +468,7 @@ const PROJECT_REQUEST_API=id=>`${API_BASE}/projects/${id}/request`;
 const PROJECT_MILESTONES_API=id=>`${API_BASE}/projects/${id}/milestones`;
 const PROJECT_APPROVAL_API=id=>`${API_BASE}/projects/${id}/approval`;
 const PROJECT_SETUP_API=id=>`${API_BASE}/projects/${id}/setup`;
+const FINANCE_APPROVAL_API=id=>`${API_BASE}/projects/${id}/finance-approval`;
 
 const VERO_TOKEN_KEY='vero_session_token';
 const VERO_USER_KEY='vero_current_user';
@@ -570,6 +571,7 @@ async function openProjectAction(i){
  const p=projects[i];if(!p?.raw?.id)return;
  if(p.stage==='Project Approval'){await openProjectApproval(p);return}
  if(p.stage==='Project Setup'){await openProjectSetup(p);return}
+ if(p.stage==='Finance Approval'){await openFinanceApproval(p);return}
  await openProject(i);
 }
 async function loadProjects(){
@@ -1088,6 +1090,78 @@ async function saveProjectSetup(e){
   if(note)note.textContent='Save failed — '+e.message;
   if(er){er.textContent='Unable to save Project Setup. '+e.message;er.style.display='block'}else alert(e.message);
  }
+}
+
+
+function financeApprovalReviewHtml(r,s){
+ const requestCost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(r?.[k])||0),0);
+ return `<div class="approval-banner"><b>Finance Approval required.</b> Review the approved commercial request and completed Project Setup. Approval moves the project to Leadership Approval; return sends it back to the assigned Project Manager.</div>
+ <section class="approval-section"><h3>Approved Request</h3><div class="approval-grid">
+  ${approvalItem('Project',r?.project_title||currentProject?.project_name)}
+  ${approvalItem('Client',r?.client_name||currentProject?.customer)}
+  ${approvalItem('Project Number',r?.project_number)}
+  ${approvalItem('Account Manager',r?.account_manager)}
+  ${approvalItem('Contract Start',fmtDate(r?.contract_start_date))}
+  ${approvalItem('Contract Expiry',fmtDate(r?.contract_expiry_date))}
+  ${approvalItem('Approved Revenue',money(r?.revenue))}
+  ${approvalItem('Approved Cost Budget',money(requestCost))}
+  ${approvalItem('Approved Margin',r?.approved_margin===null||r?.approved_margin===undefined?'—':r.approved_margin+'%')}
+ </div></section>
+ <section class="approval-section"><h3>Project Setup</h3><div class="approval-grid">
+  ${approvalItem('Project Manager',s?.project_manager)}
+  ${approvalItem('SAP Project Code',s?.sap_project_code)}
+  ${approvalItem('PO Received',yesNoText(s?.purchase_order_received))}
+  ${approvalItem('Client PO Number',s?.client_po_number)}
+  ${approvalItem('Signed Contract Received',yesNoText(s?.signed_contract_received))}
+  ${approvalItem('Client Contract Number',s?.client_contract_number)}
+  ${approvalItem('Baseline Revenue',money(s?.baseline_revenue))}
+  ${approvalItem('Baseline Cost',money(s?.baseline_cost))}
+  ${approvalItem('Sales Order Review Type',s?.sales_order_review_type)}
+  ${approvalItem('Sales Order Status',s?.sales_order_status)}
+  ${approvalItem('Fees / Payment Clause',s?.fees_payment_clause,true)}
+  ${approvalItem('Contract Link',s?.contract_link,true)}
+  ${approvalItem('Internal Kick-off',yesNoText(s?.internal_kickoff_completed))}
+  ${approvalItem('External Kick-off',yesNoText(s?.external_kickoff_completed))}
+  ${approvalItem('PSO Raised',yesNoText(s?.pso_raised))}
+  ${approvalItem('PSO Number',s?.pso_number)}
+  ${approvalItem('Project Setup Comments',s?.setup_comments,true)}
+ </div></section>`;
+}
+async function openFinanceApproval(p){
+ try{
+  currentProject=p.raw;
+  const res=await apiFetch(FINANCE_APPROVAL_API(p.raw.id),{cache:'no-store'});
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(d.message||'Unable to load Finance Approval');
+  if(!d.is_action_owner)throw new Error('This Finance Approval is assigned to another user.');
+  currentRequest=d.request||{};
+  currentProjectSetup=d.setup||{};
+  const body=document.querySelector('#setupPanel .setup-body');
+  document.querySelector('#setupPanel .setup-head h2').textContent='Finance Approval';
+  document.querySelector('#setupPanel .setup-foot').textContent='VERO finance approval • Assigned Finance Approver only';
+  body.innerHTML=`<div class="approval-shell">${financeApprovalReviewHtml(currentRequest,currentProjectSetup)}
+   <section class="approval-decision"><h3>Finance Decision</h3><p>Confirm the commercial setup is ready to proceed. Comments are optional for approval and required when returning the setup to the Project Manager.</p>
+    <div class="form-grid"><div class="form-field full"><label>Finance Comments</label><textarea id="financeApprovalComments" placeholder="Add finance comments, conditions, or the reason for returning Project Setup…"></textarea></div></div>
+    <div id="financeApprovalError" class="approval-error"></div><div id="financeApprovalSuccess" class="approval-success"></div>
+   </section>
+   <div class="approval-actions"><button class="btn return" type="button" onclick="submitFinanceApproval('Returned')">← Return to Project Manager</button><button class="btn green" type="button" onclick="submitFinanceApproval('Approved')">Approve → Leadership Approval</button></div>
+  </div>`;
+  document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';
+ }catch(e){console.error(e);alert('VERO could not open Finance Approval. '+e.message)}
+}
+async function submitFinanceApproval(decision){
+ const comments=(document.getElementById('financeApprovalComments')?.value||'').trim();
+ const er=document.getElementById('financeApprovalError'),ok=document.getElementById('financeApprovalSuccess');
+ if(er)er.style.display='none';if(ok)ok.style.display='none';
+ if(decision==='Returned'&&!comments){if(er){er.textContent='Add comments explaining what the Project Manager needs to update.';er.style.display='block'}return}
+ try{
+  const res=await apiFetch(FINANCE_APPROVAL_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision,comments})});
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(d.message||('Finance Approval API returned '+res.status));
+  if(ok){ok.textContent=decision==='Approved'?`Finance approved. ${d.action_required_by||'The Leadership Approver'} now owns Leadership Approval.`:'Project Setup returned to the Project Manager.';ok.style.display='block'}
+  await loadProjects();
+  setTimeout(()=>closeSetup(),900);
+ }catch(e){console.error(e);if(er){er.textContent=e.message;er.style.display='block'}else alert(e.message)}
 }
 
 function closeSetup(){document.getElementById('setupPanel').classList.remove('show');document.body.style.overflow=''}
