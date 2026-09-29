@@ -427,7 +427,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.34</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.35</span></footer>
 </div></main></div>
 
 
@@ -651,7 +651,7 @@ function projectInitiatorField(){
 }
 function veroProjectCodeField(){
  const code=currentProject?.project_code||'Assigned when draft is first saved';
- return `<div class="form-field"><label>VERO Project Code</label><div style="border:1px solid #d7d3d0;border-radius:8px;padding:11px 12px;background:#f8f7f6;font-size:11px;font-weight:800;color:var(--charcoal)">${esc(code)}<div style="font-size:8px;font-weight:600;color:var(--grey);margin-top:4px">Permanent VERO identifier</div></div></div>`;
+ return `<div class="form-field"><label>VERO Project Code</label><div style="border:1px solid #d7d3d0;border-radius:8px;padding:11px 12px;background:#f8f7f6;font-size:11px;font-weight:800;color:var(--charcoal)"><span id="veroProjectCodeValue">${esc(code)}</span><div style="font-size:8px;font-weight:600;color:var(--grey);margin-top:4px">Permanent VERO identifier</div></div></div>`;
 }
 async function loadAccountManagers(){
  try{
@@ -748,7 +748,12 @@ async function saveRequest(e){
   if(note)note.textContent=intent==='Submitted'?'Request submitted successfully.':'Draft saved to VERO • Project ID '+currentProject.id;
   await loadProjects();
   if(intent==='Submitted'){currentProject.status='Submitted';setTimeout(()=>{closeSetup();window.location.href='project-workspace.html?id='+encodeURIComponent(currentProject.id)},900)}
-  else{renderMilestoneEditors();document.getElementById('saveNote').textContent='Draft saved to VERO • '+(currentProject.project_code||('Project ID '+currentProject.id))}
+  else{
+  renderMilestoneEditors();
+  document.getElementById('saveNote').textContent='Draft saved to VERO • '+(currentProject.project_code||('Project ID '+currentProject.id));
+  const codeEl=document.getElementById('veroProjectCodeValue');
+  if(codeEl&&currentProject.project_code)codeEl.textContent=currentProject.project_code;
+}
  }catch(x){
   console.error(x);
   if(note)note.textContent='Save failed — '+x.message;
