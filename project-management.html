@@ -439,7 +439,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.48</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.49</span></footer>
 </div></main></div>
 
 
@@ -926,13 +926,33 @@ function updateBudget(){
    if(wrap)wrap.style.display=n('other_cost_budget')>0?'block':'none';
  }
 }
-function formDataObject(){const f=document.getElementById('requestForm'),fd=new FormData(f),p=Object.fromEntries(fd.entries());p.account_manager=projectInitiatorName();['contract_po_received'].forEach(k=>{p[k]=fd.has(k)?fd.get(k)==='true':null});
- {const v=fd.get('delivery_dates_confirmed');p.delivery_dates_confirmed=v==='true'?true:v==='false'?false:v==='na'?'na':null;}
- ['system_productised','civil_electrical_services','installation_commissioning_services'].forEach(k=>{const v=fd.get(k);p[k]=v==='true'?true:v==='false'?false:v==='na'?'na':null});
- const eng=fd.get('engineering_development_required'); if(eng!=='true')p.engineering_demand_requests=null;['handover_contract','handover_schedule','handover_tender_response','handover_pricing','handover_contract_details','handover_other'].forEach(k=>p[k]=fd.has(k));['revenue','internal_approved_budget','labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget','approved_margin','quantity_of_systems','warranty_period_months','spares_quantity','training_quantity'].forEach(k=>p[k]=p[k]===''||p[k]===undefined?null:Number(p[k]));if(p.request_type==='Internal Project'){p.other_cost_explanation=p.other_cost_explanation_internal||null;p.revenue=null;p.approved_margin=null;p.contract_start_date=null;p.contract_expiry_date=null}
- else p.internal_approved_budget=null;
+function formDataObject(){
+ const f=document.getElementById('requestForm'),fd=new FormData(f),p=Object.fromEntries(fd.entries()),internal=isInternalProject();
+ p.account_manager=projectInitiatorName();
+ const activeBudget=document.getElementById(internal?'internalBudgetStage':'externalBudgetStage');
+ ['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].forEach(k=>{
+   const el=activeBudget?.querySelector(`[name="${k}"]`);p[k]=el&&el.value!==''?Number(el.value):null;
+ });
+ if(internal){
+   const el=activeBudget?.querySelector('[name="internal_approved_budget"]');p.internal_approved_budget=el&&el.value!==''?Number(el.value):null;
+   p.other_cost_explanation=activeBudget?.querySelector('[name="other_cost_explanation_internal"]')?.value||null;
+   p.revenue=null;p.approved_margin=null;p.contract_start_date=null;p.contract_expiry_date=null;
+ }else{
+   ['revenue','approved_margin'].forEach(k=>{const el=activeBudget?.querySelector(`[name="${k}"]`);p[k]=el&&el.value!==''?Number(el.value):null});
+   p.other_cost_explanation=activeBudget?.querySelector('[name="other_cost_explanation"]')?.value||null;
+   p.internal_approved_budget=null;
+ }
+ const bool=n=>{const v=f.querySelector(`[name="${n}"]:checked`)?.value;return v==='true'?true:v==='false'?false:v==='na'?'na':null};
+ p.contract_po_received=bool('contract_po_received');
+ p.delivery_dates_confirmed=bool('delivery_dates_confirmed');
+ ['system_productised','civil_electrical_services','installation_commissioning_services'].forEach(k=>p[k]=bool(k));
+ const eng=f.querySelector('[name="engineering_development_required"]:checked')?.value;if(eng!=='true')p.engineering_demand_requests=null;
+ ['handover_contract','handover_schedule','handover_tender_response','handover_pricing','handover_contract_details','handover_other'].forEach(k=>p[k]=!!f.querySelector(`[name="${k}"]`)?.checked);
+ ['quantity_of_systems','warranty_period_months','spares_quantity','training_quantity'].forEach(k=>p[k]=p[k]===''||p[k]===undefined?null:Number(p[k]));
  delete p.other_cost_explanation_internal;
- ['request_date','contract_start_date','contract_expiry_date'].forEach(k=>{if(p[k]==='')p[k]=null});p.requested_by=signedInUserName();return p;}
+ ['request_date','contract_start_date','contract_expiry_date'].forEach(k=>{if(p[k]==='')p[k]=null});
+ p.requested_by=signedInUserName();return p;
+}
 function reviewItem(l,v){return `<div class="review-item"><label>${esc(l)}</label><strong>${esc(text(v))}</strong></div>`}
 function requestCompletionIssues(){
  const p=formDataObject(),internal=p.request_type==='Internal Project',issues=[];
@@ -1049,13 +1069,15 @@ async function saveRequest(e){
    }
  }
  payload.request_status=intent;
+ const apiPayload={...payload};
+ ['delivery_dates_confirmed','system_productised','civil_electrical_services','installation_commissioning_services'].forEach(k=>{if(apiPayload[k]==='na')apiPayload[k]=null;});
  const er=document.getElementById('requestSaveError'),ok=document.getElementById('requestSaveSuccess'),note=document.getElementById('saveNote');
  if(er)er.style.display='none';if(ok)ok.style.display='none';
  if(note)note.textContent='Saving draft to VERO…';
  try{
   await ensureProject(payload);
   payload.requested_by=payload.requested_by||currentProject.project_owner||payload.account_manager||null;
-  const res=await apiFetch(PROJECT_REQUEST_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const res=await apiFetch(PROJECT_REQUEST_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(apiPayload)});
   const data=await res.json().catch(()=>({}));
   if(!res.ok)throw new Error(data.message||('Request API returned '+res.status));
   await saveMilestones();
