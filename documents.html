@@ -123,6 +123,26 @@
 
 /* v1.9 shared VERO navigation */
 .sidebar{overflow-y:auto!important;scrollbar-width:thin}.vero-nav{display:block!important}.vero-nav .nav-section{margin:16px 0 5px;padding:0 15px;color:#aaa5a1;font-size:9px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}.vero-nav a{min-height:39px;padding:9px 12px!important;margin:1px 0;font-size:12px!important}.vero-nav .ico{width:22px!important;font-size:15px!important}.nav-toggle{width:100%;min-height:39px;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border:0;border-left:4px solid transparent;border-radius:8px;background:transparent;color:#f7f7f6;font:12px Montserrat,Verdana,Arial,sans-serif;cursor:pointer}.nav-toggle:hover{background:rgba(255,255,255,.08)}.nav-toggle-main{display:flex;align-items:center;gap:13px}.nav-caret{font-size:15px;transition:.18s}.nav-group.open .nav-caret{transform:rotate(180deg)}.nav-sub{display:none;padding:2px 0 4px 43px}.nav-group.open .nav-sub{display:block}.vero-nav .nav-sub a{display:block;min-height:auto;padding:7px 9px!important;border-left:0!important;color:#d8d5d2;font-size:11px!important}.vero-nav .nav-sub a:hover{color:#fff;background:rgba(255,255,255,.07)}
+
+/* VERO GLOBAL ACCOUNT MENU */
+.vero-account{position:relative;z-index:50}
+.vero-account-trigger{display:flex;align-items:center;gap:9px;border:0;background:transparent;padding:0;cursor:pointer;font-family:inherit;color:inherit}
+.vero-account-trigger .avatar{cursor:pointer}
+.vero-account-name{font-size:11px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.22);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vero-account-caret{font-size:9px;color:rgba(255,255,255,.9);transition:transform .16s ease}
+.vero-account.open .vero-account-caret{transform:rotate(180deg)}
+.vero-account-menu{position:absolute;right:0;top:48px;width:250px;background:#fff;border:1px solid rgba(61,57,53,.12);border-radius:11px;box-shadow:0 16px 38px rgba(30,28,26,.18);overflow:hidden;display:none;text-align:left;color:#292725}
+.vero-account.open .vero-account-menu{display:block}
+.vero-account-profile{padding:15px 16px 13px;border-bottom:1px solid #E5E1DE}
+.vero-account-profile b{display:block;font-size:12px;color:#3D3935;margin-bottom:4px}
+.vero-account-profile small{display:block;font-size:9px;color:#857874;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vero-account-item{width:100%;display:flex;align-items:center;gap:9px;border:0;background:#fff;padding:12px 16px;font:700 10px Montserrat,Verdana,Arial,sans-serif;color:#3D3935;text-decoration:none;cursor:pointer}
+.vero-account-item:hover{background:#F7F8F7}
+.vero-account-item.admin{display:none}
+.vero-account-item.signout{border-top:1px solid #E5E1DE;color:#8f2929}
+.vero-account-icon{width:18px;text-align:center;font-size:13px}
+@media(max-width:720px){.vero-account-name{display:none}.vero-account-menu{right:0;width:230px}}
+
 </style>
 </head>
 <body>
@@ -165,7 +185,7 @@
   </div>
   <div class="hero-tools">
     <input class="hero-search" placeholder="⌕   Search controlled documents...">
-    <div class="avatar">DB</div>
+    <div class="vero-account" id="veroAccount"><button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false"><div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span></button><div class="vero-account-menu" id="veroAccountMenu"><div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div><a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a><button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button></div></div>
   </div>
 </section>
 
@@ -433,4 +453,34 @@ function askAI(){let q=document.getElementById('aiQuestion').value.trim();if(!q)
 function findInDoc(){let q=document.getElementById('findText').value.trim().toLowerCase();document.querySelectorAll('#paper mark').forEach(m=>m.replaceWith(m.textContent));if(!q)return;let walker=document.createTreeWalker(document.getElementById('paper'),NodeFilter.SHOW_TEXT);let nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);nodes.forEach(n=>{let t=n.textContent,idx=t.toLowerCase().indexOf(q);if(idx>=0&&!n.parentElement.closest('.control')){let frag=document.createDocumentFragment();frag.append(t.slice(0,idx));let mark=document.createElement('mark');mark.textContent=t.slice(idx,idx+q.length);frag.append(mark);frag.append(t.slice(idx+q.length));n.replaceWith(frag)}})}
 document.addEventListener('DOMContentLoaded',loadDocuments);
 </script>
-<script>function toggleProjectsNav(button){const g=button.closest('.nav-group');const o=g.classList.toggle('open');button.setAttribute('aria-expanded',o?'true':'false')}</script></body></html>
+<script>function toggleProjectsNav(button){const g=button.closest('.nav-group');const o=g.classList.toggle('open');button.setAttribute('aria-expanded',o?'true':'false')}</script>
+<script>
+/* VERO GLOBAL ACCOUNT MENU */
+(()=>{
+ const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+ const TOKEN='vero_session_token', USER='vero_current_user';
+ const account=document.getElementById('veroAccount'); if(!account)return;
+ const trigger=document.getElementById('veroAccountTrigger');
+ const avatar=document.getElementById('veroAccountAvatar');
+ const name=document.getElementById('veroAccountName');
+ const full=document.getElementById('veroAccountFullName');
+ const email=document.getElementById('veroAccountEmail');
+ const admin=document.getElementById('veroUserManagement');
+ const signout=document.getElementById('veroAccountSignOut');
+ const initials=u=>(((u?.first_name||'').charAt(0)+(u?.last_name||'').charAt(0)).toUpperCase()||'U');
+ const fullName=u=>[u?.first_name,u?.last_name].filter(Boolean).join(' ').trim()||u?.email||'Signed in user';
+ function render(u){avatar.textContent=initials(u);name.textContent=fullName(u);full.textContent=fullName(u);email.textContent=u?.email||'';admin.style.display=u?.vero_role==='Administrator'?'flex':'none';}
+ async function load(){
+  const t=localStorage.getItem(TOKEN); if(!t){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));return;}
+  try{const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t,Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('auth');const d=await r.json();const u=d.user||d;localStorage.setItem(USER,JSON.stringify(u));render(u);}
+  catch(e){localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));}
+ }
+ trigger.addEventListener('click',e=>{e.stopPropagation();const open=account.classList.toggle('open');trigger.setAttribute('aria-expanded',String(open));});
+ document.addEventListener('click',e=>{if(!account.contains(e.target)){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
+ signout.addEventListener('click',async()=>{const t=localStorage.getItem(TOKEN);try{if(t)await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+t}})}catch(e){}localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html');});
+ load();
+})();
+</script>
+
+</body></html>
