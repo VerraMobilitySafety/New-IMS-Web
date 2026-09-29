@@ -439,7 +439,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.50</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.51</span></footer>
 </div></main></div>
 
 
@@ -929,6 +929,9 @@ function updateBudget(){
 function formDataObject(){
  const f=document.getElementById('requestForm'),fd=new FormData(f),p=Object.fromEntries(fd.entries()),internal=isInternalProject();
  p.account_manager=projectInitiatorName();
+ const activeScope=document.getElementById(internal?'internalScopeStage':'externalScopeStage');
+ ['scope_of_works','system_assumptions'].forEach(k=>{const el=activeScope?.querySelector(`[name="${k}"]`);p[k]=el?el.value:null;});
+ if(internal){const el=activeScope?.querySelector('[name="internal_expected_outcome"]');p.internal_expected_outcome=el?el.value:null;}
  const activeBudget=document.getElementById(internal?'internalBudgetStage':'externalBudgetStage');
  ['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].forEach(k=>{
    const el=activeBudget?.querySelector(`[name="${k}"]`);p[k]=el&&el.value!==''?Number(el.value):null;
