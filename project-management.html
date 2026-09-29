@@ -427,7 +427,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.42</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.43</span></footer>
 </div></main></div>
 
 
@@ -795,7 +795,7 @@ function changeRequestStep(d){goRequestStep(requestStep+d)}
 function updateRequestStep(){document.querySelectorAll('.request-page').forEach((x,i)=>x.classList.toggle('active',i===requestStep));document.querySelectorAll('.request-step').forEach((x,i)=>{x.classList.toggle('active',i===requestStep);x.classList.toggle('done',i<requestStep)});const prev=document.getElementById('requestPrev'),next=document.getElementById('requestNext'),submit=document.getElementById('requestSubmit');if(prev)prev.style.visibility=requestStep===0?'hidden':'visible';if(next)next.style.display=requestStep===requestStepNames.length-1?'none':'inline-block';if(submit)submit.style.display=requestStep===requestStepNames.length-1?'inline-block':'none';if(requestStep===3)updateBudget();if(requestStep===7)buildRequestReview();const body=document.querySelector('#setupPanel .setup-body');if(body)body.scrollTop=0;}
 function updateBudget(){
  const f=document.getElementById('requestForm');if(!f)return;
- const type=f.querySelector('[name="request_type"]')?.value||currentRequest?.request_type||'';
+ const type=f.querySelector('[name="request_type"]:checked')?.value||f.querySelector('select[name="request_type"]')?.value||currentRequest?.request_type||'';
  const internal=type==='Internal Project';
  const scope=document.getElementById(internal?'internalBudgetStage':'externalBudgetStage');
  const n=name=>Number(scope?.querySelector(`[name="${name}"]`)?.value)||0;
