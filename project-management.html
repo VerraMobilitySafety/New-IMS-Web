@@ -395,7 +395,7 @@
   </div>
 </nav>
 
- <div class="side-foot">VERRA | VERO • v2.9<br>Prototype environment</div>
+ <div class="side-foot">VERRA | VERO • v3.0<br>Prototype environment</div>
 </aside>
 <main class="main">
 <section class="global-hero">
@@ -427,7 +427,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.32</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.33</span></footer>
 </div></main></div>
 
 
@@ -1278,15 +1278,22 @@ async function openProjectExecution(p){
      `<section class="approval-section"><h3>No execution template found</h3><p>This project type does not yet have execution items configured.</p></section>`}
    <section class="approval-section"><h3>Overall Comments</h3><textarea id="executionOverallComments" style="width:100%;min-height:110px">${esc(currentExecution.overall_comments||'')}</textarea></section>
    <div id="executionError" class="approval-error"></div><div id="executionSuccess" class="approval-success"></div>
-   <div class="approval-actions"><button class="btn green" type="button" onclick="saveProjectExecution()">Save Project Execution</button></div>
   </div>`;
-  body.querySelectorAll('input,textarea,select,button').forEach(el=>{if(!d.is_project_manager)el.disabled=true});
+  body.querySelectorAll('input,textarea,select').forEach(el=>{if(!d.is_project_manager)el.disabled=true});
+  const foot=document.querySelector('#setupPanel .setup-foot');
+  foot.innerHTML=d.is_project_manager
+    ? `<button id="executionSaveBtn" class="btn green" type="button">Save Project Execution</button>`
+    : `VERO Project Execution • Read only`;
+  const saveBtn=document.getElementById('executionSaveBtn');
+  if(saveBtn) saveBtn.addEventListener('click',saveProjectExecution);
   document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';
  }catch(e){console.error(e);alert('VERO could not open Project Execution. '+e.message)}
 }
 async function saveProjectExecution(){
  const er=document.getElementById('executionError'),ok=document.getElementById('executionSuccess');
+ const btn=document.getElementById('executionSaveBtn');
  if(er)er.style.display='none';if(ok)ok.style.display='none';
+ if(btn){btn.disabled=true;btn.textContent='Saving…'}
  const items=[...document.querySelectorAll('.execution-item')].map(row=>({
   id:Number(row.dataset.itemId),
   response:row.querySelector('.execution-response').value,
@@ -1297,8 +1304,14 @@ async function saveProjectExecution(){
   const res=await apiFetch(PROJECT_EXECUTION_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items,overall_comments:document.getElementById('executionOverallComments')?.value||''})});
   const d=await res.json().catch(()=>({}));
   if(!res.ok)throw new Error(d.message||'Unable to save Project Execution');
-  if(ok){ok.textContent='Project Execution saved.';ok.style.display='block'}
- }catch(e){if(er){er.textContent=e.message;er.style.display='block'}}
+  if(ok){ok.textContent='Project Execution saved.';ok.style.display='block';ok.scrollIntoView({behavior:'smooth',block:'nearest'})}
+  if(btn)btn.textContent='Saved ✓';
+  setTimeout(()=>{if(btn){btn.disabled=false;btn.textContent='Save Project Execution'}},1200);
+ }catch(e){
+  console.error(e);
+  if(er){er.textContent=e.message;er.style.display='block';er.scrollIntoView({behavior:'smooth',block:'nearest'})}
+  if(btn){btn.disabled=false;btn.textContent='Save Project Execution'}
+ }
 }
 
 function closeSetup(){document.getElementById('setupPanel').classList.remove('show');document.body.style.overflow=''}
