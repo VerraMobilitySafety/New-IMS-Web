@@ -427,7 +427,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.44</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.45</span></footer>
 </div></main></div>
 
 
@@ -543,7 +543,7 @@ let requestStep=0;
 let currentProjectSetup={};
 let projectSetupStep=0;
 const projectSetupStepNames=['Commercial Setup','Contract & Sales Order','Mobilisation','Review & Submit'];
-const requestStepNames=['Administration','Client','System & Scope','Contract & Budget','Milestones','Delivery & Installation','Warranty & Handover','Review & Submit'];
+const requestStepNames=['Administration','Client','System & Scope','Contract & Budget','Milestones','Warranty & Handover','Review & Submit'];
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const text=v=>v===null||v===undefined||v===''?'—':String(v);
@@ -757,17 +757,34 @@ ${input('Other Cost Budget','other_cost_budget','number','min="0" step="0.01" on
 <div class="form-field full"><label>Milestone Type</label><p class="intro" style="margin-top:4px">Use Contract for committed contractual dates and Customer Expected for key customer delivery dates.</p></div>
 <div id="projectMilestones"></div>
 <button type="button" class="add-row" onclick="addMilestone()">+ Add Milestone</button>
-<div class="form-grid" style="margin-top:24px"><div class="form-field full"><label>Delivery Dates Confirmed Achievable?</label><p class="intro" style="margin:4px 0 10px">Procurement, Production and Engineering</p>${yesnona('delivery_dates_confirmed')}</div></div>
+<div class="form-grid" style="margin-top:24px"><div class="form-field full"><label>Delivery Dates Confirmed Achievable?</label><p class="intro" style="margin:4px 0 10px">Procurement, Production and Engineering</p>${yesnoNA('delivery_dates_confirmed')}</div></div>
 </div>
 <div id="internalMilestonesStage" style="display:none">
 <div id="internalProjectMilestones"></div>
 <button type="button" class="add-row" onclick="addMilestone()">+ Add Milestone</button>
 </div>
 </section>
-<section class="request-page" data-step="5"><h3>Delivery & Installation</h3><p class="intro">Define the physical delivery and implementation obligations.</p><div class="form-grid">${input('Quantity of Systems','quantity_of_systems','number','min="0"')}<div class="form-field full"><label>Is Verra Mobility Providing Civil / Electrical Works Services?</label>${yesno('civil_electrical_services')}</div><div class="form-field full"><label>Is Verra Mobility Providing Installation and Commissioning Services?</label>${yesno('installation_commissioning_services')}</div>${textarea('Comments','delivery_comments')}</div></section>
-<section class="request-page" data-step="6"><h3>Warranty & Handover</h3><p class="intro">Capture warranty, spares, training and the documentation that must be handed over.</p><div class="form-grid">${input('Warranty Period (Months)','warranty_period_months','number','min="0"')}<div class="form-field"><label>Warranty Type</label><div class="choice-grid">${['Return to Base','On Site','Other'].map(x=>choice('warranty_type',x,x)).join('')}</div></div>${textarea('Warranty Comments','warranty_comments')}<div class="form-field full"><label>Spares</label><div class="choice-grid">${['All Inclusive','As Required','Agreed Quantity'].map(x=>choice('spares_type',x,x)).join('')}</div></div>${textarea('Spares Comments','spares_comments')}<div class="form-field full"><label>Training</label><div class="choice-grid">${['Included','Agreed Quantity','Needs to be Quoted','Not Required'].map(x=>choice('training_type',x,x)).join('')}</div></div>${textarea('Training Comments','training_comments')}<div class="form-field full"><label>Documentation to be Handed Over</label><div class="choice-grid">${[['handover_contract','Contract'],['handover_schedule','Schedule'],['handover_tender_response','Tender Response'],['handover_pricing','Pricing'],['handover_contract_details','Contract Details']].map(([n,l])=>`<div class="choice"><input type="checkbox" id="${n}" name="${n}" ${val(n,false)?'checked':''}><label for="${n}">${l}</label></div>`).join('')}</div></div></div></section>
-<section class="request-page" data-step="7"><h3>Review & Submit</h3><p class="intro">Review the request before submitting it for Project Approval. Save Draft remains available until you submit.</p><div id="requestReview"></div><div id="requestSaveError" class="req-error"></div><div id="requestSaveSuccess" class="req-success"></div></section>
-<div class="request-sticky"><button class="btn outline" id="requestPrev" type="button" onclick="changeRequestStep(-1)" style="visibility:hidden">← Previous</button><span class="request-save-note" id="saveNote">Draft changes are saved to VERO when you choose Save Draft.</span><div class="right"><button class="btn outline" type="submit" value="Draft">Save Draft</button><button class="btn green" id="requestNext" type="button" onclick="changeRequestStep(1)">Next →</button><button class="btn dark" id="requestSubmit" type="submit" value="Submitted" style="display:none">Submit Request</button></div></div></form>`;requestStep=0;renderMilestoneEditors();const dateField=document.querySelector('#requestForm [name="request_date"]');if(dateField&&!dateField.value)dateField.value=new Date().toISOString().slice(0,10);const requestForm=document.getElementById('requestForm');if(requestForm)requestForm.addEventListener('change',e=>{if(e.target?.name==='request_type')updateRequestTypeLayout()});updateRequestTypeLayout();updateRequestStep();updateBudget();loadMasterContract();}
+<section class="request-page" data-step="5" id="warrantyHandoverStage">
+<h3>Warranty & Handover</h3><p class="intro">Define the post-delivery warranty, spares, training and documentation obligations.</p>
+<div class="form-grid">
+${input('Warranty Period (Months)','warranty_period_months','number','min="0"')}
+<div class="form-field full"><label>Warranty Type</label><div class="choice-grid">${['Return to Base','On Site','Other','N/A'].map(x=>choice('warranty_type',x,x)).join('')}</div></div>
+<div class="form-field full" id="warrantyDetailsWrap" style="display:none">${textarea('Warranty Details','warranty_comments')}</div>
+
+<div class="form-field full"><label>Spares</label><div class="choice-grid">${['All Inclusive','As Required','Agreed Quantity','Not Required'].map(x=>choice('spares_type',x,x)).join('')}</div></div>
+<div class="form-field" id="sparesQuantityWrap" style="display:none">${input('Spares Quantity','spares_quantity','number','min="0"')}</div>
+<div class="form-field full" id="sparesDetailsWrap" style="display:none">${textarea('Spares Details','spares_comments')}</div>
+
+<div class="form-field full"><label>Training</label><div class="choice-grid">${['Included','Agreed Quantity','Needs to be Quoted','Not Required'].map(x=>choice('training_type',x,x)).join('')}</div></div>
+<div class="form-field" id="trainingQuantityWrap" style="display:none">${input('Training Quantity','training_quantity','number','min="0"')}</div>
+<div class="form-field full" id="trainingDetailsWrap" style="display:none">${textarea('Training Details','training_comments')}</div>
+
+<div class="form-field full"><label>Documentation Handover</label><div class="choice-grid">${[['handover_contract','Contract'],['handover_schedule','Schedule'],['handover_tender_response','Tender Response'],['handover_pricing','Pricing'],['handover_contract_details','Contract Details'],['handover_other','Other']].map(([n,l])=>`<div class="choice"><input type="checkbox" id="${n}" name="${n}" ${val(n,false)?'checked':''}><label for="${n}">${l}</label></div>`).join('')}</div></div>
+<div class="form-field full" id="handoverOtherWrap" style="display:none">${input('Other Documentation','handover_other_details')}</div>
+</div>
+</section>
+<section class="request-page" data-step="6"><h3>Review & Submit</h3><p class="intro">Review the request before submitting it for Project Approval. Save Draft remains available until you submit.</p><div id="requestReview"></div><div id="requestSaveError" class="req-error"></div><div id="requestSaveSuccess" class="req-success"></div></section>
+<div class="request-sticky"><button class="btn outline" id="requestPrev" type="button" onclick="changeRequestStep(-1)" style="visibility:hidden">← Previous</button><span class="request-save-note" id="saveNote">Draft changes are saved to VERO when you choose Save Draft.</span><div class="right"><button class="btn outline" type="submit" value="Draft">Save Draft</button><button class="btn green" id="requestNext" type="button" onclick="changeRequestStep(1)">Next →</button><button class="btn dark" id="requestSubmit" type="submit" value="Submitted" style="display:none">Submit Request</button></div></div></form>`;requestStep=0;renderMilestoneEditors();const dateField=document.querySelector('#requestForm [name="request_date"]');if(dateField&&!dateField.value)dateField.value=new Date().toISOString().slice(0,10);const requestForm=document.getElementById('requestForm');if(requestForm)requestForm.addEventListener('change',e=>{if(e.target?.name==='request_type')updateRequestTypeLayout();if(['warranty_type','spares_type','training_type','handover_other'].includes(e.target?.name))updateWarrantyLayout()});updateRequestTypeLayout();updateWarrantyLayout();updateRequestStep();updateBudget();loadMasterContract();}
 function toggleDeliveryAddress(on){
  const block=document.getElementById('deliveryAddressBlock');
  if(block)block.style.display=on?'none':'block';
@@ -796,12 +813,25 @@ function updateRequestTypeLayout(){
  const steps=document.querySelectorAll('.request-step');
  if(steps[1])steps[1].textContent='2. '+(internal?'Internal Stakeholders':'Client');
  if(steps[2])steps[2].textContent='3. '+(internal?'Scope':'System & Scope');
+ const warrantyPage=document.getElementById('warrantyHandoverStage');
+ if(warrantyPage)warrantyPage.style.display=internal?'none':'';
+ if(steps[5])steps[5].style.display=internal?'none':'';
+ if(steps[6])steps[6].textContent=(internal?'6':'7')+'. Review & Submit';
  updateBudget();
 
  const engYes=document.querySelector('input[name="engineering_development_required"][value="true"]');
  const engWrap=document.getElementById('engineeringDemandWrap');
  if(engWrap)engWrap.style.display=engYes?.checked?'block':'none';
  document.querySelectorAll('input[name="engineering_development_required"]').forEach(x=>x.onchange=()=>{if(engWrap)engWrap.style.display=engYes?.checked?'block':'none'});
+}
+function updateWarrantyLayout(){
+ const f=document.getElementById('requestForm');if(!f)return;
+ const radio=n=>f.querySelector(`input[name="${n}"]:checked`)?.value||'';
+ const show=(id,on)=>{const e=document.getElementById(id);if(e)e.style.display=on?'block':'none'};
+ show('warrantyDetailsWrap',radio('warranty_type')==='Other');
+ const sp=radio('spares_type');show('sparesQuantityWrap',sp==='Agreed Quantity');show('sparesDetailsWrap',sp==='Agreed Quantity');
+ const tr=radio('training_type');show('trainingQuantityWrap',tr==='Agreed Quantity');show('trainingDetailsWrap',tr==='Agreed Quantity');
+ show('handoverOtherWrap',!!f.querySelector('[name="handover_other"]')?.checked);
 }
 function renderMilestoneEditors(){
  const internal=isInternalProject();
@@ -823,8 +853,12 @@ function addMilestone(){
  box.insertAdjacentHTML('beforeend',milestoneRow(internal?'Project':'Contract'));
 }
 function goRequestStep(i){requestStep=Math.max(0,Math.min(requestStepNames.length-1,i));updateRequestStep()}
-function changeRequestStep(d){goRequestStep(requestStep+d)}
-function updateRequestStep(){document.querySelectorAll('.request-page').forEach((x,i)=>x.classList.toggle('active',i===requestStep));document.querySelectorAll('.request-step').forEach((x,i)=>{x.classList.toggle('active',i===requestStep);x.classList.toggle('done',i<requestStep)});const prev=document.getElementById('requestPrev'),next=document.getElementById('requestNext'),submit=document.getElementById('requestSubmit');if(prev)prev.style.visibility=requestStep===0?'hidden':'visible';if(next)next.style.display=requestStep===requestStepNames.length-1?'none':'inline-block';if(submit)submit.style.display=requestStep===requestStepNames.length-1?'inline-block':'none';if(requestStep===3)updateBudget();if(requestStep===7)buildRequestReview();const body=document.querySelector('#setupPanel .setup-body');if(body)body.scrollTop=0;}
+function changeRequestStep(d){
+ let target=requestStep+d;
+ if(isInternalProject()&&target===5)target=d>0?6:4;
+ goRequestStep(target);
+}
+function updateRequestStep(){document.querySelectorAll('.request-page').forEach((x,i)=>x.classList.toggle('active',i===requestStep));document.querySelectorAll('.request-step').forEach((x,i)=>{x.classList.toggle('active',i===requestStep);x.classList.toggle('done',i<requestStep)});const prev=document.getElementById('requestPrev'),next=document.getElementById('requestNext'),submit=document.getElementById('requestSubmit');if(prev)prev.style.visibility=requestStep===0?'hidden':'visible';if(next)next.style.display=requestStep===requestStepNames.length-1?'none':'inline-block';if(submit)submit.style.display=requestStep===requestStepNames.length-1?'inline-block':'none';if(requestStep===3)updateBudget();if(requestStep===6)buildRequestReview();const body=document.querySelector('#setupPanel .setup-body');if(body)body.scrollTop=0;}
 function updateBudget(){
  const f=document.getElementById('requestForm');if(!f)return;
  const type=f.querySelector('[name="request_type"]:checked')?.value||f.querySelector('select[name="request_type"]')?.value||currentRequest?.request_type||'';
@@ -854,7 +888,7 @@ function updateBudget(){
 function formDataObject(){const f=document.getElementById('requestForm'),fd=new FormData(f),p=Object.fromEntries(fd.entries());p.account_manager=projectInitiatorName();['contract_po_received'].forEach(k=>{p[k]=fd.has(k)?fd.get(k)==='true':null});
  {const v=fd.get('delivery_dates_confirmed');p.delivery_dates_confirmed=v==='true'?true:v==='false'?false:v==='na'?'na':null;}
  ['system_productised','civil_electrical_services','installation_commissioning_services'].forEach(k=>{const v=fd.get(k);p[k]=v==='true'?true:v==='false'?false:v==='na'?'na':null});
- const eng=fd.get('engineering_development_required'); if(eng!=='true')p.engineering_demand_requests=null;['handover_contract','handover_schedule','handover_tender_response','handover_pricing','handover_contract_details'].forEach(k=>p[k]=fd.has(k));['revenue','internal_approved_budget','labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget','approved_margin','quantity_of_systems','warranty_period_months'].forEach(k=>p[k]=p[k]===''||p[k]===undefined?null:Number(p[k]));if(p.request_type==='Internal Project'){p.other_cost_explanation=p.other_cost_explanation_internal||null;p.revenue=null;p.approved_margin=null;p.contract_start_date=null;p.contract_expiry_date=null}
+ const eng=fd.get('engineering_development_required'); if(eng!=='true')p.engineering_demand_requests=null;['handover_contract','handover_schedule','handover_tender_response','handover_pricing','handover_contract_details','handover_other'].forEach(k=>p[k]=fd.has(k));['revenue','internal_approved_budget','labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget','approved_margin','quantity_of_systems','warranty_period_months','spares_quantity','training_quantity'].forEach(k=>p[k]=p[k]===''||p[k]===undefined?null:Number(p[k]));if(p.request_type==='Internal Project'){p.other_cost_explanation=p.other_cost_explanation_internal||null;p.revenue=null;p.approved_margin=null;p.contract_start_date=null;p.contract_expiry_date=null}
  else p.internal_approved_budget=null;
  delete p.other_cost_explanation_internal;
  ['request_date','contract_start_date','contract_expiry_date'].forEach(k=>{if(p[k]==='')p[k]=null});p.requested_by=signedInUserName();return p;}
