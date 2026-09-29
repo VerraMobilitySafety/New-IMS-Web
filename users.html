@@ -204,7 +204,7 @@
 <div class="admin-only-note">Administrator area • Invitations expire after 72 hours and can only be used once. Disable established users to preserve VERO history.</div>
 <section class="panel"><div class="panel-head"><div><h2>User Register</h2><span id="userCount">Loading users…</span></div><span>VERO access</span></div>
 <div style="overflow:auto"><table class="table user-table"><thead><tr><th>User</th><th>Email</th><th>Job Title</th><th>Business Unit</th><th>Country</th><th>System Access</th><th>Business Roles</th><th>Status</th><th>Last Sign-in</th><th>Actions</th></tr></thead><tbody id="userBody"><tr><td colspan="10" class="empty">Loading VERO users…</td></tr></tbody></table></div></section>
-<footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Users • v1.4</span></footer></div>
+<footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Users • v1.5</span></footer></div>
 <div class="access-denied" id="accessDenied"><h2>Administrator access required</h2><p>This area is restricted to VERO Administrators.</p><button class="btn dark" onclick="location.href='index.html'">Return Home</button></div>
 </main></div>
 
@@ -224,7 +224,7 @@
 </div>
 <div class="form-error" id="userError"></div><div class="form-success" id="userSuccess"></div>
 <div class="user-actions"><button type="button" class="btn outline" onclick="closeAddUser()">Cancel</button><button type="submit" class="btn green" id="saveUserBtn">Create Invitation</button></div>
-<div class="invite-result" id="inviteResult"><b>Invitation ready</b><div class="form-note" style="margin-bottom:8px">Copy this secure link and send it to the invited person. It expires in 72 hours.</div><div class="invite-link-row"><input id="inviteLink" readonly><button type="button" class="btn dark" onclick="copyInviteLink()">Copy Link</button></div></div>
+<div class="invite-result" id="inviteResult"><b id="secureLinkTitle">Secure link ready</b><div class="form-note" id="secureLinkHelp" style="margin-bottom:8px">Copy this secure link and send it to the user.</div><div class="invite-link-row"><input id="inviteLink" readonly><button type="button" class="btn dark" onclick="copyInviteLink()">Copy Link</button></div></div>
 </form></div></section></div>
 
 <script>
@@ -296,7 +296,7 @@ function renderUsers(){
   }else if(s==='Disabled'){
    actions=`<div class="row-actions"><button class="mini-btn" type="button" onclick="event.stopPropagation();enableUser(${Number(u.id)})">Re-enable</button><button class="mini-btn" type="button" onclick="event.stopPropagation();openEditUser(${Number(u.id)})">Roles</button></div>`;
   }else{
-   actions=`<div class="row-actions"><button class="mini-btn" type="button" onclick="event.stopPropagation();openEditUser(${Number(u.id)})">Roles</button>${isSelf?'':`<button class="mini-btn danger" type="button" onclick="event.stopPropagation();disableUser(${Number(u.id)})">Disable</button>`}</div>`;
+   actions=`<div class="row-actions"><button class="mini-btn" type="button" onclick="event.stopPropagation();openEditUser(${Number(u.id)})">Roles</button><button class="mini-btn" type="button" onclick="event.stopPropagation();createPasswordReset(${Number(u.id)})">Reset Password</button>${isSelf?'':`<button class="mini-btn danger" type="button" onclick="event.stopPropagation();disableUser(${Number(u.id)})">Disable</button>`}</div>`;
   }
   return `<tr class="data"><td><div class="user-name">${esc(((u.first_name||'')+' '+(u.last_name||'')).trim()||u.email)}</div><div class="edit-user">Manage user →</div></td><td>${esc(u.email)}</td><td>${esc(u.job_title||'—')}</td><td>${esc(u.business_unit||'—')}</td><td>${esc(u.country||'—')}</td><td><span class="role-pill ${u.vero_role==='Administrator'?'admin':'user'}">${esc(u.vero_role||'User')}</span></td><td><div class="business-pills">${(u.business_roles||[]).map(r=>`<span class="business-pill">${esc(r.role_name)}</span>`).join('')||'<span class="meta">None</span>'}</div></td><td><span class="status-pill ${statusClass(s)}">${esc(s)}</span></td><td>${fmtDate(u.last_login_at)}</td><td>${actions}</td></tr>`;
  }).join('')||'<tr><td colspan="10" class="empty">No users found.</td></tr>';
@@ -336,9 +336,27 @@ async function resendInvite(id){
   if(!r.ok)throw new Error(d.message||'Unable to create a new invitation link');
   const u=loadedUsers.find(x=>Number(x.id)===Number(id));editingUser=u||null;
   if(u)openEditUser(id);
+  document.getElementById('secureLinkTitle').textContent='Invitation ready';
+  document.getElementById('secureLinkHelp').textContent='Copy this secure link and send it to the invited person. It expires in 72 hours.';
   document.getElementById('inviteLink').value=d.invitation?.invite_url||'';
   document.getElementById('inviteResult').style.display='block';
   document.getElementById('userSuccess').textContent='New invitation created. The previous link is now invalid.';
+  document.getElementById('userSuccess').style.display='block';
+ }catch(e){alert(e.message)}
+}
+async function createPasswordReset(id){
+ const u=loadedUsers.find(x=>Number(x.id)===Number(id));if(!u)return;
+ const label=((u.first_name||'')+' '+(u.last_name||'')).trim()||u.email;
+ if(!confirm(`Create a password reset link for ${label}?\n\nThe link will expire after 1 hour and can only be used once.`))return;
+ try{
+  const r=await apiFetch('/users/'+id+'/password-reset',{method:'POST'}),d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.message||'Unable to create password reset');
+  openEditUser(id);
+  document.getElementById('secureLinkTitle').textContent='Password reset ready';
+  document.getElementById('secureLinkHelp').textContent='Copy this secure link and send it to the user. It expires in 1 hour and can only be used once.';
+  document.getElementById('inviteLink').value=d.password_reset?.reset_url||'';
+  document.getElementById('inviteResult').style.display='block';
+  document.getElementById('userSuccess').textContent='Password reset link created.';
   document.getElementById('userSuccess').style.display='block';
  }catch(e){alert(e.message)}
 }
