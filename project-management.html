@@ -439,7 +439,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.47</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.48</span></footer>
 </div></main></div>
 
 
@@ -964,7 +964,7 @@ function goToIssue(stage){goRequestStep(stage)}
 function buildRequestReview(){
  const p=formDataObject(),internal=p.request_type==='Internal Project',cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(p[k])||0),0),rev=Number(p.revenue)||0,calc=rev>0?((rev-cost)/rev)*100:null,approved=Number(p.approved_margin)||0;
  const ms=[...document.querySelectorAll('.repeat-block')].map(x=>({type:x.dataset.milestoneType,date:x.querySelector('.ms-date').value,name:x.querySelector('.ms-name').value})).filter(x=>x.name);
- const issues=requestCompletionIssues(),submit=document.getElementById('requestSubmit');if(submit){submit.disabled=issues.length>0;submit.title=issues.length?'Complete the required items before submitting.':''}
+ const issues=requestCompletionIssues(),submit=document.getElementById('requestSubmit');if(submit){submit.disabled=false;submit.title=issues.length?'Click to see the items still required for submission.':''}
  const issueHtml=issues.length?`<div class="incomplete-panel"><h4>${issues.length} incomplete item${issues.length===1?'':'s'}</h4><p class="intro">Complete these items before submitting the request.</p><div class="incomplete-list">${issues.map(x=>`<button type="button" class="incomplete-link" onclick="goToIssue(${x.stage})">${esc(x.label)} →</button>`).join('')}</div></div>`:`<div class="incomplete-panel complete"><h4>Ready for Project Approval</h4><div>All required request information is complete.</div></div>`;
  const admin=`<div class="review-section"><h4>Administration</h4><div class="review-grid">${reviewItem('Project Initiator / Account Manager',projectInitiatorName())}${reviewItem('VERO Project Code',currentProject?.project_code||'Assigned on first save')}${reviewItem('Request Date',fmtDate(p.request_date))}${reviewItem('Project Title',p.project_title)}${reviewItem('Project Type',p.request_type)}${internal?'':reviewItem('Bid / Quote Number',p.bid_quote_number)}</div></div>`;
  const party=internal?`<div class="review-section"><h4>Internal Stakeholders</h4><div class="review-grid">${reviewItem('Business Area',p.internal_business_area)}${reviewItem('Project Sponsor',p.internal_project_sponsor)}${reviewItem('Primary Stakeholder',p.internal_primary_stakeholder)}${reviewItem('Business Need / Background',p.internal_business_need)}</div></div>`:`<div class="review-section"><h4>Client</h4><div class="review-grid">${reviewItem('Client',p.client_name)}${reviewItem('Reference',p.client_reference)}${reviewItem('Primary Contact',[p.client_contact_first_name,p.client_contact_last_name].filter(Boolean).join(' '))}${reviewItem('Phone',p.client_contact_phone)}${reviewItem('Email',p.client_contact_email)}</div></div>`;
@@ -1038,7 +1038,16 @@ async function viewProjectDocument(documentId){
 async function saveRequest(e){
  e.preventDefault();
  const intent=e.submitter?.value||'Draft',payload=formDataObject();
- if(intent==='Submitted'){const issues=requestCompletionIssues();if(issues.length){goRequestStep(6);buildRequestReview();return;}}
+ if(intent==='Submitted'){
+   const issues=requestCompletionIssues();
+   if(issues.length){
+     goRequestStep(6);buildRequestReview();
+     const er=document.getElementById('requestSaveError');
+     if(er){er.textContent=`Cannot submit yet — ${issues.length} required item${issues.length===1?' is':'s are'} incomplete. Use the links above to complete the request.`;er.style.display='block';}
+     document.getElementById('requestReview')?.scrollIntoView({behavior:'smooth',block:'start'});
+     return;
+   }
+ }
  payload.request_status=intent;
  const er=document.getElementById('requestSaveError'),ok=document.getElementById('requestSaveSuccess'),note=document.getElementById('saveNote');
  if(er)er.style.display='none';if(ok)ok.style.display='none';
