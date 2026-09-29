@@ -395,7 +395,7 @@
   </div>
 </nav>
 
- <div class="side-foot">VERRA | VERO • v2.8<br>Prototype environment</div>
+ <div class="side-foot">VERRA | VERO • v2.9<br>Prototype environment</div>
 </aside>
 <main class="main">
 <section class="global-hero">
@@ -427,7 +427,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.31</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.32</span></footer>
 </div></main></div>
 
 
@@ -470,6 +470,7 @@ const PROJECT_APPROVAL_API=id=>`${API_BASE}/projects/${id}/approval`;
 const PROJECT_SETUP_API=id=>`${API_BASE}/projects/${id}/setup`;
 const FINANCE_APPROVAL_API=id=>`${API_BASE}/projects/${id}/finance-approval`;
 const LEADERSHIP_APPROVAL_API=id=>`${API_BASE}/projects/${id}/leadership-approval`;
+const PROJECT_EXECUTION_API=id=>`${API_BASE}/projects/${id}/execution`;
 
 const VERO_TOKEN_KEY='vero_session_token';
 const VERO_USER_KEY='vero_current_user';
@@ -574,6 +575,7 @@ async function openProjectAction(i){
  if(p.stage==='Project Setup'){await openProjectSetup(p);return}
  if(p.stage==='Finance Approval'){await openFinanceApproval(p);return}
  if(p.stage==='Leadership Approval'){await openLeadershipApproval(p);return}
+ if(p.stage==='Project Execution'||p.stage==='Project Execution Checklist'){await openProjectExecution(p);return}
  await openProject(i);
 }
 async function loadProjects(){
@@ -1232,6 +1234,71 @@ async function submitLeadershipApproval(decision){
   if(ok){ok.textContent=decision==='Approved'?`Leadership approved. ${d.action_required_by||'The Project Manager'} now owns the Project Execution Checklist.`:'Project returned to the Project Manager for update.';ok.style.display='block'}
   await loadProjects();setTimeout(()=>closeSetup(),900);
  }catch(e){console.error(e);if(er){er.textContent=e.message;er.style.display='block'}else alert(e.message)}
+}
+
+
+let currentExecution=null;
+function executionItemHtml(x){
+ return `<div class="approval-section execution-item" data-item-id="${x.id}">
+  <div style="display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap">
+   <h3 style="margin:0">${esc(x.item_name)}</h3>
+   <select class="execution-response" style="min-width:130px">
+    <option value="">Not set</option><option ${x.response==='Yes'?'selected':''}>Yes</option>
+    <option ${x.response==='No'?'selected':''}>No</option><option ${x.response==='N/A'?'selected':''}>N/A</option>
+   </select>
+  </div>
+  <div class="form-grid" style="margin-top:14px">
+   <div class="form-field"><label>Comments</label><textarea class="execution-comments" placeholder="Optional comments">${esc(x.comments||'')}</textarea></div>
+   <div class="form-field"><label>Evidence / document reference</label><input class="execution-evidence" value="${esc(x.evidence_reference||'')}" placeholder="Link or reference for now"></div>
+  </div>
+ </div>`;
+}
+async function openProjectExecution(p){
+ try{
+  currentProject=p.raw;
+  const res=await apiFetch(PROJECT_EXECUTION_API(p.raw.id),{cache:'no-store'});
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(d.message||'Unable to load Project Execution');
+  currentExecution=d.execution;
+  const items=currentExecution.items||[];
+  const sections=[...new Set(items.map(x=>x.section_name))];
+  const answered=items.filter(x=>x.response).length;
+  const body=document.querySelector('#setupPanel .setup-body');
+  document.querySelector('#setupPanel .setup-head h2').textContent='Project Execution';
+  document.querySelector('#setupPanel .setup-foot').textContent='VERO Project Execution • Living delivery record';
+  body.innerHTML=`<div class="approval-shell">
+   <div class="approval-banner"><b>${esc(d.project.project_title||'Project Execution')}</b><br>
+    ${esc(d.project.client_name||'—')} • ${esc(d.project.project_type||'Project')} • Project Manager: ${esc(d.project.project_manager||'—')}
+   </div>
+   <section class="approval-section"><h3>Execution Progress</h3>
+    <div style="font-size:28px;font-weight:800">${answered} / ${items.length}</div>
+    <div style="opacity:.72;margin-top:4px">items updated</div>
+   </section>
+   ${sections.length?sections.map(section=>`<div style="margin:28px 0 12px"><h2 style="margin:0">${esc(section)}</h2></div>${items.filter(x=>x.section_name===section).map(executionItemHtml).join('')}`).join(''):
+     `<section class="approval-section"><h3>No execution template found</h3><p>This project type does not yet have execution items configured.</p></section>`}
+   <section class="approval-section"><h3>Overall Comments</h3><textarea id="executionOverallComments" style="width:100%;min-height:110px">${esc(currentExecution.overall_comments||'')}</textarea></section>
+   <div id="executionError" class="approval-error"></div><div id="executionSuccess" class="approval-success"></div>
+   <div class="approval-actions"><button class="btn green" type="button" onclick="saveProjectExecution()">Save Project Execution</button></div>
+  </div>`;
+  body.querySelectorAll('input,textarea,select,button').forEach(el=>{if(!d.is_project_manager)el.disabled=true});
+  document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';
+ }catch(e){console.error(e);alert('VERO could not open Project Execution. '+e.message)}
+}
+async function saveProjectExecution(){
+ const er=document.getElementById('executionError'),ok=document.getElementById('executionSuccess');
+ if(er)er.style.display='none';if(ok)ok.style.display='none';
+ const items=[...document.querySelectorAll('.execution-item')].map(row=>({
+  id:Number(row.dataset.itemId),
+  response:row.querySelector('.execution-response').value,
+  comments:row.querySelector('.execution-comments').value,
+  evidence_reference:row.querySelector('.execution-evidence').value
+ }));
+ try{
+  const res=await apiFetch(PROJECT_EXECUTION_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items,overall_comments:document.getElementById('executionOverallComments')?.value||''})});
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(d.message||'Unable to save Project Execution');
+  if(ok){ok.textContent='Project Execution saved.';ok.style.display='block'}
+ }catch(e){if(er){er.textContent=e.message;er.style.display='block'}}
 }
 
 function closeSetup(){document.getElementById('setupPanel').classList.remove('show');document.body.style.overflow=''}
