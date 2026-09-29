@@ -427,7 +427,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.40</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.41</span></footer>
 </div></main></div>
 
 
@@ -794,16 +794,31 @@ function changeRequestStep(d){goRequestStep(requestStep+d)}
 function updateRequestStep(){document.querySelectorAll('.request-page').forEach((x,i)=>x.classList.toggle('active',i===requestStep));document.querySelectorAll('.request-step').forEach((x,i)=>{x.classList.toggle('active',i===requestStep);x.classList.toggle('done',i<requestStep)});const prev=document.getElementById('requestPrev'),next=document.getElementById('requestNext'),submit=document.getElementById('requestSubmit');if(prev)prev.style.visibility=requestStep===0?'hidden':'visible';if(next)next.style.display=requestStep===requestStepNames.length-1?'none':'inline-block';if(submit)submit.style.display=requestStep===requestStepNames.length-1?'inline-block':'none';if(requestStep===3)updateBudget();if(requestStep===7)buildRequestReview();const body=document.querySelector('#setupPanel .setup-body');if(body)body.scrollTop=0;}
 function updateBudget(){
  const f=document.getElementById('requestForm');if(!f)return;
- const n=x=>Number(f.elements[x]?.value)||0;
+ const visibleField=name=>{
+   const fields=[...f.querySelectorAll(`[name="${name}"]`)];
+   return fields.find(x=>x.offsetParent!==null)||fields[0]||null;
+ };
+ const n=name=>Number(visibleField(name)?.value)||0;
  const cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+n(k),0);
- const rev=n('revenue'),approvedMargin=n('approved_margin'),calcMargin=rev>0?((rev-cost)/rev)*100:null;
- setText('budgetRevenue',money(rev||null));setText('budgetTotal',money(cost||null));setText('budgetMargin',calcMargin===null?'—':calcMargin.toFixed(1)+'%');
- setText('budgetVariance',calcMargin===null?'—':(calcMargin-approvedMargin).toFixed(1)+' pp');
- const approvedBudget=n('internal_approved_budget');
- setText('internalApprovedBudget',money(approvedBudget||null));setText('internalPlannedCost',money(cost||null));setText('internalBudgetVariance',money(approvedBudget-cost));
- const other=n('other_cost_budget');
- const extOther=document.getElementById('otherCostExplanationWrap'),intOther=document.getElementById('internalOtherCostExplanationWrap');
- if(extOther)extOther.style.display=other>0?'block':'none';if(intOther)intOther.style.display=other>0?'block':'none';
+ const internal=(visibleField('request_type')?.value||currentRequest?.request_type)==='Internal Project';
+
+ if(internal){
+   const approved=n('internal_approved_budget');
+   setText('internalApprovedBudget',money(approved));
+   setText('internalPlannedCost',money(cost));
+   setText('internalBudgetVariance',money(approved-cost));
+   const wrap=document.getElementById('internalOtherCostExplanationWrap');
+   if(wrap)wrap.style.display=n('other_cost_budget')>0?'block':'none';
+ }else{
+   const rev=n('revenue'),approved=n('approved_margin');
+   const calc=rev>0?((rev-cost)/rev)*100:null;
+   setText('budgetRevenue',money(rev));
+   setText('budgetTotal',money(cost));
+   setText('budgetMargin',calc===null?'—':calc.toFixed(1)+'%');
+   setText('budgetVariance',calc===null?'—':(calc-approved).toFixed(1)+' pp');
+   const wrap=document.getElementById('otherCostExplanationWrap');
+   if(wrap)wrap.style.display=n('other_cost_budget')>0?'block':'none';
+ }
 }
 function formDataObject(){const f=document.getElementById('requestForm'),fd=new FormData(f),p=Object.fromEntries(fd.entries());p.account_manager=projectInitiatorName();['contract_po_received','delivery_dates_confirmed','subcontractors_approved'].forEach(k=>{p[k]=fd.has(k)?fd.get(k)==='true':null});
  ['system_productised','civil_electrical_services','installation_commissioning_services'].forEach(k=>{const v=fd.get(k);p[k]=v==='true'?true:v==='false'?false:v==='na'?'na':null});
