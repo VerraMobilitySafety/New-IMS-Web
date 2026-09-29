@@ -588,6 +588,19 @@ body {
     }
 }
 
+
+/* VERO GLOBAL ACCOUNT MENU */
+.vero-account{position:relative;display:inline-block;margin-left:14px;vertical-align:middle;z-index:50}
+.vero-account-trigger{display:flex;align-items:center;gap:9px;border:0;background:transparent;padding:0;cursor:pointer;font-family:inherit}
+.vero-account .avatar{width:38px;height:38px;border-radius:50%;background:#00263E;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700}
+.vero-account-name{font-size:12px;font-weight:700;color:#00263E;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vero-account-caret{font-size:9px;color:#6B7280;transition:transform .16s ease}
+.vero-account.open .vero-account-caret{transform:rotate(180deg)}
+.vero-account-menu{position:absolute;right:0;top:48px;width:250px;background:#fff;border:1px solid #E5E7EB;border-radius:11px;box-shadow:0 16px 38px rgba(0,38,62,.16);overflow:hidden;display:none;text-align:left;color:#1F2933}
+.vero-account.open .vero-account-menu{display:block}
+.vero-account-profile{padding:15px 16px 13px;border-bottom:1px solid #E5E7EB}.vero-account-profile b{display:block;font-size:12px;margin-bottom:4px}.vero-account-profile small{display:block;font-size:9px;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vero-account-item{width:100%;display:flex;align-items:center;gap:9px;border:0;background:#fff;padding:12px 16px;font:700 10px 'Segoe UI',Arial,sans-serif;color:#00263E;text-decoration:none;cursor:pointer}.vero-account-item:hover{background:#F4F6F8}.vero-account-item.admin{display:none}.vero-account-item.signout{border-top:1px solid #E5E7EB;color:#b42318}.vero-account-icon{width:18px;text-align:center;font-size:13px}
+
 </style>
 </head>
 
@@ -668,12 +681,9 @@ body {
         </div>
 
         <div class="header-right">
-            <div class="date">
-                September 2026
-            </div>
-
-            <div class="updated">
-                Enterprise risk profile
+            <div style="display:flex;align-items:center;justify-content:flex-end">
+                <div><div class="date">September 2026</div><div class="updated">Enterprise risk profile</div></div>
+                <div class="vero-account" id="veroAccount"><button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false"><div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span></button><div class="vero-account-menu" id="veroAccountMenu"><div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div><a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a><button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button></div></div>
             </div>
         </div>
 
@@ -1063,6 +1073,36 @@ body {
     </div>
 
 </div>
+
+
+<script>
+/* VERO GLOBAL ACCOUNT MENU */
+(()=>{
+ const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+ const TOKEN='vero_session_token', USER='vero_current_user';
+ const account=document.getElementById('veroAccount'); if(!account)return;
+ const trigger=document.getElementById('veroAccountTrigger');
+ const avatar=document.getElementById('veroAccountAvatar');
+ const name=document.getElementById('veroAccountName');
+ const full=document.getElementById('veroAccountFullName');
+ const email=document.getElementById('veroAccountEmail');
+ const admin=document.getElementById('veroUserManagement');
+ const signout=document.getElementById('veroAccountSignOut');
+ const initials=u=>(((u?.first_name||'').charAt(0)+(u?.last_name||'').charAt(0)).toUpperCase()||'U');
+ const fullName=u=>[u?.first_name,u?.last_name].filter(Boolean).join(' ').trim()||u?.email||'Signed in user';
+ function render(u){avatar.textContent=initials(u);name.textContent=fullName(u);full.textContent=fullName(u);email.textContent=u?.email||'';admin.style.display=u?.vero_role==='Administrator'?'flex':'none';}
+ async function load(){
+  const t=localStorage.getItem(TOKEN); if(!t){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));return;}
+  try{const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t,Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('auth');const d=await r.json();const u=d.user||d;localStorage.setItem(USER,JSON.stringify(u));render(u);}
+  catch(e){localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));}
+ }
+ trigger.addEventListener('click',e=>{e.stopPropagation();const open=account.classList.toggle('open');trigger.setAttribute('aria-expanded',String(open));});
+ document.addEventListener('click',e=>{if(!account.contains(e.target)){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
+ signout.addEventListener('click',async()=>{const t=localStorage.getItem(TOKEN);try{if(t)await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+t}})}catch(e){}localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html');});
+ load();
+})();
+</script>
 
 </body>
 </html>
