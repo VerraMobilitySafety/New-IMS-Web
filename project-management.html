@@ -357,12 +357,12 @@
   <div class="panel project-list">
    <div class="panel-head"><div><h2>Implementation Register</h2><span id="projectCount">Loading projects…</span></div><span>Click a project to open</span></div>
    <table class="table project-table">
-    <thead><tr><th>Project</th><th>Type</th><th>Customer</th><th>Project Owner</th><th>Status</th><th>Stage</th><th>Next Step</th></tr></thead>
+    <thead><tr><th>Project</th><th>Type</th><th>Customer</th><th>Action Required By</th><th>Status</th><th>Stage</th><th>Next Step</th></tr></thead>
     <tbody id="projectTableBody"><tr><td colspan="7" class="empty">Loading live projects from VERO…</td></tr></tbody>
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.23</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.24</span></footer>
 </div></main></div>
 
 
@@ -480,9 +480,10 @@ function normalise(p){
  const status=p.status||'Not Set';
  const s=status.toLowerCase();
  const life=s.includes('complete')?'completion':s.includes('progress')?'execution':'initiation';
- const workflowStage=p.workflow_stage||(s==='draft'?'New Project Request':s==='submitted'?'Project Setup':s==='planning'?'New Project Request':'Project Delivery');
+ const workflowStage=p.current_stage||p.workflow_stage||(s==='draft'?'New Project Request':s==='submitted'?'Project Setup':s==='planning'?'New Project Request':'Project Delivery');
  const nextStep=p.next_step||(workflowStage==='New Project Request'?'Complete New Project Request':workflowStage==='Project Setup'?'Complete Project Setup':'Open Project Workspace');
- return {raw:p,name:p.project_name||'Untitled Project',code:p.project_type||'',owner:p.project_owner||'Unassigned',customer:p.customer||'',status,stage:workflowStage,nextStep,stageKey:life,due:p.target_end_date||'',description:p.description||''};
+ const actionRequiredBy=p.action_required_by||(s==='draft'?p.project_initiator:null)||'—';
+ return {raw:p,name:p.project_name||'Untitled Project',code:p.project_type||'',owner:p.project_owner||'Unassigned',actionRequiredBy,customer:p.customer||'',status,stage:workflowStage,nextStep,stageKey:life,due:p.target_end_date||'',description:p.description||''};
 }
 function stageClass(v){return v==='initiation'?'mobilisation':v==='completion'?'delivery':'planning'}
 async function loadProjects(){
@@ -500,10 +501,10 @@ async function loadProjects(){
 function render(){
  const body=document.getElementById('projectTableBody');
  body.innerHTML=projects.map((p,i)=>{
-  const search=[p.name,p.code,p.owner,p.customer,p.stage,p.description].join(' ').toLowerCase();
+  const search=[p.name,p.code,p.owner,p.actionRequiredBy,p.customer,p.stage,p.description].join(' ').toLowerCase();
   return `<tr class="data project-row" data-stage="${esc(p.stageKey)}" data-search="${esc(search)}" onclick="openProject(${i})">
    <td><div class="project-name">${esc(p.name)}</div><div class="meta">${esc(p.description||'')}</div></td>
-   <td>${esc(p.code||'—')}</td><td>${esc(p.customer||'—')}</td><td>${esc(p.owner)}</td>
+   <td>${esc(p.code||'—')}</td><td>${esc(p.customer||'—')}</td><td><b>${esc(p.actionRequiredBy)}</b></td>
    <td><span class="status ${String(p.status).toLowerCase()==='draft'?'draft':'current'}">${esc(p.status)}</span></td>
    <td><span class="stage ${stageClass(p.stageKey)}">${esc(p.stage)}</span></td>
    <td><b style="font-size:10px">${esc(p.nextStep)}</b></td>
