@@ -303,6 +303,20 @@
 .request-save-note{min-width:260px!important}
 
 
+/* PROJECT APPROVAL v1.28 */
+.approval-shell{padding:22px 24px 110px}
+.approval-banner{background:#eef4dc;border:1px solid #d8e4af;border-radius:10px;padding:13px 15px;margin-bottom:18px;font-size:10px;line-height:1.55;color:#52641c}
+.approval-section{margin:0 0 18px}.approval-section h3{font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--grey);margin:0 0 9px}
+.approval-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.approval-item{background:#f8f7f6;border-radius:8px;padding:11px;min-height:62px}
+.approval-item.wide{grid-column:1/-1}.approval-item label{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.6px;color:var(--grey);font-weight:800;margin-bottom:5px}.approval-item strong{font-size:10px;white-space:pre-wrap;line-height:1.5}
+.approval-milestone{padding:10px 11px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;font-size:10px;line-height:1.45}
+.approval-decision{border-top:1px solid var(--line);margin-top:22px;padding-top:18px}.approval-decision h3{font-size:15px;margin:0 0 5px}.approval-decision p{font-size:10px;color:var(--grey);line-height:1.5;margin:0 0 14px}
+.approval-decision select,.approval-decision textarea{width:100%;border:1px solid #d7d3d0;border-radius:8px;padding:11px 12px;font:500 11px Montserrat;background:#fff}.approval-decision textarea{min-height:95px;resize:vertical}
+.approval-actions{position:fixed;right:18px;bottom:0;width:calc(min(980px,96vw) - 36px);z-index:125;background:#fff;border-top:1px solid var(--line);box-shadow:0 -10px 24px rgba(61,57,53,.08);padding:14px 0 16px;display:flex;justify-content:flex-end;gap:9px}
+.btn.return{background:#fff;color:#8f2929;border:1px solid #d9b6b6}.approval-error{display:none;background:#fff3f3;border:1px solid #e8bcbc;color:#8f2929;padding:10px 12px;border-radius:8px;font-size:10px;margin:12px 0}.approval-success{display:none;background:#f1f6df;border:1px solid #d8e4af;color:#52641c;padding:10px 12px;border-radius:8px;font-size:10px;margin:12px 0}
+@media(max-width:700px){.approval-grid{grid-template-columns:1fr}.approval-item.wide{grid-column:auto}.approval-actions{right:2vw;width:92vw}}
+
 /* OWNER-ONLY NEXT STEP ACTION */
 .next-step-action{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:7px;background:var(--green);color:var(--charcoal);padding:8px 10px;font:800 9px Montserrat,Verdana,Arial,sans-serif;cursor:pointer;text-decoration:none;line-height:1.2}
 .next-step-action:hover{filter:brightness(.96)}
@@ -393,7 +407,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.27</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.28</span></footer>
 </div></main></div>
 
 
@@ -432,6 +446,7 @@ const API_BASE='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsi
 const PROJECTS_API=API_BASE+'/projects';
 const PROJECT_REQUEST_API=id=>`${API_BASE}/projects/${id}/request`;
 const PROJECT_MILESTONES_API=id=>`${API_BASE}/projects/${id}/milestones`;
+const PROJECT_APPROVAL_API=id=>`${API_BASE}/projects/${id}/approval`;
 
 const VERO_TOKEN_KEY='vero_session_token';
 const VERO_USER_KEY='vero_current_user';
@@ -497,6 +512,7 @@ async function signOut(){
 
 let signedInUser=null;
 let accountManagers=[];
+let projectManagers=[];
 let projects=[],currentFilter='all';
 let currentProject=null,currentRequest=null,currentMilestones=[];
 let requestStep=0;
@@ -523,8 +539,13 @@ function ownsProjectAction(p){
  return Number.isFinite(ownerId)&&Number.isFinite(me)&&ownerId===me;
 }
 function nextStepCell(p,i){
- if(ownsProjectAction(p))return `<button type="button" class="next-step-action" onclick="event.stopPropagation();openProject(${i})">${esc(p.nextStep)} →</button>`;
+ if(ownsProjectAction(p))return `<button type="button" class="next-step-action" onclick="event.stopPropagation();openProjectAction(${i})">${esc(p.nextStep)} →</button>`;
  return `<span class="next-step-text">${esc(p.nextStep)}</span>`;
+}
+async function openProjectAction(i){
+ const p=projects[i];if(!p?.raw?.id)return;
+ if(p.stage==='Project Approval'){await openProjectApproval(p);return}
+ await openProject(i);
 }
 async function loadProjects(){
  try{
@@ -589,10 +610,13 @@ function newProject(){
 }
 function signedInUserName(){
  const first=(signedInUser?.first_name||'').trim(),last=(signedInUser?.last_name||'').trim();
- return [first,last].filter(Boolean).join(' ')||currentRequest?.project_initiator||currentRequest?.requested_by||'Signed-in VERO user';
+ return [first,last].filter(Boolean).join(' ')||signedInUser?.email||'Signed-in VERO user';
+}
+function projectInitiatorName(){
+ return currentRequest?.project_initiator||currentRequest?.requested_by||signedInUserName();
 }
 function projectInitiatorField(){
- return `<div class="form-field full"><label>Project Initiator</label><div style="border:1px solid #d7d3d0;border-radius:8px;padding:11px 12px;background:#f8f7f6;font-size:11px;font-weight:700;color:var(--charcoal)">${esc(signedInUserName())}<div style="font-size:8px;font-weight:600;color:var(--grey);margin-top:4px">Automatically recorded from your VERO account</div></div></div>`;
+ return `<div class="form-field full"><label>Project Initiator</label><div style="border:1px solid #d7d3d0;border-radius:8px;padding:11px 12px;background:#f8f7f6;font-size:11px;font-weight:700;color:var(--charcoal)">${esc(projectInitiatorName())}<div style="font-size:8px;font-weight:600;color:var(--grey);margin-top:4px">Automatically recorded from the original VERO initiator</div></div></div>`;
 }
 async function loadAccountManagers(){
  try{
@@ -643,7 +667,7 @@ function updateRequestStep(){document.querySelectorAll('.request-page').forEach(
 function updateBudget(){const f=document.getElementById('requestForm');if(!f)return;const n=x=>Number(f.elements[x]?.value)||0,rev=n('revenue'),cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+n(k),0);setText('budgetRevenue',money(rev||null));setText('budgetTotal',money(cost||null));setText('budgetMargin',rev>0?(((rev-cost)/rev)*100).toFixed(1)+'%':'—');}
 function formDataObject(){const f=document.getElementById('requestForm'),fd=new FormData(f),p=Object.fromEntries(fd.entries());['contract_po_received','system_productised','delivery_dates_confirmed','subcontractors_approved','civil_electrical_services','installation_commissioning_services'].forEach(k=>{p[k]=fd.has(k)?fd.get(k)==='true':null});['handover_contract','handover_schedule','handover_tender_response','handover_pricing','handover_contract_details'].forEach(k=>p[k]=fd.has(k));['revenue','labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget','approved_margin','quantity_of_systems','warranty_period_months'].forEach(k=>p[k]=p[k]===''||p[k]===undefined?null:Number(p[k]));['request_date','contract_start_date','contract_expiry_date'].forEach(k=>{if(p[k]==='')p[k]=null});p.requested_by=signedInUserName();return p;}
 function reviewItem(l,v){return `<div class="review-item"><label>${esc(l)}</label><strong>${esc(text(v))}</strong></div>`}
-function buildRequestReview(){const p=formDataObject(),cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(p[k])||0),0),rev=Number(p.revenue)||0;const ms=[...document.querySelectorAll('.repeat-block')].map(x=>({type:x.dataset.milestoneType,date:x.querySelector('.ms-date').value,name:x.querySelector('.ms-name').value})).filter(x=>x.name);document.getElementById('requestReview').innerHTML=`<div class="review-section"><h4>Administration</h4><div class="review-grid">${reviewItem('Project Initiator',signedInUserName())}${reviewItem('Title',p.project_title)}${reviewItem('Type',p.request_type)}${reviewItem('Account Manager',p.account_manager)}${reviewItem('Project Number',p.project_number)}</div></div><div class="review-section"><h4>Client</h4><div class="review-grid">${reviewItem('Client',p.client_name)}${reviewItem('Reference',p.client_reference)}${reviewItem('Contact',[p.client_contact_first_name,p.client_contact_last_name].filter(Boolean).join(' '))}${reviewItem('Phone',p.client_contact_phone)}</div></div><div class="review-section"><h4>Scope</h4><div class="review-grid">${reviewItem('Scope of Works',p.scope_of_works)}${reviewItem('Assumptions',p.system_assumptions)}</div></div><div class="review-section"><h4>Commercial</h4><div class="review-grid">${reviewItem('Revenue',money(rev||null))}${reviewItem('Total Cost',money(cost||null))}${reviewItem('Calculated Margin',rev>0?(((rev-cost)/rev)*100).toFixed(1)+'%':'—')}${reviewItem('Approved Margin',p.approved_margin===null?'—':p.approved_margin+'%')}</div></div><div class="review-section"><h4>Milestones</h4>${ms.length?ms.map(x=>`<div class="review-milestone"><b>${esc(x.type)}</b> • ${esc(fmtDate(x.date))}<br>${esc(x.name)}</div>`).join(''):'<div class="live-note">No milestones entered.</div>'}</div><div class="review-section"><h4>Delivery & Handover</h4><div class="review-grid">${reviewItem('Quantity of Systems',p.quantity_of_systems)}${reviewItem('Warranty',p.warranty_type)}${reviewItem('Spares',p.spares_type)}${reviewItem('Training',p.training_type)}</div></div>`;}
+function buildRequestReview(){const p=formDataObject(),cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(p[k])||0),0),rev=Number(p.revenue)||0;const ms=[...document.querySelectorAll('.repeat-block')].map(x=>({type:x.dataset.milestoneType,date:x.querySelector('.ms-date').value,name:x.querySelector('.ms-name').value})).filter(x=>x.name);document.getElementById('requestReview').innerHTML=`<div class="review-section"><h4>Administration</h4><div class="review-grid">${reviewItem('Project Initiator',projectInitiatorName())}${reviewItem('Title',p.project_title)}${reviewItem('Type',p.request_type)}${reviewItem('Account Manager',p.account_manager)}${reviewItem('Project Number',p.project_number)}</div></div><div class="review-section"><h4>Client</h4><div class="review-grid">${reviewItem('Client',p.client_name)}${reviewItem('Reference',p.client_reference)}${reviewItem('Contact',[p.client_contact_first_name,p.client_contact_last_name].filter(Boolean).join(' '))}${reviewItem('Phone',p.client_contact_phone)}</div></div><div class="review-section"><h4>Scope</h4><div class="review-grid">${reviewItem('Scope of Works',p.scope_of_works)}${reviewItem('Assumptions',p.system_assumptions)}</div></div><div class="review-section"><h4>Commercial</h4><div class="review-grid">${reviewItem('Revenue',money(rev||null))}${reviewItem('Total Cost',money(cost||null))}${reviewItem('Calculated Margin',rev>0?(((rev-cost)/rev)*100).toFixed(1)+'%':'—')}${reviewItem('Approved Margin',p.approved_margin===null?'—':p.approved_margin+'%')}</div></div><div class="review-section"><h4>Milestones</h4>${ms.length?ms.map(x=>`<div class="review-milestone"><b>${esc(x.type)}</b> • ${esc(fmtDate(x.date))}<br>${esc(x.name)}</div>`).join(''):'<div class="live-note">No milestones entered.</div>'}</div><div class="review-section"><h4>Delivery & Handover</h4><div class="review-grid">${reviewItem('Quantity of Systems',p.quantity_of_systems)}${reviewItem('Warranty',p.warranty_type)}${reviewItem('Spares',p.spares_type)}${reviewItem('Training',p.training_type)}</div></div>`;}
 async function saveMilestones(){
  const rows=[...document.querySelectorAll('.repeat-block')].map(x=>({existing_id:x.dataset.existingId,type:x.dataset.milestoneType,target_date:x.querySelector('.ms-date').value||null,milestone_name:x.querySelector('.ms-name').value.trim()})).filter(x=>x.milestone_name);
  const existingIds=new Set(currentMilestones.map(x=>String(x.id)));
@@ -695,6 +719,148 @@ async function saveRequest(e){
   if(note)note.textContent='Save failed — '+x.message;
   if(er){er.style.display='block';er.textContent='Unable to save the New Project Request. '+x.message}
   else alert('Unable to save the New Project Request. '+x.message);
+ }
+}
+
+
+async function loadProjectManagers(){
+ const r=await apiFetch(API_BASE+'/users/lookup?role='+encodeURIComponent('Project Manager'),{cache:'no-store'});
+ const d=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(d.message||'Unable to load Project Managers');
+ projectManagers=d.users||[];
+}
+function approvalItem(label,value,wide=false){
+ return `<div class="approval-item ${wide?'wide':''}"><label>${esc(label)}</label><strong>${esc(text(value))}</strong></div>`;
+}
+function yesNoText(v){return v===true?'Yes':v===false?'No':'—'}
+function docsHandoverText(r){
+ const x=[];
+ if(r.handover_contract)x.push('Contract');
+ if(r.handover_schedule)x.push('Schedule');
+ if(r.handover_tender_response)x.push('Tender Response');
+ if(r.handover_pricing)x.push('Pricing');
+ if(r.handover_contract_details)x.push('Contract Details');
+ return x.length?x.join(', '):'—';
+}
+function addressText(r,prefix){
+ return [r[prefix+'_address_line_1'],r[prefix+'_address_line_2'],r[prefix+'_city'],r[prefix+'_state_region'],r[prefix+'_postcode'],r[prefix+'_country']].filter(Boolean).join(', ')||'—';
+}
+function approvalReviewHtml(r,milestones){
+ const cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(r[k])||0),0);
+ const rev=Number(r.revenue)||0,calcMargin=rev>0?(((rev-cost)/rev)*100).toFixed(1)+'%':'—';
+ const ms=(milestones||[]).map(m=>`<div class="approval-milestone"><b>${esc(m.milestone_type||'Milestone')}</b> • ${esc(fmtDate(m.target_date))}<br>${esc(m.milestone_name||'')}</div>`).join('')||'<div class="live-note">No milestones entered.</div>';
+ return `
+ <div class="approval-banner"><b>Project Approval required.</b> Review the submitted New Project Request below. Approving it assigns the project to the selected Project Manager and moves the workflow to Project Setup.</div>
+ <section class="approval-section"><h3>Administration</h3><div class="approval-grid">
+  ${approvalItem('Project Initiator',r.project_initiator||r.requested_by)}
+  ${approvalItem('Account Manager',r.account_manager)}
+  ${approvalItem('Request Date',fmtDate(r.request_date))}
+  ${approvalItem('Type',r.request_type)}
+  ${approvalItem('Bid / Quote Number',r.bid_quote_number)}
+  ${approvalItem('Project Number',r.project_number)}
+  ${approvalItem('Title',r.project_title,true)}
+  ${approvalItem('Project Description',r.project_description,true)}
+  ${approvalItem('Contract / PO Received',yesNoText(r.contract_po_received))}
+ </div></section>
+ <section class="approval-section"><h3>Client</h3><div class="approval-grid">
+  ${approvalItem('Client Name',r.client_name)}
+  ${approvalItem('Client Reference',r.client_reference)}
+  ${approvalItem('Billing Address',addressText(r,'billing'),true)}
+  ${approvalItem('Delivery Address',addressText(r,'delivery'),true)}
+  ${approvalItem('Client Contact',[r.client_contact_first_name,r.client_contact_last_name].filter(Boolean).join(' '))}
+  ${approvalItem('Client Contact Phone',r.client_contact_phone)}
+  ${approvalItem('Background / Special Requirements',r.client_background_requirements,true)}
+ </div></section>
+ <section class="approval-section"><h3>System & Scope</h3><div class="approval-grid">
+  ${approvalItem('Master Contract',r.master_contract_url,true)}
+  ${approvalItem('Scope of Works',r.scope_of_works,true)}
+  ${approvalItem('Assumptions',r.system_assumptions,true)}
+  ${approvalItem('System Productised',yesNoText(r.system_productised))}
+  ${approvalItem('Engineering Development Demand Requests',r.engineering_demand_requests,true)}
+ </div></section>
+ <section class="approval-section"><h3>Contract & Budget</h3><div class="approval-grid">
+  ${approvalItem('Contract Start Date',fmtDate(r.contract_start_date))}
+  ${approvalItem('Contract Expiry Date',fmtDate(r.contract_expiry_date))}
+  ${approvalItem('Revenue',money(r.revenue))}
+  ${approvalItem('Total Cost Budget',money(cost))}
+  ${approvalItem('Calculated Margin',calcMargin)}
+  ${approvalItem('Approved Margin',r.approved_margin===null||r.approved_margin===undefined?'—':r.approved_margin+'%')}
+  ${approvalItem('Labour Cost',money(r.labour_cost_budget))}
+  ${approvalItem('Materials Cost',money(r.materials_cost_budget))}
+  ${approvalItem('Travel Cost',money(r.travel_cost_budget))}
+  ${approvalItem('Sub Contractor Cost',money(r.subcontractor_cost_budget))}
+  ${approvalItem('Other Cost',money(r.other_cost_budget))}
+  ${approvalItem('Other Cost Explanation',r.other_cost_explanation)}
+ </div></section>
+ <section class="approval-section"><h3>Milestones</h3>${ms}<div class="approval-grid" style="margin-top:9px">
+  ${approvalItem('Delivery Dates Confirmed Achievable',yesNoText(r.delivery_dates_confirmed))}
+  ${approvalItem('Subcontractors Approved',yesNoText(r.subcontractors_approved))}
+ </div></section>
+ <section class="approval-section"><h3>Delivery & Installation</h3><div class="approval-grid">
+  ${approvalItem('Quantity of Systems',r.quantity_of_systems)}
+  ${approvalItem('Civil / Electrical Works',yesNoText(r.civil_electrical_services))}
+  ${approvalItem('Installation & Commissioning',yesNoText(r.installation_commissioning_services))}
+  ${approvalItem('Delivery Comments',r.delivery_comments,true)}
+ </div></section>
+ <section class="approval-section"><h3>Warranty & Handover</h3><div class="approval-grid">
+  ${approvalItem('Warranty Period',r.warranty_period_months===null||r.warranty_period_months===undefined?'—':r.warranty_period_months+' months')}
+  ${approvalItem('Warranty Type',r.warranty_type)}
+  ${approvalItem('Warranty Comments',r.warranty_comments,true)}
+  ${approvalItem('Spares',r.spares_type)}
+  ${approvalItem('Spares Comments',r.spares_comments,true)}
+  ${approvalItem('Training',r.training_type)}
+  ${approvalItem('Training Comments',r.training_comments,true)}
+  ${approvalItem('Documentation Handover',docsHandoverText(r),true)}
+ </div></section>`;
+}
+async function openProjectApproval(p){
+ try{
+  currentProject=p.raw;
+  const [rr,mr,ar]=await Promise.all([
+   apiFetch(PROJECT_REQUEST_API(p.raw.id),{cache:'no-store'}),
+   apiFetch(PROJECT_MILESTONES_API(p.raw.id),{cache:'no-store'}),
+   apiFetch(PROJECT_APPROVAL_API(p.raw.id),{cache:'no-store'})
+  ]);
+  const rd=await rr.json().catch(()=>({})),md=await mr.json().catch(()=>({})),ad=await ar.json().catch(()=>({}));
+  if(!rr.ok)throw new Error(rd.message||'Unable to load New Project Request');
+  if(!ar.ok)throw new Error(ad.message||'Unable to load Project Approval');
+  if(!ad.is_action_owner)throw new Error('This Project Approval is assigned to another user.');
+  currentRequest=rd.request||{};currentMilestones=mr.ok?(md.milestones||[]):[];
+  await loadProjectManagers();
+  const body=document.querySelector('#setupPanel .setup-body');
+  document.querySelector('#setupPanel .setup-head h2').textContent='Project Approval';
+  document.querySelector('#setupPanel .setup-foot').textContent='VERO project approval • Assigned action owner only';
+  const options=projectManagers.map(u=>`<option value="${esc(u.id)}">${esc(u.display_name||[u.first_name,u.last_name].filter(Boolean).join(' ')||u.email)}</option>`).join('');
+  body.innerHTML=`<div class="approval-shell">${approvalReviewHtml(currentRequest,currentMilestones)}
+   <section class="approval-decision"><h3>Approval Decision</h3><p>Select the Project Manager who will own Project Setup if this request is approved. Comments are optional for approval and required when returning the request.</p>
+    <div class="form-grid">
+     <div class="form-field full"><label>Project Manager</label><select id="approvalProjectManager"><option value="">Select Project Manager…</option>${options}</select><div class="people-picker-note ${projectManagers.length?'':'people-picker-empty'}">${projectManagers.length?'Only active users assigned the Project Manager Business Role are available.':'No active users currently have the Project Manager Business Role.'}</div></div>
+     <div class="form-field full"><label>Approval Comments</label><textarea id="approvalComments" placeholder="Add approval comments, conditions, or the reason for returning the request…"></textarea></div>
+    </div>
+    <div id="approvalError" class="approval-error"></div><div id="approvalSuccess" class="approval-success"></div>
+   </section>
+   <div class="approval-actions"><button class="btn return" type="button" onclick="submitProjectApproval('Returned')">← Return to Initiator</button><button class="btn green" type="button" onclick="submitProjectApproval('Approved')">Approve Project →</button></div>
+  </div>`;
+  document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';
+ }catch(e){console.error(e);alert('VERO could not open the Project Approval. '+e.message)}
+}
+async function submitProjectApproval(decision){
+ const manager=document.getElementById('approvalProjectManager')?.value||'';
+ const comments=(document.getElementById('approvalComments')?.value||'').trim();
+ const er=document.getElementById('approvalError'),ok=document.getElementById('approvalSuccess');
+ if(er)er.style.display='none';if(ok)ok.style.display='none';
+ if(decision==='Approved'&&!manager){if(er){er.textContent='Select a Project Manager before approving the project.';er.style.display='block'}return}
+ if(decision==='Returned'&&!comments){if(er){er.textContent='Add comments explaining what the Project Initiator needs to update.';er.style.display='block'}return}
+ try{
+  const res=await apiFetch(PROJECT_APPROVAL_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision,comments,project_manager_user_id:manager||null})});
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(d.message||('Approval API returned '+res.status));
+  if(ok){ok.textContent=decision==='Approved'?`Project approved. ${d.project_manager||'The selected Project Manager'} now owns Project Setup.`:'Project returned to the Project Initiator for update.';ok.style.display='block'}
+  await loadProjects();
+  setTimeout(()=>closeSetup(),900);
+ }catch(e){
+  console.error(e);
+  if(er){er.textContent=e.message;er.style.display='block'}else alert(e.message);
  }
 }
 
