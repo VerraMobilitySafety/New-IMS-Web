@@ -138,7 +138,13 @@
 .project-tab.active{background:var(--charcoal);color:#fff;border-color:var(--charcoal)}
 .project-tools{display:flex;gap:8px;align-items:center}
 .project-search{width:240px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px 12px;font:500 11px Montserrat}
-.project-table{min-width:980px}.project-table .health{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800}
+.project-table{min-width:980px;table-layout:fixed}
+.project-table th:nth-child(1),.project-table td:nth-child(1){width:25%}
+.project-table th:nth-child(2),.project-table td:nth-child(2){width:16%}
+.project-table th:nth-child(3),.project-table td:nth-child(3){width:18%}
+.project-table th:nth-child(4),.project-table td:nth-child(4){width:11%}
+.project-table th:nth-child(5),.project-table td:nth-child(5){width:14%}
+.project-table th:nth-child(6),.project-table td:nth-child(6){width:16%}.project-table .health{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800}
 .health-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
 .health-dot.amber{background:var(--amber)} .health-dot.red{background:var(--red)} .health-dot.grey{background:var(--grey)}
 .progress{height:7px;background:#ece9e6;border-radius:6px;overflow:hidden;width:100px}
@@ -362,7 +368,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.25</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.26</span></footer>
 </div></main></div>
 
 
