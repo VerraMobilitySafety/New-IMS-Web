@@ -169,6 +169,12 @@
 .vero-account-icon{width:18px;text-align:center;font-size:13px}
 @media(max-width:720px){.vero-account-name{display:none}.vero-account-menu{right:0;width:230px}}
 
+
+.status-pill{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.02em}
+.status-pill.active{background:#e6f4ec;color:#1f6a45}.status-pill.invited{background:#fff4d8;color:#8a5b00}.status-pill.disabled{background:#f3e8e8;color:#8a3030}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap}.mini-btn{border:1px solid #d8dfdc;background:#fff;border-radius:7px;padding:6px 8px;font-size:11px;font-weight:800;cursor:pointer;color:#2b3732}.mini-btn:hover{border-color:#2c8259;color:#1f6a45}.mini-btn.danger:hover{border-color:#b74b4b;color:#9b2f2f}
+.invite-result{margin-top:14px;padding:14px;border:1px solid #b9dac8;background:#f3fbf6;border-radius:10px;display:none}.invite-result b{display:block;color:#123524;margin-bottom:7px}.invite-link-row{display:flex;gap:8px}.invite-link-row input{flex:1;min-width:0;border:1px solid #cbd7d1;border-radius:7px;padding:10px;font-size:12px;background:#fff}
+
 </style></head>
 <body><div class="app"><aside class="sidebar">
 <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -187,16 +193,16 @@
 <section class="global-hero"><div class="hero-content"><div class="hero-kicker">Administration</div><h1>User Management</h1><p>Control who can access VERO, their system access and Business Roles.</p><div class="hero-rule"></div></div>
 <div class="hero-tools"><input class="hero-search" placeholder="⌕   Search VERO..."><div class="vero-account" id="veroAccount"><button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false"><div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span></button><div class="vero-account-menu" id="veroAccountMenu"><div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div><a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a><button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button></div></div></div></section>
 <div class="admin-content" id="adminContent" style="display:none">
-<div class="admin-toolbar"><div class="admin-title"><h2>VERO Users</h2><p>Accounts are created by Administrators only. There is no public registration.</p></div><button class="btn green" onclick="openAddUser()">+ Add User</button></div>
-<div class="admin-only-note">Administrator area • New users can sign in immediately after their account is created.</div>
+<div class="admin-toolbar"><div class="admin-title"><h2>VERO Users</h2><p>Users are invited by Administrators and create their own password from a secure, single-use link.</p></div><button class="btn green" onclick="openAddUser()">+ Invite User</button></div>
+<div class="admin-only-note">Administrator area • Invitations expire after 72 hours and can only be used once.</div>
 <section class="panel"><div class="panel-head"><div><h2>User Register</h2><span id="userCount">Loading users…</span></div><span>VERO access</span></div>
-<div style="overflow:auto"><table class="table user-table"><thead><tr><th>User</th><th>Email</th><th>Job Title</th><th>Business Unit</th><th>Country</th><th>System Access</th><th>Business Roles</th><th>Status</th></tr></thead><tbody id="userBody"><tr><td colspan="8" class="empty">Loading VERO users…</td></tr></tbody></table></div></section>
-<footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Users • v1.1</span></footer></div>
+<div style="overflow:auto"><table class="table user-table"><thead><tr><th>User</th><th>Email</th><th>Job Title</th><th>Business Unit</th><th>Country</th><th>System Access</th><th>Business Roles</th><th>Status</th><th>Last Sign-in</th><th>Actions</th></tr></thead><tbody id="userBody"><tr><td colspan="10" class="empty">Loading VERO users…</td></tr></tbody></table></div></section>
+<footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Users • v1.2</span></footer></div>
 <div class="access-denied" id="accessDenied"><h2>Administrator access required</h2><p>This area is restricted to VERO Administrators.</p><button class="btn dark" onclick="location.href='index.html'">Return Home</button></div>
 </main></div>
 
 <div id="userPanel" class="user-backdrop" onclick="if(event.target===this)closeAddUser()"><section class="user-drawer">
-<div class="user-head"><div><small>VERO • ADMINISTRATION</small><h2 id="userDrawerTitle">Add User</h2></div><button class="user-close" onclick="closeAddUser()">×</button></div>
+<div class="user-head"><div><small>VERO • ADMINISTRATION</small><h2 id="userDrawerTitle">Invite User</h2></div><button class="user-close" onclick="closeAddUser()">×</button></div>
 <div class="user-body"><form id="userForm">
 <div class="user-grid">
 <div class="user-field"><label>First Name</label><input id="firstName" required></div>
@@ -207,10 +213,11 @@
 <div class="user-field"><label>Country</label><input id="country" value="Australia"></div>
 <div class="user-field"><label>System Access</label><select id="veroRole"><option value="User">User</option><option value="Administrator">Administrator</option></select></div>
 <div class="user-field full"><label>Business Roles</label><div id="businessRoleOptions" class="role-options"><span class="form-note">Loading Business Roles…</span></div><div class="form-note" style="margin-top:7px">Business Roles control which assignments this person can be selected for in VERO.</div></div>
-<div class="user-field full" id="passwordField"><label>Initial Password</label><input id="initialPassword" type="password" minlength="12" autocomplete="new-password" required><div class="form-note">Minimum 12 characters. VERO stores only the salted password hash. The user can sign in with this password immediately.</div></div>
+<div class="user-field full" id="inviteNote"><div class="form-note">VERO will create a secure invitation link valid for 72 hours. The invited person uses that link to choose their own password.</div></div>
 </div>
 <div class="form-error" id="userError"></div><div class="form-success" id="userSuccess"></div>
-<div class="user-actions"><button type="button" class="btn outline" onclick="closeAddUser()">Cancel</button><button type="submit" class="btn green" id="saveUserBtn">Create User</button></div>
+<div class="user-actions"><button type="button" class="btn outline" onclick="closeAddUser()">Cancel</button><button type="submit" class="btn green" id="saveUserBtn">Create Invitation</button></div>
+<div class="invite-result" id="inviteResult"><b>Invitation ready</b><div class="form-note" style="margin-bottom:8px">Copy this secure link and send it to the invited person. It expires in 72 hours.</div><div class="invite-link-row"><input id="inviteLink" readonly><button type="button" class="btn dark" onclick="copyInviteLink()">Copy Link</button></div></div>
 </form></div></section></div>
 
 <script>
@@ -228,60 +235,124 @@ async function apiFetch(path,options={}){
  return r;
 }
 function initials(u){return ((u?.first_name||'').charAt(0)+(u?.last_name||'').charAt(0)).toUpperCase()||'U'}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmtDate(v){if(!v)return '—';const d=new Date(v);return Number.isNaN(d.getTime())?esc(v):d.toLocaleString('en-AU',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}
 async function requireAdmin(){
  try{
   const r=await apiFetch('/auth/me',{cache:'no-store'});if(!r.ok)throw new Error('Unable to validate session');
-  const d=await r.json(),u=d.user;localStorage.setItem(USER_KEY,JSON.stringify(u));document.getElementById('userAvatar').textContent=initials(u);
+  const d=await r.json(),u=d.user;localStorage.setItem(USER_KEY,JSON.stringify(u));
+  const avatar=document.getElementById('veroAccountAvatar');if(avatar)avatar.textContent=initials(u);
   if(u?.vero_role!=='Administrator'){document.getElementById('accessDenied').style.display='block';return false}
   document.getElementById('adminContent').style.display='block';return true;
- }catch(e){if(e.message!=='Authentication required')loginRedirect();return false}
+ }catch(e){if(e.message!=='Authentication required'){console.error(e)}return false}
 }
 async function signOut(){
  const t=token();try{if(t)await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+t}})}catch(e){}
  clearSession();location.replace('login.html');
 }
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 let businessRoles=[],loadedUsers=[],editingUser=null;
+
 async function loadRoles(){
  const r=await apiFetch('/roles',{cache:'no-store'}),d=await r.json().catch(()=>({}));
  if(!r.ok)throw new Error(d.message||'Unable to load Business Roles');
- businessRoles=d.roles||[];
- renderRoleOptions([]);
+ businessRoles=d.roles||[];renderRoleOptions([]);
 }
 function renderRoleOptions(selectedIds=[]){
  const selected=new Set(selectedIds.map(Number)),box=document.getElementById('businessRoleOptions');
  box.innerHTML=businessRoles.map(r=>`<label class="role-option"><input type="checkbox" value="${r.id}" ${selected.has(Number(r.id))?'checked':''}><span><b>${esc(r.role_name)}</b><small>${esc(r.description||'VERO Business Role')}</small></span></label>`).join('')||'<span class="form-note">No active Business Roles configured.</span>';
 }
 function selectedRoleIds(){return [...document.querySelectorAll('#businessRoleOptions input:checked')].map(x=>Number(x.value))}
+function statusOf(u){return u.account_status|| (u.active===false?'Disabled':'Active')}
+function statusClass(s){return String(s||'').toLowerCase()}
 async function loadUsers(){
  const r=await apiFetch('/users',{cache:'no-store'});const d=await r.json().catch(()=>({}));
  if(r.status===403){document.getElementById('adminContent').style.display='none';document.getElementById('accessDenied').style.display='block';return}
  if(!r.ok)throw new Error(d.message||'Unable to load users');
  const users=Array.isArray(d)?d:(d.users||[]);loadedUsers=users;
  document.getElementById('userCount').textContent=users.length+' user'+(users.length===1?'':'s');
- document.getElementById('userBody').innerHTML=users.map(u=>`<tr class="data" onclick="openEditUser(${Number(u.id)})"><td><div class="user-name">${esc((u.first_name||'')+' '+(u.last_name||''))}</div><div class="edit-user">Edit user →</div></td><td>${esc(u.email)}</td><td>${esc(u.job_title||'—')}</td><td>${esc(u.business_unit||'—')}</td><td>${esc(u.country||'—')}</td><td><span class="role-pill ${u.vero_role==='Administrator'?'admin':'user'}">${esc(u.vero_role||'User')}</span></td><td><div class="business-pills">${(u.business_roles||[]).map(r=>`<span class="business-pill">${esc(r.role_name)}</span>`).join('')||'<span class="meta">None</span>'}</div></td><td><span class="active-pill">${u.active===false?'Inactive':'Active'}</span></td></tr>`).join('')||'<tr><td colspan="8" class="empty">No users found.</td></tr>';
+ document.getElementById('userBody').innerHTML=users.map(u=>{
+  const s=statusOf(u);
+  const actions=s==='Invited'
+   ? `<div class="row-actions"><button class="mini-btn" type="button" onclick="event.stopPropagation();resendInvite(${Number(u.id)})">New Link</button><button class="mini-btn danger" type="button" onclick="event.stopPropagation();revokeInvite(${Number(u.id)})">Revoke</button></div>`
+   : `<button class="mini-btn" type="button" onclick="event.stopPropagation();openEditUser(${Number(u.id)})">Manage</button>`;
+  return `<tr class="data" onclick="openEditUser(${Number(u.id)})"><td><div class="user-name">${esc(((u.first_name||'')+' '+(u.last_name||'')).trim()||u.email)}</div><div class="edit-user">Manage user →</div></td><td>${esc(u.email)}</td><td>${esc(u.job_title||'—')}</td><td>${esc(u.business_unit||'—')}</td><td>${esc(u.country||'—')}</td><td><span class="role-pill ${u.vero_role==='Administrator'?'admin':'user'}">${esc(u.vero_role||'User')}</span></td><td><div class="business-pills">${(u.business_roles||[]).map(r=>`<span class="business-pill">${esc(r.role_name)}</span>`).join('')||'<span class="meta">None</span>'}</div></td><td><span class="status-pill ${statusClass(s)}">${esc(s)}</span></td><td>${fmtDate(u.last_login_at)}</td><td>${actions}</td></tr>`;
+ }).join('')||'<tr><td colspan="10" class="empty">No users found.</td></tr>';
 }
-function openAddUser(){editingUser=null;document.getElementById('userForm').reset();document.getElementById('userDrawerTitle').textContent='Add User';document.getElementById('saveUserBtn').textContent='Create User';document.getElementById('passwordField').style.display='block';document.getElementById('initialPassword').required=true;document.getElementById('country').value='Australia';document.getElementById('veroRole').value='User';renderRoleOptions([]);document.getElementById('userError').style.display='none';document.getElementById('userSuccess').style.display='none';document.getElementById('userPanel').classList.add('show');document.body.style.overflow='hidden'}
-function openEditUser(id){const u=loadedUsers.find(x=>Number(x.id)===Number(id));if(!u)return;editingUser=u;document.getElementById('userForm').reset();firstName.value=u.first_name||'';lastName.value=u.last_name||'';userEmail.value=u.email||'';jobTitle.value=u.job_title||'';businessUnit.value=u.business_unit||'';country.value=u.country||'';veroRole.value=u.vero_role||'User';document.getElementById('userDrawerTitle').textContent='Manage '+((u.first_name||'')+' '+(u.last_name||'')).trim();document.getElementById('saveUserBtn').textContent='Save Business Roles';document.getElementById('passwordField').style.display='none';document.getElementById('initialPassword').required=false;renderRoleOptions((u.business_roles||[]).map(r=>r.id));document.getElementById('userError').style.display='none';document.getElementById('userSuccess').style.display='none';document.getElementById('userPanel').classList.add('show');document.body.style.overflow='hidden'}
+function resetMessages(){
+ document.getElementById('userError').style.display='none';
+ document.getElementById('userSuccess').style.display='none';
+ document.getElementById('inviteResult').style.display='none';
+ document.getElementById('inviteLink').value='';
+}
+function openAddUser(){
+ editingUser=null;document.getElementById('userForm').reset();resetMessages();document.getElementById('saveUserBtn').disabled=false;
+ document.getElementById('userDrawerTitle').textContent='Invite User';
+ document.getElementById('saveUserBtn').textContent='Create Invitation';
+ document.getElementById('inviteNote').style.display='block';
+ document.getElementById('country').value='Australia';document.getElementById('veroRole').value='User';
+ ['firstName','lastName','userEmail','jobTitle','businessUnit','country','veroRole'].forEach(id=>document.getElementById(id).disabled=false);
+ renderRoleOptions([]);document.getElementById('userPanel').classList.add('show');document.body.style.overflow='hidden';
+}
+function openEditUser(id){
+ const u=loadedUsers.find(x=>Number(x.id)===Number(id));if(!u)return;editingUser=u;document.getElementById('userForm').reset();resetMessages();
+ firstName.value=u.first_name||'';lastName.value=u.last_name||'';userEmail.value=u.email||'';jobTitle.value=u.job_title||'';businessUnit.value=u.business_unit||'';country.value=u.country||'';veroRole.value=u.vero_role||'User';
+ document.getElementById('userDrawerTitle').textContent='Manage '+(((u.first_name||'')+' '+(u.last_name||'')).trim()||u.email);
+ document.getElementById('saveUserBtn').textContent='Save Business Roles';document.getElementById('inviteNote').style.display='none';
+ ['firstName','lastName','userEmail','jobTitle','businessUnit','country','veroRole'].forEach(id=>document.getElementById(id).disabled=true);
+ renderRoleOptions((u.business_roles||[]).map(r=>r.id));document.getElementById('userPanel').classList.add('show');document.body.style.overflow='hidden';
+}
 function closeAddUser(){document.getElementById('userPanel').classList.remove('show');document.body.style.overflow=''}
+async function copyInviteLink(){
+ const input=document.getElementById('inviteLink');if(!input.value)return;
+ try{await navigator.clipboard.writeText(input.value);document.getElementById('userSuccess').textContent='Invitation link copied.';document.getElementById('userSuccess').style.display='block'}
+ catch(e){input.select();document.execCommand('copy')}
+}
+async function resendInvite(id){
+ try{
+  const r=await apiFetch('/users/'+id+'/resend-invite',{method:'POST'}),d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.message||'Unable to create a new invitation link');
+  const u=loadedUsers.find(x=>Number(x.id)===Number(id));editingUser=u||null;
+  if(u)openEditUser(id);
+  document.getElementById('inviteLink').value=d.invitation?.invite_url||'';
+  document.getElementById('inviteResult').style.display='block';
+  document.getElementById('userSuccess').textContent='New invitation created. The previous link is now invalid.';
+  document.getElementById('userSuccess').style.display='block';
+ }catch(e){alert(e.message)}
+}
+async function revokeInvite(id){
+ if(!confirm('Revoke this invitation? The invitation link will stop working and the user will be disabled.'))return;
+ try{
+  const r=await apiFetch('/users/'+id+'/revoke-invite',{method:'POST'}),d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.message||'Unable to revoke invitation');
+  await loadUsers();
+ }catch(e){alert(e.message)}
+}
 document.getElementById('userForm').addEventListener('submit',async e=>{
  e.preventDefault();const err=document.getElementById('userError'),ok=document.getElementById('userSuccess');err.style.display='none';ok.style.display='none';
  const role_ids=selectedRoleIds();
  try{
   if(editingUser){
-   const r=await apiFetch('/users/'+editingUser.id+'/roles',{method:'PUT',body:JSON.stringify({role_ids})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||'Unable to update Business Roles');
-   ok.textContent='Business Roles updated successfully.';ok.style.display='block';await loadUsers();setTimeout(closeAddUser,900);
+   const r=await apiFetch('/users/'+editingUser.id+'/roles',{method:'PUT',body:JSON.stringify({role_ids})});const d=await r.json().catch(()=>({}));
+   if(!r.ok)throw new Error(d.message||'Unable to update Business Roles');
+   ok.textContent='Business Roles updated successfully.';ok.style.display='block';await loadUsers();
   }else{
-   const payload={first_name:firstName.value.trim(),last_name:lastName.value.trim(),email:userEmail.value.trim(),job_title:jobTitle.value.trim()||null,business_unit:businessUnit.value.trim()||null,country:country.value.trim()||null,vero_role:veroRole.value,password:initialPassword.value};
-   const r=await apiFetch('/users',{method:'POST',body:JSON.stringify(payload)});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||'Unable to create user');
-   const newUser=d.user;if(role_ids.length&&newUser?.id){const rr=await apiFetch('/users/'+newUser.id+'/roles',{method:'PUT',body:JSON.stringify({role_ids})});const rd=await rr.json().catch(()=>({}));if(!rr.ok)throw new Error(rd.message||'User created, but Business Roles could not be assigned');}
-   ok.textContent='User created and Business Roles assigned successfully.';ok.style.display='block';await loadUsers();setTimeout(closeAddUser,1100);
+   const payload={first_name:firstName.value.trim(),last_name:lastName.value.trim(),email:userEmail.value.trim(),job_title:jobTitle.value.trim()||null,business_unit:businessUnit.value.trim()||null,country:country.value.trim()||null,vero_role:veroRole.value,role_ids};
+   const r=await apiFetch('/users/invite',{method:'POST',body:JSON.stringify(payload)});const d=await r.json().catch(()=>({}));
+   if(!r.ok)throw new Error(d.message||'Unable to create invitation');
+   document.getElementById('inviteLink').value=d.invitation?.invite_url||'';
+   document.getElementById('inviteResult').style.display='block';
+   ok.textContent='Invitation created successfully.';ok.style.display='block';
+   document.getElementById('saveUserBtn').disabled=true;
+   await loadUsers();
   }
  }catch(x){err.textContent=x.message;err.style.display='block'}
 });
 function toggleNavGroup(id){const g=document.getElementById(id);if(g)g.classList.toggle('open')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAddUser()});
-document.addEventListener('DOMContentLoaded',async()=>{if(await requireAdmin()){await loadRoles();await loadUsers()}});
+document.addEventListener('DOMContentLoaded',async()=>{
+ try{if(await requireAdmin()){await loadRoles();await loadUsers()}}
+ catch(e){console.error(e);document.getElementById('userBody').innerHTML='<tr><td colspan="10" class="empty">Unable to load User Management. Check the browser console.</td></tr>'}
+});
 </script>
 <script>
 /* VERO GLOBAL ACCOUNT MENU */
