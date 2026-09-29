@@ -370,6 +370,9 @@
 .commercial-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:12px 0}
 .commercial-card{border:1px solid #ddd;border-radius:10px;padding:12px;background:#fff}.commercial-card label{display:block;font-size:12px;color:#666;margin-bottom:4px}.commercial-card strong{font-size:18px}
 @media(max-width:900px){.commercial-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.required-star{color:var(--red);font-weight:900;margin-left:3px}.required-key{font-size:11px;color:var(--grey);margin:-5px 0 16px}.conditional-note{font-size:10px;color:var(--grey);margin-left:5px}
+.form-field.missing-required input,.form-field.missing-required textarea,.form-field.missing-required select{border-color:var(--red);box-shadow:0 0 0 2px rgba(201,74,74,.08)}
 </style></head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -436,7 +439,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.46</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.47</span></footer>
 </div></main></div>
 
 
@@ -692,6 +695,30 @@ function yesnoNA(name){const v=val(name,null);return `<div class="yesno"><div cl
 function input(label,name,type='text',extra=''){return `<div class="form-field"><label>${label}</label><input name="${name}" type="${type}" value="${esc(val(name,''))}" ${extra}></div>`}
 function textarea(label,name){return `<div class="form-field full"><label>${label}</label><textarea name="${name}">${esc(val(name,''))}</textarea></div>`}
 function address(prefix,title){return `<h4>${title}</h4><div class="address-grid"><div class="form-field wide"><label>Address Line 1</label><input name="${prefix}_address_line_1" value="${esc(val(prefix+'_address_line_1',''))}"></div><div class="form-field wide"><label>Address Line 2</label><input name="${prefix}_address_line_2" value="${esc(val(prefix+'_address_line_2',''))}"></div><div class="form-field"><label>City</label><input name="${prefix}_city" value="${esc(val(prefix+'_city',''))}"></div><div class="form-field"><label>State / Province / Region</label><input name="${prefix}_state_region" value="${esc(val(prefix+'_state_region',''))}"></div><div class="form-field"><label>Postal / Zip Code</label><input name="${prefix}_postcode" value="${esc(val(prefix+'_postcode',''))}"></div><div class="form-field"><label>Country</label><input name="${prefix}_country" value="${esc(val(prefix+'_country','Australia'))}"></div></div>`}
+const requiredAlways=new Set(['project_title','project_description','request_type','labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget']);
+function markRequiredFields(){
+ const f=document.getElementById('requestForm');if(!f)return;const internal=isInternalProject();
+ const req=new Set(requiredAlways);
+ if(internal)['internal_business_area','internal_project_sponsor','internal_primary_stakeholder','internal_business_need','scope_of_works','internal_expected_outcome','internal_approved_budget'].forEach(x=>req.add(x));
+ else ['bid_quote_number','contract_po_received','client_name','client_contact_first_name','client_contact_last_name','client_contact_phone','client_contact_email','scope_of_works','contract_start_date','contract_expiry_date','revenue','approved_margin','delivery_dates_confirmed','warranty_period_months','warranty_type','spares_type','training_type'].forEach(x=>req.add(x));
+ const checked=n=>f.querySelector(`[name="${n}"]:checked`)?.value;
+ if((Number(f.querySelector('[name="other_cost_budget"]')?.value)||0)>0)req.add('other_cost_explanation');
+ if(!internal&&checked('warranty_type')==='Other')req.add('warranty_comments');
+ if(!internal&&checked('spares_type')==='Agreed Quantity')req.add('spares_quantity');
+ if(!internal&&checked('training_type')==='Agreed Quantity')req.add('training_quantity');
+ if(!internal&&f.querySelector('[name="handover_other"]')?.checked)req.add('handover_other_details');
+ f.querySelectorAll('.required-star').forEach(x=>x.remove());
+ req.forEach(name=>{
+   f.querySelectorAll(`[name="${name}"]`).forEach(el=>{
+     const field=el.closest('.form-field');if(!field)return;
+     const label=field.querySelector(':scope > label')||field.querySelector('label');
+     if(label&&!label.querySelector('.required-star'))label.insertAdjacentHTML('beforeend','<span class="required-star">*</span>');
+   });
+ });
+ f.querySelectorAll('.request-page').forEach(page=>{
+   const h=page.querySelector('h3');if(h&&!page.querySelector('.required-key')&&page.querySelector('.required-star'))h.insertAdjacentHTML('afterend','<div class="required-key"><span class="required-star">*</span> Required for submission</div>');
+ });
+}
 function editRequest(){const body=document.querySelector('#setupPanel .setup-body');document.querySelector('#setupPanel .setup-head h2').textContent='New Project Request';document.querySelector('#setupPanel .setup-foot').textContent='VERO-native project workflow • PostgreSQL record';body.innerHTML=`<form id="requestForm" class="request-shell" onsubmit="saveRequest(event)"><div class="request-steps">${requestStepNames.map((x,i)=>`<button class="request-step ${i===0?'active':''}" type="button" onclick="goRequestStep(${i})">${i+1}. ${x}</button>`).join('')}</div>
 <section class="request-page active" data-step="0"><h3>Administration</h3><p class="intro">Identify the project and the type of request being handed into VERO.</p><div class="form-grid">${projectInitiatorField()}${veroProjectCodeField()}${input('Request Date','request_date','date','readonly')}${input('Bid / Quote Number','bid_quote_number')}${input('Project Title','project_title')}${textarea('Project Description','project_description')}<div class="form-field full"><label>Project Type</label><div class="choice-grid five">${['Camera Install and Commission','Product Type Approval','New Product Type','Supply of Camera System(s)','Software Development','Internal Project'].map(x=>choice('request_type',x,x)).join('')}</div></div><div class="form-field full"><label>Has a Contract / PO Been Received?</label>${yesno('contract_po_received')}</div></div></section>
 <section class="request-page" data-step="1" id="stage2Page">
@@ -793,7 +820,11 @@ ${input('Warranty Period (Months)','warranty_period_months','number','min="0"')}
 </div>
 </section>
 <section class="request-page" data-step="6"><h3>Review & Submit</h3><p class="intro">Review the request before submitting it for Project Approval. Save Draft remains available until you submit.</p><div id="requestReview"></div><div id="requestSaveError" class="req-error"></div><div id="requestSaveSuccess" class="req-success"></div></section>
-<div class="request-sticky"><button class="btn outline" id="requestPrev" type="button" onclick="changeRequestStep(-1)" style="visibility:hidden">← Previous</button><span class="request-save-note" id="saveNote">Draft changes are saved to VERO when you choose Save Draft.</span><div class="right"><button class="btn outline" type="submit" value="Draft">Save Draft</button><button class="btn green" id="requestNext" type="button" onclick="changeRequestStep(1)">Next →</button><button class="btn dark" id="requestSubmit" type="submit" value="Submitted" style="display:none">Submit Request</button></div></div></form>`;requestStep=0;renderMilestoneEditors();const dateField=document.querySelector('#requestForm [name="request_date"]');if(dateField&&!dateField.value)dateField.value=new Date().toISOString().slice(0,10);const requestForm=document.getElementById('requestForm');if(requestForm)requestForm.addEventListener('change',e=>{if(e.target?.name==='request_type')updateRequestTypeLayout();if(['warranty_type','spares_type','training_type','handover_other'].includes(e.target?.name))updateWarrantyLayout()});updateRequestTypeLayout();updateWarrantyLayout();updateRequestStep();updateBudget();loadMasterContract();}
+<div class="request-sticky"><button class="btn outline" id="requestPrev" type="button" onclick="changeRequestStep(-1)" style="visibility:hidden">← Previous</button><span class="request-save-note" id="saveNote">Draft changes are saved to VERO when you choose Save Draft.</span><div class="right"><button class="btn outline" type="submit" value="Draft">Save Draft</button><button class="btn green" id="requestNext" type="button" onclick="changeRequestStep(1)">Next →</button><button class="btn dark" id="requestSubmit" type="submit" value="Submitted" style="display:none">Submit Request</button></div></div></form>`;requestStep=0;renderMilestoneEditors();const dateField=document.querySelector('#requestForm [name="request_date"]');if(dateField&&!dateField.value)dateField.value=new Date().toISOString().slice(0,10);const requestForm=document.getElementById('requestForm');if(requestForm){
+ requestForm.addEventListener('change',e=>{if(e.target?.name==='request_type')updateRequestTypeLayout();if(['warranty_type','spares_type','training_type','handover_other'].includes(e.target?.name))updateWarrantyLayout();markRequiredFields()});
+ requestForm.addEventListener('input',e=>{if(e.target?.name==='other_cost_budget')markRequiredFields()});
+}
+updateRequestTypeLayout();updateWarrantyLayout();markRequiredFields();updateRequestStep();updateBudget();loadMasterContract();}
 function toggleDeliveryAddress(on){
  const block=document.getElementById('deliveryAddressBlock');
  if(block)block.style.display=on?'none':'block';
@@ -827,6 +858,7 @@ function updateRequestTypeLayout(){
  if(steps[5])steps[5].style.display=internal?'none':'';
  if(steps[6])steps[6].textContent=(internal?'6':'7')+'. Review & Submit';
  updateBudget();
+ markRequiredFields();
 
  const engYes=document.querySelector('input[name="engineering_development_required"][value="true"]');
  const engWrap=document.getElementById('engineeringDemandWrap');
