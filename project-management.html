@@ -427,7 +427,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.37</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.38</span></footer>
 </div></main></div>
 
 
@@ -781,7 +781,7 @@ async function loadMasterContract(){
  if(!currentProject?.id)return;
  const card=document.getElementById('masterContractCard'); if(!card)return;
  try{
-  const r=await apiFetch(`/projects/${currentProject.id}/documents`);
+  const r=await apiFetch(`${API_BASE}/projects/${currentProject.id}/documents`);
   if(!r.ok)throw new Error(`API returned ${r.status}`);
   const d=await r.json();
   const docs=(d.documents||[]).filter(x=>x.document_type==='Master Contract'&&x.status==='Current');
@@ -797,7 +797,7 @@ async function uploadMasterContract(){
  const card=document.getElementById('masterContractCard'); if(card)card.textContent='Uploading contract…';
  const fd=new FormData();fd.append('document_type','Master Contract');fd.append('document_title','Master Contract');fd.append('file',file);
  try{
-  const r=await apiFetch(`/projects/${currentProject.id}/documents`,{method:'POST',body:fd});
+  const r=await apiFetch(`${API_BASE}/projects/${currentProject.id}/documents`,{method:'POST',body:fd});
   const d=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error(d.message||`Upload failed (${r.status})`);
   input.value='';await loadMasterContract();
@@ -806,7 +806,7 @@ async function uploadMasterContract(){
 async function viewProjectDocument(documentId){
  if(!currentProject?.id)return;
  try{
-  const r=await apiFetch(`/projects/${currentProject.id}/documents/${documentId}/content`);
+  const r=await apiFetch(`${API_BASE}/projects/${currentProject.id}/documents/${documentId}/content`);
   if(!r.ok)throw new Error(`Unable to open document (${r.status})`);
   const blob=await r.blob();const url=URL.createObjectURL(blob);window.open(url,'_blank','noopener');setTimeout(()=>URL.revokeObjectURL(url),60000);
  }catch(e){alert(e.message)}
