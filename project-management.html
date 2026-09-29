@@ -427,7 +427,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.41</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.42</span></footer>
 </div></main></div>
 
 
@@ -780,6 +780,7 @@ function updateRequestTypeLayout(){
  const steps=document.querySelectorAll('.request-step');
  if(steps[1])steps[1].textContent='2. '+(internal?'Internal Stakeholders':'Client');
  if(steps[2])steps[2].textContent='3. '+(internal?'Scope':'System & Scope');
+ updateBudget();
 
  const engYes=document.querySelector('input[name="engineering_development_required"][value="true"]');
  const engWrap=document.getElementById('engineeringDemandWrap');
@@ -794,13 +795,11 @@ function changeRequestStep(d){goRequestStep(requestStep+d)}
 function updateRequestStep(){document.querySelectorAll('.request-page').forEach((x,i)=>x.classList.toggle('active',i===requestStep));document.querySelectorAll('.request-step').forEach((x,i)=>{x.classList.toggle('active',i===requestStep);x.classList.toggle('done',i<requestStep)});const prev=document.getElementById('requestPrev'),next=document.getElementById('requestNext'),submit=document.getElementById('requestSubmit');if(prev)prev.style.visibility=requestStep===0?'hidden':'visible';if(next)next.style.display=requestStep===requestStepNames.length-1?'none':'inline-block';if(submit)submit.style.display=requestStep===requestStepNames.length-1?'inline-block':'none';if(requestStep===3)updateBudget();if(requestStep===7)buildRequestReview();const body=document.querySelector('#setupPanel .setup-body');if(body)body.scrollTop=0;}
 function updateBudget(){
  const f=document.getElementById('requestForm');if(!f)return;
- const visibleField=name=>{
-   const fields=[...f.querySelectorAll(`[name="${name}"]`)];
-   return fields.find(x=>x.offsetParent!==null)||fields[0]||null;
- };
- const n=name=>Number(visibleField(name)?.value)||0;
+ const type=f.querySelector('[name="request_type"]')?.value||currentRequest?.request_type||'';
+ const internal=type==='Internal Project';
+ const scope=document.getElementById(internal?'internalBudgetStage':'externalBudgetStage');
+ const n=name=>Number(scope?.querySelector(`[name="${name}"]`)?.value)||0;
  const cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+n(k),0);
- const internal=(visibleField('request_type')?.value||currentRequest?.request_type)==='Internal Project';
 
  if(internal){
    const approved=n('internal_approved_budget');
