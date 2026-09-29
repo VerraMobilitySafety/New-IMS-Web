@@ -190,6 +190,8 @@
 .request-step.done{background:#eef4dc;border-color:#d8e4af;color:#52641c}
 .request-page h3{font-size:17px}.request-page h4{font-size:12px;margin:20px 0 10px}
 .form-field select{width:100%;border:1px solid #d7d3d0;border-radius:8px;padding:11px 12px;font:500 11px Montserrat;background:#fff}
+.people-picker-note{font-size:8px;color:var(--grey);margin-top:5px;line-height:1.45}
+.people-picker-empty{color:#8f2929}
 .choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.choice-grid.five{grid-template-columns:repeat(2,minmax(0,1fr))}
 .choice{position:relative}.choice input{position:absolute;opacity:0;pointer-events:none}.choice label{display:flex;align-items:center;min-height:48px;border:1px solid #d7d3d0;border-radius:9px;padding:11px 12px;font-size:10px;font-weight:700;cursor:pointer;background:#fff;text-transform:none;letter-spacing:0;color:var(--charcoal);margin:0}.choice input:checked+label{border-color:var(--green);box-shadow:inset 0 0 0 2px var(--green);background:#f5f8ea}
 .yesno{display:flex;gap:8px}.yesno .choice{flex:1}
@@ -360,7 +362,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.22</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.23</span></footer>
 </div></main></div>
 
 
@@ -463,6 +465,7 @@ async function signOut(){
 }
 
 let signedInUser=null;
+let accountManagers=[];
 let projects=[],currentFilter='all';
 let currentProject=null,currentRequest=null,currentMilestones=[];
 let requestStep=0;
@@ -550,6 +553,27 @@ function signedInUserName(){
 function projectInitiatorField(){
  return `<div class="form-field full"><label>Project Initiator</label><div style="border:1px solid #d7d3d0;border-radius:8px;padding:11px 12px;background:#f8f7f6;font-size:11px;font-weight:700;color:var(--charcoal)">${esc(signedInUserName())}<div style="font-size:8px;font-weight:600;color:var(--grey);margin-top:4px">Automatically recorded from your VERO account</div></div></div>`;
 }
+async function loadAccountManagers(){
+ try{
+  const r=await apiFetch(API_BASE+'/users/lookup?role='+encodeURIComponent('Account Manager'),{cache:'no-store'});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.message||'Unable to load Account Managers');
+  accountManagers=d.users||[];
+ }catch(e){
+  console.error('Account Manager lookup failed',e);
+  accountManagers=[];
+ }
+}
+function accountManagerField(){
+ const existing=val('account_manager','');
+ const options=accountManagers.map(u=>{
+  const name=(u.display_name||[u.first_name,u.last_name].filter(Boolean).join(' ')).trim();
+  return `<option value="${esc(name)}" ${String(existing)===String(name)?'selected':''}>${esc(name)}</option>`;
+ }).join('');
+ const legacy=existing&&!accountManagers.some(u=>(u.display_name||[u.first_name,u.last_name].filter(Boolean).join(' ')).trim()===existing)
+  ?`<option value="${esc(existing)}" selected>${esc(existing)} (existing value)</option>`:'';
+ return `<div class="form-field"><label>Account Manager</label><select name="account_manager"><option value="">Select Account Manager…</option>${legacy}${options}</select><div class="people-picker-note ${accountManagers.length?'':'people-picker-empty'}">${accountManagers.length?'Only active VERO users assigned the Account Manager Business Role are available.':'No active users currently have the Account Manager Business Role.'}</div></div>`;
+}
 function val(name,fallback=''){const v=currentRequest?.[name];return v===null||v===undefined?fallback:v}
 function checked(name,value){return String(val(name,''))===String(value)?'checked':''}
 function boolChecked(name,value){const v=currentRequest?.[name];return v===value?'checked':''}
@@ -559,7 +583,7 @@ function input(label,name,type='text',extra=''){return `<div class="form-field">
 function textarea(label,name){return `<div class="form-field full"><label>${label}</label><textarea name="${name}">${esc(val(name,''))}</textarea></div>`}
 function address(prefix,title){return `<h4>${title}</h4><div class="address-grid"><div class="form-field wide"><label>Address Line 1</label><input name="${prefix}_address_line_1" value="${esc(val(prefix+'_address_line_1',''))}"></div><div class="form-field wide"><label>Address Line 2</label><input name="${prefix}_address_line_2" value="${esc(val(prefix+'_address_line_2',''))}"></div><div class="form-field"><label>City</label><input name="${prefix}_city" value="${esc(val(prefix+'_city',''))}"></div><div class="form-field"><label>State / Province / Region</label><input name="${prefix}_state_region" value="${esc(val(prefix+'_state_region',''))}"></div><div class="form-field"><label>Postal / Zip Code</label><input name="${prefix}_postcode" value="${esc(val(prefix+'_postcode',''))}"></div><div class="form-field"><label>Country</label><input name="${prefix}_country" value="${esc(val(prefix+'_country','Australia'))}"></div></div>`}
 function editRequest(){const body=document.querySelector('#setupPanel .setup-body');document.querySelector('#setupPanel .setup-head h2').textContent='New Project Request';document.querySelector('#setupPanel .setup-foot').textContent='VERO-native project workflow • PostgreSQL record';body.innerHTML=`<form id="requestForm" class="request-shell" onsubmit="saveRequest(event)"><div class="request-steps">${requestStepNames.map((x,i)=>`<button class="request-step ${i===0?'active':''}" type="button" onclick="goRequestStep(${i})">${i+1}. ${x}</button>`).join('')}</div>
-<section class="request-page active" data-step="0"><h3>Administration Details</h3><p class="intro">Identify the request, its owner and the type of project being handed into VERO.</p><div class="form-grid">${projectInitiatorField()}${input('Date','request_date','date')}${input('Account Manager','account_manager')}${input('Bid / Quote Number','bid_quote_number')}${input('Title','project_title')}${input('Project Number','project_number')}${textarea('Project Description','project_description')}<div class="form-field full"><label>Type of Contract / Project Request</label><div class="choice-grid five">${['Camera Install and Commission','Product Type Approval','New Product Type','Supply of Camera System(s)','Software Development'].map(x=>choice('request_type',x,x)).join('')}</div></div><div class="form-field full"><label>Has a Contract / PO Been Received?</label>${yesno('contract_po_received')}</div></div></section>
+<section class="request-page active" data-step="0"><h3>Administration Details</h3><p class="intro">Identify the request, its owner and the type of project being handed into VERO.</p><div class="form-grid">${projectInitiatorField()}${input('Date','request_date','date')}${accountManagerField()}${input('Bid / Quote Number','bid_quote_number')}${input('Title','project_title')}${input('Project Number','project_number')}${textarea('Project Description','project_description')}<div class="form-field full"><label>Type of Contract / Project Request</label><div class="choice-grid five">${['Camera Install and Commission','Product Type Approval','New Product Type','Supply of Camera System(s)','Software Development'].map(x=>choice('request_type',x,x)).join('')}</div></div><div class="form-field full"><label>Has a Contract / PO Been Received?</label>${yesno('contract_po_received')}</div></div></section>
 <section class="request-page" data-step="1"><h3>Client Details</h3><p class="intro">Customer, billing, delivery and primary contact details.</p><div class="form-grid">${input('Client Name','client_name')}${input('Client Reference','client_reference')}</div>${address('billing','Billing Address')}<label class="inline-check"><input type="checkbox" id="sameAddress" onchange="copyBillingAddress(this.checked)"> Product delivery address is the same as billing</label>${address('delivery','Product Delivery Address')}<h4>Client Contact</h4><div class="form-grid">${input('First Name','client_contact_first_name')}${input('Last Name','client_contact_last_name')}${input('Phone','client_contact_phone')}${textarea('Comments / Background / Special Requirements','client_background_requirements')}</div></section>
 <section class="request-page" data-step="2"><h3>System & Scope</h3><p class="intro">Define the contracted scope and the technical assumptions that shape delivery.</p><div class="form-grid">${input('Master Contract URL / Reference','master_contract_url','url')}${textarea('Scope of Works','scope_of_works')}${textarea('Assumptions','system_assumptions')}<div class="form-field full"><label>Has the System Been Productised?</label>${yesno('system_productised')}</div>${textarea('What Engineering Development Demand Requests Relate to this Project (if any)?','engineering_demand_requests')}</div><div class="live-note">Document upload will be connected to VERO Documents; this field currently stores the contract reference/link.</div></section>
 <section class="request-page" data-step="3"><h3>Contract & Budget Details</h3><p class="intro">Capture the commercial baseline. Total cost and calculated margin update automatically.</p><div class="form-grid">${input('Contract Start Date','contract_start_date','date')}${input('Contract Expiry Date','contract_expiry_date','date')}${input('Revenue (AUD)','revenue','number','step="0.01" oninput="updateBudget()"')}${input('Labour Cost Budget','labour_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Materials Cost Budget','materials_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Travel Cost Budget','travel_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Sub Contractor Cost Budget','subcontractor_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Other Cost Budget','other_cost_budget','number','step="0.01" oninput="updateBudget()"')}${input('Other Cost Explanation','other_cost_explanation')}${input('Approved Margin (%)','approved_margin','number','step="0.001"')}</div><div class="budget-summary"><div class="budget-box"><label>Revenue</label><strong id="budgetRevenue">—</strong></div><div class="budget-box"><label>Total Cost Budget</label><strong id="budgetTotal">—</strong></div><div class="budget-box"><label>Calculated Margin</label><strong id="budgetMargin">—</strong></div></div></section>
@@ -636,7 +660,7 @@ async function saveRequest(e){
 function closeSetup(){document.getElementById('setupPanel').classList.remove('show');document.body.style.overflow=''}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSetup();closeProject()}});
 document.addEventListener('DOMContentLoaded',async()=>{
- if(await requireAuth())await loadProjects();
+ if(await requireAuth()){await loadAccountManagers();await loadProjects();}
 });
 </script>
 </body></html>
