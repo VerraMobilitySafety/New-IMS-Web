@@ -176,6 +176,13 @@
 .hero-tools{position:absolute;right:28px;top:22px;display:flex;align-items:center;gap:12px;z-index:3}
 .hero-search{width:280px;height:44px;background:#fff;border:1px solid rgba(255,255,255,.7);border-radius:10px;padding:0 14px;font:500 11px Montserrat;box-shadow:0 2px 10px rgba(0,0,0,.1)}
 </style>
+
+<style id="risk-layout-lock">
+/* Risk page is the canonical main/header geometry */
+.main{margin-left:260px!important;width:calc(100% - 260px)!important;padding:0 28px 35px!important;min-height:100vh!important}
+.global-hero{margin:0 -28px 24px!important}
+@media(max-width:720px){.main{margin-left:82px!important;width:calc(100% - 82px)!important;padding:0 24px 35px!important}.global-hero{margin:0 -24px 24px!important}}
+</style>
 </head><body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
