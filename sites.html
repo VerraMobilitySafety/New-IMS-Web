@@ -154,18 +154,48 @@
 .vero-account-icon{width:18px;text-align:center;font-size:13px}
 @media(max-width:720px){.vero-account-name{display:none}.vero-account-menu{right:0;width:230px}}
 
+
+/* Canonical VERO brand alignment from index v2.9 */
+.brand{margin-bottom:28px;height:82px;position:relative}
+.brand img{position:absolute;width:96px;max-height:56px;object-fit:contain;right:calc(50% + 16px);top:28px;transform:translateY(-50%)}
 </style></head><body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
- <img class="chev c1" src="verra-chevron.png" alt=""><img class="chev c2" src="verra-chevron.png" alt=""><img class="chev c3" src="verra-chevron.png" alt="">
+ <img class="chev c1" src="verra-chevron.png" alt="">
+ <img class="chev c2" src="verra-chevron.png" alt="">
+ <img class="chev c3" src="verra-chevron.png" alt="">
  <nav class="nav">
-  <div class="nav-section"><a href="index.html"><span class="ico">⌂</span><span>Home</span></a></div>
-  <div class="nav-section"><div class="nav-label">My Work</div><a class="placeholder" href="#" onclick="return false"><span class="ico">✓</span><span>My Actions</span></a></div>
-  <div class="nav-section"><div class="nav-label">Manage</div>
-   <a class="active" href="sites.html"><span class="ico">⌖</span><span>Sites</span></a>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">▦</span><span>Projects</span></a><a class="placeholder" href="#" onclick="return false"><span class="ico">✚</span><span>Safety</span></a><a class="placeholder" href="#" onclick="return false"><span class="ico">◆</span><span>Quality</span></a><a class="placeholder" href="#" onclick="return false"><span class="ico">♻</span><span>Environment</span></a><a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Insurance</span></a><a class="placeholder" href="#" onclick="return false"><span class="ico">↻</span><span>Business Continuity</span></a>
+  <div class="nav-section">
+   <a href="index.html"><span class="ico">⌂</span><span>Home</span></a>
   </div>
-  <div class="nav-section"><div class="nav-label">Governance</div><a href="documents-nav-v2.html"><span class="ico">▱</span><span>Documents</span></a><a class="placeholder" href="#" onclick="return false"><span class="ico">▥</span><span>Risks</span></a><a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Compliance</span></a><a class="placeholder" href="#" onclick="return false"><span class="ico">◎</span><span>Assurance</span></a></div>
- </nav><div class="side-foot">VERRA | VERO • v2.5<br>Prototype environment</div>
+  <div class="nav-section">
+   <div class="nav-label">My Work</div>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">✓</span><span>My Actions</span></a>
+  </div>
+  <div class="nav-section">
+   <div class="nav-label">Manage</div>
+   <a class="active" href="sites.html"><span class="ico">⌖</span><span>Sites</span></a>
+   <div class="nav-group" id="projectsNav">
+    <div class="nav-group-toggle" onclick="toggleNavGroup('projectsNav')"><span class="ico">▦</span><span>Projects</span><span class="nav-caret">›</span></div>
+    <div class="nav-sub">
+     <a class="placeholder" href="#" onclick="return false"><span>Maintenance</span></a>
+     <a href="project-management.html"><span>Implementation</span></a>
+    </div>
+   </div>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">✚</span><span>Safety</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◆</span><span>Quality</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">♻</span><span>Environment</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Insurance</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">↻</span><span>Business Continuity</span></a>
+  </div>
+  <div class="nav-section">
+   <div class="nav-label">Governance</div>
+   <a href="documents.html"><span class="ico">▱</span><span>Documents</span></a>
+   <a href="risk.html"><span class="ico">▥</span><span>Risks</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Compliance</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◎</span><span>Assurance</span></a>
+  </div>
+  </nav>
+ <div class="side-foot">VERRA | VERO • v2.9<br>Prototype environment</div>
 </aside>
 <main class="main"><section class="global-hero"><div class="hero-content"><h1>Sites</h1><div class="hero-rule"></div></div><div class="hero-tools"><input class="hero-search" placeholder="⌕   Search VERO..."><div class="vero-account" id="veroAccount"><button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false"><div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span></button><div class="vero-account-menu" id="veroAccountMenu"><div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div><a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a><button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button></div></div></div></section>
 <div class="sites-wrap"><section class="page-head"><div><h1>Verra Mobility Sites</h1><p>Select a site to open its VERO profile.</p></div><span class="site-count" id="siteCount">15 sites</span></section>
@@ -185,7 +215,7 @@
 <a class="site-card" data-site="Tamworth" href="site.html?site=tamworth"><span class="pin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 10.1A3.1 3.1 0 1 1 12 5.9a3.1 3.1 0 0 1 0 6.2z"/></svg></span><span class="site-info"><b>Tamworth</b><small>Australia</small></span><span class="site-arrow">›</span></a>
 <a class="site-card" data-site="Thornton" href="site.html?site=thornton"><span class="pin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 10.1A3.1 3.1 0 1 1 12 5.9a3.1 3.1 0 0 1 0 6.2z"/></svg></span><span class="site-info"><b>Thornton</b><small>Australia</small></span><span class="site-arrow">›</span></a>
 <a class="site-card" data-site="Wyong" href="site.html?site=wyong"><span class="pin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 10.1A3.1 3.1 0 1 1 12 5.9a3.1 3.1 0 0 1 0 6.2z"/></svg></span><span class="site-info"><b>Wyong</b><small>Australia</small></span><span class="site-arrow">›</span></a></section><div class="no-sites" id="noSites">No sites match your search.</div>
-<footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Sites • v2.5</span></footer></div></main></div>
+<footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Sites • v2.9</span></footer></div></main></div>
 <script>
 const filter=document.getElementById('siteFilter'), cards=[...document.querySelectorAll('.site-card')], count=document.getElementById('siteCount'), empty=document.getElementById('noSites');
 filter.addEventListener('input',()=>{const q=filter.value.trim().toLowerCase();let shown=0;cards.forEach(c=>{const on=c.dataset.site.toLowerCase().includes(q);c.style.display=on?'flex':'none';if(on)shown++;});count.textContent=shown+(shown===1?' site':' sites');empty.style.display=shown?'none':'block';});
