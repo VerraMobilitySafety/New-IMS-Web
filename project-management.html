@@ -206,6 +206,7 @@
 .budget-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 16px}.budget-box{background:#f8f7f6;border-radius:9px;padding:13px}.budget-box label{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.7px;color:var(--grey);font-weight:800}.budget-box strong{display:block;font-size:17px;margin-top:6px}
 .repeat-block{border:1px solid var(--line);border-radius:10px;padding:13px;margin-bottom:10px;background:#faf9f8}.repeat-row{display:grid;grid-template-columns:150px 1fr auto;gap:9px;align-items:end}.repeat-remove{border:0;background:#eeeae8;border-radius:7px;padding:10px 11px;cursor:pointer;font-weight:800}.add-row{border:1px dashed #bbb5b0;background:#fff;border-radius:8px;padding:10px 12px;font:800 10px Montserrat;cursor:pointer}
 .request-sticky{position:sticky;bottom:0;z-index:6;background:rgba(255,255,255,.97);border-top:1px solid var(--line);box-shadow:0 -8px 18px rgba(61,57,53,.06);padding:12px 0 0;margin-top:22px;display:flex;justify-content:space-between;gap:10px}.request-sticky .right{display:flex;gap:8px;margin-left:auto}.request-save-note{font-size:9px;color:var(--grey);align-self:center}
+.btn.delete-request{border:1px solid #d7a4a4;background:#fff;color:#9b3030}.btn.delete-request:hover{background:#fff4f4;border-color:#c56b6b}
 .review-section{margin-bottom:14px}.review-section h4{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--grey);margin:0 0 8px}.review-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.review-item{background:#f8f7f6;border-radius:8px;padding:10px}.review-item label{display:block;font-size:8px;text-transform:uppercase;color:var(--grey);font-weight:800;margin-bottom:4px}.review-item strong{font-size:10px;white-space:pre-wrap}.review-milestone{padding:9px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;font-size:10px}
 .req-error{display:none;background:#fff3f3;border:1px solid #e8bcbc;color:#8f2929;padding:10px 12px;border-radius:8px;font-size:10px;margin:12px 0}.req-success{display:none;background:#f1f6df;border:1px solid #d8e4af;color:#52641c;padding:10px 12px;border-radius:8px;font-size:10px;margin:12px 0}
 @media(max-width:700px){.choice-grid,.choice-grid.five,.address-grid,.budget-summary,.review-grid{grid-template-columns:1fr}.repeat-row{grid-template-columns:1fr}.request-sticky{flex-wrap:wrap}}
@@ -439,7 +440,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.51</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.52</span></footer>
 </div></main></div>
 
 
@@ -719,6 +720,34 @@ function markRequiredFields(){
    const h=page.querySelector('h3');if(h&&!page.querySelector('.required-key')&&page.querySelector('.required-star'))h.insertAdjacentHTML('afterend','<div class="required-key"><span class="required-star">*</span> Required for submission</div>');
  });
 }
+function canDeleteDraftRequest(){
+ if(!currentProject?.id)return false;
+ const status=String(currentRequest?.request_status||currentProject?.status||'').toLowerCase();
+ if(status!=='draft')return false;
+ const isAdmin=signedInUser?.vero_role==='Administrator';
+ const initiatorId=Number(currentRequest?.initiated_by_user_id),me=Number(signedInUser?.id);
+ return isAdmin||(Number.isFinite(initiatorId)&&Number.isFinite(me)&&initiatorId===me);
+}
+async function deleteDraftRequest(){
+ if(!canDeleteDraftRequest())return;
+ const code=currentProject?.project_code||('Project '+currentProject.id);
+ const title=currentProject?.project_name||currentRequest?.project_title||'this draft request';
+ if(!confirm(`Delete ${code} — ${title}?\n\nThis permanently deletes the Draft New Project Request and its associated project record and documents. This cannot be undone.`))return;
+ const note=document.getElementById('saveNote');
+ if(note)note.textContent='Deleting Draft New Project Request…';
+ try{
+  const res=await apiFetch(PROJECT_REQUEST_API(currentProject.id),{method:'DELETE'});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(data.message||('Delete failed. API returned '+res.status));
+  closeSetup();
+  currentProject=null;currentRequest={};currentMilestones=[];requestStep=0;
+  await loadProjects();
+ }catch(e){
+  console.error(e);
+  if(note)note.textContent='Delete failed — '+e.message;
+  alert('VERO could not delete this Draft New Project Request. '+e.message);
+ }
+}
 function editRequest(){const body=document.querySelector('#setupPanel .setup-body');document.querySelector('#setupPanel .setup-head h2').textContent='New Project Request';document.querySelector('#setupPanel .setup-foot').textContent='VERO-native project workflow • PostgreSQL record';body.innerHTML=`<form id="requestForm" class="request-shell" onsubmit="saveRequest(event)"><div class="request-steps">${requestStepNames.map((x,i)=>`<button class="request-step ${i===0?'active':''}" type="button" onclick="goRequestStep(${i})">${i+1}. ${x}</button>`).join('')}</div>
 <section class="request-page active" data-step="0"><h3>Administration</h3><p class="intro">Identify the project and the type of request being handed into VERO.</p><div class="form-grid">${projectInitiatorField()}${veroProjectCodeField()}${input('Request Date','request_date','date','readonly')}${input('Bid / Quote Number','bid_quote_number')}${input('Project Title','project_title')}${textarea('Project Description','project_description')}<div class="form-field full"><label>Project Type</label><div class="choice-grid five">${['Camera Install and Commission','Product Type Approval','New Product Type','Supply of Camera System(s)','Software Development','Internal Project'].map(x=>choice('request_type',x,x)).join('')}</div></div><div class="form-field full"><label>Has a Contract / PO Been Received?</label>${yesno('contract_po_received')}</div></div></section>
 <section class="request-page" data-step="1" id="stage2Page">
@@ -820,7 +849,7 @@ ${input('Warranty Period (Months)','warranty_period_months','number','min="0"')}
 </div>
 </section>
 <section class="request-page" data-step="6"><h3>Review & Submit</h3><p class="intro">Review the request before submitting it for Project Approval. Save Draft remains available until you submit.</p><div id="requestReview"></div><div id="requestSaveError" class="req-error"></div><div id="requestSaveSuccess" class="req-success"></div></section>
-<div class="request-sticky"><button class="btn outline" id="requestPrev" type="button" onclick="changeRequestStep(-1)" style="visibility:hidden">← Previous</button><span class="request-save-note" id="saveNote">Draft changes are saved to VERO when you choose Save Draft.</span><div class="right"><button class="btn outline" type="submit" value="Draft">Save Draft</button><button class="btn green" id="requestNext" type="button" onclick="changeRequestStep(1)">Next →</button><button class="btn dark" id="requestSubmit" type="submit" value="Submitted" style="display:none">Submit Request</button></div></div></form>`;requestStep=0;renderMilestoneEditors();const dateField=document.querySelector('#requestForm [name="request_date"]');if(dateField&&!dateField.value)dateField.value=new Date().toISOString().slice(0,10);const requestForm=document.getElementById('requestForm');if(requestForm){
+<div class="request-sticky"><button class="btn outline" id="requestPrev" type="button" onclick="changeRequestStep(-1)" style="visibility:hidden">← Previous</button><span class="request-save-note" id="saveNote">Draft changes are saved to VERO when you choose Save Draft.</span><div class="right">${canDeleteDraftRequest()?`<button class="btn delete-request" type="button" onclick="deleteDraftRequest()">Delete Request</button>`:''}<button class="btn outline" type="submit" value="Draft">Save Draft</button><button class="btn green" id="requestNext" type="button" onclick="changeRequestStep(1)">Next →</button><button class="btn dark" id="requestSubmit" type="submit" value="Submitted" style="display:none">Submit Request</button></div></div></form>`;requestStep=0;renderMilestoneEditors();const dateField=document.querySelector('#requestForm [name="request_date"]');if(dateField&&!dateField.value)dateField.value=new Date().toISOString().slice(0,10);const requestForm=document.getElementById('requestForm');if(requestForm){
  requestForm.addEventListener('change',e=>{if(e.target?.name==='request_type')updateRequestTypeLayout();if(['warranty_type','spares_type','training_type','handover_other'].includes(e.target?.name))updateWarrantyLayout();markRequiredFields()});
  requestForm.addEventListener('input',e=>{if(e.target?.name==='other_cost_budget')markRequiredFields()});
 }
