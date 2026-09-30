@@ -374,7 +374,7 @@
 
 .required-star{color:var(--red);font-weight:900;margin-left:3px}.required-key{font-size:11px;color:var(--grey);margin:-5px 0 16px}.conditional-note{font-size:10px;color:var(--grey);margin-left:5px}
 .form-field.missing-required input,.form-field.missing-required textarea,.form-field.missing-required select{border-color:var(--red);box-shadow:0 0 0 2px rgba(201,74,74,.08)}
-</style></head>
+</style>  <link rel="icon" type="image/png" href="/favicon.png">\n</head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt=""><img class="chev c2" src="verra-chevron.png" alt=""><img class="chev c3" src="verra-chevron.png" alt="">
@@ -592,8 +592,7 @@ function projectActionLabel(p){
 }
 function nextStepCell(p,i){
  const label=projectActionLabel(p);
- const approvalStage=p?.stage==='Finance Approval'||p?.stage==='Leadership Approval';
- if(ownsProjectAction(p)||approvalStage)return `<button type="button" class="next-step-action" onclick="event.stopPropagation();openProjectAction(${i})">${esc(label)} →</button>`;
+ if(ownsProjectAction(p))return `<button type="button" class="next-step-action" onclick="event.stopPropagation();openProjectAction(${i})">${esc(label)} →</button>`;
  return `<span class="next-step-text">${esc(label)}</span>`;
 }
 async function openProjectAction(i){
