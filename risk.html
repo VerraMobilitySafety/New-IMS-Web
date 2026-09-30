@@ -1,12 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Enterprise Risk Management</title>
-
-<style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><title>VERRA | VERO — Risks</title><style>
 
 :root {
     --verra-navy: #00263E;
@@ -601,96 +593,57 @@ body {
 .vero-account-profile{padding:15px 16px 13px;border-bottom:1px solid #E5E7EB}.vero-account-profile b{display:block;font-size:12px;margin-bottom:4px}.vero-account-profile small{display:block;font-size:9px;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vero-account-item{width:100%;display:flex;align-items:center;gap:9px;border:0;background:#fff;padding:12px 16px;font:700 10px 'Segoe UI',Arial,sans-serif;color:#00263E;text-decoration:none;cursor:pointer}.vero-account-item:hover{background:#F4F6F8}.vero-account-item.admin{display:none}.vero-account-item.signout{border-top:1px solid #E5E7EB;color:#b42318}.vero-account-icon{width:18px;text-align:center;font-size:13px}
 
-</style>
-</head>
 
-<body>
 
-<div class="sidebar">
-
-    <div class="brand">
-        <div class="brand-main">
-            VERRA <span>RISK</span>
-        </div>
-
-        <div class="brand-sub">
-            Enterprise Risk Management
-        </div>
+/* VERO RISK — canonical shell v2.8 */
+:root{--charcoal:#3D3935;--green:#A9C23F;--grey:#857874;--teal:#1D8296;--purple:#464E7E;--bg:#F7F8F7;--white:#fff;--line:#E5E1DE;--ink:#292725;--red:#C94A4A;--amber:#D49B35}
+body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.app{display:flex;min-height:100vh}.sidebar{width:260px;position:fixed;inset:0 auto 0 0;background:#252321;color:#fff;padding:22px 24px;overflow:hidden;height:100vh}
+.sidebar:before,.sidebar:after{content:none}.chev{position:absolute;z-index:1;opacity:.13;pointer-events:none}.chev.c1{width:110px;right:-32px;top:150px}.chev.c2{width:70px;left:14px;top:48%}.chev.c3{width:145px;right:-42px;bottom:65px}
+.brand,.nav,.side-foot{position:relative;z-index:2}.brand{margin-bottom:28px;height:82px;position:relative}.brand img{position:absolute;width:96px;max-height:56px;object-fit:contain;right:calc(50% + 16px);top:0}.vero-lockup{position:absolute;left:50%;top:0;height:56px;display:flex;align-items:center}.vero-divider{position:absolute;left:0;width:1px;height:34px;background:rgba(255,255,255,.42);transform:translateX(-.5px)}.vero-name{position:absolute;left:16px;color:var(--green);font-weight:800;letter-spacing:1.8px;font-size:18px;white-space:nowrap}
+.nav{display:block}.nav-section{margin:0 0 16px}.nav-label{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#9f9994;margin:0 0 6px 14px}.nav a,.nav-group-toggle{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:7px;border-left:3px solid transparent;color:#f7f7f6;text-decoration:none;font-size:12px;cursor:pointer}.nav a:hover,.nav a.active,.nav-group-toggle:hover,.nav-group.open>.nav-group-toggle{background:rgba(255,255,255,.08);border-left-color:var(--green)}.nav a.placeholder{opacity:.72;cursor:default}.nav a.placeholder:hover{background:rgba(255,255,255,.04);border-left-color:transparent}.nav-caret{margin-left:auto;font-size:10px;transition:transform .18s}.nav-group.open .nav-caret{transform:rotate(90deg)}.nav-sub{display:none;margin:2px 0 5px 34px}.nav-group.open .nav-sub{display:block}.nav-sub a{padding:7px 10px;font-size:11px}.ico{width:20px;text-align:center;font-size:15px}.side-foot{position:absolute;left:24px;bottom:24px;font-size:11px;line-height:1.7;color:#e4e1de}
+.main{margin-left:260px;width:calc(100% - 260px);padding:0 28px 35px;min-height:100vh}.global-hero{position:relative;height:245px;margin:0 -28px 24px;overflow:hidden;background-image:linear-gradient(90deg,rgba(9,49,63,.58),rgba(9,49,63,.12)),url("verra-governance-header.png");background-size:cover;background-position:center}.hero-content{position:absolute;left:48px;top:50%;transform:translateY(-50%);color:#fff;z-index:2}.hero-kicker{font-size:10px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase;margin-bottom:10px}.hero-content h1{font-size:32px;line-height:1.08;margin:0 0 8px;font-weight:800}.hero-content p{font-size:14px;margin:0;color:rgba(255,255,255,.94)}.hero-rule{width:64px;height:4px;background:var(--green);margin-top:18px}.hero-tools{position:absolute;right:28px;top:22px;display:flex;align-items:center;gap:12px;z-index:3}.hero-search{width:280px;height:44px;background:#fff;border:1px solid rgba(255,255,255,.7);border-radius:10px;padding:0 14px;font:500 11px Montserrat;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.dashboard-content{padding:0 0 0}.kpis{margin-top:0}.card,.panel{border:1px solid var(--line);box-shadow:0 3px 10px rgba(61,57,53,.05)}.header{display:none}.footer{margin-top:25px;border-top:1px solid var(--line);padding-top:15px;color:var(--grey);font-size:11px;display:flex;justify-content:space-between}
+.vero-account-name{color:#fff}.vero-account-item{font-family:Montserrat,Verdana,Arial,sans-serif}
+</style></head><body><div class="app"><aside class="sidebar">
+ <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
+ <img class="chev c1" src="verra-chevron.png" alt="">
+ <img class="chev c2" src="verra-chevron.png" alt="">
+ <img class="chev c3" src="verra-chevron.png" alt="">
+ <nav class="nav">
+  <div class="nav-section">
+   <a href="index.html"><span class="ico">⌂</span><span>Home</span></a>
+  </div>
+  <div class="nav-section">
+   <div class="nav-label">My Work</div>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">✓</span><span>My Actions</span></a>
+  </div>
+  <div class="nav-section">
+   <div class="nav-label">Manage</div>
+   <a href="sites.html"><span class="ico">⌖</span><span>Sites</span></a>
+   <div class="nav-group" id="projectsNav">
+    <div class="nav-group-toggle" onclick="toggleNavGroup('projectsNav')"><span class="ico">▦</span><span>Projects</span><span class="nav-caret">›</span></div>
+    <div class="nav-sub">
+     <a class="placeholder" href="#" onclick="return false"><span>Maintenance</span></a>
+     <a href="project-management.html"><span>Implementation</span></a>
     </div>
-
-    <div class="nav-section">
-
-        <div class="nav-label">Overview</div>
-
-        <div class="nav-item active">
-            <span class="nav-icon">◈</span>
-            Dashboard
-        </div>
-
-        <div class="nav-item">
-            <span class="nav-icon">◎</span>
-            Risk Landscape
-        </div>
-
-        <div class="nav-item">
-            <span class="nav-icon">▦</span>
-            Heatmap
-        </div>
-
-        <div class="nav-label">Management</div>
-
-        <div class="nav-item">
-            <span class="nav-icon">≡</span>
-            Risk Register
-        </div>
-
-        <div class="nav-item">
-            <span class="nav-icon">◇</span>
-            Controls
-        </div>
-
-        <div class="nav-item">
-            <span class="nav-icon">✓</span>
-            Treatments
-        </div>
-
-        <div class="nav-item">
-            <span class="nav-icon">◉</span>
-            Assurance
-        </div>
-
-    </div>
-
-</div>
-
-
-<div class="main">
-
-    <div class="header">
-
-        <div>
-            <div class="eyebrow">
-                Governance • Risk • Assurance
-            </div>
-
-            <h1>Enterprise Risk Management</h1>
-
-            <div class="subtitle">
-                Enterprise risk profile, controls and treatment performance
-            </div>
-        </div>
-
-        <div class="header-right">
-            <div style="display:flex;align-items:center;justify-content:flex-end">
-                <div><div class="date">September 2026</div><div class="updated">Enterprise risk profile</div></div>
-                <div class="vero-account" id="veroAccount"><button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false"><div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span></button><div class="vero-account-menu" id="veroAccountMenu"><div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div><a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a><button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button></div></div>
-            </div>
-        </div>
-
-    </div>
-
-
-    <!-- KPI CARDS -->
+   </div>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">✚</span><span>Safety</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◆</span><span>Quality</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">♻</span><span>Environment</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Insurance</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">↻</span><span>Business Continuity</span></a>
+  </div>
+  <div class="nav-section">
+   <div class="nav-label">Governance</div>
+   <a href="documents.html"><span class="ico">▱</span><span>Documents</span></a>
+   <a class="active" href="risk.html"><span class="ico">▥</span><span>Risks</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Compliance</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◎</span><span>Assurance</span></a>
+  </div>
+  </nav>
+ <div class="side-foot">VERRA | VERO • v2.8<br>Prototype environment</div>
+</aside><main class="main"><section class="global-hero"><div class="hero-content"><div class="hero-kicker">Governance</div><h1>Enterprise Risk Management</h1><p>Enterprise risk profile, controls and treatment performance</p><div class="hero-rule"></div></div><div class="hero-tools"><input class="hero-search" placeholder="⌕   Search VERO..."><div class="vero-account" id="veroAccount"><button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false"><div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span></button><div class="vero-account-menu" id="veroAccountMenu"><div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div><a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a><button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button></div></div></div></section><div class="dashboard-content"><!-- KPI CARDS -->
 
     <div class="kpis">
 
@@ -1068,14 +1021,7 @@ body {
     </div>
 
 
-    <div class="footer">
-        ERM Prototype • v0.1
-    </div>
-
-</div>
-
-
-<script>
+    <div class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Risks • v2.8</span></div></div></main></div><script>function toggleNavGroup(id){const g=document.getElementById(id);if(g)g.classList.toggle('open');}
 /* VERO GLOBAL ACCOUNT MENU */
 (()=>{
  const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
@@ -1102,7 +1048,4 @@ body {
  signout.addEventListener('click',async()=>{const t=localStorage.getItem(TOKEN);try{if(t)await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+t}})}catch(e){}localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html');});
  load();
 })();
-</script>
-
-</body>
-</html>
+</script></body></html>
