@@ -256,39 +256,65 @@
 .vero-account-icon{width:18px;text-align:center;font-size:13px}
 @media(max-width:720px){.vero-account-name{display:none}.vero-account-menu{right:0;width:230px}}
 
+
+/* CANONICAL VERO SIDEBAR — LOCKED TO INDEX v2.9 */
+.sidebar{width:260px;position:fixed;inset:0 auto 0 0;background:#252321;color:#fff;padding:22px 24px;overflow:hidden}
+.brand{margin-bottom:28px;height:82px;position:relative}
+.brand img{position:absolute;width:96px;max-height:56px;object-fit:contain;right:calc(50% + 16px);top:28px;transform:translateY(-50%)}
+.vero-lockup{position:absolute;left:50%;top:0;height:56px}
+.vero-divider{position:absolute;left:0;top:28px;width:1px;height:34px;background:rgba(255,255,255,.42);transform:translate(-.5px,-50%)}
+.vero-name{position:absolute;left:16px;top:28px;transform:translateY(-50%);color:var(--green);font-weight:800;letter-spacing:1.8px;font-size:18px;line-height:1;white-space:nowrap}
+.chev{position:absolute;z-index:1;opacity:.13;pointer-events:none}
+.nav{display:block}
+.nav-section{margin:0 0 16px}
+.nav-label{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#9f9994;margin:0 0 6px 14px}
+.nav a{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:7px;border-left:3px solid transparent;color:#f7f7f6;text-decoration:none;font-size:12px}
+.nav-group-toggle{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:7px;border-left:3px solid transparent;color:#f7f7f6;font-size:12px;cursor:pointer}
+.nav-caret{margin-left:auto;font-size:10px;transition:transform .18s ease}
+.nav-group.open .nav-caret{transform:rotate(90deg)}
+.nav-sub{display:none;margin:2px 0 5px 34px}
+.nav-group.open .nav-sub{display:block}
+.nav-sub a{padding:7px 10px;font-size:11px;color:#e7e4e1}
+.side-foot{position:absolute;left:24px;bottom:24px;font-size:11px;line-height:1.7;color:#e4e1de}
 </style></head>
 <body><div class="app"><aside class="sidebar">
-<div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
-<img class="chev c1" src="verra-chevron.png" alt=""><img class="chev c2" src="verra-chevron.png" alt=""><img class="chev c3" src="verra-chevron.png" alt="">
-<nav class="nav">
+ <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
+ <img class="chev c1" src="verra-chevron.png" alt="">
+ <img class="chev c2" src="verra-chevron.png" alt="">
+ <img class="chev c3" src="verra-chevron.png" alt="">
+ <nav class="nav">
   <div class="nav-section">
-    <a href="index.html"><span class="ico">⌂</span><span>Home</span></a>
+   <a href="index.html"><span class="ico">⌂</span><span>Home</span></a>
   </div>
   <div class="nav-section">
-    <div class="nav-label">My Work</div>
-    <a class="placeholder" href="#" onclick="return false"><span class="ico">✓</span><span>My Actions</span></a>
+   <div class="nav-label">My Work</div>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">✓</span><span>My Actions</span></a>
   </div>
   <div class="nav-section">
-    <div class="nav-label">Manage</div>
-    <a class="placeholder" href="#" onclick="return false"><span class="ico">⌖</span><span>Sites</span></a>
-    <a class="nav-parent active" href="project-management.html"><span class="ico">▦</span><span>Projects</span></a>
-    <a class="nav-sub placeholder" href="#" onclick="return false"><span class="ico">•</span><span>Maintenance</span></a>
-    <a class="nav-sub active" href="project-management.html"><span class="ico">•</span><span>Implementation</span></a>
-    <a class="placeholder" href="#" onclick="return false"><span class="ico">✚</span><span>Safety</span></a>
-    <a class="placeholder" href="#" onclick="return false"><span class="ico">◆</span><span>Quality</span></a>
-    <a class="placeholder" href="#" onclick="return false"><span class="ico">♻</span><span>Environment</span></a>
-    <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Insurance</span></a>
-    <a class="placeholder" href="#" onclick="return false"><span class="ico">↻</span><span>Business Continuity</span></a>
+   <div class="nav-label">Manage</div>
+   <a href="sites.html"><span class="ico">⌖</span><span>Sites</span></a>
+   <div class="nav-group open" id="projectsNav">
+    <div class="nav-group-toggle" onclick="toggleNavGroup('projectsNav')"><span class="ico">▦</span><span>Projects</span><span class="nav-caret">›</span></div>
+    <div class="nav-sub">
+     <a class="placeholder" href="#" onclick="return false"><span>Maintenance</span></a>
+     <a class="active" href="project-management.html"><span>Implementation</span></a>
+    </div>
+   </div>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">✚</span><span>Safety</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◆</span><span>Quality</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">♻</span><span>Environment</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Insurance</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">↻</span><span>Business Continuity</span></a>
   </div>
   <div class="nav-section">
-    <div class="nav-label">Governance</div>
-    <a href="documents.html"><span class="ico">▱</span><span>Documents</span></a>
-    <a class="placeholder" href="#" onclick="return false"><span class="ico">▥</span><span>Risks</span></a>
-    <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Compliance</span></a>
-    <a class="placeholder" href="#" onclick="return false"><span class="ico">◎</span><span>Assurance</span></a>
+   <div class="nav-label">Governance</div>
+   <a href="documents.html"><span class="ico">▱</span><span>Documents</span></a>
+   <a href="risk.html"><span class="ico">▥</span><span>Risks</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Compliance</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◎</span><span>Assurance</span></a>
   </div>
-</nav>
-<div class="side-foot">VERRA | VERO • v2.5<br>Prototype environment</div>
+  </nav>
+ <div class="side-foot">VERRA | VERO • v2.9<br>Prototype environment</div>
 </aside><main class="main">
 <section class="workspace-hero">
  <div class="hero-content"><a class="back-link" href="project-management.html">‹ Back to Implementation</a><div class="hero-kicker">Project Workspace</div><h1 id="heroName">Customer Implementation — Project Atlas</h1><p id="heroCustomer">Customer: Example Customer</p><div class="hero-rule"></div></div>
@@ -540,4 +566,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSetup()});
 })();
 </script>
 
+
+<script>
+function toggleNavGroup(id){const group=document.getElementById(id);if(group)group.classList.toggle('open');}
+</script>
 </body></html>
