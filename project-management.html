@@ -620,7 +620,8 @@ function render(){
  const body=document.getElementById('projectTableBody');
  body.innerHTML=projects.map((p,i)=>{
   const search=[p.name,p.owner,p.actionRequiredBy,p.customer,p.stage,p.description].join(' ').toLowerCase();
-  const canOpenRow=!(String(p.status).toLowerCase()==='draft'||p.stage==='New Project Request')||ownsProjectAction(p);
+  const restrictedApproval=p.stage==='Finance Approval'||p.stage==='Leadership Approval';
+  const canOpenRow=restrictedApproval?ownsProjectAction(p):(!(String(p.status).toLowerCase()==='draft'||p.stage==='New Project Request')||ownsProjectAction(p));
   return `<tr class="data project-row" data-stage="${esc(p.stageKey)}" data-search="${esc(search)}" ${canOpenRow?`onclick="openProject(${i})"`:''}>
    <td><div class="project-name">${esc(p.name)}</div><div class="meta">${esc(p.description||'')}</div></td>
    <td>${esc(p.customer||'—')}</td><td><b>${esc(p.actionRequiredBy)}</b></td>
