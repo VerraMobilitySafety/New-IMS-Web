@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1489,9 +1489,28 @@ async function saveProjectSetup(e){
 }
 
 
-function financeApprovalReviewHtml(r,s){
+function financeApprovalProgressHtml(fa){
+ const approvals=Array.isArray(fa?.approvals)?fa.approvals:[];
+ if(!approvals.length)return '';
+ const rows=approvals.map(a=>{
+  const decision=a.decision||'Pending';
+  const icon=decision==='Approved'?'✓':decision==='Returned'?'↩':decision==='Cancelled'?'—':'…';
+  const decided=a.decided_at?fmtDate(a.decided_at):'Awaiting decision';
+  return `<div style="display:grid;grid-template-columns:minmax(180px,1fr) 130px minmax(150px,.8fr);gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #e8e5e2">
+   <div><b>${esc(a.approver_name||a.approver_email||'Finance Approver')}</b><div style="font-size:12px;color:#857874;margin-top:2px">${esc(a.approver_email||'')}</div></div>
+   <div><span style="display:inline-flex;align-items:center;gap:6px;font-weight:800;color:#3D3935">${icon} ${esc(decision)}</span></div>
+   <div style="font-size:12px;color:#857874">${esc(decided)}</div>
+  </div>`;
+ }).join('');
+ return `<section class="approval-section"><h3>Finance Approval Progress</h3>
+  <div class="approval-banner" style="margin-bottom:12px"><b>${Number(fa.approved_count)||0} of ${Number(fa.total_required)||0} approved.</b> The project remains in Finance Approval until every required Finance Approver has approved. Any Finance Approver can return Project Setup for changes.</div>
+  <div>${rows}</div>
+ </section>`;
+}
+function financeApprovalReviewHtml(r,s,fa){
  const requestCost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(r?.[k])||0),0);
- return `<div class="approval-banner"><b>Finance Approval required.</b> Review the approved commercial request and completed Project Setup. Approval moves the project to Leadership Approval; return sends it back to the assigned Project Manager.</div>
+ return `<div class="approval-banner"><b>Finance Approval required.</b> Each assigned Finance Approver reviews the same approved commercial request and completed Project Setup. Leadership Approval begins only after all required Finance Approvers approve.</div>
+ ${financeApprovalProgressHtml(fa)}
  <section class="approval-section"><h3>Approved Request</h3><div class="approval-grid">
   ${approvalItem('Project',r?.project_title||currentProject?.project_name)}
   ${approvalItem('Client',r?.client_name||currentProject?.customer)}
@@ -1529,19 +1548,19 @@ async function openFinanceApproval(p){
   const res=await apiFetch(FINANCE_APPROVAL_API(p.raw.id),{cache:'no-store'});
   const d=await res.json().catch(()=>({}));
   if(!res.ok)throw new Error(d.message||'Unable to load Finance Approval');
-  if(!d.is_action_owner)throw new Error('This Finance Approval is assigned to another user.');
   currentRequest=d.request||{};
   currentProjectSetup=d.setup||{};
+  const fa=d.finance_approval||{};
   const body=document.querySelector('#setupPanel .setup-body');
   document.querySelector('#setupPanel .setup-head h2').textContent='Finance Approval';
-  document.querySelector('#setupPanel .setup-foot').textContent='VERO finance approval • Assigned Finance Approver only';
-  body.innerHTML=`<div class="approval-shell">${financeApprovalReviewHtml(currentRequest,currentProjectSetup)}
-   <section class="approval-decision"><h3>Finance Decision</h3><p>Confirm the commercial setup is ready to proceed. Comments are optional for approval and required when returning the setup to the Project Manager.</p>
+  document.querySelector('#setupPanel .setup-foot').textContent='VERO finance approval • All required Finance Approvers must approve';
+  const decisionSection=d.is_action_owner?`<section class="approval-decision"><h3>Your Finance Decision</h3><p>Your approval is recorded independently. Comments are optional for approval and required when returning the setup to the Project Manager.</p>
     <div class="form-grid"><div class="form-field full"><label>Finance Comments</label><textarea id="financeApprovalComments" placeholder="Add finance comments, conditions, or the reason for returning Project Setup…"></textarea></div></div>
     <div id="financeApprovalError" class="approval-error"></div><div id="financeApprovalSuccess" class="approval-success"></div>
    </section>
-   <div class="approval-actions"><button class="btn return" type="button" onclick="submitFinanceApproval('Returned')">← Return to Project Manager</button><button class="btn green" type="button" onclick="submitFinanceApproval('Approved')">Approve → Leadership Approval</button></div>
-  </div>`;
+   <div class="approval-actions"><button class="btn return" type="button" onclick="submitFinanceApproval('Returned')">← Return to Project Manager</button><button class="btn green" type="button" onclick="submitFinanceApproval('Approved')">Record My Approval →</button></div>`:
+   `<section class="approval-decision"><h3>Your Finance Decision</h3><p>${fa.my_decision?`Your decision for this approval round is <b>${esc(fa.my_decision)}</b>.`:'You do not have a pending Finance Approval action for this round.'}</p></section>`;
+  body.innerHTML=`<div class="approval-shell">${financeApprovalReviewHtml(currentRequest,currentProjectSetup,fa)}${decisionSection}</div>`;
   document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';
  }catch(e){console.error(e);alert('VERO could not open Finance Approval. '+e.message)}
 }
@@ -1554,9 +1573,14 @@ async function submitFinanceApproval(decision){
   const res=await apiFetch(FINANCE_APPROVAL_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision,comments})});
   const d=await res.json().catch(()=>({}));
   if(!res.ok)throw new Error(d.message||('Finance Approval API returned '+res.status));
-  if(ok){ok.textContent=decision==='Approved'?`Finance approved. ${d.action_required_by||'The Leadership Approver'} now owns Leadership Approval.`:'Project Setup returned to the Project Manager.';ok.style.display='block'}
+  const fa=d.finance_approval||{};
+  if(ok){
+   ok.textContent=decision==='Returned'?'Project Setup returned to the Project Manager.':
+    (d.current_stage==='Leadership Approval'?`Finance approval complete. ${d.action_required_by||'The Leadership Approver'} now owns Leadership Approval.`:`Your approval is recorded. ${fa.approved_count||0} of ${fa.total_required||0} Finance Approvers have approved; ${fa.pending_count||0} still pending.`);
+   ok.style.display='block';
+  }
   await loadProjects();
-  setTimeout(()=>closeSetup(),900);
+  setTimeout(()=>closeSetup(),1200);
  }catch(e){console.error(e);if(er){er.textContent=e.message;er.style.display='block'}else alert(e.message)}
 }
 
