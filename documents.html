@@ -316,11 +316,25 @@
 </div></div>
 
 <div id="requestBack" class="modal-back" onclick="if(event.target===this)closeRequest()"><div class="drawer">
- <div class="drawer-head"><button class="close" onclick="closeRequest()">×</button><small>DOCUMENT CONTROL</small><h2 id="requestTitle">Request New Document</h2><small>Submit directly to the Document Controller.</small></div>
+ <div class="drawer-head"><button class="close" onclick="closeRequest()">×</button><small>DOCUMENT CONTROL</small><h2 id="requestTitle">Request New Document</h2><small id="requestSubtitle">Submit a request for a new Governance controlled document.</small></div>
  <div class="drawer-body">
-  <div class="detail"><label>Proposed purpose</label><textarea id="reqText" style="width:100%;min-height:100px;border:1px solid var(--line);border-radius:7px;padding:10px;font:13px Arial" placeholder="Briefly explain what the document is required for."></textarea></div>
-  <div class="detail" style="margin-top:12px"><label>Requested by</label><strong>Current user</strong></div>
-  <div class="drawer-actions"><button class="btn green" onclick="submitRequest()">Submit Request</button><button class="btn outline" onclick="closeRequest()">Cancel</button></div>
+  <div id="newDocumentRequestFields">
+   <div class="detail"><label>Document Title *</label><input id="reqTitle" type="text" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;font:13px Montserrat,Verdana,Arial,sans-serif" placeholder="e.g. Contractor Management Procedure"></div>
+   <div class="detail-grid" style="margin-top:12px">
+    <div class="detail"><label>Document Type</label><select id="reqType" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;background:#fff;font:13px Montserrat,Verdana,Arial,sans-serif"><option value="">Select type…</option><option>Policy</option><option>Procedure</option><option>Standard</option><option>Work Instruction</option><option>Management Plan</option><option>Form</option><option>Template</option><option>Guideline</option></select></div>
+    <div class="detail"><label>Proposed Owner</label><input id="reqOwner" type="text" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;font:13px Montserrat,Verdana,Arial,sans-serif" placeholder="e.g. Governance"></div>
+   </div>
+   <div class="detail" style="margin-top:12px"><label>Why is this document required? *</label><textarea id="reqReason" style="width:100%;min-height:105px;border:1px solid var(--line);border-radius:7px;padding:10px;font:13px Montserrat,Verdana,Arial,sans-serif" placeholder="Explain the business need, requirement or gap this document will address."></textarea></div>
+   <div class="detail" style="margin-top:12px"><label>Additional Information</label><textarea id="reqAdditional" style="width:100%;min-height:80px;border:1px solid var(--line);border-radius:7px;padding:10px;font:13px Montserrat,Verdana,Arial,sans-serif" placeholder="Optional context, references or other information for the Document Controller."></textarea></div>
+   <div class="detail" style="margin-top:12px"><label>Requested By</label><strong id="reqRequestedBy">Current user</strong></div>
+   <div id="requestMessage" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-size:12px"></div>
+   <div class="drawer-actions"><button id="submitRequestBtn" class="btn green" onclick="submitRequest()">Submit Request</button><button class="btn outline" onclick="closeRequest()">Cancel</button></div>
+  </div>
+  <div id="changeRequestPlaceholder" style="display:none">
+   <div class="detail"><label>Request Document Change</label><strong>Change requests are the next workflow being connected to VERO.</strong></div>
+   <p style="font-size:12px;color:var(--grey);line-height:1.6">This button has deliberately not been connected to the New Document workflow. Select an existing controlled document before requesting a change once that workflow is enabled.</p>
+   <div class="drawer-actions"><button class="btn outline" onclick="closeRequest()">Close</button></div>
+  </div>
  </div>
 </div></div>
 
@@ -431,10 +445,53 @@ function openControlledPdf(){if(!selectedDocument){if(liveDocuments.length===1){
 function closeDrawer(){document.getElementById('drawerBack').classList.remove('show')}
 function openViewer(){document.getElementById('viewer').classList.add('show')}
 function closeViewer(){document.getElementById('viewer').classList.remove('show');document.getElementById('pdfFrame').src='';if(currentViewerBlobUrl){URL.revokeObjectURL(currentViewerBlobUrl);currentViewerBlobUrl=null;}}
-function openRequest(){document.getElementById('requestTitle').textContent='Request New Document';document.getElementById('reqText').value='';document.getElementById('requestBack').classList.add('show')}
-function openChange(){document.getElementById('requestTitle').textContent='Request Document Change';document.getElementById('reqText').value='';document.getElementById('requestBack').classList.add('show')}
+function currentUserForRequest(){
+ try{return JSON.parse(localStorage.getItem('vero_current_user')||'{}');}catch(e){return {};}
+}
+function currentUserName(){
+ const u=currentUserForRequest();
+ return [u.first_name,u.last_name].filter(Boolean).join(' ').trim()||u.email||'Current user';
+}
+function setRequestMessage(message,type='error'){
+ const el=document.getElementById('requestMessage');
+ el.textContent=message;el.style.display='block';
+ el.style.background=type==='success'?'#eaf3d0':'#fbe4e4';
+ el.style.color=type==='success'?'#52641c':'#8f2929';
+ el.style.border=type==='success'?'1px solid #cbdc91':'1px solid #e8bcbc';
+}
+function clearRequestMessage(){const el=document.getElementById('requestMessage');el.textContent='';el.style.display='none';}
+function openRequest(){
+ document.getElementById('requestTitle').textContent='Request New Document';
+ document.getElementById('requestSubtitle').textContent='Submit a request for a new Governance controlled document.';
+ document.getElementById('newDocumentRequestFields').style.display='block';
+ document.getElementById('changeRequestPlaceholder').style.display='none';
+ document.getElementById('reqTitle').value='';document.getElementById('reqType').value='';document.getElementById('reqOwner').value='';document.getElementById('reqReason').value='';document.getElementById('reqAdditional').value='';
+ document.getElementById('reqRequestedBy').textContent=currentUserName();clearRequestMessage();
+ const btn=document.getElementById('submitRequestBtn');btn.disabled=false;btn.textContent='Submit Request';
+ document.getElementById('requestBack').classList.add('show');
+}
+function openChange(){
+ document.getElementById('requestTitle').textContent='Request Document Change';
+ document.getElementById('requestSubtitle').textContent='Change control will be connected as a separate Governance workflow.';
+ document.getElementById('newDocumentRequestFields').style.display='none';
+ document.getElementById('changeRequestPlaceholder').style.display='block';
+ document.getElementById('requestBack').classList.add('show');
+}
 function closeRequest(){document.getElementById('requestBack').classList.remove('show')}
-function submitRequest(){alert('Prototype: request submitted to the Document Controller.');closeRequest()}
+async function submitRequest(){
+ const title=document.getElementById('reqTitle').value.trim(),docType=document.getElementById('reqType').value.trim(),owner=document.getElementById('reqOwner').value.trim(),reason=document.getElementById('reqReason').value.trim(),additional=document.getElementById('reqAdditional').value.trim();
+ clearRequestMessage();
+ if(!title){setRequestMessage('Enter a proposed document title.');document.getElementById('reqTitle').focus();return;}
+ if(!reason){setRequestMessage('Explain why the document is required.');document.getElementById('reqReason').focus();return;}
+ const btn=document.getElementById('submitRequestBtn');btn.disabled=true;btn.textContent='Submitting…';
+ try{
+  const response=await fetch(API_BASE+'/document-requests',{method:'POST',headers:authHeaders({'Content-Type':'application/json','Accept':'application/json'}),body:JSON.stringify({proposed_document_title:title,proposed_document_type:docType,proposed_document_owner:owner,business_reason:reason,additional_information:additional})});
+  if(response.status===401){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'documents.html'));return;}
+  let data={};try{data=await response.json();}catch(e){}
+  if(!response.ok)throw new Error(data.message||`API returned ${response.status}`);
+  const requestId=data.request?.id;setRequestMessage(requestId?`Document Request #${requestId} submitted successfully.`:'Document request submitted successfully.','success');btn.textContent='Submitted ✓';setTimeout(()=>closeRequest(),1400);
+ }catch(err){console.error('Unable to submit document request',err);setRequestMessage(err.message||'Unable to submit document request. Please try again.');btn.disabled=false;btn.textContent='Submit Request';}
+}
 function openCopyRequest(){if(!selectedDocument){alert('Select a document first.');return;}document.getElementById('viewer').classList.add('show');document.getElementById('copyEmail').value='';document.getElementById('copyRequest').classList.add('show');const parts=document.querySelectorAll('#copyRequest .copy-doc strong');if(parts[0])parts[0].textContent=`${selectedDocument.documentNumber} — ${selectedDocument.documentTitle}`;if(parts[1])parts[1].textContent=`${selectedDocument.controlledVersion} · ${selectedDocument.workflowStatus}`;}
 function closeCopyRequest(){document.getElementById('copyRequest').classList.remove('show')}
 function sendCopy(){const email=document.getElementById('copyEmail').value.trim();if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return alert('Enter a valid email address.');alert('Prototype: an UNCONTROLLED COPY would now be generated and emailed to '+email+'.');closeCopyRequest();}
