@@ -1826,8 +1826,10 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
 <script>function toggleNavGroup(id){const group=document.getElementById(id);if(group)group.classList.toggle('open');}</script>
 <style id="risk-layout-lock">
-/* Risk page is the canonical main/header geometry */
-.main{margin-left:260px!important;width:calc(100% - 260px)!important;padding:0 28px 35px!important;min-height:100vh!important}
-.global-hero{margin:0 -28px 24px!important;transform:none!important;width:auto!important}
+/* Exact working Index/Risk geometry */
+html,body{margin:0!important;padding:0!important}
+.app{margin:0!important;padding:0!important}
+.main{margin:0 0 0 260px!important;width:calc(100% - 260px)!important;padding:0 28px 35px!important;min-height:100vh!important}
+.main > .global-hero{position:relative!important;height:245px!important;margin:0 -28px 24px!important;padding:0!important;overflow:hidden!important;transform:none!important;width:auto!important;background-image:linear-gradient(90deg,rgba(9,49,63,.58),rgba(9,49,63,.12)),url("verra-governance-header.png")!important;background-size:cover!important;background-position:center!important}
 </style>
 </body></html>
