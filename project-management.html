@@ -440,7 +440,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.53</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.54</span></footer>
 </div></main></div>
 
 
@@ -607,7 +607,8 @@ function render(){
  const body=document.getElementById('projectTableBody');
  body.innerHTML=projects.map((p,i)=>{
   const search=[p.name,p.owner,p.actionRequiredBy,p.customer,p.stage,p.description].join(' ').toLowerCase();
-  return `<tr class="data project-row" data-stage="${esc(p.stageKey)}" data-search="${esc(search)}" onclick="openProject(${i})">
+  const canOpenRow=!(String(p.status).toLowerCase()==='draft'||p.stage==='New Project Request')||ownsProjectAction(p);
+  return `<tr class="data project-row" data-stage="${esc(p.stageKey)}" data-search="${esc(search)}" ${canOpenRow?`onclick="openProject(${i})"`:''}>
    <td><div class="project-name">${esc(p.name)}</div><div class="meta">${esc(p.description||'')}</div></td>
    <td>${esc(p.customer||'—')}</td><td><b>${esc(p.actionRequiredBy)}</b></td>
    <td><span class="status ${String(p.status).toLowerCase()==='draft'?'draft':'current'}">${esc(p.status)}</span></td>
@@ -632,6 +633,7 @@ function applyFilters(){
 async function openProject(i){
  const p=projects[i];if(!p?.raw?.id)return;
  if(String(p.status).toLowerCase()==='draft'||p.stage==='New Project Request'){
+  if(!ownsProjectAction(p))return;
   try{
    currentProject=p.raw;
    const [rr,mr]=await Promise.all([apiFetch(PROJECT_REQUEST_API(p.raw.id),{cache:'no-store'}),apiFetch(PROJECT_MILESTONES_API(p.raw.id),{cache:'no-store'})]);
