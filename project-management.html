@@ -440,7 +440,7 @@
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.52</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.53</span></footer>
 </div></main></div>
 
 
@@ -1157,7 +1157,14 @@ function docsHandoverText(r){
 function addressText(r,prefix){
  return [r[prefix+'_address_line_1'],r[prefix+'_address_line_2'],r[prefix+'_city'],r[prefix+'_state_region'],r[prefix+'_postcode'],r[prefix+'_country']].filter(Boolean).join(', ')||'—';
 }
-function approvalReviewHtml(r,milestones){
+function approvalMasterContractItem(doc){
+ if(!doc)return `<div class="approval-item wide"><label>Master Contract</label><strong>—</strong></div>`;
+ const title=esc(doc.document_title||doc.file_name||'Master Contract');
+ const file=esc(doc.file_name||'');
+ const version=esc(doc.version_number||1);
+ return `<div class="approval-item wide"><label>Master Contract</label><strong>📄 ${title}</strong><div style="margin-top:6px;font-size:12px;color:#746f6c">${file}${file?' · ':''}Version ${version}</div><button type="button" class="btn outline" style="margin-top:9px" onclick="viewProjectDocument(${Number(doc.id)})">View Document</button></div>`;
+}
+function approvalReviewHtml(r,milestones,masterContract=null){
  const cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(r[k])||0),0);
  const rev=Number(r.revenue)||0,calcMargin=rev>0?(((rev-cost)/rev)*100).toFixed(1)+'%':'—';
  const ms=(milestones||[]).map(m=>`<div class="approval-milestone"><b>${esc(m.milestone_type||'Milestone')}</b> • ${esc(fmtDate(m.target_date))}<br>${esc(m.milestone_name||'')}</div>`).join('')||'<div class="live-note">No milestones entered.</div>';
@@ -1184,7 +1191,7 @@ function approvalReviewHtml(r,milestones){
   ${approvalItem('Background / Special Requirements',r.client_background_requirements,true)}
  </div></section>
  <section class="approval-section"><h3>System & Scope</h3><div class="approval-grid">
-  ${approvalItem('Master Contract',r.master_contract_url,true)}
+  ${approvalMasterContractItem(masterContract)}
   ${approvalItem('Scope of Works',r.scope_of_works,true)}
   ${approvalItem('Assumptions',r.system_assumptions,true)}
   ${approvalItem('System Productised',yesNoText(r.system_productised))}
@@ -1228,12 +1235,14 @@ function approvalReviewHtml(r,milestones){
 async function openProjectApproval(p){
  try{
   currentProject=p.raw;
-  const [rr,mr,ar]=await Promise.all([
+  const [rr,mr,ar,dr]=await Promise.all([
    apiFetch(PROJECT_REQUEST_API(p.raw.id),{cache:'no-store'}),
    apiFetch(PROJECT_MILESTONES_API(p.raw.id),{cache:'no-store'}),
-   apiFetch(PROJECT_APPROVAL_API(p.raw.id),{cache:'no-store'})
+   apiFetch(PROJECT_APPROVAL_API(p.raw.id),{cache:'no-store'}),
+   apiFetch(`${API_BASE}/projects/${p.raw.id}/documents`,{cache:'no-store'})
   ]);
-  const rd=await rr.json().catch(()=>({})),md=await mr.json().catch(()=>({})),ad=await ar.json().catch(()=>({}));
+  const rd=await rr.json().catch(()=>({})),md=await mr.json().catch(()=>({})),ad=await ar.json().catch(()=>({})),dd=await dr.json().catch(()=>({}));
+  const masterContract=(dr.ok?(dd.documents||[]):[]).find(x=>x.document_type==='Master Contract'&&x.status==='Current')||null;
   if(!rr.ok)throw new Error(rd.message||'Unable to load New Project Request');
   if(!ar.ok)throw new Error(ad.message||'Unable to load Project Approval');
   if(!ad.is_action_owner)throw new Error('This Project Approval is assigned to another user.');
@@ -1243,7 +1252,7 @@ async function openProjectApproval(p){
   document.querySelector('#setupPanel .setup-head h2').textContent='Project Approval';
   document.querySelector('#setupPanel .setup-foot').textContent='VERO project approval • Assigned action owner only';
   const options=projectManagers.map(u=>`<option value="${esc(u.id)}">${esc(u.display_name||[u.first_name,u.last_name].filter(Boolean).join(' ')||u.email)}</option>`).join('');
-  body.innerHTML=`<div class="approval-shell">${approvalReviewHtml(currentRequest,currentMilestones)}
+  body.innerHTML=`<div class="approval-shell">${approvalReviewHtml(currentRequest,currentMilestones,masterContract)}
    <section class="approval-decision"><h3>Approval Decision</h3><p>Select the Project Manager who will own Project Setup if this request is approved. Comments are optional for approval and required when returning the request.</p>
     <div class="form-grid">
      <div class="form-field full"><label>Project Manager</label><select id="approvalProjectManager"><option value="">Select Project Manager…</option>${options}</select><div class="people-picker-note ${projectManagers.length?'':'people-picker-empty'}">${projectManagers.length?'Only active users assigned the Project Manager Business Role are available.':'No active users currently have the Project Manager Business Role.'}</div></div>
