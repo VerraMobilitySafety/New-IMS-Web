@@ -215,11 +215,8 @@
 <div class="home-content">
 
 <section class="home-bottom">
- <div class="panel"><div class="panel-head"><h3>My Actions</h3><span>4 outstanding</span></div><div class="home-actions">
-  <div class="home-action" onclick="location.href='documents.html'"><span class="action-dot red"></span><div><b>Document review required</b><small>IMS.02.01.PRO.01 Document and Records Management Procedure</small></div><span class="go">›</span></div>
-  <div class="home-action" onclick="location.href='documents.html'"><span class="action-dot"></span><div><b>Document acknowledgement required</b><small>IMS.03.21.PRO.01 Working at Heights Risk Management Procedure</small></div><span class="go">›</span></div>
-  <div class="home-action" onclick="location.href='risk.html'"><span class="action-dot teal"></span><div><b>Risk treatment due</b><small>Action assigned to you requires an update</small></div><span class="go">›</span></div>
-  <div class="home-action" onclick="alert('Compliance is coming to VERO soon.')"><span class="action-dot gold"></span><div><b>Compliance evidence pending</b><small>Evidence or status update required</small></div><span class="go">›</span></div>
+ <div class="panel"><div class="panel-head"><h3>My Actions</h3><span id="myActionsCount">Loading…</span></div><div class="home-actions" id="myActionsList">
+  <div class="empty">Loading your actions…</div>
  </div></div>
  <div class="panel"><div class="home-ai"><div class="ai-title"><h3>VERO AI</h3><span class="beta">BETA</span></div><p>Ask questions about documents, risks, compliance and governance across Verra Mobility.</p>
   <div class="home-ai-box"><input id="homeAI" placeholder="e.g. What are our working at heights requirements?"><button onclick="askAI()">➤</button></div>
@@ -245,7 +242,71 @@ function toggleNavGroup(id){
  const group=document.getElementById(id);
  if(group) group.classList.toggle('open');
 }
-document.addEventListener('DOMContentLoaded',()=>{updateGreeting();});
+function actionDotClass(action){
+ const source=(action.source||'').toLowerCase();
+ if(source==='documents') return 'red';
+ if(source==='risks') return 'teal';
+ if(source==='compliance') return 'gold';
+ return '';
+}
+function actionTarget(action){
+ if(action.target_id!=null && action.target){
+  return action.target+'?action='+encodeURIComponent(action.target_id);
+ }
+ return action.target||'#';
+}
+function renderMyActions(actions){
+ const count=document.getElementById('myActionsCount');
+ const list=document.getElementById('myActionsList');
+ if(!count||!list)return;
+ count.textContent=actions.length===1?'1 outstanding':`${actions.length} outstanding`;
+ if(!actions.length){
+  list.innerHTML='<div class="empty">You have no outstanding actions.</div>';
+  return;
+ }
+ list.innerHTML=actions.map(action=>{
+  const dot=actionDotClass(action);
+  const target=actionTarget(action);
+  const title=action.title||'Action required';
+  const description=action.description||action.action_type||'Action requires your attention';
+  const meta=[action.source, action.status].filter(Boolean).join(' · ');
+  return `<div class="home-action" onclick="location.href='${target.replace(/'/g,"\\'")}'">
+   <span class="action-dot ${dot}"></span>
+   <div><b>${escapeHtml(title)}</b><small>${escapeHtml(description)}${meta?' · '+escapeHtml(meta):''}</small></div>
+   <span class="go">›</span>
+  </div>`;
+ }).join('');
+}
+function escapeHtml(value){
+ return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+async function loadMyActions(){
+ const token=localStorage.getItem('vero_session_token');
+ const count=document.getElementById('myActionsCount');
+ const list=document.getElementById('myActionsList');
+ if(!token){if(count)count.textContent='—';if(list)list.innerHTML='<div class="empty">Please sign in to view your actions.</div>';return;}
+ try{
+  const r=await fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/my-actions',{
+   headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store'
+  });
+  if(r.status===401){
+   if(count)count.textContent='—';
+   if(list)list.innerHTML='<div class="empty">Your session has expired. Please sign in again.</div>';
+   return;
+  }
+  const d=await r.json();
+  if(!r.ok)throw new Error(d.message||'Unable to load actions');
+  renderMyActions(d.actions||[]);
+ }catch(e){
+  console.error('Unable to load My Actions',e);
+  if(count)count.textContent='Unavailable';
+  if(list)list.innerHTML='<div class="empty">Unable to load your actions right now.</div>';
+ }
+}
+document.addEventListener('DOMContentLoaded',()=>{
+ updateGreeting();
+ loadMyActions();
+});
 function askAI(){let q=document.getElementById('homeAI').value.trim();if(!q)return alert('Enter a question first.');alert('Prototype: VERO AI will route this question to the appropriate governance source.');}
 function setQ(b){document.getElementById('homeAI').value=b.textContent;document.getElementById('homeAI').focus();}
 </script>
