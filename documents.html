@@ -270,7 +270,7 @@
    <table class="table">
     <thead><tr><th>Document</th><th>Type</th><th>Owner</th><th>Version</th><th>Status</th><th>Review</th></tr></thead>
     <tbody id="documentsBody">
-      <tr><td colspan="6" class="empty">Loading documents from SharePoint…</td></tr>
+      <tr><td colspan="6" class="empty">Loading documents from VERO…</td></tr>
      </tbody>
    </table>
   </section>
@@ -356,7 +356,7 @@
     </div>
   </div>
 
- <div class="viewer-top"><button class="viewer-btn" onclick="closeViewer()">← Close</button><div><h2>IMS.03.00.PRO.01 — Risk Management Procedure</h2><small>Version 4.0 • CURRENT • Approved and Controlled ✓</small></div><div class="spacer"></div><input id="findText" oninput="findInDoc()" placeholder="Search document..." style="padding:9px;border-radius:7px;border:0;width:190px"><button class="viewer-btn copy-toolbar-btn" onclick="openCopyRequest()">Request a Copy</button><span class="viewer-btn" style="background:var(--green)">View only</span></div>
+ <div class="viewer-top"><button class="viewer-btn" onclick="closeViewer()">← Close</button><div><h2 id="viewerTitle">Controlled Document</h2><small id="viewerMeta">Current controlled version</small></div><div class="spacer"></div><input id="findText" oninput="findInDoc()" placeholder="Search document..." style="padding:9px;border-radius:7px;border:0;width:190px"><button class="viewer-btn copy-toolbar-btn" onclick="openCopyRequest()">Request a Copy</button><span class="viewer-btn" style="background:var(--green)">View only</span></div>
  <div class="viewer-main" style="display:block;position:relative;">
    <div class="pdf-frame-wrap">
     <iframe id="pdfFrame" class="pdf-frame" title="Controlled document PDF"></iframe>
@@ -364,144 +364,82 @@
   </div>
  </div>
  <script>
-const DOCUMENTS_API="/api/controlled-documents";const CONTROLLED_PDF_API="/api/controlled-document";
+const API_BASE='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+const DOCUMENTS_API=API_BASE+'/documents?entity_type=Governance';
+const TOKEN_KEY='vero_session_token';
 let liveDocuments=[];
 let selectedDocument=null;
+let currentViewerBlobUrl=null;
 
-function esc(value){
- return String(value ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-}
-function fmtDate(value){
- if(!value) return '—';
- const d=new Date(value);
- return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'});
-}
-function statusClass(status){
- const s=(status||'').toLowerCase();
- if(s==='current') return 'current';
- if(s.includes('review')) return 'review';
- if(s.includes('approval') || s.includes('approved')) return 'approval';
- if(s.includes('draft')) return 'draft';
- if(s.includes('overdue')) return 'overdue';
- return 'draft';
-}
-function displayStatus(status){
- return status || 'Draft';
-}
-function documentTypeShort(type){
- const map={'Procedure':'PRO','Policy':'POL','Standard':'STD','Work Instruction':'WI','Management Plan':'MP','Form':'FRM','Template':'TMP','Guideline':'GUI'};
- return map[type] || type || '—';
-}
+function getToken(){return localStorage.getItem(TOKEN_KEY)||'';}
+function authHeaders(extra={}){const t=getToken();return {...extra,...(t?{Authorization:'Bearer '+t}:{})};}
+function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function fmtDate(value){if(!value)return '—';const d=new Date(value);return Number.isNaN(d.getTime())?String(value):d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'});}
+function statusClass(status){const s=(status||'').toLowerCase();if(s==='current')return 'current';if(s.includes('review'))return 'review';if(s.includes('approval')||s.includes('approved'))return 'approval';if(s.includes('draft'))return 'draft';if(s.includes('overdue'))return 'overdue';return 'draft';}
+function displayStatus(status){return status||'Draft';}
+function documentTypeShort(type){const map={'Procedure':'PRO','Policy':'POL','Standard':'STD','Work Instruction':'WI','Management Plan':'MP','Form':'FRM','Template':'TMP','Guideline':'GUI'};return map[type]||type||'—';}
+function normaliseDocument(r){return {id:r.id,documentNumber:r.document_number||'—',documentTitle:r.document_title||r.file_name||'Untitled document',documentType:r.document_type||'—',documentOwner:r.document_owner||'—',documentAuthor:r.uploaded_by||'—',workflowStatus:r.status||'Draft',controlledVersion:r.version_number||'—',effectiveDate:r.effective_date||null,nextReviewDate:r.review_date||null,changeSummary:r.description||'',purpose:r.description||'Controlled document managed in VERO.',fileName:r.file_name||'',contentType:r.content_type||'',aiSearchable:!!r.ai_searchable,allowView:r.allow_view!==false,allowDownload:!!r.allow_download,accessLevel:r.access_level||'Internal',createdAt:r.created_at||null,updatedAt:r.updated_at||null};}
+
 function openDocById(id){
- const d=liveDocuments.find(x=>String(x.id)===String(id));
- if(!d) return;
- selectedDocument=d;
- document.getElementById('dNo').textContent=d.documentNumber||'—';
- document.getElementById('dTitle').textContent=d.documentTitle||d.fileName||'Untitled document';
- document.getElementById('dType').textContent=d.documentType||'—';
- document.getElementById('dOwner').textContent=d.documentOwner||'—';
- document.getElementById('dAuthor').textContent=d.documentAuthor||'—';
- document.getElementById('dVersion').textContent=d.controlledVersion||'—';
+ const d=liveDocuments.find(x=>String(x.id)===String(id));if(!d)return;selectedDocument=d;
+ document.getElementById('dNo').textContent=d.documentNumber;
+ document.getElementById('dTitle').textContent=d.documentTitle;
+ document.getElementById('dType').textContent=d.documentType;
+ document.getElementById('dOwner').textContent=d.documentOwner;
+ document.getElementById('dAuthor').textContent=d.documentAuthor;
+ document.getElementById('dVersion').textContent=d.controlledVersion;
  document.getElementById('dStatus').textContent=displayStatus(d.workflowStatus);
  document.getElementById('dReview').textContent=fmtDate(d.nextReviewDate);
  document.getElementById('dEffective').textContent=fmtDate(d.effectiveDate);
  document.getElementById('dChangeSummary').textContent=d.changeSummary||'No change summary recorded.';
- document.getElementById('dPurpose').textContent='Controlled document record sourced live from the SharePoint Document Masters library.';
+ document.getElementById('dPurpose').textContent=d.purpose;
  document.getElementById('drawerBack').classList.add('show');
 }
 function renderDocuments(){
  const body=document.getElementById('documentsBody');
- if(!liveDocuments.length){
-   body.innerHTML='<tr><td colspan="6" class="empty">No documents were returned from SharePoint.</td></tr>';
-   return;
- }
- body.innerHTML=liveDocuments.map(d=>`
-  <tr class="data" onclick="openDocById('${esc(d.id)}')">
-   <td><div class="docno">${esc(d.documentNumber||'—')}</div><div class="title">${esc(d.documentTitle||d.fileName||'Untitled document')}</div><div class="meta">${esc(d.changeSummary||'Live document record from SharePoint Document Masters.')}</div></td>
-   <td>${esc(documentTypeShort(d.documentType))}</td>
-   <td>${esc(d.documentOwner||'—')}</td>
-   <td>${esc(d.controlledVersion||'—')}</td>
-   <td><span class="status ${statusClass(d.workflowStatus)}">${esc(displayStatus(d.workflowStatus))}</span></td>
-   <td>${esc(fmtDate(d.nextReviewDate))}</td>
-  </tr>`).join('');
+ if(!liveDocuments.length){body.innerHTML='<tr><td colspan="6" class="empty">No Governance documents are currently registered in VERO.</td></tr>';return;}
+ body.innerHTML=liveDocuments.map(d=>`<tr class="data" onclick="openDocById('${esc(d.id)}')"><td><div class="docno">${esc(d.documentNumber)}</div><div class="title">${esc(d.documentTitle)}</div><div class="meta">${esc(d.changeSummary||'Controlled document managed in VERO.')}</div></td><td>${esc(documentTypeShort(d.documentType))}</td><td>${esc(d.documentOwner)}</td><td>${esc(d.controlledVersion)}</td><td><span class="status ${statusClass(d.workflowStatus)}">${esc(displayStatus(d.workflowStatus))}</span></td><td>${esc(fmtDate(d.nextReviewDate))}</td></tr>`).join('');
 }
-function updateKpis(){
- const now=new Date();
- const current=liveDocuments.filter(d=>(d.workflowStatus||'').toLowerCase()==='current').length;
- const overdue=liveDocuments.filter(d=>d.nextReviewDate && new Date(d.nextReviewDate)<now && (d.workflowStatus||'').toLowerCase()!=='withdrawn').length;
- const approvals=liveDocuments.filter(d=>['awaiting approval','approved – pending publication','approved - pending publication'].includes((d.workflowStatus||'').toLowerCase())).length;
- document.getElementById('currentCount').textContent=current;
- document.getElementById('overdueCount').textContent=overdue;
- document.getElementById('approvalCount').textContent=approvals;
-}
+function updateKpis(){const now=new Date();const current=liveDocuments.filter(d=>(d.workflowStatus||'').toLowerCase()==='current').length;const overdue=liveDocuments.filter(d=>d.nextReviewDate&&new Date(d.nextReviewDate)<now&&(d.workflowStatus||'').toLowerCase()!=='withdrawn').length;const approvals=liveDocuments.filter(d=>['awaiting approval','approved – pending publication','approved - pending publication'].includes((d.workflowStatus||'').toLowerCase())).length;document.getElementById('currentCount').textContent=current;document.getElementById('overdueCount').textContent=overdue;document.getElementById('approvalCount').textContent=approvals;}
 async function loadDocuments(){
  const body=document.getElementById('documentsBody');
  try{
-  const response=await fetch(DOCUMENTS_API,{headers:{'Accept':'application/json'}});
-  if(!response.ok) throw new Error(`API returned ${response.status}`);
-  const data=await response.json();
-  const rows=Array.isArray(data)?data:(Array.isArray(data.documents)?data.documents:[]);
-  liveDocuments=rows.map((r,index)=>{
-   if(r.documentNumber||r.documentTitle||r.fileName) return {...r,workflowStatus:r.workflowStatus||'Current'};
-   const fileName=r['{FilenameWithExtension}']||r['{Name}']||'Untitled document';
-   const baseName=fileName.replace(/\.pdf$/i,'');
-   const m=baseName.match(/^([A-Z0-9]+(?:\.[A-Z0-9]+)+)\s+(.+)$/i);
-   return {id:r.ID??r.ItemInternalId??index,documentNumber:m?m[1]:'—',documentTitle:m?m[2]:baseName,documentType:'Procedure',documentOwner:(r.Editor&&r.Editor.DisplayName)||'Governance',documentAuthor:(r.Author&&r.Author.DisplayName)||'—',workflowStatus:'Current',controlledVersion:r['{VersionNumber}']||'—',effectiveDate:r.Created||null,nextReviewDate:null,changeSummary:'Current approved controlled PDF from SharePoint.',fileName:fileName,webUrl:r['{Link}']||null};
-  });
-  renderDocuments(); updateKpis();
- }catch(err){
-  console.error('Unable to load Governance documents',err);
-  body.innerHTML='<tr><td colspan="6" class="empty">Unable to load controlled documents from SharePoint. Please refresh or contact Governance.</td></tr>';
-  document.getElementById('currentCount').textContent='—';
-  document.getElementById('overdueCount').textContent='—';
-  document.getElementById('approvalCount').textContent='—';
- }
+  const response=await fetch(DOCUMENTS_API,{headers:authHeaders({Accept:'application/json'}),cache:'no-store'});
+  if(response.status===401){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'documents.html'));return;}
+  if(!response.ok)throw new Error(`API returned ${response.status}`);
+  const data=await response.json();const rows=Array.isArray(data.documents)?data.documents:[];liveDocuments=rows.map(normaliseDocument);renderDocuments();updateKpis();
+ }catch(err){console.error('Unable to load VERO Governance documents',err);body.innerHTML='<tr><td colspan="6" class="empty">Unable to load controlled documents from VERO. Please refresh or contact Governance.</td></tr>';document.getElementById('currentCount').textContent='—';document.getElementById('overdueCount').textContent='—';document.getElementById('approvalCount').textContent='—';}
 }
-
-function openSelectedDocument(){
- if(!selectedDocument) {
-   alert('Select a document first.');
-   return;
- }
- const status=(selectedDocument.workflowStatus||'').toLowerCase();
- const isCurrent=status==='current';
- if(!isCurrent && selectedDocument.webUrl){
-   window.open(selectedDocument.webUrl,'_blank','noopener,noreferrer');
-   return;
- }
- if(isCurrent){
-   const frame=document.getElementById('pdfFrame');
-   frame.src=CONTROLLED_PDF_API;
-   document.getElementById('viewer').classList.add('show');
-   closeDrawer();
-   return;
- }
- alert('No controlled PDF is available for this document yet.');
+async function openSelectedDocument(){
+ if(!selectedDocument){alert('Select a document first.');return;}
+ if(!selectedDocument.allowView){alert('Viewing is not permitted for this document.');return;}
+ const frame=document.getElementById('pdfFrame');
+ try{
+  const response=await fetch(`${API_BASE}/documents/${encodeURIComponent(selectedDocument.id)}/content`,{headers:authHeaders(),cache:'no-store'});
+  if(response.status===401){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'documents.html'));return;}
+  if(response.status===403){alert('Viewing is not permitted for this document.');return;}
+  if(!response.ok)throw new Error(`Document API returned ${response.status}`);
+  const blob=await response.blob();
+  if(currentViewerBlobUrl)URL.revokeObjectURL(currentViewerBlobUrl);
+  currentViewerBlobUrl=URL.createObjectURL(blob);frame.src=currentViewerBlobUrl;
+  document.getElementById('viewerTitle').textContent=`${selectedDocument.documentNumber} — ${selectedDocument.documentTitle}`;
+  document.getElementById('viewerMeta').textContent=`Version ${selectedDocument.controlledVersion} • ${selectedDocument.workflowStatus.toUpperCase()} • ${selectedDocument.accessLevel}`;
+  document.getElementById('viewer').classList.add('show');closeDrawer();
+ }catch(err){console.error('Unable to open controlled document',err);alert('Unable to open this controlled document. Please try again.');}
 }
-function openControlledPdf(){ const frame=document.getElementById('pdfFrame'); frame.src=CONTROLLED_PDF_API; document.getElementById('viewer').classList.add('show'); }
+function openControlledPdf(){if(!selectedDocument){if(liveDocuments.length===1){selectedDocument=liveDocuments[0];}else{alert('Select a document from the register first.');return;}}openSelectedDocument();}
 function closeDrawer(){document.getElementById('drawerBack').classList.remove('show')}
 function openViewer(){document.getElementById('viewer').classList.add('show')}
-function closeViewer(){document.getElementById('viewer').classList.remove('show');document.getElementById('pdfFrame').src=''}
+function closeViewer(){document.getElementById('viewer').classList.remove('show');document.getElementById('pdfFrame').src='';if(currentViewerBlobUrl){URL.revokeObjectURL(currentViewerBlobUrl);currentViewerBlobUrl=null;}}
 function openRequest(){document.getElementById('requestTitle').textContent='Request New Document';document.getElementById('reqText').value='';document.getElementById('requestBack').classList.add('show')}
 function openChange(){document.getElementById('requestTitle').textContent='Request Document Change';document.getElementById('reqText').value='';document.getElementById('requestBack').classList.add('show')}
 function closeRequest(){document.getElementById('requestBack').classList.remove('show')}
 function submitRequest(){alert('Prototype: request submitted to the Document Controller.');closeRequest()}
-function openCopyRequest(){
- var v=document.getElementById('viewer');
- var m=document.getElementById('copyRequest');
- v.classList.add('show');
- document.getElementById('copyEmail').value='';
- m.classList.add('show');
-}
+function openCopyRequest(){if(!selectedDocument){alert('Select a document first.');return;}document.getElementById('viewer').classList.add('show');document.getElementById('copyEmail').value='';document.getElementById('copyRequest').classList.add('show');const parts=document.querySelectorAll('#copyRequest .copy-doc strong');if(parts[0])parts[0].textContent=`${selectedDocument.documentNumber} — ${selectedDocument.documentTitle}`;if(parts[1])parts[1].textContent=`${selectedDocument.controlledVersion} · ${selectedDocument.workflowStatus}`;}
 function closeCopyRequest(){document.getElementById('copyRequest').classList.remove('show')}
-function sendCopy(){
- const email=document.getElementById('copyEmail').value.trim();
- if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert('Enter a valid email address.');
- alert('Prototype: an UNCONTROLLED COPY of the Current document would now be generated as PDF and emailed to '+email+'. The transaction would also be written to the audit trail.');
- closeCopyRequest();
-}
-function askAI(){let q=document.getElementById('aiQuestion').value.trim();if(!q){alert('Enter a question first.');return}alert('Prototype AI response:\n\nThis will search only Current, approved controlled documents and provide source references.\n\nQuestion: '+q)}
-function findInDoc(){let q=document.getElementById('findText').value.trim().toLowerCase();document.querySelectorAll('#paper mark').forEach(m=>m.replaceWith(m.textContent));if(!q)return;let walker=document.createTreeWalker(document.getElementById('paper'),NodeFilter.SHOW_TEXT);let nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);nodes.forEach(n=>{let t=n.textContent,idx=t.toLowerCase().indexOf(q);if(idx>=0&&!n.parentElement.closest('.control')){let frag=document.createDocumentFragment();frag.append(t.slice(0,idx));let mark=document.createElement('mark');mark.textContent=t.slice(idx,idx+q.length);frag.append(mark);frag.append(t.slice(idx+q.length));n.replaceWith(frag)}})}
+function sendCopy(){const email=document.getElementById('copyEmail').value.trim();if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return alert('Enter a valid email address.');alert('Prototype: an UNCONTROLLED COPY would now be generated and emailed to '+email+'.');closeCopyRequest();}
+function askAI(){let q=document.getElementById('aiQuestion').value.trim();if(!q){alert('Enter a question first.');return}alert('Governance AI indexing is the next stage. The document register already records which Current documents are AI-searchable.\n\nQuestion: '+q)}
+function findInDoc(){const q=document.getElementById('findText').value.trim();if(q)alert('Browser PDF/text search will be enabled as the controlled viewer is refined.');}
 document.addEventListener('DOMContentLoaded',loadDocuments);
 </script>
 <script>function toggleProjectsNav(button){const g=button.closest('.nav-group');const o=g.classList.toggle('open');button.setAttribute('aria-expanded',o?'true':'false')}</script>
