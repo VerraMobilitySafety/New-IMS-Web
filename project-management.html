@@ -1599,9 +1599,27 @@ async function submitFinanceApproval(decision){
 }
 
 
-function leadershipApprovalReviewHtml(r,s){
+function leadershipApprovalProgressHtml(la){
+ const approvals=Array.isArray(la?.approvals)?la.approvals:[];
+ const rows=approvals.map(a=>{
+  const decision=a.decision||'Pending';
+  const icon=decision==='Approved'?'✓':decision==='Returned'?'↩':decision==='Cancelled'?'×':'○';
+  const decided=a.decided_at?fmtDate(a.decided_at):'Awaiting decision';
+  return `<div style="display:grid;grid-template-columns:minmax(180px,1fr) 120px 140px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #E5E1DE">
+   <div><b>${esc(a.approver_name||a.approver_email||'Leadership Approver')}</b><div style="font-size:12px;color:#857874;margin-top:2px">${esc(a.approver_email||'')}</div></div>
+   <div><span style="display:inline-flex;align-items:center;gap:6px;font-weight:800;color:#3D3935">${icon} ${esc(decision)}</span></div>
+   <div style="font-size:12px;color:#857874">${esc(decided)}</div>
+  </div>`;
+ }).join('');
+ return `<section class="approval-section"><h3>Leadership Approval Progress</h3>
+  <div class="approval-banner" style="margin-bottom:12px"><b>${Number(la?.approved_count)||0} of ${Number(la?.total_required)||0} approved.</b> The project remains in Leadership Approval until both Leadership Approvers have approved. Either approver can return the project to the Project Manager.</div>
+  <div>${rows}</div>
+ </section>`;
+}
+function leadershipApprovalReviewHtml(r,s,la){
  const requestCost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(r?.[k])||0),0);
- return `<div class="approval-banner"><b>Leadership Approval required.</b> Finance has approved the project. Leadership approval authorises the project to proceed to the Project Execution Checklist, which is completed by the assigned Project Manager before execution begins.</div>
+ return `<div class="approval-banner"><b>Leadership Approval required.</b> Finance has approved the project. Both assigned Leadership Approvers must approve before VERO activates the project and opens Project Execution.</div>
+ ${leadershipApprovalProgressHtml(la)}
  <section class="approval-section"><h3>Project Summary</h3><div class="approval-grid">
   ${approvalItem('Project',r?.project_title||currentProject?.project_name)}
   ${approvalItem('Client',r?.client_name||currentProject?.customer)}
@@ -1637,18 +1655,18 @@ async function openLeadershipApproval(p){
   const res=await apiFetch(LEADERSHIP_APPROVAL_API(p.raw.id),{cache:'no-store'});
   const d=await res.json().catch(()=>({}));
   if(!res.ok)throw new Error(d.message||'Unable to load Leadership Approval');
-  if(!d.is_action_owner)throw new Error('This Leadership Approval is assigned to another user.');
   currentRequest=d.request||{};currentProjectSetup=d.setup||{};
+  const la=d.leadership_approval||{};
   const body=document.querySelector('#setupPanel .setup-body');
   document.querySelector('#setupPanel .setup-head h2').textContent='Leadership Approval';
-  document.querySelector('#setupPanel .setup-foot').textContent='VERO leadership approval • Assigned Leadership Approver only';
-  body.innerHTML=`<div class="approval-shell">${leadershipApprovalReviewHtml(currentRequest,currentProjectSetup)}
-   <section class="approval-decision"><h3>Leadership Decision</h3><p>Approval hands the project back to the assigned Project Manager to complete the Project Execution Checklist. Comments are optional for approval and required when returning the project.</p>
+  document.querySelector('#setupPanel .setup-foot').textContent='VERO leadership approval • Both Leadership Approvers must approve';
+  const decisionSection=d.is_action_owner?`<section class="approval-decision"><h3>Your Leadership Decision</h3><p>Your approval is recorded independently. Comments are optional for approval and required when returning the project to the Project Manager.</p>
     <div class="form-grid"><div class="form-field full"><label>Leadership Comments</label><textarea id="leadershipApprovalComments" placeholder="Add leadership comments, conditions, or the reason for returning the project…"></textarea></div></div>
     <div id="leadershipApprovalError" class="approval-error"></div><div id="leadershipApprovalSuccess" class="approval-success"></div>
    </section>
-   <div class="approval-actions"><button class="btn return" type="button" onclick="submitLeadershipApproval('Returned')">← Return to Project Manager</button><button class="btn green" type="button" onclick="submitLeadershipApproval('Approved')">Approve → Execution Checklist</button></div>
-  </div>`;
+   <div class="approval-actions"><button class="btn return" type="button" onclick="submitLeadershipApproval('Returned')">← Return to Project Manager</button><button class="btn green" type="button" onclick="submitLeadershipApproval('Approved')">Record My Approval →</button></div>`:
+   `<section class="approval-decision"><h3>Your Leadership Decision</h3><p>${la.my_decision?`Your decision for this approval round is <b>${esc(la.my_decision)}</b>.`:'You do not have a pending Leadership Approval action for this round.'}</p></section>`;
+  body.innerHTML=`<div class="approval-shell">${leadershipApprovalReviewHtml(currentRequest,currentProjectSetup,la)}${decisionSection}</div>`;
   document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';
  }catch(e){console.error(e);alert('VERO could not open Leadership Approval. '+e.message)}
 }
@@ -1661,8 +1679,13 @@ async function submitLeadershipApproval(decision){
   const res=await apiFetch(LEADERSHIP_APPROVAL_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision,comments})});
   const d=await res.json().catch(()=>({}));
   if(!res.ok)throw new Error(d.message||('Leadership Approval API returned '+res.status));
-  if(ok){ok.textContent=decision==='Approved'?`Leadership approved. ${d.action_required_by||'The Project Manager'} now owns the Project Execution Checklist.`:'Project returned to the Project Manager for update.';ok.style.display='block'}
-  await loadProjects();setTimeout(()=>closeSetup(),900);
+  const la=d.leadership_approval||{};
+  if(ok){
+   ok.textContent=decision==='Returned'?'Project returned to the Project Manager for update.':
+    (d.current_stage==='Project Execution'?`Leadership approval complete. ${d.action_required_by||'The Project Manager'} now owns Project Execution.`:`Your approval is recorded. ${la.approved_count||0} of ${la.total_required||0} Leadership Approvers have approved; ${la.pending_count||0} still pending.`);
+   ok.style.display='block';
+  }
+  await loadProjects();setTimeout(()=>closeSetup(),1200);
  }catch(e){console.error(e);if(er){er.textContent=e.message;er.style.display='block'}else alert(e.message)}
 }
 
