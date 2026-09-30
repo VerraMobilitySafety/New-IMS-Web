@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -578,9 +578,23 @@ function ownsProjectAction(p){
  const ownerId=Number(p?.actionRequiredByUserId),me=Number(signedInUser?.id);
  return Number.isFinite(ownerId)&&Number.isFinite(me)&&ownerId===me;
 }
+function projectActionLabel(p){
+ const labels={
+  'New Project Request':'Complete New Project Request',
+  'Project Approval':'Review Project Approval',
+  'Project Setup':'Complete Project Setup',
+  'Finance Approval':'Review Finance Approval',
+  'Leadership Approval':'Review Leadership Approval',
+  'Project Execution':'Open Project',
+  'Project Execution Checklist':'Open Project'
+ };
+ return labels[p?.stage]||p?.nextStep||'Open Project';
+}
 function nextStepCell(p,i){
- if(ownsProjectAction(p))return `<button type="button" class="next-step-action" onclick="event.stopPropagation();openProjectAction(${i})">${esc(p.nextStep)} →</button>`;
- return `<span class="next-step-text">${esc(p.nextStep)}</span>`;
+ const label=projectActionLabel(p);
+ const approvalStage=p?.stage==='Finance Approval'||p?.stage==='Leadership Approval';
+ if(ownsProjectAction(p)||approvalStage)return `<button type="button" class="next-step-action" onclick="event.stopPropagation();openProjectAction(${i})">${esc(label)} →</button>`;
+ return `<span class="next-step-text">${esc(label)}</span>`;
 }
 async function openProjectAction(i){
  const p=projects[i];if(!p?.raw?.id)return;
