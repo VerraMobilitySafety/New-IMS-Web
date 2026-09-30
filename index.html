@@ -3,7 +3,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<title>VERRA | VERO — Integrated Management System</title><style>
+<title>VERRA | VERO — Home</title><style>
 :root{
  --charcoal:#3D3935; --green:#A9C23F; --grey:#857874; --teal:#1D8296;
  --purple:#464E7E; --bg:#F7F8F7; --white:#fff; --line:#E5E1DE;
@@ -12,7 +12,7 @@
 *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Montserrat,Verdana,Arial,sans-serif}
 .app{display:flex;min-height:100vh}.sidebar{width:260px;position:fixed;inset:0 auto 0 0;background:#252321;color:#fff;padding:22px 24px;overflow:hidden}
 .sidebar:after{content:none}.chev{position:absolute;z-index:1;opacity:.13;pointer-events:none}.chev.c1{width:110px;right:-32px;top:150px}.chev.c2{width:70px;left:14px;top:48%}.chev.c3{width:145px;right:-42px;bottom:65px}
-.brand,.nav,.side-foot{position:relative;z-index:2}.brand{margin-bottom:28px;height:82px;display:flex;align-items:flex-start;gap:12px}.brand img{width:126px;max-height:56px;object-fit:contain;object-position:left top}.vero-lockup{display:flex;align-items:center;gap:11px;height:56px;font-weight:800;letter-spacing:1.8px;color:#fff;font-size:18px}.vero-divider{width:1px;height:28px;background:rgba(255,255,255,.42)}.vero-name{color:var(--green)}
+.brand,.nav,.side-foot{position:relative;z-index:2}.brand{margin:0 auto 28px;height:82px;display:flex;align-items:center;justify-content:center;gap:0;width:100%}.brand img{width:126px;max-height:56px;object-fit:contain;object-position:center}.vero-lockup{display:flex;align-items:center;gap:11px;height:56px;font-weight:800;letter-spacing:1.8px;color:#fff;font-size:18px}.vero-divider{width:1px;height:32px;background:rgba(255,255,255,.42);margin-left:10px}.vero-name{color:var(--green)}
 .nav{display:block}.nav-section{margin:0 0 16px}.nav-label{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#9f9994;margin:0 0 6px 14px}.nav a{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:7px;border-left:3px solid transparent;color:#f7f7f6;text-decoration:none;font-size:12px}.nav a:hover,.nav a.active{background:rgba(255,255,255,.08);border-left-color:var(--green)}.nav a.placeholder{opacity:.72;cursor:default}.nav a.placeholder:hover{background:rgba(255,255,255,.04);border-left-color:transparent}.nav-group-toggle{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:7px;border-left:3px solid transparent;color:#f7f7f6;font-size:12px;cursor:pointer}.nav-group-toggle:hover,.nav-group.open>.nav-group-toggle{background:rgba(255,255,255,.08);border-left-color:var(--green)}.nav-caret{margin-left:auto;font-size:10px;transition:transform .18s ease}.nav-group.open .nav-caret{transform:rotate(90deg)}.nav-sub{display:none;margin:2px 0 5px 34px}.nav-group.open .nav-sub{display:block}.nav-sub a{padding:7px 10px;font-size:11px;color:#e7e4e1}.ico{width:20px;text-align:center;font-size:15px}.side-foot{position:absolute;left:24px;bottom:24px;font-size:11px;line-height:1.7;color:#e4e1de}
 .main{margin-left:260px;width:calc(100% - 260px);padding:30px 48px 35px}.top{display:flex;justify-content:space-between;align-items:center;gap:20px}.crumb{font-size:12px;color:var(--grey);letter-spacing:1.4px;text-transform:uppercase}.top-right{display:flex;align-items:center;gap:14px}.search{width:310px;background:#fff;border:1px solid var(--line);border-radius:26px;padding:12px 17px;color:#777}.avatar{width:38px;height:38px;border-radius:50%;background:var(--charcoal);color:#fff;display:grid;place-items:center;font-weight:800}
 .hero{margin:28px 0 24px}.hero h1{font-size:40px;margin:6px 0 8px}.hero p{margin:0;color:#68625e;font-size:17px}.rule{height:4px;width:70px;background:var(--green);margin:15px 0}
@@ -186,7 +186,7 @@
    <a class="placeholder" href="#" onclick="return false"><span class="ico">◎</span><span>Assurance</span></a>
   </div>
   </nav>
- <div class="side-foot">VERRA | VERO • v2.5<br>Prototype environment</div>
+ <div class="side-foot">VERRA | VERO • v2.7<br>Prototype environment</div>
 </aside>
 <main class="main">
 <section class="global-hero">
@@ -200,7 +200,7 @@
   <div class="home-action" onclick="location.href='documents.html'"><span class="action-dot red"></span><div><b>Document review required</b><small>IMS.02.01.PRO.01 Document and Records Management Procedure</small></div><span class="go">›</span></div>
   <div class="home-action" onclick="location.href='documents.html'"><span class="action-dot"></span><div><b>Document acknowledgement required</b><small>IMS.03.21.PRO.01 Working at Heights Risk Management Procedure</small></div><span class="go">›</span></div>
   <div class="home-action" onclick="location.href='risk.html'"><span class="action-dot teal"></span><div><b>Risk treatment due</b><small>Action assigned to you requires an update</small></div><span class="go">›</span></div>
-  <div class="home-action" onclick="location.href='compliance.html'"><span class="action-dot gold"></span><div><b>Compliance evidence pending</b><small>Evidence or status update required</small></div><span class="go">›</span></div>
+  <div class="home-action" onclick="alert('Compliance is coming to VERO soon.')"><span class="action-dot gold"></span><div><b>Compliance evidence pending</b><small>Evidence or status update required</small></div><span class="go">›</span></div>
  </div></div>
  <div class="panel"><div class="home-ai"><div class="ai-title"><h3>VERO AI</h3><span class="beta">BETA</span></div><p>Ask questions about documents, risks, compliance and governance across Verra Mobility.</p>
   <div class="home-ai-box"><input id="homeAI" placeholder="e.g. What are our working at heights requirements?"><button onclick="askAI()">➤</button></div>
@@ -208,20 +208,25 @@
   <div class="quick-q"><button onclick="setQ(this)">Show current WHS policies</button><button onclick="setQ(this)">What are our high risks?</button><button onclick="setQ(this)">When is the next document review?</button><button onclick="setQ(this)">What compliance evidence is due?</button></div>
  </div></div>
 </section>
-<footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Home • v2.6</span></footer>
+<footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Home • v2.7</span></footer>
 </div></main></div>
 <script>
-function updateGreeting(){
+function updateGreeting(firstName){
  const hour=new Date().getHours();
  const greeting=hour<12?'Good morning':hour<18?'Good afternoon':'Good evening';
  const el=document.getElementById('timeGreeting');
- if(el) el.textContent=greeting+', Douglas';
+ if(!el)return;
+ let name=firstName||'';
+ if(!name){
+  try{const u=JSON.parse(localStorage.getItem('vero_current_user')||'{}');name=u.first_name||'';}catch(e){}
+ }
+ el.textContent=greeting+(name?', '+name:'');
 }
 function toggleNavGroup(id){
  const group=document.getElementById(id);
  if(group) group.classList.toggle('open');
 }
-document.addEventListener('DOMContentLoaded',()=>{updateGreeting();requireAuth();});
+document.addEventListener('DOMContentLoaded',()=>{updateGreeting();});
 function askAI(){let q=document.getElementById('homeAI').value.trim();if(!q)return alert('Enter a question first.');alert('Prototype: VERO AI will route this question to the appropriate governance source.');}
 function setQ(b){document.getElementById('homeAI').value=b.textContent;document.getElementById('homeAI').focus();}
 </script>
@@ -243,7 +248,7 @@ function setQ(b){document.getElementById('homeAI').value=b.textContent;document.
  function render(u){avatar.textContent=initials(u);name.textContent=fullName(u);full.textContent=fullName(u);email.textContent=u?.email||'';admin.style.display=u?.vero_role==='Administrator'?'flex':'none';}
  async function load(){
   const t=localStorage.getItem(TOKEN); if(!t){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));return;}
-  try{const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t,Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('auth');const d=await r.json();const u=d.user||d;localStorage.setItem(USER,JSON.stringify(u));render(u);}
+  try{const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t,Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('auth');const d=await r.json();const u=d.user||d;localStorage.setItem(USER,JSON.stringify(u));render(u);updateGreeting(u?.first_name||'');}
   catch(e){localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));}
  }
  trigger.addEventListener('click',e=>{e.stopPropagation();const open=account.classList.toggle('open');trigger.setAttribute('aria-expanded',String(open));});
