@@ -209,38 +209,7 @@
  <img class="chev c1" src="verra-chevron.png" alt="">
  <img class="chev c2" src="verra-chevron.png" alt="">
  <img class="chev c3" src="verra-chevron.png" alt="">
- <nav class="nav">
-  <div class="nav-section">
-   <a class="active" href="index.html"><span class="ico">⌂</span><span>Home</span></a>
-  </div>
-  <div class="nav-section">
-   <div class="nav-label">My Work</div>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">✓</span><span>My Actions</span></a>
-  </div>
-  <div class="nav-section">
-   <div class="nav-label">Manage</div>
-   <a href="sites.html"><span class="ico">⌖</span><span>Sites</span></a>
-   <div class="nav-group" id="projectsNav">
-    <div class="nav-group-toggle" onclick="toggleNavGroup('projectsNav')"><span class="ico">▦</span><span>Projects</span><span class="nav-caret">›</span></div>
-    <div class="nav-sub">
-     <a class="placeholder" href="#" onclick="return false"><span>Maintenance</span></a>
-     <a href="project-management.html"><span>Implementation</span></a>
-    </div>
-   </div>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">✚</span><span>Safety</span></a>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">◆</span><span>Quality</span></a>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">♻</span><span>Environment</span></a>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Insurance</span></a>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">↻</span><span>Business Continuity</span></a>
-  </div>
-  <div class="nav-section">
-   <div class="nav-label">Governance</div>
-   <a href="documents.html"><span class="ico">▱</span><span>Documents</span></a>
-   <a href="risk.html"><span class="ico">▥</span><span>Risks</span></a>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Compliance</span></a>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">◎</span><span>Assurance</span></a>
-  </div>
-  </nav>
+ <nav class="nav"><div id="vero-nav"></div></nav>
  <div class="side-foot">VERRA | VERO • v2.9<br>Prototype environment</div>
 </aside>
 <main class="main">
@@ -554,6 +523,7 @@ function setQ(b){document.getElementById('homeAI').value=b.textContent;document.
 })();
 </script>
 
+<script src="nav.js"></script>
 </body></html>
 <style id="risk-layout-lock">
 /* Risk page is the canonical main/header geometry */
