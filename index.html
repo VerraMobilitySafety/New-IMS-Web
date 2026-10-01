@@ -44,6 +44,20 @@
 .action-detail-section{margin-top:20px}
 .action-detail-section h3{font-size:13px;margin:0 0 9px}
 .action-detail-section .detail-copy{background:#f8f7f6;border-radius:8px;padding:13px;font-size:11px;line-height:1.55;color:#4f4a46;white-space:pre-wrap}
+
+.action-decision-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+.action-decision-actions button{border:0;border-radius:8px;padding:11px 14px;font:800 10px Montserrat,Verdana,Arial,sans-serif;cursor:pointer}
+.action-btn-approve{background:var(--green);color:var(--charcoal)}
+.action-btn-more{background:#fff0d9;color:#7d5815;border:1px solid #ead5a9!important}
+.action-btn-reject{background:#fbe4e4;color:#8f2929}
+.action-decision-actions button:disabled{opacity:.55;cursor:wait}
+.action-decision-note{width:100%;min-height:82px;border:1px solid #d8d4d1;border-radius:8px;padding:11px;font:500 11px Montserrat,Verdana,Arial,sans-serif;resize:vertical;display:none;margin-top:10px}
+.action-decision-note.show{display:block}
+.action-decision-message{font-size:10px;line-height:1.45;margin-top:10px;display:none;padding:10px;border-radius:8px}
+.action-decision-message.show{display:block}
+.action-decision-message.error{background:#fbe4e4;color:#8f2929}
+.action-decision-message.success{background:#eaf3d0;color:#52641c}
+
 .action-detail-footer{border-top:1px solid var(--line);margin-top:24px;padding-top:18px;color:var(--grey);font-size:9px}
 @media(max-width:600px){.action-detail-grid{grid-template-columns:1fr}}
 
@@ -266,6 +280,14 @@
     <h3>Additional information</h3>
     <div class="detail-copy" id="actionDetailAdditional">—</div>
    </div>
+   <div class="action-decision-actions" id="actionDecisionActions">
+    <button class="action-btn-approve" type="button" onclick="submitActionDecision('approve')">Approve</button>
+    <button class="action-btn-more" type="button" onclick="prepareActionDecision('more_information')">Request More Information</button>
+    <button class="action-btn-reject" type="button" onclick="prepareActionDecision('reject')">Reject</button>
+    <textarea class="action-decision-note" id="actionDecisionNote" placeholder="Enter the reason or notes required for this decision..."></textarea>
+    <button class="action-btn-more" id="actionDecisionConfirm" type="button" style="display:none" onclick="submitPreparedDecision()">Confirm Decision</button>
+    <div class="action-decision-message" id="actionDecisionMessage"></div>
+   </div>
    <div class="action-detail-footer" id="actionDetailFooter"></div>
   </div>
  </aside>
@@ -333,9 +355,21 @@ function formatActionDate(value){
 function actionField(label,value){
  return `<div class="action-detail-field"><label>${escapeHtml(label)}</label><strong>${escapeHtml(value??'—')}</strong></div>`;
 }
+function resetDecisionUI(){
+ const note=document.getElementById('actionDecisionNote');
+ const confirm=document.getElementById('actionDecisionConfirm');
+ const message=document.getElementById('actionDecisionMessage');
+ const buttons=document.querySelectorAll('#actionDecisionActions > button');
+ if(note){note.value='';note.classList.remove('show');}
+ if(confirm){confirm.style.display='none';confirm.dataset.decision='';}
+ if(message){message.textContent='';message.className='action-decision-message';}
+ buttons.forEach((b,i)=>{if(b.id!=='actionDecisionConfirm')b.style.display='';b.disabled=false;});
+}
 function openActionDetail(index){
  const action=(window.myActions||[])[index];
  if(!action)return;
+ window.currentAction=action;
+ resetDecisionUI();
 
  document.getElementById('actionDetailKicker').textContent=action.source||'MY ACTION';
  document.getElementById('actionDetailTitle').textContent=action.description||action.title||'Action';
@@ -357,17 +391,107 @@ function openActionDetail(index){
  document.getElementById('actionDetailFooter').textContent=
    `Action ID: ${action.id} · Priority: ${action.priority||'Normal'}`;
 
+ const decisionActions=document.getElementById('actionDecisionActions');
+ decisionActions.style.display=action.source==='Documents' && action.action_type==='Document Request' ? 'block' : 'none';
+
  document.getElementById('actionDetailBackdrop').classList.add('show');
  document.body.style.overflow='hidden';
+}
+function prepareActionDecision(decision){
+ const note=document.getElementById('actionDecisionNote');
+ const confirm=document.getElementById('actionDecisionConfirm');
+ const message=document.getElementById('actionDecisionMessage');
+ const approve=document.querySelector('.action-btn-approve');
+ const more=document.querySelector('.action-btn-more');
+ const reject=document.querySelector('.action-btn-reject');
+
+ message.textContent='';
+ message.className='action-decision-message';
+ note.classList.add('show');
+ note.focus();
+ confirm.style.display='inline-block';
+ confirm.dataset.decision=decision;
+
+ if(decision==='more_information'){
+  note.placeholder='What information is required from the requester?';
+  confirm.textContent='Request Information';
+ }else{
+  note.placeholder='Why is this request being rejected?';
+  confirm.textContent='Confirm Rejection';
+ }
+ approve.style.display='none';
+ more.style.display='none';
+ reject.style.display='none';
+}
+async function submitActionDecision(decision){
+ if(decision!=='approve')return;
+ await sendActionDecision(decision,'');
+}
+async function submitPreparedDecision(){
+ const confirm=document.getElementById('actionDecisionConfirm');
+ const decision=confirm.dataset.decision;
+ const notes=document.getElementById('actionDecisionNote').value.trim();
+ if(!notes){
+  showDecisionMessage('Notes are required for this decision.','error');
+  document.getElementById('actionDecisionNote').focus();
+  return;
+ }
+ await sendActionDecision(decision,notes);
+}
+function showDecisionMessage(text,type){
+ const message=document.getElementById('actionDecisionMessage');
+ message.textContent=text;
+ message.className='action-decision-message show '+type;
+}
+async function sendActionDecision(decision,notes){
+ const action=window.currentAction;
+ if(!action||!action.source_id)return;
+
+ const token=localStorage.getItem('vero_session_token');
+ if(!token){
+  showDecisionMessage('Your session has expired. Please sign in again.','error');
+  return;
+ }
+
+ const allButtons=document.querySelectorAll('#actionDecisionActions button');
+ allButtons.forEach(b=>b.disabled=true);
+
+ try{
+  const r=await fetch(
+   'https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/document-requests/'+encodeURIComponent(action.source_id)+'/decision',
+   {
+    method:'POST',
+    headers:{
+     Authorization:'Bearer '+token,
+     'Content-Type':'application/json',
+     Accept:'application/json'
+    },
+    body:JSON.stringify({decision,notes})
+   }
+  );
+
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.message||'Unable to process decision');
+
+  showDecisionMessage(d.message||'Decision completed successfully.','success');
+  document.getElementById('actionDetailStatus').textContent=d.request?.status||'Updated';
+
+  setTimeout(async()=>{
+   closeActionDetail();
+   await loadMyActions();
+  },700);
+ }catch(e){
+  console.error('Unable to process document request decision',e);
+  showDecisionMessage(e.message||'Unable to process decision.','error');
+  allButtons.forEach(b=>b.disabled=false);
+ }
 }
 function closeActionDetail(event){
  if(event && event.target!==document.getElementById('actionDetailBackdrop'))return;
  document.getElementById('actionDetailBackdrop').classList.remove('show');
  document.body.style.overflow='';
+ window.currentAction=null;
 }
-document.addEventListener('keydown',e=>{
- if(e.key==='Escape')closeActionDetail();
-});
 function escapeHtml(value){
  return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
