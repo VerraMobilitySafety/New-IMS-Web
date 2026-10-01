@@ -25,6 +25,28 @@
 .empty{padding:22px 20px;color:var(--grey);font-size:13px}.footer{margin-top:25px;border-top:1px solid var(--line);padding-top:15px;color:var(--grey);font-size:11px;display:flex;justify-content:space-between}
 .modal-back{position:fixed;inset:0;background:rgba(35,32,29,.48);display:none;z-index:20}.modal-back.show{display:flex;justify-content:flex-end}.drawer{width:min(620px,92vw);height:100%;background:#fff;box-shadow:-15px 0 35px rgba(0,0,0,.2);overflow:auto}.drawer-head{background:var(--charcoal);color:#fff;padding:24px;position:sticky;top:0;z-index:2}.drawer-head .close{float:right;background:transparent;border:0;color:#fff;font-size:25px;cursor:pointer}.drawer-head h2{margin:5px 0;font-size:24px}.drawer-head small{color:#ddd}.drawer-body{padding:22px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.detail{background:#f8f7f6;border-radius:8px;padding:12px}.detail label{display:block;color:var(--grey);font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}.detail strong{font-size:13px}.section{margin-top:22px}.section h3{font-size:14px;margin:0 0 10px}.timeline{border-left:2px solid var(--line);padding-left:16px}.event{margin-bottom:16px}.event b{font-size:12px}.event small{display:block;color:var(--grey);margin-top:3px}.drawer-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
 .viewer{position:fixed;inset:0;background:#f1f0ee;display:none;z-index:30}.viewer.show{display:flex;flex-direction:column}.viewer-top{height:64px;background:var(--charcoal);color:#fff;display:flex;align-items:center;gap:18px;padding:0 20px}.viewer-top h2{font-size:16px;margin:0}.viewer-top small{color:#ddd}.viewer-top .spacer{flex:1}.viewer-btn{background:#fff;color:var(--charcoal);border:0;border-radius:7px;padding:9px 12px;font-weight:800;cursor:pointer}.viewer-main{display:grid;grid-template-columns:245px 1fr;min-height:0;flex:1}.toc{background:#fff;border-right:1px solid var(--line);padding:20px;overflow:auto}.toc h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--grey)}.toc a{display:block;padding:8px 5px;color:var(--charcoal);text-decoration:none;font-size:12px;border-radius:5px}.toc a:hover{background:#f0f2ed}.paper-wrap{overflow:auto;padding:35px}.paper{background:#fff;max-width:800px;margin:auto;padding:60px 70px;min-height:1100px;box-shadow:0 4px 20px rgba(0,0,0,.12);font-family:Georgia,serif;line-height:1.65}.paper h1{font-size:30px}.paper h2{font-size:20px;margin-top:35px}.paper .control{font-family:Arial,sans-serif;font-size:11px;color:var(--grey);border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:30px}.uncontrolled{font-family:Arial,sans-serif;background:#fff3f3;border:1px solid #e8bcbc;color:#8f2929;padding:9px;text-align:center;font-size:10px;font-weight:800;margin-bottom:20px}
+
+/* MY ACTIONS DETAIL DRAWER */
+.action-detail-backdrop{position:fixed;inset:0;background:rgba(35,32,29,.48);display:none;z-index:80}
+.action-detail-backdrop.show{display:block}
+.action-detail-drawer{position:absolute;right:0;top:0;height:100%;width:min(620px,94vw);background:#fff;box-shadow:-16px 0 40px rgba(0,0,0,.22);overflow:auto}
+.action-detail-head{background:var(--charcoal);color:#fff;padding:24px 26px;position:sticky;top:0;z-index:2}
+.action-detail-head .close{float:right;background:transparent;border:0;color:#fff;font-size:28px;line-height:1;cursor:pointer}
+.action-detail-kicker{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);font-weight:800}
+.action-detail-head h2{font-size:23px;line-height:1.2;margin:7px 38px 6px 0}
+.action-detail-head p{font-size:11px;color:#ddd8d4;margin:0}
+.action-detail-body{padding:24px 26px 32px}
+.action-status{display:inline-flex;padding:6px 10px;border-radius:14px;background:#fff0d9;color:#7d5815;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:18px}
+.action-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+.action-detail-field{background:#f8f7f6;border-radius:8px;padding:12px}
+.action-detail-field label{display:block;color:var(--grey);font-size:8px;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px}
+.action-detail-field strong{font-size:11px;line-height:1.4}
+.action-detail-section{margin-top:20px}
+.action-detail-section h3{font-size:13px;margin:0 0 9px}
+.action-detail-section .detail-copy{background:#f8f7f6;border-radius:8px;padding:13px;font-size:11px;line-height:1.55;color:#4f4a46;white-space:pre-wrap}
+.action-detail-footer{border-top:1px solid var(--line);margin-top:24px;padding-top:18px;color:var(--grey);font-size:9px}
+@media(max-width:600px){.action-detail-grid{grid-template-columns:1fr}}
+
 @media(max-width:1050px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
 @media(max-width:720px){.sidebar{width:82px;padding:28px 12px}.brand .gov,.brand .tag,.nav a span:not(.ico),.side-foot{display:none}.main{margin-left:82px;width:calc(100% - 82px);padding:24px}.top-right .search{width:200px}.viewer-main{grid-template-columns:1fr}.toc{display:none}.paper{padding:35px}.detail-grid{grid-template-columns:1fr}}
 
@@ -224,6 +246,31 @@
   <div class="quick-q"><button onclick="setQ(this)">Show current WHS policies</button><button onclick="setQ(this)">What are our high risks?</button><button onclick="setQ(this)">When is the next document review?</button><button onclick="setQ(this)">What compliance evidence is due?</button></div>
  </div></div>
 </section>
+
+<div class="action-detail-backdrop" id="actionDetailBackdrop" onclick="closeActionDetail(event)">
+ <aside class="action-detail-drawer" role="dialog" aria-modal="true" aria-labelledby="actionDetailTitle">
+  <div class="action-detail-head">
+   <button class="close" type="button" onclick="closeActionDetail()">×</button>
+   <div class="action-detail-kicker" id="actionDetailKicker">MY ACTION</div>
+   <h2 id="actionDetailTitle">Action</h2>
+   <p id="actionDetailSubtitle"></p>
+  </div>
+  <div class="action-detail-body">
+   <div class="action-status" id="actionDetailStatus">Submitted</div>
+   <div class="action-detail-grid" id="actionDetailGrid"></div>
+   <div class="action-detail-section">
+    <h3>Business reason</h3>
+    <div class="detail-copy" id="actionDetailReason">—</div>
+   </div>
+   <div class="action-detail-section">
+    <h3>Additional information</h3>
+    <div class="detail-copy" id="actionDetailAdditional">—</div>
+   </div>
+   <div class="action-detail-footer" id="actionDetailFooter"></div>
+  </div>
+ </aside>
+</div>
+
 <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Home • v2.9</span></footer>
 </div></main></div>
 <script>
@@ -259,24 +306,68 @@ function renderMyActions(actions){
  const count=document.getElementById('myActionsCount');
  const list=document.getElementById('myActionsList');
  if(!count||!list)return;
+ window.myActions=actions||[];
  count.textContent=actions.length===1?'1 outstanding':`${actions.length} outstanding`;
  if(!actions.length){
   list.innerHTML='<div class="empty">You have no outstanding actions.</div>';
   return;
  }
- list.innerHTML=actions.map(action=>{
+ list.innerHTML=actions.map((action,index)=>{
   const dot=actionDotClass(action);
-  const target=actionTarget(action);
   const title=action.title||'Action required';
   const description=action.description||action.action_type||'Action requires your attention';
   const meta=[action.source, action.status].filter(Boolean).join(' · ');
-  return `<div class="home-action" onclick="location.href='${target.replace(/'/g,"\\'")}'">
+  return `<div class="home-action" onclick="openActionDetail(${index})" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openActionDetail(${index})">
    <span class="action-dot ${dot}"></span>
    <div><b>${escapeHtml(title)}</b><small>${escapeHtml(description)}${meta?' · '+escapeHtml(meta):''}</small></div>
    <span class="go">›</span>
   </div>`;
  }).join('');
 }
+function formatActionDate(value){
+ if(!value)return '—';
+ const d=new Date(value);
+ if(Number.isNaN(d.getTime()))return value;
+ return d.toLocaleString('en-AU',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function actionField(label,value){
+ return `<div class="action-detail-field"><label>${escapeHtml(label)}</label><strong>${escapeHtml(value??'—')}</strong></div>`;
+}
+function openActionDetail(index){
+ const action=(window.myActions||[])[index];
+ if(!action)return;
+
+ document.getElementById('actionDetailKicker').textContent=action.source||'MY ACTION';
+ document.getElementById('actionDetailTitle').textContent=action.description||action.title||'Action';
+ document.getElementById('actionDetailSubtitle').textContent=
+   `${action.action_type||'Action'}${action.source_id?` · Request #${action.source_id}`:''}`;
+ document.getElementById('actionDetailStatus').textContent=action.status||'Open';
+
+ document.getElementById('actionDetailGrid').innerHTML=[
+  actionField('Request type',action.action_type==='Document Request'?'New Document':action.action_type),
+  actionField('Document type',action.document_type),
+  actionField('Proposed owner',action.document_owner),
+  actionField('Requested by',action.requested_by),
+  actionField('Assigned to',action.assigned_to),
+  actionField('Submitted',formatActionDate(action.created_at))
+ ].join('');
+
+ document.getElementById('actionDetailReason').textContent=action.business_reason||'—';
+ document.getElementById('actionDetailAdditional').textContent=action.additional_information||'—';
+ document.getElementById('actionDetailFooter').textContent=
+   `Action ID: ${action.id} · Priority: ${action.priority||'Normal'}`;
+
+ document.getElementById('actionDetailBackdrop').classList.add('show');
+ document.body.style.overflow='hidden';
+}
+function closeActionDetail(event){
+ if(event && event.target!==document.getElementById('actionDetailBackdrop'))return;
+ document.getElementById('actionDetailBackdrop').classList.remove('show');
+ document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape')closeActionDetail();
+});
 function escapeHtml(value){
  return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
