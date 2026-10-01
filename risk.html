@@ -617,38 +617,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  <img class="chev c1" src="verra-chevron.png" alt="">
  <img class="chev c2" src="verra-chevron.png" alt="">
  <img class="chev c3" src="verra-chevron.png" alt="">
- <nav class="nav">
-  <div class="nav-section">
-   <a href="index.html"><span class="ico">⌂</span><span>Home</span></a>
-  </div>
-  <div class="nav-section">
-   <div class="nav-label">My Work</div>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">✓</span><span>My Actions</span></a>
-  </div>
-  <div class="nav-section">
-   <div class="nav-label">Manage</div>
-   <a href="sites.html"><span class="ico">⌖</span><span>Sites</span></a>
-   <div class="nav-group" id="projectsNav">
-    <div class="nav-group-toggle" onclick="toggleNavGroup('projectsNav')"><span class="ico">▦</span><span>Projects</span><span class="nav-caret">›</span></div>
-    <div class="nav-sub">
-     <a class="placeholder" href="#" onclick="return false"><span>Maintenance</span></a>
-     <a href="project-management.html"><span>Implementation</span></a>
-    </div>
-   </div>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">✚</span><span>Safety</span></a>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">◆</span><span>Quality</span></a>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">♻</span><span>Environment</span></a>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Insurance</span></a>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">↻</span><span>Business Continuity</span></a>
-  </div>
-  <div class="nav-section">
-   <div class="nav-label">Governance</div>
-   <a href="documents.html"><span class="ico">▱</span><span>Documents</span></a>
-   <a class="active" href="risk.html"><span class="ico">▥</span><span>Risks</span></a>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Compliance</span></a>
-   <a class="placeholder" href="#" onclick="return false"><span class="ico">◎</span><span>Assurance</span></a>
-  </div>
-  </nav>
+ <nav class="nav"><div id="vero-nav"></div></nav>
  <div class="side-foot">VERRA | VERO • v2.9<br>Prototype environment</div>
 </aside><main class="main"><section class="global-hero"><div class="hero-content"><div class="hero-kicker">Governance</div><h1>Enterprise Risk Management</h1><p>Enterprise risk profile, controls and treatment performance</p><div class="hero-rule"></div></div><div class="hero-tools"><input class="hero-search" placeholder="⌕   Search VERO..."><div class="vero-account" id="veroAccount"><button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false"><div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span></button><div class="vero-account-menu" id="veroAccountMenu"><div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div><a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a><button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button></div></div></div></section><div class="dashboard-content"><!-- KPI CARDS -->
 
@@ -1055,4 +1024,5 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  signout.addEventListener('click',async()=>{const t=localStorage.getItem(TOKEN);try{if(t)await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+t}})}catch(e){}localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html');});
  load();
 })();
-</script></body></html>
+</script><script src="nav.js"></script>
+</body></html>
