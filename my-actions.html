@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>VERRA | VERO — Home</title><style>
+:root{
+ --charcoal:#3D3935; --green:#A9C23F; --grey:#857874; --teal:#1D8296;
+ --purple:#464E7E; --bg:#F7F8F7; --white:#fff; --line:#E5E1DE;
+ --ink:#292725; --red:#C94A4A; --amber:#D49B35;
+}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Montserrat,Verdana,Arial,sans-serif}
+.app{display:flex;min-height:100vh}.sidebar{width:260px;position:fixed;inset:0 auto 0 0;background:#252321;color:#fff;padding:22px 24px;overflow:hidden}
+.sidebar:after{content:none}.chev{position:absolute;z-index:1;opacity:.13;pointer-events:none}.chev.c1{width:110px;right:-32px;top:150px}.chev.c2{width:70px;left:14px;top:48%}.chev.c3{width:145px;right:-42px;bottom:65px}
+.brand,.nav,.side-foot{position:relative;z-index:2}.brand{margin-bottom:28px;height:82px;position:relative}.brand img{position:absolute;width:96px;max-height:56px;object-fit:contain;right:calc(50% + 16px);top:28px;transform:translateY(-50%)}.vero-lockup{position:absolute;left:50%;top:0;height:56px}.vero-divider{position:absolute;left:0;top:28px;width:1px;height:34px;background:rgba(255,255,255,.42);transform:translate(-.5px,-50%)}.vero-name{position:absolute;left:16px;top:28px;transform:translateY(-50%);color:var(--green);font-weight:800;letter-spacing:1.8px;font-size:18px;line-height:1;white-space:nowrap}
+.nav{display:block}.nav-section{margin:0 0 16px}.nav-label{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#9f9994;margin:0 0 6px 14px}.nav a{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:7px;border-left:3px solid transparent;color:#f7f7f6;text-decoration:none;font-size:12px}.nav a:hover,.nav a.active{background:rgba(255,255,255,.08);border-left-color:var(--green)}.nav a.placeholder{opacity:.72;cursor:default}.nav a.placeholder:hover{background:rgba(255,255,255,.04);border-left-color:transparent}.nav-group-toggle{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:7px;border-left:3px solid transparent;color:#f7f7f6;font-size:12px;cursor:pointer}.nav-group-toggle:hover,.nav-group.open>.nav-group-toggle{background:rgba(255,255,255,.08);border-left-color:var(--green)}.nav-caret{margin-left:auto;font-size:10px;transition:transform .18s ease}.nav-group.open .nav-caret{transform:rotate(90deg)}.nav-sub{display:none;margin:2px 0 5px 34px}.nav-group.open .nav-sub{display:block}.nav-sub a{padding:7px 10px;font-size:11px;color:#e7e4e1}.ico{width:20px;text-align:center;font-size:15px}.side-foot{position:absolute;left:24px;bottom:24px;font-size:11px;line-height:1.7;color:#e4e1de}
+.main{margin-left:260px;width:calc(100% - 260px);padding:30px 48px 35px}.top{display:flex;justify-content:space-between;align-items:center;gap:20px}.crumb{font-size:12px;color:var(--grey);letter-spacing:1.4px;text-transform:uppercase}.top-right{display:flex;align-items:center;gap:14px}.search{width:310px;background:#fff;border:1px solid var(--line);border-radius:26px;padding:12px 17px;color:#777}.avatar{width:38px;height:38px;border-radius:50%;background:var(--charcoal);color:#fff;display:grid;place-items:center;font-weight:800}
+.hero{margin:28px 0 24px}.hero h1{font-size:40px;margin:6px 0 8px}.hero p{margin:0;color:#68625e;font-size:17px}.rule{height:4px;width:70px;background:var(--green);margin:15px 0}
+.actions{display:flex;gap:12px;flex-wrap:wrap}.btn{border:0;border-radius:8px;padding:12px 16px;font-weight:800;cursor:pointer;font-size:13px}.btn.green{background:var(--green);color:var(--charcoal)}.btn.dark{background:var(--charcoal);color:#fff}.btn.outline{background:#fff;border:1px solid var(--line);color:var(--charcoal)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 3px 10px rgba(61,57,53,.05)}.kpi b{font-size:30px}.kpi span{display:block;color:var(--grey);font-size:12px;margin-top:5px}.kpi.green{border-top:4px solid var(--green)}.kpi.teal{border-top:4px solid var(--teal)}.kpi.red{border-top:4px solid var(--red)}.kpi.purple{border-top:4px solid var(--purple)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px}.panel{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 3px 10px rgba(61,57,53,.05);overflow:hidden}.panel-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}.panel-head h2{font-size:18px;margin:0}.panel-head span{font-size:12px;color:var(--grey)}
+.table{width:100%;border-collapse:collapse}.table th{text-align:left;background:#faf9f8;color:var(--grey);font-size:11px;text-transform:uppercase;letter-spacing:.7px;padding:12px 15px}.table td{padding:15px;border-top:1px solid var(--line);font-size:13px}.table tr.data{cursor:pointer}.table tr.data:hover{background:#fbfcfa}.docno{font-weight:800;color:var(--charcoal)}.title{font-weight:700}.meta{font-size:11px;color:var(--grey);margin-top:3px}.status{display:inline-flex;padding:5px 8px;border-radius:14px;font-size:10px;font-weight:800}.current{background:#eaf3d0;color:#52641c}.review{background:#fff0d9;color:#7d5815}.overdue{background:#fbe4e4;color:#8f2929}.approval{background:#e9e9f4;color:#3e4677}.draft{background:#eeeae8;color:#625b57}
+.ai{margin:18px;background:linear-gradient(145deg,#3D3935,#292725);color:#fff;border-radius:12px;padding:20px}.ai .label{font-size:11px;letter-spacing:1.5px;color:var(--green);font-weight:800}.ai h3{margin:8px 0;font-size:19px}.ai p{font-size:13px;color:#ddd8d4;line-height:1.5}.ai input{width:100%;border:0;border-radius:8px;padding:12px;margin:7px 0 10px;font-size:13px}.ai button{background:var(--green);border:0;border-radius:8px;padding:11px 14px;font-weight:800;cursor:pointer}
+.tasks{padding:4px 20px 16px}.task{padding:14px 0;border-bottom:1px solid var(--line);display:flex;gap:11px}.task:last-child{border-bottom:0}.dot{width:9px;height:9px;border-radius:50%;background:var(--green);margin-top:5px;flex:none}.dot.red{background:var(--red)}.task b{font-size:13px}.task small{display:block;color:var(--grey);margin-top:3px}
+.empty{padding:22px 20px;color:var(--grey);font-size:13px}.footer{margin-top:25px;border-top:1px solid var(--line);padding-top:15px;color:var(--grey);font-size:11px;display:flex;justify-content:space-between}
+.modal-back{position:fixed;inset:0;background:rgba(35,32,29,.48);display:none;z-index:20}.modal-back.show{display:flex;justify-content:flex-end}.drawer{width:min(620px,92vw);height:100%;background:#fff;box-shadow:-15px 0 35px rgba(0,0,0,.2);overflow:auto}.drawer-head{background:var(--charcoal);color:#fff;padding:24px;position:sticky;top:0;z-index:2}.drawer-head .close{float:right;background:transparent;border:0;color:#fff;font-size:25px;cursor:pointer}.drawer-head h2{margin:5px 0;font-size:24px}.drawer-head small{color:#ddd}.drawer-body{padding:22px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.detail{background:#f8f7f6;border-radius:8px;padding:12px}.detail label{display:block;color:var(--grey);font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}.detail strong{font-size:13px}.section{margin-top:22px}.section h3{font-size:14px;margin:0 0 10px}.timeline{border-left:2px solid var(--line);padding-left:16px}.event{margin-bottom:16px}.event b{font-size:12px}.event small{display:block;color:var(--grey);margin-top:3px}.drawer-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.viewer{position:fixed;inset:0;background:#f1f0ee;display:none;z-index:30}.viewer.show{display:flex;flex-direction:column}.viewer-top{height:64px;background:var(--charcoal);color:#fff;display:flex;align-items:center;gap:18px;padding:0 20px}.viewer-top h2{font-size:16px;margin:0}.viewer-top small{color:#ddd}.viewer-top .spacer{flex:1}.viewer-btn{background:#fff;color:var(--charcoal);border:0;border-radius:7px;padding:9px 12px;font-weight:800;cursor:pointer}.viewer-main{display:grid;grid-template-columns:245px 1fr;min-height:0;flex:1}.toc{background:#fff;border-right:1px solid var(--line);padding:20px;overflow:auto}.toc h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--grey)}.toc a{display:block;padding:8px 5px;color:var(--charcoal);text-decoration:none;font-size:12px;border-radius:5px}.toc a:hover{background:#f0f2ed}.paper-wrap{overflow:auto;padding:35px}.paper{background:#fff;max-width:800px;margin:auto;padding:60px 70px;min-height:1100px;box-shadow:0 4px 20px rgba(0,0,0,.12);font-family:Georgia,serif;line-height:1.65}.paper h1{font-size:30px}.paper h2{font-size:20px;margin-top:35px}.paper .control{font-family:Arial,sans-serif;font-size:11px;color:var(--grey);border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:30px}.uncontrolled{font-family:Arial,sans-serif;background:#fff3f3;border:1px solid #e8bcbc;color:#8f2929;padding:9px;text-align:center;font-size:10px;font-weight:800;margin-bottom:20px}
+
+/* MY ACTIONS DETAIL DRAWER */
+.action-detail-backdrop{position:fixed;inset:0;background:rgba(35,32,29,.48);display:none;z-index:80}
+.action-detail-backdrop.show{display:block}
+.action-detail-drawer{position:absolute;right:0;top:0;height:100%;width:min(620px,94vw);background:#fff;box-shadow:-16px 0 40px rgba(0,0,0,.22);overflow:auto}
+.action-detail-head{background:var(--charcoal);color:#fff;padding:24px 26px;position:sticky;top:0;z-index:2}
+.action-detail-head .close{float:right;background:transparent;border:0;color:#fff;font-size:28px;line-height:1;cursor:pointer}
+.action-detail-kicker{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);font-weight:800}
+.action-detail-head h2{font-size:23px;line-height:1.2;margin:7px 38px 6px 0}
+.action-detail-head p{font-size:11px;color:#ddd8d4;margin:0}
+.action-detail-body{padding:24px 26px 32px}
+.action-status{display:inline-flex;padding:6px 10px;border-radius:14px;background:#fff0d9;color:#7d5815;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:18px}
+.action-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+.action-detail-field{background:#f8f7f6;border-radius:8px;padding:12px}
+.action-detail-field label{display:block;color:var(--grey);font-size:8px;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px}
+.action-detail-field strong{font-size:11px;line-height:1.4}
+.action-detail-section{margin-top:20px}
+.action-detail-section h3{font-size:13px;margin:0 0 9px}
+.action-detail-section .detail-copy{background:#f8f7f6;border-radius:8px;padding:13px;font-size:11px;line-height:1.55;color:#4f4a46;white-space:pre-wrap}
+
+.action-decision-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
+.action-decision-actions button{border:0;border-radius:8px;padding:11px 14px;font:800 10px Montserrat,Verdana,Arial,sans-serif;cursor:pointer}
+.action-btn-approve{background:var(--green);color:var(--charcoal)}
+.action-btn-more{background:#fff0d9;color:#7d5815;border:1px solid #ead5a9!important}
+.action-btn-reject{background:#fbe4e4;color:#8f2929}
+.action-decision-actions button:disabled{opacity:.55;cursor:wait}
+.action-decision-note{width:100%;min-height:82px;border:1px solid #d8d4d1;border-radius:8px;padding:11px;font:500 11px Montserrat,Verdana,Arial,sans-serif;resize:vertical;display:none;margin-top:10px}
+.action-decision-note.show{display:block}
+.action-decision-message{font-size:10px;line-height:1.45;margin-top:10px;display:none;padding:10px;border-radius:8px}
+.action-decision-message.show{display:block}
+.action-decision-message.error{background:#fbe4e4;color:#8f2929}
+.action-decision-message.success{background:#eaf3d0;color:#52641c}
+
+.action-detail-footer{border-top:1px solid var(--line);margin-top:24px;padding-top:18px;color:var(--grey);font-size:9px}
+@media(max-width:600px){.action-detail-grid{grid-template-columns:1fr}}
+
+@media(max-width:1050px){.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+@media(max-width:720px){.sidebar{width:82px;padding:28px 12px}.brand .gov,.brand .tag,.nav a span:not(.ico),.side-foot{display:none}.main{margin-left:82px;width:calc(100% - 82px);padding:24px}.top-right .search{width:200px}.viewer-main{grid-template-columns:1fr}.toc{display:none}.paper{padding:35px}.detail-grid{grid-template-columns:1fr}}
+
+.viewer .viewer-copy-overlay{
+  position:absolute !important;
+  inset:62px 0 0 0 !important;
+  z-index:999 !important;
+  display:none !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:24px !important;
+  background:rgba(25,24,22,.56) !important;
+}
+.viewer .viewer-copy-overlay.show{display:flex !important}
+.viewer .viewer-copy-card{
+  position:relative !important;
+  width:min(520px,calc(100vw - 48px)) !important;
+  max-height:calc(100vh - 115px) !important;
+  overflow:auto !important;
+  background:#fff !important;
+  border-radius:12px !important;
+  box-shadow:0 22px 65px rgba(0,0,0,.35) !important;
+  color:var(--ink) !important;
+}
+.viewer .copy-head{
+  position:relative !important;
+  background:var(--black) !important;
+  color:#fff !important;
+  padding:22px 24px 20px !important;
+  border-radius:12px 12px 0 0 !important;
+}
+.viewer .copy-head small{font-size:9px;letter-spacing:1px;color:#d8d4d1}
+.viewer .copy-head h2{margin:5px 0 4px;font-size:22px}
+.viewer .copy-head p{margin:0;color:#ddd8d4;font-size:11px}
+.viewer .copy-close{
+  position:absolute;right:16px;top:13px;border:0;background:transparent;
+  color:#fff;font-size:25px;cursor:pointer
+}
+.viewer .copy-body{padding:22px 24px 24px !important}
+.viewer .copy-doc{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:17px}
+.viewer .copy-doc div{background:#f7f6f5;border-radius:8px;padding:11px}
+.viewer .copy-doc span,.viewer .copy-label{
+  display:block;font-size:8px;font-weight:800;letter-spacing:.7px;
+  text-transform:uppercase;color:var(--grey);margin-bottom:5px
+}
+.viewer .copy-doc strong{font-size:10px}
+.viewer .copy-email{
+  width:100% !important;border:1px solid #d7d3d0 !important;border-radius:7px !important;
+  padding:11px 12px !important;font-size:11px !important;margin-bottom:14px !important
+}
+.viewer .copy-warning{
+  background:#fff7e7;border:1px solid #ead5a9;border-radius:8px;
+  padding:12px;font-size:10px;line-height:1.55;color:#665538
+}
+.viewer .copy-explain{font-size:10px;line-height:1.55;color:#625d59}
+.viewer .copy-actions{display:flex;gap:8px;margin-top:17px}
+.viewer .copy-audit{font-size:8px;color:var(--grey);line-height:1.5;margin:15px 0 0}
+
+
+.viewer-top .copy-toolbar-btn{
+  background:var(--green)!important;color:#262421!important;
+  border:0!important;border-radius:7px!important;padding:9px 13px!important;
+  font-weight:800!important;cursor:pointer!important;white-space:nowrap!important;
+}
+
+/* HOME v1.3 — canonical Document Management v1.5 shell */
+.main{padding-top:0!important}
+.global-hero{
+ position:relative;height:245px;margin:0 -28px 18px;overflow:hidden;
+ background-image:linear-gradient(90deg,rgba(9,49,63,.58) 0%,rgba(9,49,63,.25) 48%,rgba(9,49,63,.08) 100%),url("verra-governance-header.png");
+ background-size:cover;background-position:center;
+}
+.hero-content{position:absolute;left:48px;top:50%;transform:translateY(-50%);color:#fff;z-index:2}
+.hero-kicker{font-size:10px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase;margin-bottom:12px}
+.hero-content h1{font-size:32px;line-height:1.08;margin:0 0 8px;font-weight:800;letter-spacing:-.4px}
+.hero-content p{font-size:15px;margin:0;color:rgba(255,255,255,.94)}
+.hero-rule{width:64px;height:4px;background:var(--green);margin-top:20px}
+.hero-tools{position:absolute;right:28px;top:22px;display:flex;align-items:center;gap:12px;z-index:3}
+.hero-search{width:280px;background:#fff;border:1px solid rgba(255,255,255,.7);border-radius:9px;padding:11px 14px;font-size:11px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.hero-tools .avatar{background:#302e2b;color:#fff;border:2px solid rgba(255,255,255,.8)}
+.home-content{padding-top:0}
+.home-modules{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:17px}
+.home-module{background:#fff;border:1px solid var(--line);border-radius:11px;box-shadow:0 3px 12px rgba(61,57,53,.035);padding:20px;cursor:pointer;min-height:180px;position:relative;overflow:hidden}
+.home-module:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--green)}
+.home-module.risk:before{background:var(--teal)}.home-module.compliance:before{background:var(--purple)}
+.module-icon{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:21px;background:#edf4d8;margin-bottom:17px}
+.home-module.risk .module-icon{background:#e1f1f4;color:var(--teal)}.home-module.compliance .module-icon{background:#e9eaf1;color:var(--purple)}
+.home-module h3{margin:0 0 7px;font-size:18px}.home-module p{margin:0 0 18px;font-size:11px;line-height:1.55;color:#6e6864}.home-module strong{font-size:10px;text-transform:uppercase;letter-spacing:.55px}
+.home-bottom{display:grid;grid-template-columns:1.35fr .75fr;gap:16px}
+.home-actions{padding:0 20px}.home-action{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);align-items:center;cursor:pointer}.home-action:last-child{border-bottom:0}
+.action-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}.action-dot.red{background:#c94f4f}.action-dot.teal{background:var(--teal)}.action-dot.gold{background:#dba21f}
+.home-action b{font-size:11px}.home-action small{display:block;font-size:9px;color:#77706c;margin-top:4px}.home-action .go{margin-left:auto;font-size:19px}
+.home-ai{padding:20px}.home-ai .ai-title{display:flex;align-items:center;gap:8px}.home-ai h3{font-size:18px;margin:0}.home-ai p{font-size:11px;color:#6e6864;line-height:1.55}
+.home-ai-box{border:1px solid #d8d4d1;border-radius:8px;display:flex;overflow:hidden;margin:14px 0 9px}.home-ai-box input{border:0;outline:0;flex:1;padding:11px;font-size:11px}.home-ai-box button{border:0;background:var(--green);padding:0 15px;font-weight:800;cursor:pointer}
+.ai-note{font-size:8px;color:#68751f;font-weight:800}
+.quick-q{display:flex;flex-wrap:wrap;gap:6px;margin-top:15px}.quick-q button{border:1px solid #ddd9d5;background:#fff;border-radius:15px;padding:6px 9px;font-size:8px;cursor:pointer}
+@media(max-width:1000px){.home-modules,.home-bottom{grid-template-columns:1fr}.hero-search{width:210px}}
+
+/* LOCKED GLOBAL HEADER CONTROLS */
+.hero-tools{position:absolute!important;right:28px!important;top:22px!important;display:flex!important;align-items:center!important;gap:12px!important;z-index:3!important}
+.hero-search{box-sizing:border-box!important;width:280px!important;height:44px!important;background:#fff!important;border:1px solid rgba(255,255,255,.7)!important;border-radius:10px!important;padding:0 14px!important;font-size:11px!important;line-height:44px!important;font-family:Montserrat,Verdana,sans-serif!important;box-shadow:0 2px 10px rgba(0,0,0,.1)!important}
+.hero-tools .avatar{box-sizing:border-box!important;width:36px!important;height:36px!important;min-width:36px!important;border-radius:50%!important;display:grid!important;place-items:center!important;background:#302e2b!important;color:#fff!important;border:2px solid rgba(255,255,255,.8)!important;font-size:11px!important;font-weight:800!important}
+
+
+/* VERO GLOBAL ACCOUNT MENU */
+.vero-account{position:relative;z-index:50}
+.vero-account-trigger{display:flex;align-items:center;gap:9px;border:0;background:transparent;padding:0;cursor:pointer;font-family:inherit;color:inherit}
+.vero-account-trigger .avatar{cursor:pointer}
+.vero-account-name{font-size:11px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.22);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vero-account-caret{font-size:9px;color:rgba(255,255,255,.9);transition:transform .16s ease}
+.vero-account.open .vero-account-caret{transform:rotate(180deg)}
+.vero-account-menu{position:absolute;right:0;top:48px;width:250px;background:#fff;border:1px solid rgba(61,57,53,.12);border-radius:11px;box-shadow:0 16px 38px rgba(30,28,26,.18);overflow:hidden;display:none;text-align:left;color:#292725}
+.vero-account.open .vero-account-menu{display:block}
+.vero-account-profile{padding:15px 16px 13px;border-bottom:1px solid #E5E1DE}
+.vero-account-profile b{display:block;font-size:12px;color:#3D3935;margin-bottom:4px}
+.vero-account-profile small{display:block;font-size:9px;color:#857874;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vero-account-item{width:100%;display:flex;align-items:center;gap:9px;border:0;background:#fff;padding:12px 16px;font:700 10px Montserrat,Verdana,Arial,sans-serif;color:#3D3935;text-decoration:none;cursor:pointer}
+.vero-account-item:hover{background:#F7F8F7}
+.vero-account-item.admin{display:none}
+.vero-account-item.signout{border-top:1px solid #E5E1DE;color:#8f2929}
+.vero-account-icon{width:18px;text-align:center;font-size:13px}
+@media(max-width:720px){.vero-account-name{display:none}.vero-account-menu{right:0;width:230px}}
+
+
+/* LOCKED MASTER HEADER — exact geometry from risk.html */
+.global-hero{position:relative!important;height:245px!important;margin:0 -28px 24px!important;overflow:hidden!important;background-image:linear-gradient(90deg,rgba(9,49,63,.58),rgba(9,49,63,.12)),url("verra-governance-header.png")!important;background-size:cover!important;background-position:center!important}
+.hero-content{position:absolute!important;left:48px!important;top:50%!important;transform:translateY(-50%)!important;color:#fff!important;z-index:2!important}
+.hero-kicker{font-size:10px!important;font-weight:800!important;letter-spacing:1.7px!important;text-transform:uppercase!important;margin-bottom:10px!important}
+.hero-content h1{font-size:32px!important;line-height:1.08!important;margin:0 0 8px!important;font-weight:800!important;letter-spacing:normal!important}
+.hero-content p{font-size:14px!important;margin:0!important;color:rgba(255,255,255,.94)!important}
+.hero-rule{width:64px!important;height:4px!important;background:var(--green)!important;margin-top:18px!important}
+.hero-tools{position:absolute!important;right:28px!important;top:22px!important;display:flex!important;align-items:center!important;gap:12px!important;z-index:3!important}
+.hero-search{box-sizing:border-box!important;width:280px!important;height:44px!important;background:#fff!important;border:1px solid rgba(255,255,255,.7)!important;border-radius:10px!important;padding:0 14px!important;font:500 11px Montserrat,Verdana,Arial,sans-serif!important;box-shadow:0 2px 10px rgba(0,0,0,.1)!important}
+
+
+/* EXACT RISK HEADER GEOMETRY — consolidated */
+.global-hero{position:relative!important;height:245px!important;margin:0 -28px 24px!important;overflow:hidden!important;background-image:linear-gradient(90deg,rgba(9,49,63,.58),rgba(9,49,63,.12)),url("verra-governance-header.png")!important;background-size:cover!important;background-position:center!important}
+.hero-content{position:absolute!important;left:48px!important;top:50%!important;transform:translateY(-50%)!important;color:#fff!important;z-index:2!important}
+.hero-content h1{font-size:32px!important;line-height:1.08!important;margin:0 0 8px!important;font-weight:800!important;letter-spacing:normal!important}
+.hero-rule{width:64px!important;height:4px!important;background:var(--green)!important;margin-top:18px!important}
+.hero-tools{position:absolute!important;right:28px!important;top:22px!important;display:flex!important;align-items:center!important;gap:12px!important;z-index:3!important}
+.hero-search{box-sizing:border-box!important;width:280px!important;height:44px!important;background:#fff!important;border:1px solid rgba(255,255,255,.7)!important;border-radius:10px!important;padding:0 14px!important;font:500 11px Montserrat,Verdana,Arial,sans-serif!important;box-shadow:0 2px 10px rgba(0,0,0,.1)!important}
+
+/* MY ACTIONS PAGE */
+.actions-page{padding:0 0 30px}
+.actions-intro{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin:0 0 20px}
+.actions-intro h2{font-size:22px;margin:0 0 5px}
+.actions-intro p{font-size:11px;color:var(--grey);margin:0}
+.actions-summary{display:flex;gap:9px;flex-wrap:wrap}
+.summary-pill{background:#fff;border:1px solid var(--line);border-radius:18px;padding:8px 11px;font-size:9px;font-weight:800;color:var(--charcoal)}
+.action-toolbar{background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px;display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}
+.action-filter{border:1px solid var(--line);background:#fff;border-radius:7px;padding:9px 11px;font:600 10px Montserrat,Verdana,Arial,sans-serif;color:var(--charcoal)}
+.action-filter.active{background:var(--charcoal);color:#fff;border-color:var(--charcoal)}
+.action-list-panel{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 3px 12px rgba(61,57,53,.035);overflow:hidden}
+.action-list-head{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.action-list-head h3{margin:0;font-size:15px}
+.action-list-head span{font-size:9px;color:var(--grey)}
+.full-action{display:grid;grid-template-columns:10px minmax(0,1fr) auto auto;gap:14px;align-items:center;padding:17px 20px;border-bottom:1px solid var(--line);cursor:pointer}
+.full-action:last-child{border-bottom:0}
+.full-action:hover{background:#fbfcfa}
+.full-action .action-dot{margin-top:0}
+.full-action-main b{font-size:12px}
+.full-action-main small{display:block;font-size:9px;color:var(--grey);margin-top:5px}
+.full-action-meta{font-size:9px;color:var(--grey);text-align:right}
+.full-action-status{display:inline-flex;padding:5px 8px;border-radius:14px;font-size:8px;font-weight:800;background:#fff0d9;color:#7d5815}
+.full-action-go{font-size:18px;color:var(--charcoal)}
+.action-empty{padding:38px 20px;text-align:center;color:var(--grey);font-size:11px}
+.action-error{padding:22px;color:#8f2929;background:#fbe4e4;font-size:10px}
+@media(max-width:850px){
+ .actions-intro{align-items:flex-start;flex-direction:column}
+ .full-action{grid-template-columns:10px minmax(0,1fr) auto}
+ .full-action-meta{display:none}
+}
+
+</style></head>
+<body><div class="app"><aside class="sidebar">
+ <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
+ <img class="chev c1" src="verra-chevron.png" alt="">
+ <img class="chev c2" src="verra-chevron.png" alt="">
+ <img class="chev c3" src="verra-chevron.png" alt="">
+ <nav class="nav">
+  <div class="nav-section">
+   <a href="index.html"><span class="ico">⌂</span><span>Home</span></a>
+  </div>
+  <div class="nav-section">
+   <div class="nav-label">My Work</div>
+   <a class="active" href="my-actions.html"><span class="ico">✓</span><span>My Actions</span></a>
+  </div>
+  <div class="nav-section">
+   <div class="nav-label">Manage</div>
+   <a href="sites.html"><span class="ico">⌖</span><span>Sites</span></a>
+   <div class="nav-group" id="projectsNav">
+    <div class="nav-group-toggle" onclick="toggleNavGroup('projectsNav')"><span class="ico">▦</span><span>Projects</span><span class="nav-caret">›</span></div>
+    <div class="nav-sub">
+     <a class="placeholder" href="#" onclick="return false"><span>Maintenance</span></a>
+     <a href="project-management.html"><span>Implementation</span></a>
+    </div>
+   </div>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">✚</span><span>Safety</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◆</span><span>Quality</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">♻</span><span>Environment</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Insurance</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">↻</span><span>Business Continuity</span></a>
+  </div>
+  <div class="nav-section">
+   <div class="nav-label">Governance</div>
+   <a href="documents.html"><span class="ico">▱</span><span>Documents</span></a>
+   <a href="risk.html"><span class="ico">▥</span><span>Risks</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◇</span><span>Compliance</span></a>
+   <a class="placeholder" href="#" onclick="return false"><span class="ico">◎</span><span>Assurance</span></a>
+  </div>
+ </nav>
+ <div class="side-foot">VERRA | VERO • v2.9<br>Prototype environment</div>
+ </aside>
+
+ <main class="main">
+  <section class="global-hero">
+   <div class="hero-content">
+    <div class="hero-kicker">My Work</div>
+    <h1>My Actions</h1>
+    <p>Everything currently requiring your attention across VERO.</p>
+    <div class="hero-rule"></div>
+   </div>
+   <div class="hero-tools">
+    <input class="hero-search" placeholder="⌕   Search VERO...">
+    <div class="vero-account" id="veroAccount">
+     <button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false">
+      <div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span>
+     </button>
+     <div class="vero-account-menu" id="veroAccountMenu">
+      <div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div>
+      <a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a>
+      <button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button>
+     </div>
+    </div>
+   </div>
+  </section>
+
+  <div class="actions-page">
+   <div class="actions-intro">
+    <div>
+     <h2>Your work queue</h2>
+     <p>Actions are generated by the workflows you are responsible for.</p>
+    </div>
+    <div class="actions-summary">
+     <span class="summary-pill" id="summaryOutstanding">— outstanding</span>
+     <span class="summary-pill" id="summaryModules">— modules</span>
+    </div>
+   </div>
+
+   <div class="action-toolbar">
+    <button class="action-filter active" data-filter="all" onclick="setActionFilter('all',this)">All</button>
+    <button class="action-filter" data-filter="due" onclick="setActionFilter('due',this)">Due / Overdue</button>
+    <button class="action-filter" data-filter="documents" onclick="setActionFilter('documents',this)">Documents</button>
+    <button class="action-filter" data-filter="risks" onclick="setActionFilter('risks',this)">Risks</button>
+    <button class="action-filter" data-filter="incidents" onclick="setActionFilter('incidents',this)">Incidents</button>
+    <button class="action-filter" data-filter="projects" onclick="setActionFilter('projects',this)">Projects</button>
+   </div>
+
+   <div class="action-list-panel">
+    <div class="action-list-head"><h3>Outstanding actions</h3><span id="actionListCount">Loading…</span></div>
+    <div id="fullActionList"><div class="action-empty">Loading your actions…</div></div>
+   </div>
+  </div>
+
+  <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • My Actions • v2.9</span></footer>
+ </main>
+</div>
+
+<div class="action-detail-backdrop" id="actionDetailBackdrop" onclick="closeActionDetail(event)">
+ <aside class="action-detail-drawer" role="dialog" aria-modal="true" aria-labelledby="actionDetailTitle">
+  <div class="action-detail-head">
+   <button class="close" type="button" onclick="closeActionDetail()">×</button>
+   <div class="action-detail-kicker" id="actionDetailKicker">MY ACTION</div>
+   <h2 id="actionDetailTitle">Action</h2>
+   <p id="actionDetailSubtitle"></p>
+  </div>
+  <div class="action-detail-body">
+   <div class="action-status" id="actionDetailStatus">Submitted</div>
+   <div class="action-detail-grid" id="actionDetailGrid"></div>
+   <div class="action-detail-section"><h3>Business reason</h3><div class="detail-copy" id="actionDetailReason">—</div></div>
+   <div class="action-detail-section"><h3>Additional information</h3><div class="detail-copy" id="actionDetailAdditional">—</div></div>
+   <div class="action-decision-actions" id="actionDecisionActions">
+    <button class="action-btn-approve" type="button" onclick="submitActionDecision('approve')">Approve</button>
+    <button class="action-btn-more" type="button" onclick="prepareActionDecision('more_information')">Request More Information</button>
+    <button class="action-btn-reject" type="button" onclick="prepareActionDecision('reject')">Reject</button>
+    <textarea class="action-decision-note" id="actionDecisionNote" placeholder="Enter the reason or notes required for this decision..."></textarea>
+    <button class="action-btn-more" id="actionDecisionConfirm" type="button" style="display:none" onclick="submitPreparedDecision()">Confirm Decision</button>
+    <div class="action-decision-message" id="actionDecisionMessage"></div>
+   </div>
+   <div class="action-detail-footer" id="actionDetailFooter"></div>
+  </div>
+ </aside>
+</div>
+
+<script>
+const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+const TOKEN_KEY='vero_session_token', USER_KEY='vero_current_user';
+let allActions=[], currentFilter='all', currentAction=null;
+
+function updateGreeting(firstName){
+ const hour=new Date().getHours();
+ const greeting=hour<12?'Good morning':hour<18?'Good afternoon':'Good evening';
+ const el=document.getElementById('timeGreeting');
+ if(el)el.textContent=greeting+(firstName?', '+firstName:'');
+}
+function toggleNavGroup(id){const group=document.getElementById(id);if(group)group.classList.toggle('open');}
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+function formatDate(value){
+ if(!value)return '—';
+ const d=new Date(value); if(Number.isNaN(d.getTime()))return value;
+ return d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'});
+}
+function formatActionDate(value){
+ if(!value)return '—';
+ const d=new Date(value); if(Number.isNaN(d.getTime()))return value;
+ return d.toLocaleString('en-AU',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function dotClass(action){
+ const source=(action.source||'').toLowerCase();
+ if(source==='documents')return 'red';
+ if(source==='risks')return 'teal';
+ if(source==='compliance')return 'gold';
+ return '';
+}
+function filteredActions(){
+ if(currentFilter==='all')return allActions;
+ if(currentFilter==='documents')return allActions.filter(a=>(a.source||'').toLowerCase()==='documents');
+ if(currentFilter==='risks')return allActions.filter(a=>(a.source||'').toLowerCase()==='risks');
+ if(currentFilter==='incidents')return allActions.filter(a=>(a.source||'').toLowerCase()==='incidents');
+ if(currentFilter==='projects')return allActions.filter(a=>(a.source||'').toLowerCase()==='projects');
+ if(currentFilter==='due'){
+  const now=Date.now();
+  return allActions.filter(a=>a.due_at && new Date(a.due_at).getTime()<=now+7*86400000);
+ }
+ return allActions;
+}
+function renderActions(){
+ const list=document.getElementById('fullActionList');
+ const visible=filteredActions();
+ document.getElementById('actionListCount').textContent=`${visible.length} shown`;
+ if(!visible.length){list.innerHTML='<div class="action-empty">No actions match this view.</div>';return;}
+ list.innerHTML=visible.map((a,i)=>{
+  const originalIndex=allActions.indexOf(a);
+  const meta=[a.source,a.action_type].filter(Boolean).join(' · ');
+  return `<div class="full-action" onclick="openActionDetail(${originalIndex})" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openActionDetail(${originalIndex})">
+   <span class="action-dot ${dotClass(a)}"></span>
+   <div class="full-action-main"><b>${escapeHtml(a.title||'Action required')}</b><small>${escapeHtml(a.description||'')}${meta?' · '+escapeHtml(meta):''}</small></div>
+   <div class="full-action-meta">${a.due_at?`Due ${escapeHtml(formatDate(a.due_at))}`:escapeHtml(formatDate(a.created_at))}</div>
+   <span class="full-action-status">${escapeHtml(a.status||'Open')}</span>
+   <span class="full-action-go">›</span>
+  </div>`;
+ }).join('');
+}
+function setActionFilter(filter,button){
+ currentFilter=filter;
+ document.querySelectorAll('.action-filter').forEach(b=>b.classList.remove('active'));
+ if(button)button.classList.add('active');
+ renderActions();
+}
+function actionField(label,value){return `<div class="action-detail-field"><label>${escapeHtml(label)}</label><strong>${escapeHtml(value??'—')}</strong></div>`;}
+function resetDecisionUI(){
+ const note=document.getElementById('actionDecisionNote'), confirm=document.getElementById('actionDecisionConfirm'), message=document.getElementById('actionDecisionMessage');
+ if(note){note.value='';note.classList.remove('show');}
+ if(confirm){confirm.style.display='none';confirm.dataset.decision='';}
+ if(message){message.textContent='';message.className='action-decision-message';}
+ document.querySelectorAll('#actionDecisionActions > button').forEach(b=>{if(b.id!=='actionDecisionConfirm'){b.style.display='';b.disabled=false;}});
+}
+function openActionDetail(index){
+ const action=allActions[index]; if(!action)return;
+ currentAction=action; resetDecisionUI();
+ document.getElementById('actionDetailKicker').textContent=action.source||'MY ACTION';
+ document.getElementById('actionDetailTitle').textContent=action.description||action.title||'Action';
+ document.getElementById('actionDetailSubtitle').textContent=`${action.action_type||'Action'}${action.source_id?` · #${action.source_id}`:''}`;
+ document.getElementById('actionDetailStatus').textContent=action.status||'Open';
+ document.getElementById('actionDetailGrid').innerHTML=[
+  actionField('Request type',action.action_type==='Document Request'?'New Document':action.action_type),
+  actionField('Document type',action.document_type),
+  actionField('Proposed owner',action.document_owner),
+  actionField('Requested by',action.requested_by),
+  actionField('Assigned to',action.assigned_to),
+  actionField('Submitted',formatActionDate(action.created_at))
+ ].join('');
+ document.getElementById('actionDetailReason').textContent=action.business_reason||'—';
+ document.getElementById('actionDetailAdditional').textContent=action.additional_information||'—';
+ document.getElementById('actionDetailFooter').textContent=`Action ID: ${action.id} · Priority: ${action.priority||'Normal'}`;
+ document.getElementById('actionDecisionActions').style.display=(action.source==='Documents'&&action.action_type==='Document Request')?'block':'none';
+ document.getElementById('actionDetailBackdrop').classList.add('show');
+ document.body.style.overflow='hidden';
+}
+function prepareActionDecision(decision){
+ const note=document.getElementById('actionDecisionNote'), confirm=document.getElementById('actionDecisionConfirm');
+ note.classList.add('show');note.focus();confirm.style.display='inline-block';confirm.dataset.decision=decision;
+ confirm.textContent=decision==='more_information'?'Request Information':'Confirm Rejection';
+ note.placeholder=decision==='more_information'?'What information is required from the requester?':'Why is this request being rejected?';
+ document.querySelector('.action-btn-approve').style.display='none';
+ document.querySelectorAll('.action-btn-more').forEach(b=>{if(b.id!=='actionDecisionConfirm')b.style.display='none';});
+ document.querySelector('.action-btn-reject').style.display='none';
+}
+async function submitActionDecision(decision){if(decision==='approve')await sendActionDecision(decision,'');}
+async function submitPreparedDecision(){
+ const confirm=document.getElementById('actionDecisionConfirm'), notes=document.getElementById('actionDecisionNote').value.trim();
+ if(!notes){showDecisionMessage('Notes are required for this decision.','error');return;}
+ await sendActionDecision(confirm.dataset.decision,notes);
+}
+function showDecisionMessage(text,type){const m=document.getElementById('actionDecisionMessage');m.textContent=text;m.className='action-decision-message show '+type;}
+async function sendActionDecision(decision,notes){
+ const action=currentAction, token=localStorage.getItem(TOKEN_KEY); if(!action||!action.source_id||!token)return;
+ const buttons=document.querySelectorAll('#actionDecisionActions button');buttons.forEach(b=>b.disabled=true);
+ try{
+  const r=await fetch(`${API}/document-requests/${encodeURIComponent(action.source_id)}/decision`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({decision,notes})});
+  const d=await r.json().catch(()=>({})); if(!r.ok)throw new Error(d.message||'Unable to process decision');
+  showDecisionMessage(d.message||'Decision completed successfully.','success');
+  setTimeout(()=>{closeActionDetail();loadActions();},700);
+ }catch(e){showDecisionMessage(e.message||'Unable to process decision.','error');buttons.forEach(b=>b.disabled=false);}
+}
+function closeActionDetail(event){
+ if(event&&event.target!==document.getElementById('actionDetailBackdrop'))return;
+ document.getElementById('actionDetailBackdrop').classList.remove('show');document.body.style.overflow='';currentAction=null;
+}
+async function loadActions(){
+ const token=localStorage.getItem(TOKEN_KEY), list=document.getElementById('fullActionList');
+ if(!token){list.innerHTML='<div class="action-error">Please sign in to view your actions.</div>';return;}
+ try{
+  const r=await fetch(`${API}/my-actions`,{headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store'});
+  const d=await r.json(); if(!r.ok)throw new Error(d.message||'Unable to load actions');
+  allActions=d.actions||[];
+  document.getElementById('summaryOutstanding').textContent=`${allActions.length} outstanding`;
+  document.getElementById('summaryModules').textContent=`${new Set(allActions.map(a=>a.source)).size} modules`;
+  renderActions();
+ }catch(e){console.error(e);list.innerHTML='<div class="action-error">Unable to load your actions right now.</div>';document.getElementById('actionListCount').textContent='Unavailable';}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+ const saved=JSON.parse(localStorage.getItem(USER_KEY)||'{}');updateGreeting(saved.first_name||'');loadActions();
+ const trigger=document.getElementById('veroAccountTrigger'),account=document.getElementById('veroAccount'),avatar=document.getElementById('veroAccountAvatar'),name=document.getElementById('veroAccountName'),full=document.getElementById('veroAccountFullName'),email=document.getElementById('veroAccountEmail'),admin=document.getElementById('veroUserManagement'),signout=document.getElementById('veroAccountSignOut');
+ const initials=u=>(((u?.first_name||'').charAt(0)+(u?.last_name||'').charAt(0)).toUpperCase()||'U');
+ const fullName=u=>[u?.first_name,u?.last_name].filter(Boolean).join(' ').trim()||u?.email||'Signed in user';
+ function render(u){avatar.textContent=initials(u);name.textContent=fullName(u);full.textContent=fullName(u);email.textContent=u?.email||'';admin.style.display=u?.vero_role==='Administrator'?'flex':'none';updateGreeting(u?.first_name||'');}
+ async function loadMe(){const t=localStorage.getItem(TOKEN_KEY);if(!t){location.replace('login.html?return=my-actions.html');return;}try{const r=await fetch(`${API}/auth/me`,{headers:{Authorization:'Bearer '+t,Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('auth');const d=await r.json();const u=d.user||d;localStorage.setItem(USER_KEY,JSON.stringify(u));render(u);}catch(e){localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(USER_KEY);location.replace('login.html?return=my-actions.html');}}
+ trigger.addEventListener('click',e=>{e.stopPropagation();const open=account.classList.toggle('open');trigger.setAttribute('aria-expanded',String(open));});
+ document.addEventListener('click',e=>{if(!account.contains(e.target)){account.classList.remove('open');trigger.setAttribute('aria-expanded','false');}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){account.classList.remove('open');trigger.setAttribute('aria-expanded','false');closeActionDetail();}});
+ signout.addEventListener('click',async()=>{const t=localStorage.getItem(TOKEN_KEY);try{if(t)await fetch(`${API}/auth/logout`,{method:'POST',headers:{Authorization:'Bearer '+t}});}catch(e){}localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(USER_KEY);location.replace('login.html');});
+ loadMe();
+});
+</script>
+</body></html>
