@@ -44,6 +44,7 @@
 .action-detail-section{margin-top:20px}
 .action-detail-section h3{font-size:13px;margin:0 0 9px}
 .action-detail-section .detail-copy{background:#f8f7f6;border-radius:8px;padding:13px;font-size:11px;line-height:1.55;color:#4f4a46;white-space:pre-wrap}
+.action-draft-card{display:none;margin-top:20px;background:#f8f7f6;border:1px solid var(--line);border-radius:9px;padding:14px}.action-draft-card.show{display:flex;align-items:center;gap:12px}.action-draft-icon{width:38px;height:38px;border-radius:8px;background:#eaf3d0;display:grid;place-items:center;font-size:18px;flex:none}.action-draft-info{min-width:0;flex:1}.action-draft-info label{display:block;color:var(--grey);font-size:8px;text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}.action-draft-info strong{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.action-draft-info small{display:block;color:var(--grey);font-size:8px;margin-top:4px}.action-draft-open{border:0;border-radius:8px;padding:10px 12px;background:var(--green);color:var(--charcoal);font:800 9px Montserrat,Verdana,Arial,sans-serif;cursor:pointer;white-space:nowrap}.action-draft-open:disabled{opacity:.55;cursor:wait}
 
 .action-decision-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
 .action-decision-actions button{border:0;border-radius:8px;padding:11px 14px;font:800 10px Montserrat,Verdana,Arial,sans-serif;cursor:pointer}
@@ -312,7 +313,8 @@
    <div class="action-detail-grid" id="actionDetailGrid"></div>
    <div class="action-detail-section"><h3>Business reason</h3><div class="detail-copy" id="actionDetailReason">—</div></div>
    <div class="action-detail-section"><h3>Additional information</h3><div class="detail-copy" id="actionDetailAdditional">—</div></div>
-   <div class="action-decision-actions" id="actionDecisionActions">
+   <div class="action-draft-card" id="actionDraftCard"><div class="action-draft-icon">📄</div><div class="action-draft-info"><label>Completed Word Draft</label><strong id="actionDraftName">—</strong><small id="actionDraftMeta"></small></div><button class="action-draft-open" id="actionDraftOpen" type="button" onclick="openDocumentDraft()">Open Draft Document</button></div>
+    <div class="action-decision-actions" id="actionDecisionActions">
     <button class="action-btn-approve" type="button" onclick="submitActionDecision('approve')">Approve</button>
     <button class="action-btn-more" type="button" onclick="prepareActionDecision('more_information')">Request More Information</button>
     <button class="action-btn-reject" type="button" onclick="prepareActionDecision('reject')">Reject</button>
@@ -394,6 +396,7 @@ function setActionFilter(filter,button){
  renderActions();
 }
 function actionField(label,value){return `<div class="action-detail-field"><label>${escapeHtml(label)}</label><strong>${escapeHtml(value??'—')}</strong></div>`;}
+function formatBytes(value){const n=Number(value);if(!Number.isFinite(n)||n<0)return '';if(n<1024)return `${n} B`;if(n<1048576)return `${(n/1024).toFixed(n<10240?1:0)} KB`;return `${(n/1048576).toFixed(1)} MB`;}
 function resetDecisionUI(){
  const note=document.getElementById('actionDecisionNote'), confirm=document.getElementById('actionDecisionConfirm'), message=document.getElementById('actionDecisionMessage');
  if(note){note.value='';note.classList.remove('show');}
@@ -428,6 +431,7 @@ function openActionDetail(index){
   document.getElementById('actionDetailReason').textContent=action.business_reason||'—';
   document.getElementById('actionDetailAdditional').textContent=action.additional_information||'—';
  }
+ const draftCard=document.getElementById('actionDraftCard');if(draftCard){const showDraft=isDocumentRequest&&action.has_draft&&action.draft_file_name;draftCard.classList.toggle('show',!!showDraft);document.getElementById('actionDraftName').textContent=showDraft?action.draft_file_name:'—';document.getElementById('actionDraftMeta').textContent=showDraft?[formatBytes(action.draft_file_size_bytes),action.draft_uploaded_at?`Uploaded ${formatActionDate(action.draft_uploaded_at)}`:''].filter(Boolean).join(' · '):'';}
  document.getElementById('actionDetailFooter').textContent=`Action ID: ${action.id} · Priority: ${action.priority||'Normal'}`;
  document.getElementById('actionDecisionActions').style.display=isDocumentRequest?'block':'none';
  const projectActions=document.getElementById('projectActionActions');
@@ -444,6 +448,7 @@ function openProjectAction(){
  if(!action||action.source!=='Projects'||!action.source_id)return;
  location.href=`project-workspace.html?id=${encodeURIComponent(action.source_id)}`;
 }
+async function openDocumentDraft(){const action=currentAction,token=localStorage.getItem(TOKEN_KEY);if(!action||action.source!=='Documents'||action.action_type!=='Document Request'||!action.source_id||!token)return;const btn=document.getElementById('actionDraftOpen');if(btn)btn.disabled=true;try{const r=await fetch(`${API}/document-requests/${encodeURIComponent(action.source_id)}/draft`,{headers:{Authorization:'Bearer '+token},cache:'no-store'});if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.message||'Unable to open draft document');}const blob=await r.blob();const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=action.draft_file_name||'document-draft.docx';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}catch(e){showDecisionMessage(e.message||'Unable to open draft document.','error');}finally{if(btn)btn.disabled=false;}}
 function prepareActionDecision(decision){
  const note=document.getElementById('actionDecisionNote'), confirm=document.getElementById('actionDecisionConfirm');
  note.classList.add('show');note.focus();confirm.style.display='inline-block';confirm.dataset.decision=decision;
