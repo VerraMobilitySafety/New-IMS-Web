@@ -311,7 +311,13 @@
 
   <div id="replacementDocumentsField" class="detail" style="display:none;margin-top:12px">
    <label>Documents Being Replaced *</label>
-   <select id="reqReplacementDocuments" multiple size="5" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;background:#fff;font:13px Montserrat,Verdana,Arial,sans-serif"></select>
+   <div id="reqReplacementPicker" style="position:relative">
+    <button type="button" id="reqReplacementToggle" onclick="toggleReplacementPicker()" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;background:#fff;font:13px Montserrat,Verdana,Arial,sans-serif;text-align:left;cursor:pointer">
+     Select current controlled document(s)…
+    </button>
+    <div id="reqReplacementMenu" style="display:none;position:absolute;z-index:20;left:0;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--line);border-radius:7px;padding:6px;max-height:220px;overflow:auto;box-shadow:0 8px 20px rgba(0,0,0,.12)"></div>
+   </div>
+   <select id="reqReplacementDocuments" multiple style="display:none"></select>
    <div style="font-size:10px;color:var(--grey);line-height:1.5;margin-top:7px">Select one or more current documents that the new document will replace. The Document Controller will validate the selection.</div>
   </div>
 
@@ -472,6 +478,57 @@ function setRequestMessage(message,type='error'){
  el.style.border=type==='success'?'1px solid #cbdc91':'1px solid #e8bcbc';
 }
 function clearRequestMessage(){const el=document.getElementById('requestMessage');el.textContent='';el.style.display='none';}
+function toggleReplacementPicker(){
+ const menu=document.getElementById('reqReplacementMenu');
+ menu.style.display=menu.style.display==='block'?'none':'block';
+}
+
+function updateReplacementPickerLabel(){
+ const select=document.getElementById('reqReplacementDocuments');
+ const selected=Array.from(select.selectedOptions);
+
+ const button=document.getElementById('reqReplacementToggle');
+
+ if(!selected.length){
+  button.textContent='Select current controlled document(s)…';
+ }else if(selected.length===1){
+  button.textContent=selected[0].textContent;
+ }else{
+  button.textContent=`${selected.length} documents selected`;
+ }
+}
+
+function renderReplacementPicker(){
+ const select=document.getElementById('reqReplacementDocuments');
+ const menu=document.getElementById('reqReplacementMenu');
+
+ menu.innerHTML='';
+
+ Array.from(select.options).forEach(option=>{
+  const row=document.createElement('label');
+  row.style.cssText='display:flex;align-items:flex-start;gap:9px;padding:9px 8px;border-radius:5px;cursor:pointer;font-size:12px;line-height:1.4';
+
+  const checkbox=document.createElement('input');
+  checkbox.type='checkbox';
+  checkbox.checked=option.selected;
+  checkbox.style.marginTop='2px';
+
+  checkbox.addEventListener('change',()=>{
+   option.selected=checkbox.checked;
+   updateReplacementPickerLabel();
+  });
+
+  const text=document.createElement('span');
+  text.textContent=option.textContent;
+
+  row.appendChild(checkbox);
+  row.appendChild(text);
+  menu.appendChild(row);
+ });
+
+ updateReplacementPickerLabel();
+}
+
 function populateDocumentRequestSelectors(){
  const single=document.getElementById('reqExistingDocument');
  const multi=document.getElementById('reqReplacementDocuments');
@@ -479,7 +536,9 @@ function populateDocumentRequestSelectors(){
  single.innerHTML='<option value="">Select a current controlled document…</option>';
  multi.innerHTML='';
 
- liveDocuments.forEach(doc=>{
+ liveDocuments
+  .filter(doc=>(doc.status||'').toLowerCase()==='current')
+  .forEach(doc=>{
   const id=doc.id;
   const number=doc.documentNumber||doc.document_number||'No number';
   const title=doc.documentTitle||doc.document_title||'Untitled document';
@@ -495,6 +554,8 @@ function populateDocumentRequestSelectors(){
   multiOption.textContent=label;
   multi.appendChild(multiOption);
  });
+
+ renderReplacementPicker();
 }
 
 function openRequest(){
