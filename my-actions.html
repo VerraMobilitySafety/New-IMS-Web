@@ -339,6 +339,62 @@
     </div>
    </div>
 
+   <div id="documentPublicationPanel" style="display:none;margin-top:20px">
+    <div class="action-detail-section">
+     <h3>Publish Controlled Document</h3>
+
+     <div class="action-detail-field" style="margin-bottom:10px">
+      <label>Document Reference</label>
+      <strong id="publicationDocumentReference">—</strong>
+     </div>
+
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="action-detail-field">
+       <label for="publicationDocumentType">Document Type *</label>
+       <select id="publicationDocumentType" style="width:100%;box-sizing:border-box;border:1px solid #d8d4d1;border-radius:7px;padding:9px;background:#fff">
+        <option value="">Select type…</option>
+        <option value="Policy">Policy</option>
+        <option value="Procedure">Procedure</option>
+        <option value="Standard">Standard</option>
+        <option value="Work Instruction">Work Instruction</option>
+        <option value="Management Plan">Management Plan</option>
+        <option value="Form">Form</option>
+        <option value="Template">Template</option>
+        <option value="Guideline">Guideline</option>
+       </select>
+      </div>
+
+      <div class="action-detail-field">
+       <label for="publicationDocumentOwner">Document Owner *</label>
+       <input id="publicationDocumentOwner" type="text" placeholder="e.g. Director, Workplace Governance" style="width:100%;box-sizing:border-box;border:1px solid #d8d4d1;border-radius:7px;padding:9px;background:#fff">
+      </div>
+     </div>
+
+     <div class="action-detail-field" style="margin-bottom:10px">
+      <label for="publicationPdf">Final Controlled PDF *</label>
+      <input id="publicationPdf" type="file" accept=".pdf,application/pdf" style="width:100%;box-sizing:border-box;margin-top:5px">
+     </div>
+
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="action-detail-field">
+       <label for="publicationEffectiveDate">Effective Date *</label>
+       <input id="publicationEffectiveDate" type="date" style="width:100%;box-sizing:border-box;border:1px solid #d8d4d1;border-radius:7px;padding:9px;background:#fff">
+      </div>
+
+      <div class="action-detail-field">
+       <label for="publicationReviewDate">Next Review Date</label>
+       <input id="publicationReviewDate" type="date" style="width:100%;box-sizing:border-box;border:1px solid #d8d4d1;border-radius:7px;padding:9px;background:#fff">
+      </div>
+     </div>
+
+     <div id="publicationMessage" class="action-decision-message"></div>
+
+     <button class="action-btn-approve" id="publishDocumentButton" type="button" onclick="publishControlledDocument()" style="border:0;border-radius:8px;padding:11px 14px;font:800 10px Montserrat,Verdana,Arial,sans-serif;cursor:pointer;margin-top:14px">
+      Publish Document
+     </button>
+    </div>
+   </div>
+
     <div class="action-decision-actions" id="actionDecisionActions">
     <button class="action-btn-approve" type="button" onclick="submitActionDecision('approve')">Approve</button>
     <button class="action-btn-more" type="button" onclick="prepareActionDecision('more_information')">Request More Information</button>
@@ -545,14 +601,40 @@ function openActionDetail(index){
   `Action ID: ${action.id} · Priority: ${action.priority||'Normal'}`;
 
  const decisionActions=document.getElementById('actionDecisionActions');
- decisionActions.style.display=isDocumentRequest?'block':'none';
+
+ const isPublicationStage=
+  isDocumentRequest &&
+  !isDocumentApproval &&
+  action.status==='Ready for Publication';
+
+ decisionActions.style.display=
+  isDocumentRequest && !isPublicationStage ? 'block' : 'none';
+
+ const publicationPanel=document.getElementById('documentPublicationPanel');
+ if(publicationPanel){
+  publicationPanel.style.display=isPublicationStage ? 'block' : 'none';
+
+  if(isPublicationStage){
+   document.getElementById('publicationDocumentReference').textContent=
+    action.document_number||action.assigned_document_number||'—';
+
+   document.getElementById('publicationPdf').value='';
+   document.getElementById('publicationEffectiveDate').value='';
+   document.getElementById('publicationReviewDate').value='';
+
+   const publicationMessage=document.getElementById('publicationMessage');
+   publicationMessage.textContent='';
+   publicationMessage.className='action-decision-message';
+  }
+ }
 
  const governancePanel=document.getElementById('newDocumentGovernance');
  if(governancePanel){
   const showGovernance=
    isDocumentRequest &&
    !isDocumentApproval &&
-   requestType==='New Document';
+   requestType==='New Document' &&
+   action.status!=='Ready for Publication';
 
   governancePanel.style.display=showGovernance ? 'block' : 'none';
 
@@ -665,6 +747,95 @@ async function sendActionDecision(decision,notes){
   setTimeout(()=>{closeActionDetail();loadActions();},700);
  }catch(e){showDecisionMessage(e.message||'Unable to process decision.','error');buttons.forEach(b=>b.disabled=false);}
 }
+async function publishControlledDocument(){
+ const action=currentAction;
+ const token=localStorage.getItem(TOKEN_KEY);
+ const message=document.getElementById('publicationMessage');
+ const button=document.getElementById('publishDocumentButton');
+
+ if(!action||!action.source_id||!token)return;
+
+ const documentType=document.getElementById('publicationDocumentType').value;
+ const documentOwner=document.getElementById('publicationDocumentOwner').value.trim();
+ const effectiveDate=document.getElementById('publicationEffectiveDate').value;
+ const reviewDate=document.getElementById('publicationReviewDate').value;
+ const pdf=document.getElementById('publicationPdf').files[0];
+
+ const showPublicationMessage=(text,type)=>{
+  message.textContent=text;
+  message.className='action-decision-message show '+type;
+ };
+
+ if(!documentType){
+  showPublicationMessage('Select the Document Type.','error');
+  return;
+ }
+
+ if(!documentOwner){
+  showPublicationMessage('Enter the Document Owner.','error');
+  return;
+ }
+
+ if(!effectiveDate){
+  showPublicationMessage('Select the Effective Date.','error');
+  return;
+ }
+
+ if(!pdf){
+  showPublicationMessage('Upload the final controlled PDF.','error');
+  return;
+ }
+
+ if(!pdf.name.toLowerCase().endsWith('.pdf')){
+  showPublicationMessage('The final controlled document must be a PDF.','error');
+  return;
+ }
+
+ const form=new FormData();
+ form.append('document_type',documentType);
+ form.append('document_owner',documentOwner);
+ form.append('effective_date',effectiveDate);
+ form.append('review_date',reviewDate);
+ form.append('file',pdf);
+
+ button.disabled=true;
+ showPublicationMessage('Publishing controlled document…','success');
+
+ try{
+  const r=await fetch(
+   `${API}/document-requests/${encodeURIComponent(action.source_id)}/publish`,
+   {
+    method:'POST',
+    headers:{Authorization:'Bearer '+token},
+    body:form
+   }
+  );
+
+  const d=await r.json().catch(()=>({}));
+
+  if(!r.ok){
+   throw new Error(d.message||'Unable to publish controlled document');
+  }
+
+  showPublicationMessage(
+   `${d.document?.document_number||'Document'} v${d.document?.version_number||'1.0'} published successfully.`,
+   'success'
+  );
+
+  setTimeout(()=>{
+   closeActionDetail();
+   loadActions();
+  },900);
+
+ }catch(e){
+  showPublicationMessage(
+   e.message||'Unable to publish controlled document.',
+   'error'
+  );
+  button.disabled=false;
+ }
+}
+
 function closeActionDetail(event){
  if(event&&event.target!==document.getElementById('actionDetailBackdrop'))return;
  document.getElementById('actionDetailBackdrop').classList.remove('show');document.body.style.overflow='';currentAction=null;
