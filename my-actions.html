@@ -326,7 +326,16 @@
 
     <div class="action-detail-section">
      <h3>Required Approver(s)</h3>
-     <div id="documentApproverList" style="display:grid;gap:8px"></div>
+     <div id="documentApproverPicker" style="position:relative">
+      <button type="button" id="documentApproverToggle" onclick="toggleDocumentApproverPicker()" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:11px;background:#fff;font:600 11px Montserrat,Verdana,Arial,sans-serif;text-align:left;cursor:pointer">
+       Select approver(s)…
+      </button>
+      <div id="documentApproverSelected" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+      <div id="documentApproverMenu" style="display:none;position:absolute;z-index:30;left:0;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px;box-shadow:0 8px 20px rgba(0,0,0,.12)">
+       <input id="documentApproverSearch" type="text" placeholder="Search people…" oninput="filterDocumentApprovers()" style="width:100%;box-sizing:border-box;border:1px solid #d8d4d1;border-radius:7px;padding:9px;font:500 10px Montserrat,Verdana,Arial,sans-serif">
+       <div id="documentApproverList" style="max-height:230px;overflow:auto;margin-top:7px"></div>
+      </div>
+     </div>
     </div>
    </div>
 
@@ -638,12 +647,78 @@ function closeActionDetail(event){
  if(event&&event.target!==document.getElementById('actionDetailBackdrop'))return;
  document.getElementById('actionDetailBackdrop').classList.remove('show');document.body.style.overflow='';currentAction=null;
 }
+let documentApproverUsers=[];
+
+function toggleDocumentApproverPicker(){
+ const menu=document.getElementById('documentApproverMenu');
+ if(!menu)return;
+ menu.style.display=menu.style.display==='block'?'none':'block';
+
+ if(menu.style.display==='block'){
+  const search=document.getElementById('documentApproverSearch');
+  if(search){
+   search.value='';
+   filterDocumentApprovers();
+   search.focus();
+  }
+ }
+}
+
+function selectedDocumentApproverIds(){
+ return Array.from(
+  document.querySelectorAll('.document-approver-checkbox:checked')
+ ).map(cb=>Number(cb.value));
+}
+
+function renderSelectedDocumentApprovers(){
+ const selected=document.getElementById('documentApproverSelected');
+ const button=document.getElementById('documentApproverToggle');
+ if(!selected||!button)return;
+
+ const ids=selectedDocumentApproverIds();
+ const users=documentApproverUsers.filter(u=>ids.includes(Number(u.id)));
+
+ selected.innerHTML=users.map(u=>{
+  const name=[u.first_name,u.last_name].filter(Boolean).join(' ')||u.email;
+
+  return `<span style="display:inline-flex;align-items:center;gap:6px;background:#eaf3d0;border:1px solid #cbdc91;border-radius:14px;padding:5px 9px;font:700 9px Montserrat,Verdana,Arial,sans-serif">
+   ${escapeHtml(name)}
+   <button type="button" data-approver-id="${u.id}" onclick="removeDocumentApprover(${u.id})" style="border:0;background:none;padding:0;cursor:pointer;font:800 11px Arial;color:var(--charcoal)">×</button>
+  </span>`;
+ }).join('');
+
+ button.textContent=users.length
+  ? `${users.length} approver${users.length===1?'':'s'} selected`
+  : 'Select approver(s)…';
+}
+
+function removeDocumentApprover(userId){
+ const checkbox=document.querySelector(
+  `.document-approver-checkbox[value="${userId}"]`
+ );
+
+ if(checkbox){
+  checkbox.checked=false;
+  renderSelectedDocumentApprovers();
+  filterDocumentApprovers();
+ }
+}
+
+function filterDocumentApprovers(){
+ const search=(document.getElementById('documentApproverSearch')?.value||'').trim().toLowerCase();
+
+ document.querySelectorAll('#documentApproverList > label').forEach(row=>{
+  const text=(row.dataset.search||'').toLowerCase();
+  row.style.display=!search||text.includes(search)?'flex':'none';
+ });
+}
+
 async function loadDocumentApprovers(){
  const token=localStorage.getItem(TOKEN_KEY);
  const list=document.getElementById('documentApproverList');
  if(!token||!list)return;
 
- list.innerHTML='<div style="font-size:10px;color:var(--grey)">Loading approvers…</div>';
+ list.innerHTML='<div style="font-size:10px;color:var(--grey);padding:8px">Loading approvers…</div>';
 
  try{
   const r=await fetch(`${API}/users`,{
@@ -654,20 +729,25 @@ async function loadDocumentApprovers(){
   const d=await r.json();
   if(!r.ok)throw new Error(d.message||'Unable to load approvers');
 
-  const users=(d.users||[]).filter(u=>u.active&&u.account_status==='Active');
+  documentApproverUsers=(d.users||[]).filter(
+   u=>u.active&&u.account_status==='Active'
+  );
 
-  list.innerHTML=users.map(u=>{
+  list.innerHTML=documentApproverUsers.map(u=>{
    const name=[u.first_name,u.last_name].filter(Boolean).join(' ')||u.email;
    const detail=[u.job_title,u.email].filter(Boolean).join(' · ');
+   const searchText=[name,detail].join(' ').toLowerCase();
 
-   return `<label style="display:flex;align-items:flex-start;gap:10px;background:#f8f7f6;border:1px solid var(--line);border-radius:8px;padding:11px;cursor:pointer">
-    <input type="checkbox" class="document-approver-checkbox" value="${u.id}" style="margin-top:2px">
+   return `<label data-search="${escapeHtml(searchText)}" style="display:flex;align-items:flex-start;gap:10px;padding:9px;border-radius:6px;cursor:pointer;font-size:11px">
+    <input type="checkbox" class="document-approver-checkbox" value="${u.id}" onchange="renderSelectedDocumentApprovers()" style="margin-top:2px">
     <span>
-     <strong style="display:block;font-size:11px">${escapeHtml(name)}</strong>
+     <strong style="display:block;font-size:10px">${escapeHtml(name)}</strong>
      <small style="display:block;margin-top:3px;color:var(--grey);font-size:8px">${escapeHtml(detail)}</small>
     </span>
    </label>`;
   }).join('');
+
+  renderSelectedDocumentApprovers();
 
  }catch(e){
   console.error(e);
