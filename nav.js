@@ -78,7 +78,7 @@
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">◇</span><span>Compliance CManagment</span>
+        <span class="ico">◇</span><span>Compliance Managment</span>
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
