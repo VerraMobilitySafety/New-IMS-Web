@@ -283,14 +283,14 @@
 <script>
 function updateGreeting(firstName){
  const hour=new Date().getHours();
- const greeting=hour<12?'Good morning':hour<18?'Good afternoon':'Good evening';
+ const greeting=hour<12?'Morning':hour<18?'G'day':'Hey there';
  const el=document.getElementById('timeGreeting');
  if(!el)return;
  let name=firstName||'';
  if(!name){
   try{const u=JSON.parse(localStorage.getItem('vero_current_user')||'{}');name=u.first_name||'';}catch(e){}
  }
- el.textContent=greeting+(name?', '+name:'');
+ el.textContent=greeting+(name?' '+name:'');
 }
 function toggleNavGroup(id){
  const group=document.getElementById(id);
