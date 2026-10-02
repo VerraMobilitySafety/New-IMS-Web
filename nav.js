@@ -46,15 +46,15 @@
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">✚</span><span>Safety</span>
+        <span class="ico">✚</span><span>Safety Risk Management</span>
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">◆</span><span>Quality</span>
+        <span class="ico">◆</span><span>Quality Risk Management</span>
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">♻</span><span>Environment</span>
+        <span class="ico">♻</span><span>Environment Risk Management</span>
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
