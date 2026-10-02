@@ -31,7 +31,7 @@
     </div>
 
     <div class="nav-section">
-      <div class="nav-label">Manage</div>
+      <div class="nav-label">Operations</div>
 
       <a class="${isActive('sites.html') ? 'active' : ''}" href="sites.html">
         <span class="ico">⌖</span><span>Verra Mobility Locations</span>
@@ -46,6 +46,14 @@
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
+        <span class="ico">♙</span><span>Contractor Management</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Management Systems</div>
+
+      <a class="placeholder" href="#" onclick="return false">
         <span class="ico">✚</span><span>Safety Risks</span>
       </a>
 
@@ -55,14 +63,6 @@
 
       <a class="placeholder" href="#" onclick="return false">
         <span class="ico">♻</span><span>Environment Risks</span>
-      </a>
-
-      <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">◇</span><span>Insurance</span>
-      </a>
-
-      <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">↻</span><span>Business Continuity</span>
       </a>
     </div>
 
@@ -78,11 +78,19 @@
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">◇</span><span>Compliance Managment</span>
+        <span class="ico">◇</span><span>Compliance Management</span>
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
         <span class="ico">◎</span><span>Assurance Management</span>
+      </a>
+
+      <a class="placeholder" href="#" onclick="return false">
+        <span class="ico">◇</span><span>Insurance</span>
+      </a>
+
+      <a class="placeholder" href="#" onclick="return false">
+        <span class="ico">↻</span><span>Business Continuity</span>
       </a>
     </div>
   `;
