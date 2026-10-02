@@ -38,23 +38,23 @@
       </a>
 
       <a class="${projectActive ? 'active' : ''}" href="project-management.html">
-        <span class="ico">▦</span><span>Project Management</span>
+        <span class="ico">▦</span><span>Projects</span>
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">⚙</span><span>Maintenance Management</span>
+        <span class="ico">⚙</span><span>Maintenance</span>
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">✚</span><span>Safety Risk Management</span>
+        <span class="ico">✚</span><span>Safety Risks</span>
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">◆</span><span>Quality Risk Management</span>
+        <span class="ico">◆</span><span>Quality Risks</span>
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">♻</span><span>Environment Risk Management</span>
+        <span class="ico">♻</span><span>Environment Risks</span>
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
