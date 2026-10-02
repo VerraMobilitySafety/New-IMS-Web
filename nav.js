@@ -34,7 +34,7 @@
       <div class="nav-label">Manage</div>
 
       <a class="${isActive('sites.html') ? 'active' : ''}" href="sites.html">
-        <span class="ico">⌖</span><span>Verra Locations</span>
+        <span class="ico">⌖</span><span>Verra Mobility Locations</span>
       </a>
 
       <a class="${projectActive ? 'active' : ''}" href="project-management.html">
