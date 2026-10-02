@@ -628,7 +628,11 @@ async function sendActionDecision(decision,notes){
 
  const payload={decision,notes};
 
- if(decision==='approve' && action.request_type==='New Document'){
+ if(
+  decision==='approve' &&
+  action.action_type==='Document Request' &&
+  action.request_type==='New Document'
+ ){
   const documentNumber=document.getElementById('documentReference').value.trim();
   const approverUserIds=[
    ...document.querySelectorAll('.document-approver-checkbox:checked')
