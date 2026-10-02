@@ -453,7 +453,7 @@ async function openSelectedDocument(){
   if(!response.ok)throw new Error(`Document API returned ${response.status}`);
   const blob=await response.blob();
   if(currentViewerBlobUrl)URL.revokeObjectURL(currentViewerBlobUrl);
-  currentViewerBlobUrl=URL.createObjectURL(blob);frame.src=currentViewerBlobUrl;
+  currentViewerBlobUrl=URL.createObjectURL(blob);frame.src=currentViewerBlobUrl+'#toolbar=0&navpanes=0&scrollbar=1';
   document.getElementById('viewerTitle').textContent=`${selectedDocument.documentNumber} — ${selectedDocument.documentTitle}`;
   document.getElementById('viewerMeta').textContent=`Version ${selectedDocument.controlledVersion} • ${selectedDocument.workflowStatus.toUpperCase()} • ${selectedDocument.accessLevel}`;
   document.getElementById('viewer').classList.add('show');closeDrawer();
