@@ -407,39 +407,141 @@ function resetDecisionUI(){
 function openActionDetail(index){
  const action=allActions[index]; if(!action)return;
  currentAction=action; resetDecisionUI();
+
  const isDocumentRequest=action.source==='Documents'&&action.action_type==='Document Request';
  const isProject=action.source==='Projects';
- document.getElementById('actionDetailKicker').textContent=action.source||'MY ACTION';
- document.getElementById('actionDetailTitle').textContent=action.description||action.title||'Action';
- document.getElementById('actionDetailSubtitle').textContent=`${action.action_type||'Action'}${action.source_id?` · #${action.source_id}`:''}`;
+ const requestType=action.request_type||'New Document';
+
+ const requestLabels={
+  'New Document':'New Document',
+  'Revise Existing Document':'Document Revision',
+  'Replace Existing Document':'Document Replacement',
+  'Withdraw Document':'Document Withdrawal'
+ };
+
+ const approvalLabels={
+  'New Document':'Approve New Document',
+  'Revise Existing Document':'Approve Revision',
+  'Replace Existing Document':'Approve Replacement',
+  'Withdraw Document':'Approve Withdrawal'
+ };
+
+ document.getElementById('actionDetailKicker').textContent=
+  isDocumentRequest?'DOCUMENT CONTROL':(action.source||'MY ACTION');
+
+ document.getElementById('actionDetailTitle').textContent=
+  isDocumentRequest
+   ? `${requestLabels[requestType]||requestType}: ${action.document_title||action.description||action.title||'Document'}`
+   : (action.description||action.title||'Action');
+
+ document.getElementById('actionDetailSubtitle').textContent=
+  isDocumentRequest
+   ? `${requestType}${action.source_id?` · Request #${action.source_id}`:''}`
+   : `${action.action_type||'Action'}${action.source_id?` · #${action.source_id}`:''}`;
+
  document.getElementById('actionDetailStatus').textContent=action.status||'Open';
+
  if(isProject){
   document.getElementById('actionDetailGrid').innerHTML=[
-   actionField('Project code',action.project_code), actionField('Project name',action.project_name),
-   actionField('Stage',action.approval_stage||action.action_type), actionField('Assigned to',action.assigned_to),
-   actionField('Next step',action.next_step||action.title), actionField('Created',formatActionDate(action.created_at))
+   actionField('Project code',action.project_code),
+   actionField('Project name',action.project_name),
+   actionField('Stage',action.approval_stage||action.action_type),
+   actionField('Assigned to',action.assigned_to),
+   actionField('Next step',action.next_step||action.title),
+   actionField('Created',formatActionDate(action.created_at))
   ].join('');
+
   document.getElementById('actionDetailReason').textContent=action.next_step||action.title||'—';
   document.getElementById('actionDetailAdditional').textContent='Continue this action in the Project Workspace.';
+
+ }else if(isDocumentRequest){
+
+  const fields=[
+   actionField('Request type',requestType),
+   actionField('Document type',action.document_type),
+   actionField('Proposed owner',action.document_owner),
+   actionField('Requested by',action.requested_by),
+   actionField('Assigned to',action.assigned_to),
+   actionField('Submitted',formatActionDate(action.created_at))
+  ];
+
+  if(requestType==='Revise Existing Document'||requestType==='Withdraw Document'){
+   fields.splice(1,0,actionField('Existing document',action.existing_document_id?`Document #${action.existing_document_id}`:'—'));
+  }
+
+  document.getElementById('actionDetailGrid').innerHTML=fields.join('');
+  document.getElementById('actionDetailReason').textContent=action.business_reason||'—';
+  document.getElementById('actionDetailAdditional').textContent=action.additional_information||'—';
+
  }else{
   document.getElementById('actionDetailGrid').innerHTML=[
-   actionField('Request type',action.action_type==='Document Request'?'New Document':action.action_type),
-   actionField('Document type',action.document_type), actionField('Proposed owner',action.document_owner),
-   actionField('Requested by',action.requested_by), actionField('Assigned to',action.assigned_to),
+   actionField('Request type',action.action_type),
+   actionField('Document type',action.document_type),
+   actionField('Proposed owner',action.document_owner),
+   actionField('Requested by',action.requested_by),
+   actionField('Assigned to',action.assigned_to),
    actionField('Submitted',formatActionDate(action.created_at))
   ].join('');
+
   document.getElementById('actionDetailReason').textContent=action.business_reason||'—';
   document.getElementById('actionDetailAdditional').textContent=action.additional_information||'—';
  }
- const draftCard=document.getElementById('actionDraftCard');if(draftCard){const showDraft=isDocumentRequest&&action.has_draft&&action.draft_file_name;draftCard.classList.toggle('show',!!showDraft);document.getElementById('actionDraftName').textContent=showDraft?action.draft_file_name:'—';document.getElementById('actionDraftMeta').textContent=showDraft?[formatBytes(action.draft_file_size_bytes),action.draft_uploaded_at?`Uploaded ${formatActionDate(action.draft_uploaded_at)}`:''].filter(Boolean).join(' · '):'';}
- document.getElementById('actionDetailFooter').textContent=`Action ID: ${action.id} · Priority: ${action.priority||'Normal'}`;
- document.getElementById('actionDecisionActions').style.display=isDocumentRequest?'block':'none';
+
+ const draftCard=document.getElementById('actionDraftCard');
+ if(draftCard){
+  const showDraft=
+   isDocumentRequest &&
+   requestType!=='Withdraw Document' &&
+   action.has_draft &&
+   action.draft_file_name;
+
+  draftCard.classList.toggle('show',!!showDraft);
+
+  document.getElementById('actionDraftName').textContent=
+   showDraft?action.draft_file_name:'—';
+
+  document.getElementById('actionDraftMeta').textContent=
+   showDraft
+    ?[
+      formatBytes(action.draft_file_size_bytes),
+      action.draft_uploaded_at?`Uploaded ${formatActionDate(action.draft_uploaded_at)}`:''
+     ].filter(Boolean).join(' · ')
+    :'';
+ }
+
+ document.getElementById('actionDetailFooter').textContent=
+  `Action ID: ${action.id} · Priority: ${action.priority||'Normal'}`;
+
+ const decisionActions=document.getElementById('actionDecisionActions');
+ decisionActions.style.display=isDocumentRequest?'block':'none';
+
+ if(isDocumentRequest){
+  const approveButton=decisionActions.querySelector('.action-btn-approve');
+  const moreButton=decisionActions.querySelector('.action-btn-more');
+
+  if(approveButton){
+   approveButton.textContent=approvalLabels[requestType]||'Approve';
+  }
+
+  if(moreButton){
+   moreButton.textContent='Return for Changes';
+  }
+ }
+
  const projectActions=document.getElementById('projectActionActions');
+
  if(projectActions){
   projectActions.style.display=isProject?'block':'none';
   const btn=projectActions.querySelector('button');
-  if(btn)btn.textContent=action.action_type==='New Project Request'?'Continue New Project Request →':'Open Project Workspace →';
+
+  if(btn){
+   btn.textContent=
+    action.action_type==='New Project Request'
+     ?'Continue New Project Request →'
+     :'Open Project Workspace →';
+  }
  }
+
  document.getElementById('actionDetailBackdrop').classList.add('show');
  document.body.style.overflow='hidden';
 }
@@ -452,8 +554,8 @@ async function openDocumentDraft(){const action=currentAction,token=localStorage
 function prepareActionDecision(decision){
  const note=document.getElementById('actionDecisionNote'), confirm=document.getElementById('actionDecisionConfirm');
  note.classList.add('show');note.focus();confirm.style.display='inline-block';confirm.dataset.decision=decision;
- confirm.textContent=decision==='more_information'?'Request Information':'Confirm Rejection';
- note.placeholder=decision==='more_information'?'What information is required from the requester?':'Why is this request being rejected?';
+ confirm.textContent=decision==='more_information'?'Confirm Return for Changes':'Confirm Rejection';
+ note.placeholder=decision==='more_information'?'Describe the changes required before this document can be resubmitted.':'Why is this request being rejected?';
  document.querySelector('.action-btn-approve').style.display='none';
  document.querySelectorAll('.action-btn-more').forEach(b=>{if(b.id!=='actionDecisionConfirm')b.style.display='none';});
  document.querySelector('.action-btn-reject').style.display='none';
