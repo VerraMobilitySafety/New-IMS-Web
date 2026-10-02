@@ -221,8 +221,7 @@
  </section>
 
  <div class="actions">
-  <button class="btn green" onclick="openRequest()">＋ Request New Document</button>
-  <button class="btn outline" onclick="openChange()">↗ Request Document Change</button>
+  <button class="btn green" onclick="openRequest()">＋ Request Document Action</button>
   <button class="btn dark" onclick="openControlledPdf()">View Controlled Document</button>
  </div>
 
@@ -285,22 +284,70 @@
 </div></div>
 
 <div id="requestBack" class="modal-back" onclick="if(event.target===this)closeRequest()"><div class="drawer">
- <div class="drawer-head"><button class="close" onclick="closeRequest()">×</button><small>DOCUMENT CONTROL</small><h2 id="requestTitle">Request New Document</h2><small id="requestSubtitle">Submit a completed Word draft for Document Control review.</small></div>
+ <div class="drawer-head">
+  <button class="close" onclick="closeRequest()">×</button>
+  <small>DOCUMENT CONTROL</small>
+  <h2 id="requestTitle">Request Document Action</h2>
+  <small id="requestSubtitle">Submit a document control request for review.</small>
+ </div>
  <div class="drawer-body">
-  <div id="newDocumentRequestFields">
-   <div class="detail"><label>Document Title *</label><input id="reqTitle" type="text" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;font:13px Montserrat,Verdana,Arial,sans-serif" placeholder="e.g. Contractor Management Procedure"></div>
-   <div class="detail" style="margin-top:12px"><label>Completed Word Draft (.docx) *</label><input id="reqFile" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;background:#fff;font:13px Montserrat,Verdana,Arial,sans-serif"><div style="font-size:10px;color:var(--grey);line-height:1.5;margin-top:7px">Upload the completed draft. The Document Controller will assign the controlled document number, classification, owner and approval route.</div></div>
-   <div class="detail" style="margin-top:12px"><label>Why is this document required? *</label><textarea id="reqReason" style="width:100%;min-height:105px;border:1px solid var(--line);border-radius:7px;padding:10px;font:13px Montserrat,Verdana,Arial,sans-serif" placeholder="Explain the business need, requirement or gap this document will address."></textarea></div>
-   <div class="detail" style="margin-top:12px"><label>Additional Information</label><textarea id="reqAdditional" style="width:100%;min-height:80px;border:1px solid var(--line);border-radius:7px;padding:10px;font:13px Montserrat,Verdana,Arial,sans-serif" placeholder="Optional context, references or other information for the Document Controller."></textarea></div>
-   <div class="detail" style="margin-top:12px"><label>Requested By</label><strong id="reqRequestedBy">Current user</strong></div>
-   <div id="requestMessage" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-size:12px"></div>
-   <div class="drawer-actions"><button id="submitRequestBtn" class="btn green" onclick="submitRequest()">Submit Request</button><button class="btn outline" onclick="closeRequest()">Cancel</button></div>
+
+  <div class="detail">
+   <label>What do you need to do? *</label>
+   <select id="reqType" onchange="updateRequestType()" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;background:#fff;font:13px Montserrat,Verdana,Arial,sans-serif">
+    <option value="New Document">Create a new document</option>
+    <option value="Revise Existing Document">Revise an existing document</option>
+    <option value="Replace Existing Document">Replace existing document(s)</option>
+    <option value="Withdraw Document">Withdraw an existing document</option>
+   </select>
   </div>
-  <div id="changeRequestPlaceholder" style="display:none">
-   <div class="detail"><label>Request Document Change</label><strong>Change requests are the next workflow being connected to VERO.</strong></div>
-   <p style="font-size:12px;color:var(--grey);line-height:1.6">This button has deliberately not been connected to the New Document workflow. Select an existing controlled document before requesting a change once that workflow is enabled.</p>
-   <div class="drawer-actions"><button class="btn outline" onclick="closeRequest()">Close</button></div>
+
+  <div id="existingDocumentField" class="detail" style="display:none;margin-top:12px">
+   <label id="existingDocumentLabel">Existing Document *</label>
+   <select id="reqExistingDocument" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;background:#fff;font:13px Montserrat,Verdana,Arial,sans-serif">
+    <option value="">Select a current controlled document…</option>
+   </select>
   </div>
+
+  <div id="replacementDocumentsField" class="detail" style="display:none;margin-top:12px">
+   <label>Documents Being Replaced *</label>
+   <select id="reqReplacementDocuments" multiple size="5" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;background:#fff;font:13px Montserrat,Verdana,Arial,sans-serif"></select>
+   <div style="font-size:10px;color:var(--grey);line-height:1.5;margin-top:7px">Select one or more current documents that the new document will replace. The Document Controller will validate the selection.</div>
+  </div>
+
+  <div id="requestTitleField" class="detail" style="margin-top:12px">
+   <label>Document Title *</label>
+   <input id="reqTitle" type="text" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;font:13px Montserrat,Verdana,Arial,sans-serif" placeholder="e.g. Contractor Management Procedure">
+  </div>
+
+  <div id="requestFileField" class="detail" style="margin-top:12px">
+   <label>Completed Word Draft (.docx) *</label>
+   <input id="reqFile" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;background:#fff;font:13px Montserrat,Verdana,Arial,sans-serif">
+   <div style="font-size:10px;color:var(--grey);line-height:1.5;margin-top:7px">Upload the completed draft for Document Control and approval review.</div>
+  </div>
+
+  <div class="detail" style="margin-top:12px">
+   <label id="requestReasonLabel">Why is this document required? *</label>
+   <textarea id="reqReason" style="width:100%;min-height:105px;border:1px solid var(--line);border-radius:7px;padding:10px;font:13px Montserrat,Verdana,Arial,sans-serif" placeholder="Explain the business need, requirement or reason for this request."></textarea>
+  </div>
+
+  <div class="detail" style="margin-top:12px">
+   <label>Additional Information</label>
+   <textarea id="reqAdditional" style="width:100%;min-height:80px;border:1px solid var(--line);border-radius:7px;padding:10px;font:13px Montserrat,Verdana,Arial,sans-serif" placeholder="Optional context, references or information for the Document Controller."></textarea>
+  </div>
+
+  <div class="detail" style="margin-top:12px">
+   <label>Requested By</label>
+   <strong id="reqRequestedBy">Current user</strong>
+  </div>
+
+  <div id="requestMessage" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-size:12px"></div>
+
+  <div class="drawer-actions">
+   <button id="submitRequestBtn" class="btn green" onclick="submitRequest()">Submit Request</button>
+   <button class="btn outline" onclick="closeRequest()">Cancel</button>
+  </div>
+
  </div>
 </div></div>
 
@@ -425,48 +472,238 @@ function setRequestMessage(message,type='error'){
  el.style.border=type==='success'?'1px solid #cbdc91':'1px solid #e8bcbc';
 }
 function clearRequestMessage(){const el=document.getElementById('requestMessage');el.textContent='';el.style.display='none';}
+function populateDocumentRequestSelectors(){
+ const single=document.getElementById('reqExistingDocument');
+ const multi=document.getElementById('reqReplacementDocuments');
+
+ single.innerHTML='<option value="">Select a current controlled document…</option>';
+ multi.innerHTML='';
+
+ liveDocuments.forEach(doc=>{
+  const id=doc.id;
+  const number=doc.documentNumber||doc.document_number||'No number';
+  const title=doc.documentTitle||doc.document_title||'Untitled document';
+  const label=`${number} — ${title}`;
+
+  const option=document.createElement('option');
+  option.value=id;
+  option.textContent=label;
+  single.appendChild(option);
+
+  const multiOption=document.createElement('option');
+  multiOption.value=id;
+  multiOption.textContent=label;
+  multi.appendChild(multiOption);
+ });
+}
+
 function openRequest(){
- document.getElementById('requestTitle').textContent='Request New Document';
- document.getElementById('requestSubtitle').textContent='Submit a completed Word draft for Document Control review.';
- document.getElementById('newDocumentRequestFields').style.display='block';
- document.getElementById('changeRequestPlaceholder').style.display='none';
- document.getElementById('reqTitle').value='';document.getElementById('reqFile').value='';document.getElementById('reqReason').value='';document.getElementById('reqAdditional').value='';
- document.getElementById('reqRequestedBy').textContent=currentUserName();clearRequestMessage();
- const btn=document.getElementById('submitRequestBtn');btn.disabled=false;btn.textContent='Submit Request';
+ document.getElementById('reqType').value='New Document';
+ document.getElementById('reqTitle').value='';
+ document.getElementById('reqFile').value='';
+ document.getElementById('reqReason').value='';
+ document.getElementById('reqAdditional').value='';
+ document.getElementById('reqExistingDocument').value='';
+ Array.from(document.getElementById('reqReplacementDocuments').options).forEach(o=>o.selected=false);
+
+ populateDocumentRequestSelectors();
+
+ document.getElementById('reqRequestedBy').textContent=currentUserName();
+ clearRequestMessage();
+
+ const btn=document.getElementById('submitRequestBtn');
+ btn.disabled=false;
+ btn.textContent='Submit Request';
+
+ updateRequestType();
  document.getElementById('requestBack').classList.add('show');
 }
-function openChange(){
- document.getElementById('requestTitle').textContent='Request Document Change';
- document.getElementById('requestSubtitle').textContent='Change control will be connected as a separate Governance workflow.';
- document.getElementById('newDocumentRequestFields').style.display='none';
- document.getElementById('changeRequestPlaceholder').style.display='block';
- document.getElementById('requestBack').classList.add('show');
+
+function updateRequestType(){
+ const type=document.getElementById('reqType').value;
+
+ const existingField=document.getElementById('existingDocumentField');
+ const replacementField=document.getElementById('replacementDocumentsField');
+ const titleField=document.getElementById('requestTitleField');
+ const fileField=document.getElementById('requestFileField');
+ const titleInput=document.getElementById('reqTitle');
+ const reasonLabel=document.getElementById('requestReasonLabel');
+
+ existingField.style.display='none';
+ replacementField.style.display='none';
+ titleField.style.display='none';
+ fileField.style.display='none';
+ titleInput.readOnly=false;
+
+ if(type==='New Document'){
+  document.getElementById('requestTitle').textContent='Request New Document';
+  document.getElementById('requestSubtitle').textContent='Submit a completed Word draft for Document Control review.';
+  titleField.style.display='block';
+  fileField.style.display='block';
+  reasonLabel.textContent='Why is this document required? *';
+ }
+
+ if(type==='Revise Existing Document'){
+  document.getElementById('requestTitle').textContent='Request Document Revision';
+  document.getElementById('requestSubtitle').textContent='Submit a revised Word draft for an existing controlled document.';
+  document.getElementById('existingDocumentLabel').textContent='Document Being Revised *';
+  existingField.style.display='block';
+  fileField.style.display='block';
+  reasonLabel.textContent='Why is this revision required? *';
+ }
+
+ if(type==='Replace Existing Document'){
+  document.getElementById('requestTitle').textContent='Request Document Replacement';
+  document.getElementById('requestSubtitle').textContent='Create a new controlled document that replaces one or more current documents.';
+  replacementField.style.display='block';
+  titleField.style.display='block';
+  fileField.style.display='block';
+  reasonLabel.textContent='Why are these documents being replaced? *';
+ }
+
+ if(type==='Withdraw Document'){
+  document.getElementById('requestTitle').textContent='Request Document Withdrawal';
+  document.getElementById('requestSubtitle').textContent='Request retirement of a current controlled document with no replacement.';
+  document.getElementById('existingDocumentLabel').textContent='Document Being Withdrawn *';
+  existingField.style.display='block';
+  reasonLabel.textContent='Why should this document be withdrawn? *';
+ }
+
+ clearRequestMessage();
 }
-function closeRequest(){document.getElementById('requestBack').classList.remove('show')}
+
+function closeRequest(){
+ document.getElementById('requestBack').classList.remove('show');
+}
+
 async function submitRequest(){
+ const type=document.getElementById('reqType').value;
  const title=document.getElementById('reqTitle').value.trim();
  const file=document.getElementById('reqFile').files[0];
  const reason=document.getElementById('reqReason').value.trim();
  const additional=document.getElementById('reqAdditional').value.trim();
+ const existingId=document.getElementById('reqExistingDocument').value;
+ const replacementIds=Array.from(document.getElementById('reqReplacementDocuments').selectedOptions).map(o=>o.value);
+
  clearRequestMessage();
- if(!title){setRequestMessage('Enter a document title.');document.getElementById('reqTitle').focus();return;}
- if(!file){setRequestMessage('Attach the completed Word draft (.docx).');document.getElementById('reqFile').focus();return;}
- if(!file.name.toLowerCase().endsWith('.docx')){setRequestMessage('The completed draft must be a .docx Word document.');document.getElementById('reqFile').value='';document.getElementById('reqFile').focus();return;}
- if(!reason){setRequestMessage('Explain why the document is required.');document.getElementById('reqReason').focus();return;}
- const btn=document.getElementById('submitRequestBtn');btn.disabled=true;btn.textContent='Submitting…';
+
+ if(type==='New Document'&&!title){
+  setRequestMessage('Enter a document title.');
+  document.getElementById('reqTitle').focus();
+  return;
+ }
+
+ if(type==='Revise Existing Document'&&!existingId){
+  setRequestMessage('Select the document being revised.');
+  document.getElementById('reqExistingDocument').focus();
+  return;
+ }
+
+ if(type==='Replace Existing Document'){
+  if(!replacementIds.length){
+   setRequestMessage('Select at least one document being replaced.');
+   document.getElementById('reqReplacementDocuments').focus();
+   return;
+  }
+  if(!title){
+   setRequestMessage('Enter the title of the replacement document.');
+   document.getElementById('reqTitle').focus();
+   return;
+  }
+ }
+
+ if(type==='Withdraw Document'&&!existingId){
+  setRequestMessage('Select the document being withdrawn.');
+  document.getElementById('reqExistingDocument').focus();
+  return;
+ }
+
+ const requiresDraft=type!=='Withdraw Document';
+
+ if(requiresDraft&&!file){
+  setRequestMessage('Attach the completed Word draft (.docx).');
+  document.getElementById('reqFile').focus();
+  return;
+ }
+
+ if(file&&!file.name.toLowerCase().endsWith('.docx')){
+  setRequestMessage('The completed draft must be a .docx Word document.');
+  document.getElementById('reqFile').value='';
+  document.getElementById('reqFile').focus();
+  return;
+ }
+
+ if(!reason){
+  setRequestMessage('Enter the business reason for this request.');
+  document.getElementById('reqReason').focus();
+  return;
+ }
+
+ const btn=document.getElementById('submitRequestBtn');
+ btn.disabled=true;
+ btn.textContent='Submitting…';
+
  const form=new FormData();
- form.append('proposed_document_title',title);
+ form.append('request_type',type);
  form.append('business_reason',reason);
  form.append('additional_information',additional);
- form.append('file',file);
+
+ if(type==='New Document'||type==='Replace Existing Document'){
+  form.append('proposed_document_title',title);
+ }
+
+ if(type==='Revise Existing Document'||type==='Withdraw Document'){
+  form.append('existing_document_id',existingId);
+ }
+
+ if(type==='Replace Existing Document'){
+  form.append('replacement_document_ids',replacementIds.join(','));
+ }
+
+ if(requiresDraft&&file){
+  form.append('file',file);
+ }
+
  try{
-  const response=await fetch(API_BASE+'/document-requests',{method:'POST',headers:authHeaders({Accept:'application/json'}),body:form});
-  if(response.status===401){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'documents.html'));return;}
-  let data={};try{data=await response.json();}catch(e){}
-  if(!response.ok)throw new Error(data.message||`API returned ${response.status}`);
-  const requestId=data.request?.id;setRequestMessage(requestId?`Document Request #${requestId} submitted successfully with ${file.name}.`:'Document request submitted successfully.','success');btn.textContent='Submitted ✓';setTimeout(()=>closeRequest(),1600);
- }catch(err){console.error('Unable to submit document request',err);setRequestMessage(err.message||'Unable to submit document request. Please try again.');btn.disabled=false;btn.textContent='Submit Request';}
+  const response=await fetch(
+   API_BASE+'/document-requests',
+   {
+    method:'POST',
+    headers:authHeaders({Accept:'application/json'}),
+    body:form
+   }
+  );
+
+  if(response.status===401){
+   location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'documents.html'));
+   return;
+  }
+
+  let data={};
+  try{data=await response.json();}catch(e){}
+
+  if(!response.ok){
+   throw new Error(data.message||`API returned ${response.status}`);
+  }
+
+  const requestId=data.request?.id;
+  const successText=requestId
+   ? `Document Request #${requestId} submitted successfully.`
+   : 'Document request submitted successfully.';
+
+  setRequestMessage(successText,'success');
+  btn.textContent='Submitted ✓';
+
+  setTimeout(()=>closeRequest(),1600);
+
+ }catch(err){
+  console.error('Unable to submit document request',err);
+  setRequestMessage(err.message||'Unable to submit document request. Please try again.');
+  btn.disabled=false;
+  btn.textContent='Submit Request';
+ }
 }
+
 function openCopyRequest(){if(!selectedDocument){alert('Select a document first.');return;}document.getElementById('viewer').classList.add('show');document.getElementById('copyEmail').value='';document.getElementById('copyRequest').classList.add('show');const parts=document.querySelectorAll('#copyRequest .copy-doc strong');if(parts[0])parts[0].textContent=`${selectedDocument.documentNumber} — ${selectedDocument.documentTitle}`;if(parts[1])parts[1].textContent=`${selectedDocument.controlledVersion} · ${selectedDocument.workflowStatus}`;}
 function closeCopyRequest(){document.getElementById('copyRequest').classList.remove('show')}
 function sendCopy(){const email=document.getElementById('copyEmail').value.trim();if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return alert('Enter a valid email address.');alert('Prototype: an UNCONTROLLED COPY would now be generated and emailed to '+email+'.');closeCopyRequest();}
