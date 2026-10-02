@@ -70,19 +70,19 @@
       <div class="nav-label">Governance</div>
 
       <a class="${isActive('documents.html') ? 'active' : ''}" href="documents.html">
-        <span class="ico">▱</span><span>Documents</span>
+        <span class="ico">▱</span><span>Document Management</span>
       </a>
 
       <a class="${isActive('risk.html') ? 'active' : ''}" href="risk.html">
-        <span class="ico">▥</span><span>Risks</span>
+        <span class="ico">▥</span><span>Risk Management</span>
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">◇</span><span>Compliance</span>
+        <span class="ico">◇</span><span>Compliance CManagment</span>
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">◎</span><span>Assurance</span>
+        <span class="ico">◎</span><span>Assurance Management</span>
       </a>
     </div>
   `;
