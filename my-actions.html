@@ -314,6 +314,22 @@
    <div class="action-detail-section"><h3>Business reason</h3><div class="detail-copy" id="actionDetailReason">—</div></div>
    <div class="action-detail-section"><h3>Additional information</h3><div class="detail-copy" id="actionDetailAdditional">—</div></div>
    <div class="action-draft-card" id="actionDraftCard"><div class="action-draft-icon">📄</div><div class="action-draft-info"><label>Completed Word Draft</label><strong id="actionDraftName">—</strong><small id="actionDraftMeta"></small></div><button class="action-draft-open" id="actionDraftOpen" type="button" onclick="openDocumentDraft()">Open Draft Document</button></div>
+
+   <div id="newDocumentGovernance" style="display:none;margin-top:20px">
+    <div class="action-detail-section">
+     <h3>Document Control</h3>
+     <div class="action-detail-field">
+      <label for="documentReference">Document Reference</label>
+      <input id="documentReference" type="text" placeholder="e.g. IMS.01.01.POL.01" style="width:100%;box-sizing:border-box;border:1px solid #d8d4d1;border-radius:8px;padding:11px;font:600 11px Montserrat,Verdana,Arial,sans-serif;background:#fff">
+     </div>
+    </div>
+
+    <div class="action-detail-section">
+     <h3>Required Approver(s)</h3>
+     <div id="documentApproverList" style="display:grid;gap:8px"></div>
+    </div>
+   </div>
+
     <div class="action-decision-actions" id="actionDecisionActions">
     <button class="action-btn-approve" type="button" onclick="submitActionDecision('approve')">Approve</button>
     <button class="action-btn-more" type="button" onclick="prepareActionDecision('more_information')">Request More Information</button>
@@ -515,12 +531,30 @@ function openActionDetail(index){
  const decisionActions=document.getElementById('actionDecisionActions');
  decisionActions.style.display=isDocumentRequest?'block':'none';
 
+ const governancePanel=document.getElementById('newDocumentGovernance');
+ if(governancePanel){
+  const showGovernance=
+   isDocumentRequest && requestType==='New Document';
+
+  governancePanel.style.display=showGovernance ? 'block' : 'none';
+
+  if(showGovernance){
+   document.getElementById('documentReference').value=
+    action.assigned_document_number||action.document_number||'';
+
+   loadDocumentApprovers();
+  }
+ }
+
  if(isDocumentRequest){
   const approveButton=decisionActions.querySelector('.action-btn-approve');
   const moreButton=decisionActions.querySelector('.action-btn-more');
 
   if(approveButton){
-   approveButton.textContent=approvalLabels[requestType]||'Approve';
+   approveButton.textContent=
+    requestType==='New Document'
+     ? 'Send for Approval'
+     : (approvalLabels[requestType]||'Approve');
   }
 
   if(moreButton){
@@ -569,9 +603,32 @@ async function submitPreparedDecision(){
 function showDecisionMessage(text,type){const m=document.getElementById('actionDecisionMessage');m.textContent=text;m.className='action-decision-message show '+type;}
 async function sendActionDecision(decision,notes){
  const action=currentAction, token=localStorage.getItem(TOKEN_KEY); if(!action||!action.source_id||!token)return;
+
+ const payload={decision,notes};
+
+ if(decision==='approve' && action.request_type==='New Document'){
+  const documentNumber=document.getElementById('documentReference').value.trim();
+  const approverUserIds=[
+   ...document.querySelectorAll('.document-approver-checkbox:checked')
+  ].map(cb=>Number(cb.value));
+
+  if(!documentNumber){
+   showDecisionMessage('Enter the document reference before sending for approval.','error');
+   return;
+  }
+
+  if(!approverUserIds.length){
+   showDecisionMessage('Select at least one required approver.','error');
+   return;
+  }
+
+  payload.document_number=documentNumber;
+  payload.approver_user_ids=approverUserIds;
+ }
+
  const buttons=document.querySelectorAll('#actionDecisionActions button');buttons.forEach(b=>b.disabled=true);
  try{
-  const r=await fetch(`${API}/document-requests/${encodeURIComponent(action.source_id)}/decision`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({decision,notes})});
+  const r=await fetch(`${API}/document-requests/${encodeURIComponent(action.source_id)}/decision`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(payload)});
   const d=await r.json().catch(()=>({})); if(!r.ok)throw new Error(d.message||'Unable to process decision');
   showDecisionMessage(d.message||'Decision completed successfully.','success');
   setTimeout(()=>{closeActionDetail();loadActions();},700);
@@ -581,6 +638,43 @@ function closeActionDetail(event){
  if(event&&event.target!==document.getElementById('actionDetailBackdrop'))return;
  document.getElementById('actionDetailBackdrop').classList.remove('show');document.body.style.overflow='';currentAction=null;
 }
+async function loadDocumentApprovers(){
+ const token=localStorage.getItem(TOKEN_KEY);
+ const list=document.getElementById('documentApproverList');
+ if(!token||!list)return;
+
+ list.innerHTML='<div style="font-size:10px;color:var(--grey)">Loading approvers…</div>';
+
+ try{
+  const r=await fetch(`${API}/users`,{
+   headers:{Authorization:'Bearer '+token,Accept:'application/json'},
+   cache:'no-store'
+  });
+
+  const d=await r.json();
+  if(!r.ok)throw new Error(d.message||'Unable to load approvers');
+
+  const users=(d.users||[]).filter(u=>u.active&&u.account_status==='Active');
+
+  list.innerHTML=users.map(u=>{
+   const name=[u.first_name,u.last_name].filter(Boolean).join(' ')||u.email;
+   const detail=[u.job_title,u.email].filter(Boolean).join(' · ');
+
+   return `<label style="display:flex;align-items:flex-start;gap:10px;background:#f8f7f6;border:1px solid var(--line);border-radius:8px;padding:11px;cursor:pointer">
+    <input type="checkbox" class="document-approver-checkbox" value="${u.id}" style="margin-top:2px">
+    <span>
+     <strong style="display:block;font-size:11px">${escapeHtml(name)}</strong>
+     <small style="display:block;margin-top:3px;color:var(--grey);font-size:8px">${escapeHtml(detail)}</small>
+    </span>
+   </label>`;
+  }).join('');
+
+ }catch(e){
+  console.error(e);
+  list.innerHTML='<div class="action-error">Unable to load approvers.</div>';
+ }
+}
+
 async function loadActions(){
  const token=localStorage.getItem(TOKEN_KEY), list=document.getElementById('fullActionList');
  if(!token){list.innerHTML='<div class="action-error">Please sign in to view your actions.</div>';return;}
