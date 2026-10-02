@@ -433,7 +433,13 @@ function openActionDetail(index){
  const action=allActions[index]; if(!action)return;
  currentAction=action; resetDecisionUI();
 
- const isDocumentRequest=action.source==='Documents'&&action.action_type==='Document Request';
+ const isDocumentRequest=
+  action.source==='Documents' &&
+  (action.action_type==='Document Request'||action.action_type==='Document Approval');
+
+ const isDocumentApproval=
+  action.source==='Documents' &&
+  action.action_type==='Document Approval';
  const isProject=action.source==='Projects';
  const requestType=action.request_type||'New Document';
 
@@ -483,6 +489,7 @@ function openActionDetail(index){
 
   const fields=[
    actionField('Request type',requestType),
+   ...(action.document_number ? [actionField('Document reference',action.document_number)] : []),
    actionField('Document type',action.document_type),
    actionField('Proposed owner',action.document_owner),
    actionField('Requested by',action.requested_by),
@@ -543,7 +550,9 @@ function openActionDetail(index){
  const governancePanel=document.getElementById('newDocumentGovernance');
  if(governancePanel){
   const showGovernance=
-   isDocumentRequest && requestType==='New Document';
+   isDocumentRequest &&
+   !isDocumentApproval &&
+   requestType==='New Document';
 
   governancePanel.style.display=showGovernance ? 'block' : 'none';
 
@@ -561,9 +570,13 @@ function openActionDetail(index){
 
   if(approveButton){
    approveButton.textContent=
-    requestType==='New Document'
-     ? 'Send for Approval'
-     : (approvalLabels[requestType]||'Approve');
+    isDocumentApproval
+     ? 'Approve'
+     : (
+       requestType==='New Document'
+        ? 'Send for Approval'
+        : (approvalLabels[requestType]||'Approve')
+      );
   }
 
   if(moreButton){
@@ -637,7 +650,12 @@ async function sendActionDecision(decision,notes){
 
  const buttons=document.querySelectorAll('#actionDecisionActions button');buttons.forEach(b=>b.disabled=true);
  try{
-  const r=await fetch(`${API}/document-requests/${encodeURIComponent(action.source_id)}/decision`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(payload)});
+  const decisionEndpoint=
+   action.action_type==='Document Approval'
+    ? 'approval'
+    : 'decision';
+
+  const r=await fetch(`${API}/document-requests/${encodeURIComponent(action.source_id)}/${decisionEndpoint}`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(payload)});
   const d=await r.json().catch(()=>({})); if(!r.ok)throw new Error(d.message||'Unable to process decision');
   showDecisionMessage(d.message||'Decision completed successfully.','success');
   setTimeout(()=>{closeActionDetail();loadActions();},700);
