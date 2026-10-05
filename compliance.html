@@ -1585,7 +1585,7 @@ button,input,select,textarea{font-family:inherit}
 
     <button
      class="btn outline"
-     onclick="alert('Link Existing is being connected next.')"
+     onclick="openLinkExisting()"
     >
      Link Existing
     </button>
@@ -3370,6 +3370,366 @@ async function loadComplianceProjects(){
 
   select.innerHTML=
    '<option value="">Unable to load projects</option>';
+ }
+}
+</script>
+
+<style>
+.link-existing-search{
+ width:100%;
+ border:1px solid var(--line);
+ border-radius:8px;
+ padding:11px 12px;
+ font-size:10px;
+ margin-bottom:10px;
+}
+
+.link-existing-list{
+ border:1px solid var(--line);
+ border-radius:9px;
+ overflow:hidden;
+ max-height:320px;
+ overflow-y:auto;
+}
+
+.link-existing-item{
+ display:flex;
+ align-items:center;
+ gap:12px;
+ padding:13px 14px;
+ border-bottom:1px solid var(--line);
+ cursor:pointer;
+ background:#fff;
+}
+
+.link-existing-item:last-child{
+ border-bottom:0;
+}
+
+.link-existing-item:hover{
+ background:#fafbf7;
+}
+
+.link-existing-item.selected{
+ background:#f3f7e5;
+ box-shadow:inset 4px 0 0 var(--green);
+}
+
+.link-existing-main{
+ flex:1;
+ min-width:0;
+}
+
+.link-existing-main b{
+ display:block;
+ font-size:10px;
+ margin-bottom:4px;
+}
+
+.link-existing-main small{
+ display:block;
+ font-size:8px;
+ color:var(--grey);
+}
+
+.link-existing-code{
+ font-size:9px;
+ font-weight:800;
+ color:var(--charcoal);
+ min-width:105px;
+}
+
+.link-existing-empty{
+ padding:20px;
+ text-align:center;
+ color:var(--grey);
+ font-size:9px;
+}
+</style>
+
+<script>
+/* LINK SUBMISSION TO EXISTING COMPLIANCE OBLIGATION */
+
+let selectedExistingObligationId=null;
+
+function openLinkExisting(){
+
+ selectedExistingObligationId=null;
+
+ const body=document.querySelector(
+  '#controllerModal .drawer-body'
+ );
+
+ let picker=document.getElementById(
+  'linkExistingPicker'
+ );
+
+ if(picker){
+  picker.remove();
+ }
+
+ picker=document.createElement('div');
+ picker.id='linkExistingPicker';
+ picker.className='section';
+
+ picker.innerHTML=`
+  <h3>Link to Existing Obligation</h3>
+
+  <div class="form-note">
+   Use this when the submitted requirement is already controlled
+   in the Compliance Register. No duplicate obligation will be created.
+  </div>
+
+  <input
+   class="link-existing-search"
+   id="linkExistingSearch"
+   type="search"
+   placeholder="Search code, obligation, type or source..."
+   oninput="filterExistingObligations()"
+  >
+
+  <div
+   class="link-existing-list"
+   id="linkExistingList"
+  ></div>
+
+  <div class="drawer-actions">
+
+   <button
+    class="btn outline"
+    onclick="document.getElementById('linkExistingPicker').remove()"
+   >
+    Cancel
+   </button>
+
+   <button
+    class="btn green"
+    id="confirmLinkExisting"
+    onclick="submitLinkExisting()"
+    disabled
+   >
+    Link Existing Obligation
+   </button>
+
+  </div>
+ `;
+
+ body.appendChild(picker);
+
+ renderExistingObligations(
+  Object.values(obligationsLive)
+ );
+
+ picker.scrollIntoView({
+  behavior:'smooth',
+  block:'start'
+ });
+}
+
+
+function renderExistingObligations(items){
+
+ const list=document.getElementById(
+  'linkExistingList'
+ );
+
+ if(!list)return;
+
+ if(!items.length){
+
+  list.innerHTML=
+   '<div class="link-existing-empty">'+
+   'No matching obligations found.'+
+   '</div>';
+
+  return;
+ }
+
+ list.innerHTML=items.map(o=>{
+
+  const app=o.applicability||{};
+
+  return `
+   <div
+    class="link-existing-item"
+    data-obligation-id="${o.id}"
+    onclick="selectExistingObligation(${o.id},this)"
+   >
+
+    <div class="link-existing-code">
+     ${escapeComplianceText(o.obligation_code||'—')}
+    </div>
+
+    <div class="link-existing-main">
+
+     <b>
+      ${escapeComplianceText(
+       o.obligation_title||'Untitled obligation'
+      )}
+     </b>
+
+     <small>
+      ${escapeComplianceText(o.compliance_type||'')}
+      ${o.source_name
+       ? ' · '+escapeComplianceText(o.source_name)
+       : ''
+      }
+      ${app.name
+       ? ' · '+escapeComplianceText(app.name)
+       : ''
+      }
+     </small>
+
+    </div>
+
+   </div>
+  `;
+ }).join('');
+}
+
+
+function filterExistingObligations(){
+
+ const q=document.getElementById(
+  'linkExistingSearch'
+ ).value.trim().toLowerCase();
+
+ const items=Object.values(
+  obligationsLive
+ ).filter(o=>{
+
+  const app=o.applicability||{};
+
+  return [
+   o.obligation_code,
+   o.obligation_title,
+   o.compliance_type,
+   o.source_name,
+   o.source_reference,
+   app.type,
+   app.name
+  ]
+  .filter(Boolean)
+  .join(' ')
+  .toLowerCase()
+  .includes(q);
+ });
+
+ renderExistingObligations(items);
+}
+
+
+function selectExistingObligation(id,element){
+
+ selectedExistingObligationId=id;
+
+ document.querySelectorAll(
+  '.link-existing-item'
+ ).forEach(el=>
+  el.classList.remove('selected')
+ );
+
+ element.classList.add('selected');
+
+ document.getElementById(
+  'confirmLinkExisting'
+ ).disabled=false;
+}
+
+
+async function submitLinkExisting(){
+
+ if(!selectedExistingObligationId){
+  alert('Select the existing obligation to link.');
+  return;
+ }
+
+ const existing=
+  obligationsLive[selectedExistingObligationId];
+
+ if(!existing){
+  alert('Selected obligation could not be found.');
+  return;
+ }
+
+ const confirmed=confirm(
+  'Link this submission to '+
+  existing.obligation_code+
+  ' — '+
+  existing.obligation_title+
+  '?\n\nNo new obligation will be created.'
+ );
+
+ if(!confirmed)return;
+
+ const modal=document.getElementById(
+  'controllerModal'
+ );
+
+ const requestId=modal.dataset.requestId;
+
+ const notesField=
+  modal.querySelector('.section textarea');
+
+ const controllerNotes=
+  notesField
+  ? notesField.value.trim()
+  : '';
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+
+   '/compliance/requests/'+
+   requestId+
+   '/decision',
+   {
+    method:'POST',
+    headers:{
+     ...complianceAuthHeaders(),
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     decision:'Linked Existing',
+     controller_notes:controllerNotes,
+     existing_obligation_id:
+      selectedExistingObligationId
+    })
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to link existing obligation.'
+   );
+  }
+
+  alert(
+   `${data.request.request_code} linked to `+
+   `${existing.obligation_code}.`
+  );
+
+  closeModal('controllerModal');
+
+  history.replaceState(
+   {},
+   '',
+   'compliance.html'
+  );
+
+  await loadComplianceRegister();
+
+ }catch(error){
+
+  console.error(
+   'Link Existing failed',
+   error
+  );
+
+  alert(error.message);
  }
 }
 </script>
