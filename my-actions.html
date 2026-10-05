@@ -534,6 +534,75 @@
     </div>
    </div>
 
+    <div id="complianceActivityPanel" style="display:none;margin-top:20px">
+
+     <div style="border-top:1px solid var(--line);padding-top:18px">
+
+      <div style="font:800 10px Montserrat,Verdana,Arial,sans-serif;color:var(--charcoal);margin-bottom:12px">
+       COMPLETE COMPLIANCE ACTIVITY
+      </div>
+
+      <div class="action-detail-grid" style="margin-bottom:16px">
+       <div class="action-detail-field">
+        <label>Period</label>
+        <strong id="complianceActivityPeriod">—</strong>
+       </div>
+
+       <div class="action-detail-field">
+        <label>Due Date</label>
+        <strong id="complianceActivityDue">—</strong>
+       </div>
+
+       <div class="action-detail-field">
+        <label>Required Record</label>
+        <strong id="complianceActivityRecordType">—</strong>
+       </div>
+
+       <div class="action-detail-field">
+        <label>Security</label>
+        <strong id="complianceActivitySecurity">—</strong>
+       </div>
+      </div>
+
+      <div class="field">
+       <label>Completion Notes</label>
+       <textarea
+        id="complianceActivityNotes"
+        placeholder="Add any notes about completion..."
+        style="width:100%;min-height:80px;border:1px solid var(--line);border-radius:8px;padding:10px"
+       ></textarea>
+      </div>
+
+      <div class="compliance-record-methods">
+
+       <button type="button"
+               onclick="selectComplianceRecordMethod('upload')">
+        <strong>Upload Record</strong>
+        <span>Upload evidence of the completed activity</span>
+       </button>
+
+       <button type="button"
+               onclick="selectComplianceRecordMethod('existing')">
+        <strong>Link Existing Record</strong>
+        <span>Use an existing REC-xxxxxx record</span>
+       </button>
+
+       <button type="button"
+               onclick="selectComplianceRecordMethod('system')">
+        <strong>System Generated</strong>
+        <span>Create the compliance record in New IMS</span>
+       </button>
+
+      </div>
+
+      <div id="complianceRecordMethodContent" style="margin-top:14px"></div>
+
+      <div id="complianceActivityMessage"
+           class="action-decision-message"></div>
+
+     </div>
+    </div>
+
     <div class="action-decision-actions" id="actionDecisionActions">
     <button class="action-btn-approve" type="button" onclick="submitActionDecision('approve')">Approve</button>
     <button class="action-btn-more" type="button" onclick="prepareActionDecision('more_information')">Request More Information</button>
@@ -646,6 +715,10 @@ function openActionDetail(index){
  const isCompliance=
   action.source==='Compliance' &&
   action.action_type==='Compliance Review';
+
+ const isComplianceActivity=
+  action.source==='Compliance' &&
+  action.action_type==='Compliance Activity';
 
  const requestType=action.request_type||'New Document';
 
@@ -760,6 +833,27 @@ function openActionDetail(index){
   document.getElementById('actionDetailReason').textContent=action.business_reason||'—';
   document.getElementById('actionDetailAdditional').textContent=action.additional_information||'—';
 
+ }else if(isComplianceActivity){
+
+  document.getElementById('actionDetailGrid').innerHTML=[
+   actionField('Requirement',action.obligation_code),
+   actionField('Activity',action.activity_title),
+   actionField('Frequency',action.frequency),
+   actionField('Period',action.period_label),
+   actionField('Due date',formatActionDate(action.due_date)),
+   actionField('Status',action.status)
+  ].join('');
+
+  document.getElementById('actionDetailReason').textContent=
+   action.activity_description||
+   action.obligation_title||
+   '—';
+
+  document.getElementById('actionDetailAdditional').textContent=
+   action.record_required
+    ? `Completion requires a ${action.required_record_type||'record'}.`
+    : 'No completion record is required.';
+
  }else if(isCompliance){
 
   document.getElementById('actionDetailGrid').innerHTML=[
@@ -820,6 +914,44 @@ function openActionDetail(index){
  document.getElementById('actionDetailFooter').textContent=
   `Action ID: ${action.id} · Priority: ${action.priority||'Normal'}`;
 
+ const complianceActivityPanel=
+  document.getElementById('complianceActivityPanel');
+
+ if(complianceActivityPanel){
+
+  complianceActivityPanel.style.display=
+   isComplianceActivity ? 'block' : 'none';
+
+  if(isComplianceActivity){
+
+   document.getElementById('complianceActivityPeriod').textContent=
+    action.period_label||'—';
+
+   document.getElementById('complianceActivityDue').textContent=
+    formatActionDate(action.due_date);
+
+   document.getElementById('complianceActivityRecordType').textContent=
+    action.required_record_title||
+    action.required_record_type||
+    '—';
+
+   document.getElementById('complianceActivitySecurity').textContent=
+    action.security_classification||'Internal';
+
+   document.getElementById('complianceActivityNotes').value='';
+
+   document.getElementById('complianceRecordMethodContent').innerHTML='';
+
+   document.querySelectorAll('.compliance-record-methods button')
+    .forEach(b=>b.classList.remove('active'));
+
+   const msg=document.getElementById('complianceActivityMessage');
+
+   msg.textContent='';
+   msg.className='action-decision-message';
+  }
+ }
+
  const decisionActions=document.getElementById('actionDecisionActions');
 
  const isPublicationStage=
@@ -834,6 +966,7 @@ function openActionDetail(index){
 
  decisionActions.style.display=
   !isCompliance &&
+  !isComplianceActivity &&
   isDocumentRequest &&
   !isDocumentReview &&
   !isPublicationStage &&
@@ -1635,5 +1768,55 @@ document.addEventListener('DOMContentLoaded',()=>{
  border-radius:8px !important;
  font:800 10px Montserrat,Verdana,Arial,sans-serif !important;
  line-height:1.2 !important;
+}
+</style>
+
+<style>
+.compliance-record-methods{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:10px;
+ margin-top:14px;
+}
+
+.compliance-record-methods button{
+ border:1px solid var(--line);
+ border-radius:9px;
+ background:#fff;
+ padding:14px;
+ text-align:left;
+ cursor:pointer;
+ min-height:82px;
+}
+
+.compliance-record-methods button:hover{
+ border-color:var(--green);
+ background:#fafbf5;
+}
+
+.compliance-record-methods button.active{
+ border-color:var(--green);
+ box-shadow:inset 0 0 0 1px var(--green);
+ background:#f5f8e9;
+}
+
+.compliance-record-methods strong{
+ display:block;
+ font:800 10px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--charcoal);
+ margin-bottom:5px;
+}
+
+.compliance-record-methods span{
+ display:block;
+ font:500 9px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--grey);
+ line-height:1.4;
+}
+
+@media(max-width:760px){
+ .compliance-record-methods{
+  grid-template-columns:1fr;
+ }
 }
 </style>
