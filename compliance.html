@@ -955,63 +955,6 @@ button,input,select,textarea{font-family:inherit}
 
 </div>
 
-<section class="type-grid">
-
- <div class="type-card client" onclick="setType('Client')">
-  <div class="type-label">Client</div>
-  <div class="type-number">3</div>
-  <div class="type-meta">
-   Project and maintenance obligations
-  </div>
- </div>
-
- <div class="type-card regulatory" onclick="setType('Regulatory')">
-  <div class="type-label">Regulatory</div>
-  <div class="type-number">1</div>
-  <div class="type-meta">
-   Legal and regulatory obligations
-  </div>
- </div>
-
- <div class="type-card internal" onclick="setType('Internal')">
-  <div class="type-label">Internal</div>
-  <div class="type-number">1</div>
-  <div class="type-meta">
-   IMS and internal governance obligations
-  </div>
- </div>
-
-</section>
-
-<section class="kpis">
-
- <div class="kpi good">
-  <b>1</b>
-  <span>Compliant</span>
- </div>
-
- <div class="kpi partial">
-  <b>0</b>
-  <span>Partially Compliant</span>
- </div>
-
- <div class="kpi bad">
-  <b>0</b>
-  <span>Non-Compliant</span>
- </div>
-
- <div class="kpi none">
-  <b>4</b>
-  <span>Not Yet Assessed</span>
- </div>
-
- <div class="kpi action">
-  <b>0</b>
-  <span>Open Actions</span>
- </div>
-
-</section>
-
 <section class="panel">
 
  <div class="panel-head">
@@ -1024,49 +967,87 @@ button,input,select,textarea{font-family:inherit}
   <small id="registerCount">5 obligations</small>
  </div>
 
- <div class="toolbar">
+ <div class="compliance-toolbar">
 
-  <input
-   id="complianceSearch"
-   type="search"
-   placeholder="Search obligations, sources or applicability..."
-   oninput="filterRegister()"
-  >
+  <div class="compliance-search-wrap">
+   <span class="compliance-search-icon">⌕</span>
+   <input
+    id="complianceSearch"
+    type="search"
+    placeholder="Search compliance obligations..."
+    oninput="filterRegister()"
+   >
+  </div>
 
-  <select
-   id="typeFilter"
-   onchange="filterRegister()"
-  >
-   <option value="">All Types</option>
-   <option value="Client">Client</option>
-   <option value="Regulatory">Regulatory</option>
-   <option value="Internal">Internal</option>
-  </select>
+  <div class="compliance-toolbar-right">
 
-  <select
-   id="applicabilityFilter"
-   onchange="filterRegister()"
-  >
-   <option value="">All Applicability</option>
-   <option value="Project">Project</option>
-   <option value="Maintenance">Maintenance</option>
-   <option value="Jurisdiction">Jurisdiction</option>
-   <option value="Organisation">Organisation</option>
-  </select>
+   <div class="compliance-view-toggle">
 
-  <select
-   id="statusFilter"
-   onchange="filterRegister()"
-  >
-   <option value="">All Statuses</option>
-   <option value="Compliant">Compliant</option>
-   <option value="Partially Compliant">
-    Partially Compliant
-   </option>
-   <option value="Not Assessed">Not Assessed</option>
-  </select>
+    <button
+     class="compliance-view active"
+     data-type=""
+     onclick="setComplianceType(this,'')"
+    >
+     All Obligations
+     <span>5</span>
+    </button>
+
+    <button
+     class="compliance-view"
+     data-type="Client"
+     onclick="setComplianceType(this,'Client')"
+    >
+     Client
+     <span>3</span>
+    </button>
+
+    <button
+     class="compliance-view"
+     data-type="Regulatory"
+     onclick="setComplianceType(this,'Regulatory')"
+    >
+     Regulatory
+     <span>1</span>
+    </button>
+
+    <button
+     class="compliance-view"
+     data-type="Internal"
+     onclick="setComplianceType(this,'Internal')"
+    >
+     Internal
+     <span>1</span>
+    </button>
+
+   </div>
+
+   <select
+    id="applicabilityFilter"
+    onchange="filterRegister()"
+   >
+    <option value="">All Applicability</option>
+    <option value="Project">Project</option>
+    <option value="Maintenance">Maintenance</option>
+    <option value="Jurisdiction">Jurisdiction</option>
+    <option value="Organisation">Organisation</option>
+   </select>
+
+   <select
+    id="statusFilter"
+    onchange="filterRegister()"
+   >
+    <option value="">All Statuses</option>
+    <option value="Compliant">Compliant</option>
+    <option value="Partially Compliant">Partially Compliant</option>
+    <option value="Non-Compliant">Non-Compliant</option>
+    <option value="Not Assessed">Not Assessed</option>
+   </select>
+
+  </div>
 
  </div>
+
+ <input id="typeFilter" type="hidden" value="">
 
  <div class="table-wrap">
 
@@ -2290,3 +2271,133 @@ document.addEventListener('keydown',e=>{
  position:relative !important;
 }
 </style>
+
+<style>
+/* DOCUMENT MANAGEMENT STYLE COMPLIANCE REGISTER */
+
+.compliance-toolbar{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:16px;
+ padding:16px 18px;
+ border-bottom:1px solid var(--line);
+ flex-wrap:wrap;
+}
+
+.compliance-search-wrap{
+ position:relative;
+ flex:1 1 340px;
+ max-width:660px;
+}
+
+.compliance-search-icon{
+ position:absolute;
+ left:14px;
+ top:50%;
+ transform:translateY(-50%);
+ color:var(--grey);
+ pointer-events:none;
+ font-size:15px;
+}
+
+.compliance-search-wrap input{
+ width:100%;
+ box-sizing:border-box;
+ border:1px solid var(--line);
+ border-radius:8px;
+ padding:11px 14px 11px 38px;
+ background:#fff;
+ font:600 11px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--charcoal);
+}
+
+.compliance-toolbar-right{
+ display:flex;
+ align-items:center;
+ gap:10px;
+ flex-wrap:wrap;
+}
+
+.compliance-view-toggle{
+ display:flex;
+ border:1px solid var(--line);
+ border-radius:8px;
+ overflow:hidden;
+ background:#fff;
+}
+
+.compliance-view{
+ border:0;
+ border-right:1px solid var(--line);
+ background:#fff;
+ padding:11px 14px;
+ font:700 9px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--grey);
+ cursor:pointer;
+ white-space:nowrap;
+}
+
+.compliance-view:last-child{
+ border-right:0;
+}
+
+.compliance-view span{
+ margin-left:4px;
+ opacity:.7;
+}
+
+.compliance-view.active{
+ background:var(--charcoal);
+ color:#fff;
+}
+
+.compliance-toolbar-right select{
+ border:1px solid var(--line);
+ border-radius:8px;
+ padding:10px 30px 10px 12px;
+ background:#fff;
+ font:700 9px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--charcoal);
+}
+
+@media(max-width:1100px){
+ .compliance-search-wrap{
+  max-width:none;
+  flex-basis:100%;
+ }
+
+ .compliance-toolbar-right{
+  width:100%;
+ }
+}
+
+@media(max-width:760px){
+ .compliance-view-toggle{
+  width:100%;
+  overflow:auto;
+ }
+
+ .compliance-view{
+  flex:1;
+ }
+
+ .compliance-toolbar-right select{
+  flex:1;
+ }
+}
+</style>
+
+<script>
+function setComplianceType(button,type){
+
+ document.getElementById('typeFilter').value=type;
+
+ document.querySelectorAll('.compliance-view')
+  .forEach(b=>b.classList.remove('active'));
+
+ button.classList.add('active');
+
+ filterRegister();
+}
+</script>
