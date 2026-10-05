@@ -1330,14 +1330,28 @@ button,input,select,textarea{font-family:inherit}
      <div class="field">
       <label>Applicability</label>
 
-      <select id="singleApplicability">
-       <option value="Project">Project</option>
-       <option value="Maintenance">Maintenance</option>
-       <option value="Operations">Operations</option>
+      <select id="singleApplicability" onchange="updateComplianceApplicability()">
+       <option value="">Select applicability...</option>
        <option value="Organisation">Organisation</option>
        <option value="Business Area">Business Area</option>
        <option value="Jurisdiction">Jurisdiction</option>
+       <option value="Client">Client</option>
+       <option value="Project">Project</option>
+       <option value="Operations">Operations</option>
+       <option value="Maintenance">Maintenance</option>
       </select>
+
+      <div id="singleApplicabilityTarget" style="display:none;margin-top:10px">
+       <label id="singleApplicabilityTargetLabel">Applies To</label>
+       <input id="singleApplicabilityName" type="text">
+      </div>
+
+      <div id="singleProjectTarget" style="display:none;margin-top:10px">
+       <label>Project</label>
+       <select id="singleProject">
+        <option value="">Select project...</option>
+       </select>
+      </div>
      </div>
 
      <div class="field full">
@@ -1890,6 +1904,10 @@ async function prototypeSubmit(){
  const title=document.getElementById('singleTitle').value.trim();
  const type=document.getElementById('singleType').value;
  const applicability=document.getElementById('singleApplicability').value;
+ const applicabilityName=
+  document.getElementById('singleApplicabilityName')?.value.trim()||'';
+ const projectId=
+  document.getElementById('singleProject')?.value||null;
  const description=document.getElementById('singleDescription').value.trim();
  const source=document.getElementById('singleSource').value.trim();
  const reference=document.getElementById('singleReference').value.trim();
@@ -1902,6 +1920,24 @@ async function prototypeSubmit(){
 
  if(!description){
   alert('Describe the compliance requirement.');
+  return;
+ }
+
+ if(!applicability){
+  alert('Select where this requirement applies.');
+  return;
+ }
+
+ if(applicability==='Project' && !projectId){
+  alert('Select the project this requirement applies to.');
+  return;
+ }
+
+ if(
+  !['Project','Organisation'].includes(applicability) &&
+  !applicabilityName
+ ){
+  alert('Enter where this requirement applies.');
   return;
  }
 
@@ -1933,7 +1969,11 @@ async function prototypeSubmit(){
      applicability_name:
       applicability==='Organisation'
       ? 'Verra Mobility'
-      : '',
+      : applicabilityName,
+     project_id:
+      applicability==='Project'
+      ? projectId
+      : null,
      additional_information:additional
     })
    }
@@ -3225,6 +3265,111 @@ async function submitComplianceAmendment(){
   );
 
   alert(error.message);
+ }
+}
+</script>
+
+<script>
+/* COMPLIANCE APPLICABILITY */
+
+let complianceProjectsLoaded=false;
+
+async function updateComplianceApplicability(){
+
+ const type=document.getElementById('singleApplicability').value;
+ const target=document.getElementById('singleApplicabilityTarget');
+ const projectTarget=document.getElementById('singleProjectTarget');
+ const name=document.getElementById('singleApplicabilityName');
+ const label=document.getElementById('singleApplicabilityTargetLabel');
+
+ target.style.display='none';
+ projectTarget.style.display='none';
+
+ if(type==='Organisation'){
+  target.style.display='block';
+  label.textContent='Applies To';
+  name.value='Verra Mobility';
+  name.readOnly=true;
+  return;
+ }
+
+ name.readOnly=false;
+
+ if(type==='Project'){
+  projectTarget.style.display='block';
+  await loadComplianceProjects();
+  return;
+ }
+
+ if(type){
+  target.style.display='block';
+
+  const labels={
+   'Business Area':'Business Area',
+   'Jurisdiction':'Jurisdiction',
+   'Client':'Client',
+   'Operations':'Operation / Business Area',
+   'Maintenance':'Maintenance / Client'
+  };
+
+  label.textContent=labels[type]||'Applies To';
+  name.value='';
+ }
+}
+
+async function loadComplianceProjects(){
+
+ if(complianceProjectsLoaded)return;
+
+ const select=document.getElementById('singleProject');
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+'/projects',
+   {
+    headers:complianceAuthHeaders(),
+    cache:'no-store'
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error('Unable to load projects.');
+  }
+
+  const projects=Array.isArray(data)
+   ? data
+   : (data.projects||[]);
+
+  select.innerHTML=
+   '<option value="">Select project...</option>';
+
+  projects.forEach(p=>{
+
+   const option=document.createElement('option');
+
+   option.value=p.id;
+
+   option.textContent=
+    [
+     p.project_code,
+     p.project_name,
+     p.customer
+    ].filter(Boolean).join(' — ');
+
+   select.appendChild(option);
+  });
+
+  complianceProjectsLoaded=true;
+
+ }catch(error){
+
+  console.error('Unable to load Compliance projects',error);
+
+  select.innerHTML=
+   '<option value="">Unable to load projects</option>';
  }
 }
 </script>
