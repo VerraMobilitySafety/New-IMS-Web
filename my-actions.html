@@ -1136,16 +1136,28 @@ async function completeDocumentReview(){
 
  try{
   const form=new FormData();
-  form.append('outcome',outcome);
-  form.append('review_notes',notes);
-  form.append('next_review_date',nextReviewDate);
+  let endpoint=`${API}/documents/${encodeURIComponent(action.source_id)}/review`;
 
-  if(outcome==='Revision Required'&&revisionDraft){
+  if(outcome==='Revision Required'){
+   endpoint=`${API}/document-requests`;
+
+   form.append('request_type','Revise Existing Document');
+   form.append('business_reason',notes);
+   form.append(
+    'additional_information',
+    'Created from scheduled document review.'
+   );
+   form.append('existing_document_id',action.source_id);
+   form.append('created_from_review','true');
    form.append('file',revisionDraft);
+  }else{
+   form.append('outcome',outcome);
+   form.append('review_notes',notes);
+   form.append('next_review_date',nextReviewDate);
   }
 
   const r=await fetch(
-   `${API}/documents/${encodeURIComponent(action.source_id)}/review`,
+   endpoint,
    {
     method:'POST',
     headers:{
@@ -1174,7 +1186,7 @@ async function completeDocumentReview(){
    outcome==='Withdrawal Required'
     ? `Review completed. Withdrawal Request #${d.review?.resulting_document_request_id||'—'} submitted to Document Control.`
     : outcome==='Revision Required'
-     ? `Review completed. Revision Request #${d.review?.resulting_document_request_id||'—'} submitted to Document Control.`
+     ? `Review completed. Revision Request #${d.request?.id||'—'} submitted to Document Control.`
      : `Review completed. Next review: ${formatActionDate(d.review?.next_review_date)}.`;
 
   showReviewMessage(successText,'success');
