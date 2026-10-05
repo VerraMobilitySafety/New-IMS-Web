@@ -1564,14 +1564,14 @@ button,input,select,textarea{font-family:inherit}
 
     <button
      class="btn teal"
-     onclick="controllerDecision('Approved with Amendments')"
+     onclick="alert('Amend & Approve is being connected next.')"
     >
      Amend & Approve
     </button>
 
     <button
      class="btn outline"
-     onclick="controllerDecision('Linked Existing')"
+     onclick="alert('Link Existing is being connected next.')"
     >
      Link Existing
     </button>
@@ -2889,4 +2889,130 @@ document.addEventListener('DOMContentLoaded',()=>{
   openComplianceRequestFromAction(requestId);
  }
 });
+</script>
+
+<script>
+/* LIVE COMPLIANCE CONTROLLER DECISIONS */
+
+async function controllerDecision(decision){
+
+ const modal=document.getElementById('controllerModal');
+ const requestId=modal.dataset.requestId;
+
+ if(!requestId){
+  alert('Compliance request ID is missing.');
+  return;
+ }
+
+ const notesField=
+  modal.querySelector('.section textarea');
+
+ const controllerNotes=
+  notesField ? notesField.value.trim() : '';
+
+ let rejectionReason=null;
+
+ if(decision==='Returned' && !controllerNotes){
+  alert('Add Controller notes explaining what information is required.');
+  return;
+ }
+
+ if(decision==='Rejected'){
+
+  rejectionReason=prompt(
+   'Rejection reason:\n\n'+
+   'Not an Obligation\n'+
+   'Duplicate\n'+
+   'Already Controlled\n'+
+   'Not Applicable\n'+
+   'Insufficient Information\n'+
+   'Incorrect Interpretation\n'+
+   'Other'
+  );
+
+  if(!rejectionReason)return;
+ }
+
+ if(decision==='Approved'){
+
+  const confirmed=confirm(
+   'Approve this requirement and create it as a controlled Compliance Obligation?'
+  );
+
+  if(!confirmed)return;
+ }
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+
+   '/compliance/requests/'+
+   requestId+
+   '/decision',
+   {
+    method:'POST',
+    headers:{
+     ...complianceAuthHeaders(),
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     decision:decision,
+     controller_notes:controllerNotes,
+     rejection_reason:rejectionReason
+    })
+   }
+  );
+
+  if(response.status===401){
+   location.replace(
+    'login.html?return='+
+    encodeURIComponent(location.href)
+   );
+   return;
+  }
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to process Controller decision.'
+   );
+  }
+
+  if(decision==='Approved' && data.obligation){
+
+   alert(
+    `${data.request.request_code} approved.\n\n`+
+    `Controlled obligation created: `+
+    `${data.obligation.obligation_code}`
+   );
+
+  }else{
+
+   alert(
+    `${data.request.request_code} — ${data.request.status}`
+   );
+  }
+
+  closeModal('controllerModal');
+
+  history.replaceState(
+   {},
+   '',
+   'compliance.html'
+  );
+
+  await loadComplianceRegister();
+
+ }catch(error){
+
+  console.error(
+   'Compliance Controller decision failed',
+   error
+  );
+
+  alert(error.message);
+ }
+}
 </script>
