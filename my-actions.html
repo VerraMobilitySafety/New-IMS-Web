@@ -1156,10 +1156,18 @@ async function completeDocumentReview(){
    }
   );
 
-  const d=await r.json().catch(()=>({}));
+  const raw=await r.text();
+
+  let d={};
+  try{
+   d=raw ? JSON.parse(raw) : {};
+  }catch(e){}
 
   if(!r.ok){
-   throw new Error(d.message||'Unable to complete document review');
+   throw new Error(
+    d.message||
+    `HTTP ${r.status}: ${raw||r.statusText||'No response body'}`
+   );
   }
 
   const successText=
