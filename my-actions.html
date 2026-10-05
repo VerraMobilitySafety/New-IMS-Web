@@ -324,6 +324,35 @@
      </div>
     </div>
 
+    <div class="action-detail-section" id="revisionControlFields" style="display:none">
+     <h3>Revision Control</h3>
+
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="action-detail-field">
+       <label>Current Version</label>
+       <strong id="revisionCurrentVersion">—</strong>
+      </div>
+
+      <div class="action-detail-field">
+       <label for="revisionType">Revision Classification *</label>
+       <select id="revisionType" onchange="updateProposedRevisionVersion()" style="width:100%;box-sizing:border-box;border:1px solid #d8d4d1;border-radius:7px;padding:9px;background:#fff;font:600 11px Montserrat,Verdana,Arial,sans-serif">
+        <option value="">Select classification…</option>
+        <option value="Minor">Minor revision</option>
+        <option value="Major">Major revision</option>
+       </select>
+      </div>
+     </div>
+
+     <div class="action-detail-field" style="margin-top:10px">
+      <label>Proposed Version</label>
+      <strong id="revisionProposedVersion">Select Minor or Major</strong>
+     </div>
+
+     <div style="font-size:9px;line-height:1.5;color:var(--grey);margin-top:8px">
+      Minor revisions increment the decimal version. Major revisions increment the whole version and reset the decimal to zero.
+     </div>
+    </div>
+
     <div class="action-detail-section">
      <h3>Required Approver(s)</h3>
      <div id="documentApproverPicker" style="position:relative">
@@ -346,6 +375,11 @@
      <div class="action-detail-field" style="margin-bottom:10px">
       <label>Document Reference</label>
       <strong id="publicationDocumentReference">—</strong>
+     </div>
+
+     <div id="publicationRevisionSummary" class="action-detail-field" style="display:none;margin-bottom:10px">
+      <label>Approved Revision</label>
+      <strong id="publicationRevisionDetail">—</strong>
      </div>
 
      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
@@ -553,8 +587,28 @@ function openActionDetail(index){
    actionField('Submitted',formatActionDate(action.created_at))
   ];
 
-  if(requestType==='Revise Existing Document'||requestType==='Withdraw Document'){
-   fields.splice(1,0,actionField('Existing document',action.existing_document_id?`Document #${action.existing_document_id}`:'—'));
+  if(requestType==='Revise Existing Document'){
+   fields.splice(
+    1,
+    0,
+    actionField(
+     'Document reference',
+     action.document_number||action.existing_document_number||'—'
+    ),
+    actionField('Revision classification',action.revision_type||'—'),
+    actionField('Proposed version',action.proposed_version||'—')
+   );
+  }else if(requestType==='Withdraw Document'){
+   fields.splice(
+    1,
+    0,
+    actionField(
+     'Existing document',
+     action.existing_document_id
+      ? `Document #${action.existing_document_id}`
+      : '—'
+    )
+   );
   }
 
   document.getElementById('actionDetailGrid').innerHTML=fields.join('');
@@ -618,6 +672,25 @@ function openActionDetail(index){
    document.getElementById('publicationDocumentReference').textContent=
     action.document_number||action.assigned_document_number||'—';
 
+   const publicationRevisionSummary=
+    document.getElementById('publicationRevisionSummary');
+
+   if(action.request_type==='Revise Existing Document'){
+    publicationRevisionSummary.style.display='block';
+
+    document.getElementById('publicationRevisionDetail').textContent=
+     `${action.revision_type||'Revision'} · v${action.current_version||'—'} → v${action.proposed_version||'—'}`;
+   }else{
+    publicationRevisionSummary.style.display='none';
+    document.getElementById('publicationRevisionDetail').textContent='—';
+   }
+
+   document.getElementById('publicationDocumentType').value=
+    action.document_type||action.existing_document_type||'';
+
+   document.getElementById('publicationDocumentOwner').value=
+    action.document_owner||action.existing_document_owner||'';
+
    document.getElementById('publicationPdf').value='';
    document.getElementById('publicationEffectiveDate').value='';
    document.getElementById('publicationReviewDate').value='';
@@ -630,17 +703,42 @@ function openActionDetail(index){
 
  const governancePanel=document.getElementById('newDocumentGovernance');
  if(governancePanel){
+  const isRevision=requestType==='Revise Existing Document';
+
   const showGovernance=
    isDocumentRequest &&
    !isDocumentApproval &&
-   requestType==='New Document' &&
+   ['New Document','Revise Existing Document'].includes(requestType) &&
    action.status!=='Ready for Publication';
 
   governancePanel.style.display=showGovernance ? 'block' : 'none';
 
   if(showGovernance){
-   document.getElementById('documentReference').value=
-    action.assigned_document_number||action.document_number||'';
+   const reference=document.getElementById('documentReference');
+   const revisionFields=document.getElementById('revisionControlFields');
+   const revisionType=document.getElementById('revisionType');
+
+   reference.value=
+    action.assigned_document_number||
+    action.existing_document_number||
+    action.document_number||
+    '';
+
+   reference.readOnly=isRevision;
+   reference.style.background=isRevision?'#f2f1ef':'#fff';
+
+   if(revisionFields){
+    revisionFields.style.display=isRevision?'block':'none';
+   }
+
+   if(isRevision){
+    document.getElementById('revisionCurrentVersion').textContent=
+     action.current_version||'—';
+
+    revisionType.value='';
+    document.getElementById('revisionProposedVersion').textContent=
+     'Select Minor or Major';
+   }
 
    loadDocumentApprovers();
   }
@@ -713,25 +811,48 @@ async function sendActionDecision(decision,notes){
  if(
   decision==='approve' &&
   action.action_type==='Document Request' &&
-  action.request_type==='New Document'
+  ['New Document','Revise Existing Document'].includes(action.request_type)
  ){
-  const documentNumber=document.getElementById('documentReference').value.trim();
   const approverUserIds=[
    ...document.querySelectorAll('.document-approver-checkbox:checked')
   ].map(cb=>Number(cb.value));
-
-  if(!documentNumber){
-   showDecisionMessage('Enter the document reference before sending for approval.','error');
-   return;
-  }
 
   if(!approverUserIds.length){
    showDecisionMessage('Select at least one required approver.','error');
    return;
   }
 
-  payload.document_number=documentNumber;
   payload.approver_user_ids=approverUserIds;
+
+  if(action.request_type==='New Document'){
+   const documentNumber=
+    document.getElementById('documentReference').value.trim();
+
+   if(!documentNumber){
+    showDecisionMessage(
+     'Enter the document reference before sending for approval.',
+     'error'
+    );
+    return;
+   }
+
+   payload.document_number=documentNumber;
+  }
+
+  if(action.request_type==='Revise Existing Document'){
+   const revisionType=
+    document.getElementById('revisionType').value;
+
+   if(!revisionType){
+    showDecisionMessage(
+     'Select Major or Minor revision before sending for approval.',
+     'error'
+    );
+    return;
+   }
+
+   payload.revision_type=revisionType;
+  }
  }
 
  const buttons=document.querySelectorAll('#actionDecisionActions button');buttons.forEach(b=>b.disabled=true);
@@ -841,6 +962,36 @@ function closeActionDetail(event){
  document.getElementById('actionDetailBackdrop').classList.remove('show');document.body.style.overflow='';currentAction=null;
 }
 let documentApproverUsers=[];
+
+function updateProposedRevisionVersion(){
+ const action=currentAction;
+ const type=document.getElementById('revisionType')?.value||'';
+ const output=document.getElementById('revisionProposedVersion');
+
+ if(!output)return;
+
+ const current=action?.current_version||'';
+
+ if(!type){
+  output.textContent='Select Minor or Major';
+  return;
+ }
+
+ const match=current.match(/^(\d+)\.(\d+)$/);
+
+ if(!match){
+  output.textContent='Unable to calculate';
+  return;
+ }
+
+ const major=Number(match[1]);
+ const minor=Number(match[2]);
+
+ output.textContent=
+  type==='Major'
+   ? `${major+1}.0`
+   : `${major}.${minor+1}`;
+}
 
 function toggleDocumentApproverPicker(){
  const menu=document.getElementById('documentApproverMenu');
