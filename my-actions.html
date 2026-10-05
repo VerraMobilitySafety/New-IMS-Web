@@ -588,9 +588,10 @@
        </button>
 
        <button type="button"
+               id="complianceSystemRecordOption"
                onclick="selectComplianceRecordMethod('system')">
-        <strong>System Generated</strong>
-        <span>Create the compliance record in New IMS</span>
+        <strong>Create System Record</strong>
+        <span>Use evidence captured within New IMS</span>
        </button>
 
       </div>
@@ -939,6 +940,14 @@ function openActionDetail(index){
     action.security_classification||'Internal';
 
    document.getElementById('complianceActivityNotes').value='';
+
+   const systemOption=
+    document.getElementById('complianceSystemRecordOption');
+
+   if(systemOption){
+    systemOption.style.display=
+     action.system_record_allowed ? '' : 'none';
+   }
 
    document.getElementById('complianceRecordMethodContent').innerHTML='';
 
