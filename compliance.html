@@ -1458,6 +1458,7 @@ button,input,select,textarea{font-family:inherit}
      <div class="field full">
       <label>Requirement Title</label>
       <input
+       id="singleTitle"
        type="text"
        placeholder="e.g. Annual technician competency training"
       >
@@ -1466,23 +1467,23 @@ button,input,select,textarea{font-family:inherit}
      <div class="field">
       <label>Compliance Type</label>
 
-      <select>
-       <option>Client</option>
-       <option>Regulatory</option>
-       <option>Internal</option>
+      <select id="singleType">
+       <option value="Client">Client</option>
+       <option value="Regulatory">Regulatory</option>
+       <option value="Internal">Internal</option>
       </select>
      </div>
 
      <div class="field">
       <label>Applicability</label>
 
-      <select>
-       <option>Project</option>
-       <option>Maintenance</option>
-       <option>Operations</option>
-       <option>Organisation</option>
-       <option>Business Area</option>
-       <option>Jurisdiction</option>
+      <select id="singleApplicability">
+       <option value="Project">Project</option>
+       <option value="Maintenance">Maintenance</option>
+       <option value="Operations">Operations</option>
+       <option value="Organisation">Organisation</option>
+       <option value="Business Area">Business Area</option>
+       <option value="Jurisdiction">Jurisdiction</option>
       </select>
      </div>
 
@@ -1490,6 +1491,7 @@ button,input,select,textarea{font-family:inherit}
       <label>Requirement Description</label>
 
       <textarea
+       id="singleDescription"
        placeholder="Describe the requirement..."
       ></textarea>
      </div>
@@ -1498,6 +1500,7 @@ button,input,select,textarea{font-family:inherit}
       <label>Source</label>
 
       <input
+       id="singleSource"
        type="text"
        placeholder="Contract, legislation, policy..."
       >
@@ -1507,6 +1510,7 @@ button,input,select,textarea{font-family:inherit}
       <label>Source Reference</label>
 
       <input
+       id="singleReference"
        type="text"
        placeholder="Clause, section, correspondence..."
       >
@@ -1516,6 +1520,7 @@ button,input,select,textarea{font-family:inherit}
       <label>Supporting Information</label>
 
       <textarea
+       id="singleAdditional"
        placeholder="Add context, evidence or other information..."
       ></textarea>
      </div>
@@ -2027,13 +2032,103 @@ function prototypeAction(name){
 }
 
 
-function prototypeSubmit(){
+async function prototypeSubmit(){
 
- alert(
-  'Prototype only: this requirement would now be submitted to the Compliance Controller.'
- );
+ const title=document.getElementById('singleTitle').value.trim();
+ const type=document.getElementById('singleType').value;
+ const applicability=document.getElementById('singleApplicability').value;
+ const description=document.getElementById('singleDescription').value.trim();
+ const source=document.getElementById('singleSource').value.trim();
+ const reference=document.getElementById('singleReference').value.trim();
+ const additional=document.getElementById('singleAdditional').value.trim();
 
- closeModal('submitModal');
+ if(!title){
+  alert('Enter a requirement title.');
+  return;
+ }
+
+ if(!description){
+  alert('Describe the compliance requirement.');
+  return;
+ }
+
+ const button=event?.target;
+
+ if(button){
+  button.disabled=true;
+  button.textContent='Submitting...';
+ }
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+'/compliance/requests',
+   {
+    method:'POST',
+    headers:{
+     ...complianceAuthHeaders(),
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     submission_type:'Single Requirement',
+     request_title:title,
+     description:description,
+     compliance_type:type,
+     source_name:source,
+     source_reference:reference,
+     applicability_type:applicability,
+     applicability_name:
+      applicability==='Organisation'
+      ? 'Verra Mobility'
+      : '',
+     additional_information:additional
+    })
+   }
+  );
+
+  if(response.status===401){
+   location.replace('login.html?return=compliance.html');
+   return;
+  }
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to submit compliance requirement.'
+   );
+  }
+
+  alert(
+   data.request.request_code+
+   ' submitted successfully for Compliance Controller review.'
+  );
+
+  closeModal('submitModal');
+
+  document.getElementById('singleTitle').value='';
+  document.getElementById('singleDescription').value='';
+  document.getElementById('singleSource').value='';
+  document.getElementById('singleReference').value='';
+  document.getElementById('singleAdditional').value='';
+
+ }catch(error){
+
+  console.error(
+   'Compliance submission failed',
+   error
+  );
+
+  alert(error.message);
+
+ }finally{
+
+  if(button){
+   button.disabled=false;
+   button.textContent='Submit for Controller Review';
+  }
+ }
 }
 
 
