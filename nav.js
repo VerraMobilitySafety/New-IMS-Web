@@ -77,7 +77,7 @@
         <span class="ico">▥</span><span>Risk Management</span>
       </a>
 
-      <a class="placeholder" href="#" onclick="return false">
+      <a class="${isActive('compliance.html') ? 'active' : ''}" href="compliance.html">
         <span class="ico">◇</span><span>Compliance Management</span>
       </a>
 
