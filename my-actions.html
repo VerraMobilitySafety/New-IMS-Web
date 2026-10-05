@@ -368,6 +368,42 @@
     </div>
    </div>
 
+   <div id="documentWithdrawalPanel" style="display:none;margin-top:20px">
+    <div class="action-detail-section">
+     <h3>Withdraw Controlled Document</h3>
+
+     <div class="action-detail-field" style="margin-bottom:10px">
+      <label>Document Reference</label>
+      <strong id="withdrawalDocumentReference">—</strong>
+     </div>
+
+     <div class="action-detail-field" style="margin-bottom:10px">
+      <label>Current Version</label>
+      <strong id="withdrawalDocumentVersion">—</strong>
+     </div>
+
+     <div style="background:#fff0d9;border:1px solid #ead5a9;border-radius:8px;padding:12px;font-size:10px;line-height:1.55;color:#665538">
+      Formal approval is complete. Withdrawing this document will remove it from the current controlled document register and Governance AI. Its governance and version history will be retained.
+     </div>
+
+     <button
+      class="action-btn-reject"
+      id="withdrawDocumentButton"
+      type="button"
+      onclick="withdrawControlledDocument()"
+      style="margin-top:14px"
+     >
+      Withdraw Controlled Document
+     </button>
+
+     <div
+      class="action-decision-message"
+      id="withdrawalMessage"
+      style="margin-top:10px"
+     ></div>
+    </div>
+   </div>
+
    <div id="documentPublicationPanel" style="display:none;margin-top:20px">
     <div class="action-detail-section">
      <h3>Publish Controlled Document</h3>
@@ -661,8 +697,41 @@ function openActionDetail(index){
   !isDocumentApproval &&
   action.status==='Ready for Publication';
 
+ const isWithdrawalStage=
+  isDocumentRequest &&
+  !isDocumentApproval &&
+  action.status==='Ready for Withdrawal';
+
  decisionActions.style.display=
-  isDocumentRequest && !isPublicationStage ? 'block' : 'none';
+  isDocumentRequest &&
+  !isPublicationStage &&
+  !isWithdrawalStage
+   ? 'block'
+   : 'none';
+
+ const withdrawalPanel=document.getElementById('documentWithdrawalPanel');
+
+ if(withdrawalPanel){
+  withdrawalPanel.style.display=isWithdrawalStage ? 'block' : 'none';
+
+  if(isWithdrawalStage){
+   document.getElementById('withdrawalDocumentReference').textContent=
+    action.document_number||
+    action.existing_document_number||
+    action.assigned_document_number||
+    '—';
+
+   document.getElementById('withdrawalDocumentVersion').textContent=
+    action.current_version||'—';
+
+   const withdrawalMessage=document.getElementById('withdrawalMessage');
+   withdrawalMessage.textContent='';
+   withdrawalMessage.className='action-decision-message';
+
+   const withdrawalButton=document.getElementById('withdrawDocumentButton');
+   withdrawalButton.disabled=false;
+  }
+ }
 
  const publicationPanel=document.getElementById('documentPublicationPanel');
  if(publicationPanel){
@@ -704,12 +773,13 @@ function openActionDetail(index){
  const governancePanel=document.getElementById('newDocumentGovernance');
  if(governancePanel){
   const isRevision=requestType==='Revise Existing Document';
+  const isWithdrawal=requestType==='Withdraw Document';
 
   const showGovernance=
    isDocumentRequest &&
    !isDocumentApproval &&
-   ['New Document','Revise Existing Document'].includes(requestType) &&
-   action.status!=='Ready for Publication';
+   ['New Document','Revise Existing Document','Withdraw Document'].includes(requestType) &&
+   !['Ready for Publication','Ready for Withdrawal'].includes(action.status);
 
   governancePanel.style.display=showGovernance ? 'block' : 'none';
 
@@ -724,8 +794,9 @@ function openActionDetail(index){
     action.document_number||
     '';
 
-   reference.readOnly=isRevision;
-   reference.style.background=isRevision?'#f2f1ef':'#fff';
+   reference.readOnly=isRevision||isWithdrawal;
+   reference.style.background=
+    (isRevision||isWithdrawal)?'#f2f1ef':'#fff';
 
    if(revisionFields){
     revisionFields.style.display=isRevision?'block':'none';
@@ -811,7 +882,7 @@ async function sendActionDecision(decision,notes){
  if(
   decision==='approve' &&
   action.action_type==='Document Request' &&
-  ['New Document','Revise Existing Document'].includes(action.request_type)
+  ['New Document','Revise Existing Document','Withdraw Document'].includes(action.request_type)
  ){
   const approverUserIds=[
    ...document.querySelectorAll('.document-approver-checkbox:checked')
@@ -868,6 +939,59 @@ async function sendActionDecision(decision,notes){
   setTimeout(()=>{closeActionDetail();loadActions();},700);
  }catch(e){showDecisionMessage(e.message||'Unable to process decision.','error');buttons.forEach(b=>b.disabled=false);}
 }
+async function withdrawControlledDocument(){
+ const action=currentAction;
+ const token=localStorage.getItem(TOKEN_KEY);
+ const message=document.getElementById('withdrawalMessage');
+ const button=document.getElementById('withdrawDocumentButton');
+
+ if(!action||!action.source_id||!token)return;
+
+ if(!confirm(
+  'Withdraw this controlled document? It will no longer be Current or available to Governance AI.'
+ )){
+  return;
+ }
+
+ button.disabled=true;
+ message.textContent='';
+ message.className='action-decision-message';
+
+ try{
+  const r=await fetch(
+   `${API}/document-requests/${encodeURIComponent(action.source_id)}/withdraw`,
+   {
+    method:'POST',
+    headers:{
+     Authorization:'Bearer '+token,
+     Accept:'application/json'
+    }
+   }
+  );
+
+  const d=await r.json().catch(()=>({}));
+
+  if(!r.ok){
+   throw new Error(d.message||'Unable to withdraw controlled document');
+  }
+
+  message.textContent=
+   d.message||'Controlled document withdrawn successfully.';
+  message.className='action-decision-message show success';
+
+  setTimeout(()=>{
+   closeActionDetail();
+   loadActions();
+  },700);
+
+ }catch(e){
+  message.textContent=
+   e.message||'Unable to withdraw controlled document.';
+  message.className='action-decision-message show error';
+  button.disabled=false;
+ }
+}
+
 async function publishControlledDocument(){
  const action=currentAction;
  const token=localStorage.getItem(TOKEN_KEY);
