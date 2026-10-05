@@ -426,7 +426,7 @@ function fmtDate(value){if(!value)return '—';const d=new Date(value);return Nu
 function statusClass(status){const s=(status||'').toLowerCase();if(s==='current')return 'current';if(s.includes('review'))return 'review';if(s.includes('approval')||s.includes('approved'))return 'approval';if(s.includes('draft'))return 'draft';if(s.includes('overdue'))return 'overdue';return 'draft';}
 function displayStatus(status){return status||'Draft';}
 function documentTypeShort(type){const map={'Procedure':'PRO','Policy':'POL','Standard':'STD','Work Instruction':'WI','Management Plan':'MP','Form':'FRM','Template':'TMP','Guideline':'GUI'};return map[type]||type||'—';}
-function normaliseDocument(r){return {id:r.id,documentNumber:r.document_number||'—',documentTitle:r.document_title||r.file_name||'Untitled document',documentType:r.document_type||'—',documentOwner:r.document_owner||'—',documentAuthor:r.uploaded_by||'—',workflowStatus:r.status||'Draft',controlledVersion:r.version_number||'—',effectiveDate:r.effective_date||null,nextReviewDate:r.review_date||null,changeSummary:r.description||'',purpose:r.description||'Controlled document managed in VERO.',fileName:r.file_name||'',contentType:r.content_type||'',aiSearchable:!!r.ai_searchable,allowView:r.allow_view!==false,allowDownload:!!r.allow_download,accessLevel:r.access_level||'Internal',createdAt:r.created_at||null,updatedAt:r.updated_at||null};}
+function normaliseDocument(r){return {id:r.id,documentNumber:r.document_number||'—',documentTitle:r.document_title||r.file_name||'Untitled document',documentType:r.document_type||'—',documentOwnerUserId:r.document_owner_user_id??null,documentOwner:r.document_owner_name||r.document_owner||'—',documentOwnerEmail:r.document_owner_email||'',documentAuthor:r.uploaded_by||'—',workflowStatus:r.status||'Draft',controlledVersion:r.version_number||'—',effectiveDate:r.effective_date||null,nextReviewDate:r.review_date||null,changeSummary:r.description||'',purpose:r.description||'Controlled document managed in VERO.',fileName:r.file_name||'',contentType:r.content_type||'',aiSearchable:!!r.ai_searchable,allowView:r.allow_view!==false,allowDownload:!!r.allow_download,accessLevel:r.access_level||'Internal',createdAt:r.created_at||null,updatedAt:r.updated_at||null};}
 
 function openDocById(id){
  const d=liveDocuments.find(x=>String(x.id)===String(id));if(!d)return;selectedDocument=d;
@@ -598,19 +598,17 @@ function setDocumentView(view,button){
 
 function documentIsMine(doc){
  const user=currentUserForRequest();
- const owner=(doc.documentOwner||'').trim().toLowerCase();
 
- if(!owner)return false;
+ if(
+  doc.documentOwnerUserId===null ||
+  doc.documentOwnerUserId===undefined ||
+  user.id===null ||
+  user.id===undefined
+ ){
+  return false;
+ }
 
- const fullName=[user.first_name,user.last_name]
-  .filter(Boolean)
-  .join(' ')
-  .trim()
-  .toLowerCase();
-
- const email=(user.email||'').trim().toLowerCase();
-
- return owner===fullName||owner===email;
+ return Number(doc.documentOwnerUserId)===Number(user.id);
 }
 
 function documentIsDueForReview(doc){

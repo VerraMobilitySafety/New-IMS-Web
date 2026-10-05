@@ -436,7 +436,9 @@
 
       <div class="action-detail-field">
        <label for="publicationDocumentOwner">Document Owner *</label>
-       <input id="publicationDocumentOwner" type="text" placeholder="e.g. Director, Workplace Governance" style="width:100%;box-sizing:border-box;border:1px solid #d8d4d1;border-radius:7px;padding:9px;background:#fff">
+       <select id="publicationDocumentOwner" style="width:100%;box-sizing:border-box;border:1px solid #d8d4d1;border-radius:7px;padding:9px;background:#fff">
+        <option value="">Select owner…</option>
+       </select>
       </div>
      </div>
 
@@ -757,8 +759,11 @@ function openActionDetail(index){
    document.getElementById('publicationDocumentType').value=
     action.document_type||action.existing_document_type||'';
 
-   document.getElementById('publicationDocumentOwner').value=
-    action.document_owner||action.existing_document_owner||'';
+   populatePublicationOwnerUsers(
+    action.document_owner_user_id||
+    action.existing_document_owner_user_id||
+    null
+   );
 
    document.getElementById('publicationPdf').value='';
    document.getElementById('publicationEffectiveDate').value='';
@@ -1001,7 +1006,7 @@ async function publishControlledDocument(){
  if(!action||!action.source_id||!token)return;
 
  const documentType=document.getElementById('publicationDocumentType').value;
- const documentOwner=document.getElementById('publicationDocumentOwner').value.trim();
+ const documentOwnerUserId=document.getElementById('publicationDocumentOwner').value;
  const effectiveDate=document.getElementById('publicationEffectiveDate').value;
  const reviewDate=document.getElementById('publicationReviewDate').value;
  const pdf=document.getElementById('publicationPdf').files[0];
@@ -1016,8 +1021,8 @@ async function publishControlledDocument(){
   return;
  }
 
- if(!documentOwner){
-  showPublicationMessage('Enter the Document Owner.','error');
+ if(!documentOwnerUserId){
+  showPublicationMessage('Select the Document Owner.','error');
   return;
  }
 
@@ -1038,7 +1043,7 @@ async function publishControlledDocument(){
 
  const form=new FormData();
  form.append('document_type',documentType);
- form.append('document_owner',documentOwner);
+ form.append('document_owner_user_id',documentOwnerUserId);
  form.append('effective_date',effectiveDate);
  form.append('review_date',reviewDate);
  form.append('file',pdf);
@@ -1181,6 +1186,25 @@ function filterDocumentApprovers(){
  });
 }
 
+function populatePublicationOwnerUsers(selectedUserId=null){
+ const select=document.getElementById('publicationDocumentOwner');
+ if(!select)return;
+
+ select.innerHTML=
+  '<option value="">Select owner…</option>'+
+  documentApproverUsers.map(u=>{
+   const name=[u.first_name,u.last_name]
+    .filter(Boolean)
+    .join(' ')||u.email;
+
+   return `<option value="${u.id}">${escapeHtml(name)}</option>`;
+  }).join('');
+
+ if(selectedUserId!==null&&selectedUserId!==undefined){
+  select.value=String(selectedUserId);
+ }
+}
+
 async function loadDocumentApprovers(){
  const token=localStorage.getItem(TOKEN_KEY);
  const list=document.getElementById('documentApproverList');
@@ -1200,6 +1224,8 @@ async function loadDocumentApprovers(){
   documentApproverUsers=(d.users||[]).filter(
    u=>u.active&&u.account_status==='Active'
   );
+
+  populatePublicationOwnerUsers();
 
   list.innerHTML=documentApproverUsers.map(u=>{
    const name=[u.first_name,u.last_name].filter(Boolean).join(' ')||u.email;
