@@ -576,7 +576,10 @@ function setQ(b){document.getElementById('homeAI').value=b.textContent;document.
  async function load(){
   const t=localStorage.getItem(TOKEN); if(!t){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));return;}
   try{const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t,Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('auth');const d=await r.json();const u=d.user||d;localStorage.setItem(USER,JSON.stringify(u));render(u);updateGreeting(u?.first_name||'');}
-  catch(e){localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));}
+  catch(e){
+   console.error('VERO auth/startup error:',e);
+   alert('VERO startup error: '+(e?.message||e));
+  }
  }
  trigger.addEventListener('click',e=>{e.stopPropagation();const open=account.classList.toggle('open');trigger.setAttribute('aria-expanded',String(open));});
  document.addEventListener('click',e=>{if(!account.contains(e.target)){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
