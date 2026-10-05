@@ -209,45 +209,66 @@
   </div>
 </section>
 
- <div class="top">
-  <div class="crumb">Governance / Document Management</div>
-  <div class="top-right"><div class="search">⌕ &nbsp; Search controlled documents...</div><div class="avatar">DB</div></div>
- </div>
-
- <div class="actions">
+ <div class="actions document-actions">
   <button class="btn green" onclick="openRequest()">＋ Request Document Action</button>
+  <button class="btn dark" type="button" onclick="openGovernanceAI()">✦ Ask Governance AI</button>
  </div>
 
- <section class="kpis">
-  <div class="kpi green"><b id="currentCount">—</b><span>Current controlled documents</span></div>
-  <div class="kpi red"><b id="overdueCount">—</b><span>Overdue reviews</span></div>
-  <div class="kpi purple"><b id="approvalCount">—</b><span>Awaiting approval</span></div>
- </section>
-
- <div class="grid">
-  <section class="panel">
-   <div class="panel-head"><h2>Find a controlled document</h2><span>Current documents</span></div>
-   <table class="table">
-    <thead><tr><th>Document</th><th>Type</th><th>Owner</th><th>Version</th><th>Status</th><th>Review</th></tr></thead>
-    <tbody id="documentsBody">
-      <tr><td colspan="6" class="empty">Loading documents from VERO…</td></tr>
-     </tbody>
-   </table>
-  </section>
-
-  <aside>
-   <div class="ai">
-    <div class="label">✦ GOVERNANCE AI</div>
-    <h3>Ask about current documents</h3>
-    <p>Search and answer questions using only current, approved controlled documents.</p>
-    <input id="aiQuestion" placeholder="e.g. What are our requirements for working near traffic?">
-    <button onclick="askAI()">Ask Governance AI →</button>
+ <section class="panel document-library">
+  <div class="document-toolbar">
+   <div class="document-search-wrap">
+    <span class="document-search-icon">⌕</span>
+    <input id="documentSearch" type="search" placeholder="Search controlled documents..." oninput="applyDocumentFilters()">
    </div>
-  </aside>
- </div>
+
+   <div class="document-filters">
+    <div class="document-view-toggle" role="group" aria-label="Document view">
+     <button type="button" class="document-view active" data-view="all" onclick="setDocumentView('all',this)">All Documents</button>
+     <button type="button" class="document-view" data-view="mine" onclick="setDocumentView('mine',this)">My Documents</button>
+     <button type="button" class="document-view" data-view="review" onclick="setDocumentView('review',this)">Due for Review</button>
+    </div>
+
+    <select id="documentTypeFilter" onchange="applyDocumentFilters()" aria-label="Filter by document type">
+     <option value="">All Types</option>
+    </select>
+   </div>
+  </div>
+
+  <table class="table">
+   <thead><tr><th>Document</th><th>Type</th><th>Owner</th><th>Version</th><th>Review</th></tr></thead>
+   <tbody id="documentsBody">
+    <tr><td colspan="5" class="empty">Loading documents from VERO…</td></tr>
+   </tbody>
+  </table>
+ </section>
 
  <div class="footer"><span>Controlled documents • Current versions only for employees</span><span>Verra Governance • Document Management • v1.9</span></div>
 </main>
+</div>
+
+<div id="governanceAIBack" class="modal-back" onclick="if(event.target===this)closeGovernanceAI()">
+ <div class="drawer">
+  <div class="drawer-head">
+   <button class="close" onclick="closeGovernanceAI()">×</button>
+   <small>✦ VERO GOVERNANCE AI</small>
+   <h2>Ask Governance AI</h2>
+   <small>Current approved controlled documents only</small>
+  </div>
+
+  <div class="drawer-body">
+   <div style="background:#f2f5e8;border-radius:10px;padding:16px;margin-bottom:18px">
+    <strong style="font-size:13px">Governance knowledge, grounded in VERO</strong>
+    <p style="font-size:12px;line-height:1.6;color:#625d59;margin:7px 0 0">
+     Ask questions about requirements, responsibilities and controls. Governance AI will use only current, approved controlled documents and will identify the documents used in its answer.
+    </p>
+   </div>
+
+   <div class="detail">
+    <label>Governance AI</label>
+    <strong>Conversational document search is coming next.</strong>
+   </div>
+  </div>
+ </div>
 </div>
 
 <div id="drawerBack" class="modal-back" onclick="if(event.target===this)closeDrawer()"><div class="drawer">
@@ -539,20 +560,176 @@ function toggleDocumentHistory(){
  button.textContent=opening?'Hide History':'View History';
 }
 
-function renderDocuments(){
- const body=document.getElementById('documentsBody');
- if(!liveDocuments.length){body.innerHTML='<tr><td colspan="6" class="empty">No Governance documents are currently registered in VERO.</td></tr>';return;}
- body.innerHTML=liveDocuments.map(d=>`<tr class="data" onclick="openDocById('${esc(d.id)}')"><td><div class="docno">${esc(d.documentNumber)}</div><div class="title">${esc(d.documentTitle)}</div><div class="meta">${esc(d.changeSummary||'Controlled document managed in VERO.')}</div></td><td>${esc(documentTypeShort(d.documentType))}</td><td>${esc(d.documentOwner)}</td><td>${esc(d.controlledVersion)}</td><td><span class="status ${statusClass(d.workflowStatus)}">${esc(displayStatus(d.workflowStatus))}</span></td><td>${esc(fmtDate(d.nextReviewDate))}</td></tr>`).join('');
+let documentView='all';
+
+function currentDocuments(){
+ return liveDocuments.filter(
+  d=>(d.workflowStatus||'').toLowerCase()==='current'
+ );
 }
-function updateKpis(){const now=new Date();const current=liveDocuments.filter(d=>(d.workflowStatus||'').toLowerCase()==='current').length;const overdue=liveDocuments.filter(d=>d.nextReviewDate&&new Date(d.nextReviewDate)<now&&(d.workflowStatus||'').toLowerCase()!=='withdrawn').length;const approvals=liveDocuments.filter(d=>['awaiting approval','approved – pending publication','approved - pending publication'].includes((d.workflowStatus||'').toLowerCase())).length;document.getElementById('currentCount').textContent=current;document.getElementById('overdueCount').textContent=overdue;document.getElementById('approvalCount').textContent=approvals;}
+
+function populateDocumentTypeFilter(){
+ const select=document.getElementById('documentTypeFilter');
+ if(!select)return;
+
+ const selected=select.value;
+
+ const types=[...new Set(
+  currentDocuments()
+   .map(d=>(d.documentType||'').trim())
+   .filter(Boolean)
+ )].sort((a,b)=>a.localeCompare(b));
+
+ select.innerHTML=
+  '<option value="">All Types</option>'+
+  types.map(type=>`<option value="${esc(type)}">${esc(type)}</option>`).join('');
+
+ if(types.includes(selected))select.value=selected;
+}
+
+function setDocumentView(view,button){
+ documentView=view;
+
+ document.querySelectorAll('.document-view').forEach(btn=>{
+  btn.classList.toggle('active',btn===button);
+ });
+
+ applyDocumentFilters();
+}
+
+function documentIsMine(doc){
+ const user=currentUserForRequest();
+ const owner=(doc.documentOwner||'').trim().toLowerCase();
+
+ if(!owner)return false;
+
+ const fullName=[user.first_name,user.last_name]
+  .filter(Boolean)
+  .join(' ')
+  .trim()
+  .toLowerCase();
+
+ const email=(user.email||'').trim().toLowerCase();
+
+ return owner===fullName||owner===email;
+}
+
+function documentIsDueForReview(doc){
+ if(!doc.nextReviewDate)return false;
+
+ const review=new Date(doc.nextReviewDate);
+ if(Number.isNaN(review.getTime()))return false;
+
+ const now=new Date();
+ const dueWindow=new Date(now);
+ dueWindow.setDate(dueWindow.getDate()+60);
+
+ return review<=dueWindow;
+}
+
+function applyDocumentFilters(){
+ const search=(document.getElementById('documentSearch')?.value||'')
+  .trim()
+  .toLowerCase();
+
+ const type=(document.getElementById('documentTypeFilter')?.value||'')
+  .trim()
+  .toLowerCase();
+
+ let docs=currentDocuments();
+
+ if(search){
+  docs=docs.filter(d=>
+   [
+    d.documentNumber,
+    d.documentTitle,
+    d.documentType,
+    d.documentOwner
+   ]
+    .filter(Boolean)
+    .some(value=>String(value).toLowerCase().includes(search))
+  );
+ }
+
+ if(type){
+  docs=docs.filter(
+   d=>(d.documentType||'').trim().toLowerCase()===type
+  );
+ }
+
+ if(documentView==='mine'){
+  docs=docs.filter(documentIsMine);
+ }else if(documentView==='review'){
+  docs=docs.filter(documentIsDueForReview);
+ }
+
+ renderDocuments(docs);
+}
+
+function renderDocuments(documents=currentDocuments()){
+ const body=document.getElementById('documentsBody');
+
+ if(!documents.length){
+  const message=
+   documentView==='mine'
+    ? 'No current controlled documents are assigned to you.'
+    : documentView==='review'
+     ? 'No current controlled documents are due for review.'
+     : 'No current controlled documents match your search.';
+
+  body.innerHTML=`<tr><td colspan="5" class="empty">${esc(message)}</td></tr>`;
+  return;
+ }
+
+ body.innerHTML=documents.map(d=>`
+  <tr class="data" onclick="openDocById('${esc(d.id)}')">
+   <td>
+    <div class="docno">${esc(d.documentNumber)}</div>
+    <div class="title">${esc(d.documentTitle)}</div>
+    <div class="meta">${esc(d.changeSummary||'Controlled document managed in VERO.')}</div>
+   </td>
+   <td>${esc(documentTypeShort(d.documentType))}</td>
+   <td>${esc(d.documentOwner)}</td>
+   <td>${esc(d.controlledVersion)}</td>
+   <td>${esc(fmtDate(d.nextReviewDate))}</td>
+  </tr>
+ `).join('');
+}
+
 async function loadDocuments(){
  const body=document.getElementById('documentsBody');
+
  try{
-  const response=await fetch(DOCUMENTS_API,{headers:authHeaders({Accept:'application/json'}),cache:'no-store'});
-  if(response.status===401){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'documents.html'));return;}
+  const response=await fetch(
+   DOCUMENTS_API,
+   {
+    headers:authHeaders({Accept:'application/json'}),
+    cache:'no-store'
+   }
+  );
+
+  if(response.status===401){
+   location.replace(
+    'login.html?return='+
+    encodeURIComponent(location.pathname.split('/').pop()||'documents.html')
+   );
+   return;
+  }
+
   if(!response.ok)throw new Error(`API returned ${response.status}`);
-  const data=await response.json();const rows=Array.isArray(data.documents)?data.documents:[];liveDocuments=rows.map(normaliseDocument);renderDocuments();updateKpis();
- }catch(err){console.error('Unable to load VERO Governance documents',err);body.innerHTML='<tr><td colspan="6" class="empty">Unable to load controlled documents from VERO. Please refresh or contact Governance.</td></tr>';document.getElementById('currentCount').textContent='—';document.getElementById('overdueCount').textContent='—';document.getElementById('approvalCount').textContent='—';}
+
+  const data=await response.json();
+  const rows=Array.isArray(data.documents)?data.documents:[];
+
+  liveDocuments=rows.map(normaliseDocument);
+  populateDocumentTypeFilter();
+  applyDocumentFilters();
+
+ }catch(err){
+  console.error('Unable to load VERO Governance documents',err);
+  body.innerHTML=
+   '<tr><td colspan="5" class="empty">Unable to load controlled documents from VERO. Please refresh or contact Governance.</td></tr>';
+ }
 }
 async function openSelectedDocument(){
  if(!selectedDocument){alert('Select a document first.');return;}
@@ -572,6 +749,14 @@ async function openSelectedDocument(){
  }catch(err){console.error('Unable to open controlled document',err);alert('Unable to open this controlled document. Please try again.');}
 }
 function openControlledPdf(){if(!selectedDocument){if(liveDocuments.length===1){selectedDocument=liveDocuments[0];}else{alert('Select a document from the register first.');return;}}openSelectedDocument();}
+function openGovernanceAI(){
+ document.getElementById('governanceAIBack').classList.add('show');
+}
+
+function closeGovernanceAI(){
+ document.getElementById('governanceAIBack').classList.remove('show');
+}
+
 function closeDrawer(){document.getElementById('drawerBack').classList.remove('show')}
 function openViewer(){document.getElementById('viewer').classList.add('show')}
 function closeViewer(){document.getElementById('viewer').classList.remove('show');document.getElementById('pdfFrame').src='';if(currentViewerBlobUrl){URL.revokeObjectURL(currentViewerBlobUrl);currentViewerBlobUrl=null;}}
@@ -880,7 +1065,6 @@ async function submitRequest(){
 function openCopyRequest(){if(!selectedDocument){alert('Select a document first.');return;}document.getElementById('viewer').classList.add('show');document.getElementById('copyEmail').value='';document.getElementById('copyRequest').classList.add('show');const parts=document.querySelectorAll('#copyRequest .copy-doc strong');if(parts[0])parts[0].textContent=`${selectedDocument.documentNumber} — ${selectedDocument.documentTitle}`;if(parts[1])parts[1].textContent=`${selectedDocument.controlledVersion} · ${selectedDocument.workflowStatus}`;}
 function closeCopyRequest(){document.getElementById('copyRequest').classList.remove('show')}
 function sendCopy(){const email=document.getElementById('copyEmail').value.trim();if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return alert('Enter a valid email address.');alert('Prototype: an UNCONTROLLED COPY would now be generated and emailed to '+email+'.');closeCopyRequest();}
-function askAI(){let q=document.getElementById('aiQuestion').value.trim();if(!q){alert('Enter a question first.');return}alert('Governance AI indexing is the next stage. The document register already records which Current documents are AI-searchable.\n\nQuestion: '+q)}
 function findInDoc(){const q=document.getElementById('findText').value.trim();if(q)alert('Browser PDF/text search will be enabled as the controlled viewer is refined.');}
 document.addEventListener('DOMContentLoaded',loadDocuments);
 </script>
@@ -917,3 +1101,123 @@ document.addEventListener('DOMContentLoaded',loadDocuments);
 <script>function toggleNavGroup(id){const group=document.getElementById(id);if(group)group.classList.toggle("open");}</script>
 <script src="nav.js"></script>
 </body></html>
+
+<style id="document-library-ui">
+.document-actions{
+  margin:22px 0 18px;
+}
+
+.document-library{
+  width:100%;
+}
+
+.document-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:16px 18px;
+  border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+}
+
+.document-search-wrap{
+  position:relative;
+  flex:1 1 340px;
+  max-width:560px;
+}
+
+.document-search-icon{
+  position:absolute;
+  left:14px;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--grey);
+  pointer-events:none;
+}
+
+.document-search-wrap input{
+  width:100%;
+  box-sizing:border-box;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:11px 14px 11px 38px;
+  background:#fff;
+  font:600 12px Montserrat,Verdana,Arial,sans-serif;
+  color:var(--charcoal);
+}
+
+.document-filters{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.document-view-toggle{
+  display:flex;
+  border:1px solid var(--line);
+  border-radius:8px;
+  overflow:hidden;
+  background:#fff;
+}
+
+.document-view{
+  border:0;
+  border-right:1px solid var(--line);
+  background:#fff;
+  padding:10px 13px;
+  font:700 10px Montserrat,Verdana,Arial,sans-serif;
+  color:var(--grey);
+  cursor:pointer;
+}
+
+.document-view:last-child{
+  border-right:0;
+}
+
+.document-view.active{
+  background:var(--charcoal);
+  color:#fff;
+}
+
+#documentTypeFilter{
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:10px 32px 10px 12px;
+  background:#fff;
+  font:700 10px Montserrat,Verdana,Arial,sans-serif;
+  color:var(--charcoal);
+}
+
+@media(max-width:900px){
+  .document-toolbar{
+    align-items:stretch;
+  }
+
+  .document-search-wrap{
+    max-width:none;
+    flex-basis:100%;
+  }
+
+  .document-filters{
+    width:100%;
+    justify-content:space-between;
+  }
+}
+
+@media(max-width:650px){
+  .document-view-toggle{
+    width:100%;
+  }
+
+  .document-view{
+    flex:1;
+    padding:10px 7px;
+  }
+
+  #documentTypeFilter{
+    width:100%;
+  }
+}
+</style>
