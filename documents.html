@@ -520,7 +520,7 @@ function populateDocumentRequestSelectors(){
  multi.innerHTML='';
 
  liveDocuments
-  .filter(doc=>(doc.status||'').toLowerCase()==='current')
+  .filter(doc=>(doc.workflowStatus||'').toLowerCase()==='current')
   .forEach(doc=>{
   const id=doc.id;
   const number=doc.documentNumber||doc.document_number||'No number';
