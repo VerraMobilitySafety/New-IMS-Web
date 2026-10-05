@@ -285,6 +285,7 @@
     <button class="action-filter active" data-filter="all" onclick="setActionFilter('all',this)">All</button>
     <button class="action-filter" data-filter="due" onclick="setActionFilter('due',this)">Due / Overdue</button>
     <button class="action-filter" data-filter="documents" onclick="setActionFilter('documents',this)">Documents</button>
+    <button class="action-filter" data-filter="compliance" onclick="setActionFilter('compliance',this)">Compliance</button>
     <button class="action-filter" data-filter="risks" onclick="setActionFilter('risks',this)">Risks</button>
     <button class="action-filter" data-filter="incidents" onclick="setActionFilter('incidents',this)">Incidents</button>
     <button class="action-filter" data-filter="projects" onclick="setActionFilter('projects',this)">Projects</button>
@@ -582,6 +583,7 @@ function dotClass(action){
 function filteredActions(){
  if(currentFilter==='all')return allActions;
  if(currentFilter==='documents')return allActions.filter(a=>(a.source||'').toLowerCase()==='documents');
+ if(currentFilter==='compliance')return allActions.filter(a=>(a.source||'').toLowerCase()==='compliance');
  if(currentFilter==='risks')return allActions.filter(a=>(a.source||'').toLowerCase()==='risks');
  if(currentFilter==='incidents')return allActions.filter(a=>(a.source||'').toLowerCase()==='incidents');
  if(currentFilter==='projects')return allActions.filter(a=>(a.source||'').toLowerCase()==='projects');
@@ -640,6 +642,11 @@ function openActionDetail(index){
   action.action_type==='Document Review';
 
  const isProject=action.source==='Projects';
+
+ const isCompliance=
+  action.source==='Compliance' &&
+  action.action_type==='Compliance Review';
+
  const requestType=action.request_type||'New Document';
 
  const requestLabels={
@@ -661,19 +668,25 @@ function openActionDetail(index){
    ? 'DOCUMENT REVIEW'
    : isDocumentRequest
     ? 'DOCUMENT CONTROL'
-    : (action.source||'MY ACTION');
+    : isCompliance
+     ? 'COMPLIANCE CONTROL'
+     : (action.source||'MY ACTION');
 
  document.getElementById('actionDetailTitle').textContent=
   isDocumentReview
    ? `${action.document_number||'Document'} ${action.document_title||action.description||''}`.trim()
    : isDocumentRequest
     ? `${requestLabels[requestType]||requestType}: ${action.document_title||action.description||action.title||'Document'}`
-    : (action.description||action.title||'Action');
+    : isCompliance
+     ? `${action.request_code||'Compliance Request'} — ${action.description||action.request_title||'Requirement'}`
+     : (action.description||action.title||'Action');
 
  document.getElementById('actionDetailSubtitle').textContent=
   isDocumentRequest
    ? `${requestType}${action.source_id?` · Request #${action.source_id}`:''}`
-   : `${action.action_type||'Action'}${action.source_id?` · #${action.source_id}`:''}`;
+   : isCompliance
+    ? `${action.submission_type||'Compliance Requirement'} · ${action.request_code||''}`
+    : `${action.action_type||'Action'}${action.source_id?` · #${action.source_id}`:''}`;
 
  document.getElementById('actionDetailStatus').textContent=action.status||'Open';
 
@@ -747,6 +760,27 @@ function openActionDetail(index){
   document.getElementById('actionDetailReason').textContent=action.business_reason||'—';
   document.getElementById('actionDetailAdditional').textContent=action.additional_information||'—';
 
+ }else if(isCompliance){
+
+  document.getElementById('actionDetailGrid').innerHTML=[
+   actionField('Request',action.request_code),
+   actionField('Submission type',action.submission_type),
+   actionField('Compliance type',action.compliance_type),
+   actionField('Applicability',action.applicability_type),
+   actionField('Submitted by',action.requested_by),
+   actionField('Submitted',formatActionDate(action.created_at))
+  ].join('');
+
+  document.getElementById('actionDetailReason').textContent=
+   action.description||action.request_title||'—';
+
+  document.getElementById('actionDetailAdditional').innerHTML=
+   `<button class="action-btn-approve"
+            type="button"
+            onclick="openComplianceAction()">
+      Review Compliance Requirement →
+    </button>`;
+
  }else{
   document.getElementById('actionDetailGrid').innerHTML=[
    actionField('Request type',action.action_type),
@@ -799,6 +833,7 @@ function openActionDetail(index){
   action.status==='Ready for Withdrawal';
 
  decisionActions.style.display=
+  !isCompliance &&
   isDocumentRequest &&
   !isDocumentReview &&
   !isPublicationStage &&
@@ -982,6 +1017,13 @@ function openActionDetail(index){
  document.getElementById('actionDetailBackdrop').classList.add('show');
  document.body.style.overflow='hidden';
 }
+function openComplianceAction(){
+ if(!currentAction)return;
+
+ location.href=
+  `compliance.html?request=${encodeURIComponent(currentAction.source_id)}`;
+}
+
 function openProjectAction(){
  const action=currentAction;
  if(!action||action.source!=='Projects'||!action.source_id)return;
