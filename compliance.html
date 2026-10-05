@@ -1564,7 +1564,7 @@ button,input,select,textarea{font-family:inherit}
 
     <button
      class="btn teal"
-     onclick="alert('Amend & Approve is being connected next.')"
+     onclick="enableComplianceAmendment()"
     >
      Amend & Approve
     </button>
@@ -2830,6 +2830,8 @@ async function openComplianceRequestFromAction(requestId){
   const request=data.request;
   const item=(data.items||[])[0];
 
+  currentComplianceReview=item;
+
   if(!item){
    throw new Error('No compliance requirement was found in this request.');
   }
@@ -3003,6 +3005,222 @@ async function controllerDecision(decision){
 
   console.error(
    'Compliance Controller decision failed',
+   error
+  );
+
+  alert(error.message);
+ }
+}
+</script>
+
+<script>
+/* COMPLIANCE AMEND & APPROVE */
+
+let currentComplianceReview=null;
+
+function enableComplianceAmendment(){
+
+ if(!currentComplianceReview){
+  alert('Compliance request details are not loaded.');
+  return;
+ }
+
+ const item=currentComplianceReview;
+
+ const body=document.querySelector('#controllerModal .drawer-body');
+
+ let editor=document.getElementById('complianceAmendEditor');
+
+ if(editor){
+  editor.remove();
+ }
+
+ editor=document.createElement('div');
+ editor.id='complianceAmendEditor';
+ editor.className='section';
+
+ editor.innerHTML=`
+  <h3>Amend Proposed Obligation</h3>
+
+  <div class="form-grid">
+
+   <div class="field full">
+    <label>Obligation Title</label>
+    <input id="amendTitle" value="${escapeComplianceValue(item.proposed_title)}">
+   </div>
+
+   <div class="field full">
+    <label>Description</label>
+    <textarea id="amendDescription">${escapeComplianceText(item.proposed_description)}</textarea>
+   </div>
+
+   <div class="field">
+    <label>Compliance Type</label>
+    <select id="amendType">
+     ${complianceOption('Client',item.proposed_compliance_type)}
+     ${complianceOption('Regulatory',item.proposed_compliance_type)}
+     ${complianceOption('Internal',item.proposed_compliance_type)}
+    </select>
+   </div>
+
+   <div class="field">
+    <label>Applicability</label>
+    <select id="amendApplicability">
+     ${complianceOption('Organisation',item.proposed_applicability_type)}
+     ${complianceOption('Business Area',item.proposed_applicability_type)}
+     ${complianceOption('Jurisdiction',item.proposed_applicability_type)}
+     ${complianceOption('Client',item.proposed_applicability_type)}
+     ${complianceOption('Project',item.proposed_applicability_type)}
+     ${complianceOption('Operations',item.proposed_applicability_type)}
+     ${complianceOption('Maintenance',item.proposed_applicability_type)}
+    </select>
+   </div>
+
+   <div class="field">
+    <label>Applicability Name</label>
+    <input id="amendApplicabilityName"
+           value="${escapeComplianceValue(item.proposed_applicability_name)}">
+   </div>
+
+   <div class="field">
+    <label>Frequency</label>
+    <input id="amendFrequency"
+           value="${escapeComplianceValue(item.proposed_frequency)}">
+   </div>
+
+   <div class="field">
+    <label>Source</label>
+    <input id="amendSource"
+           value="${escapeComplianceValue(item.proposed_source_name)}">
+   </div>
+
+   <div class="field">
+    <label>Source Reference</label>
+    <input id="amendReference"
+           value="${escapeComplianceValue(item.proposed_source_reference)}">
+   </div>
+
+   <div class="field full">
+    <label>Evidence Required</label>
+    <textarea id="amendEvidence">${escapeComplianceText(item.proposed_evidence_required)}</textarea>
+   </div>
+
+  </div>
+
+  <div class="drawer-actions">
+   <button class="btn outline"
+           onclick="document.getElementById('complianceAmendEditor').remove()">
+    Cancel
+   </button>
+
+   <button class="btn green"
+           onclick="submitComplianceAmendment()">
+    Approve Amended Obligation
+   </button>
+  </div>
+ `;
+
+ body.appendChild(editor);
+
+ editor.scrollIntoView({
+  behavior:'smooth',
+  block:'start'
+ });
+}
+
+function escapeComplianceValue(value){
+ return String(value||'')
+  .replace(/&/g,'&amp;')
+  .replace(/"/g,'&quot;')
+  .replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;');
+}
+
+function escapeComplianceText(value){
+ return String(value||'')
+  .replace(/&/g,'&amp;')
+  .replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;');
+}
+
+function complianceOption(value,current){
+ return `<option value="${value}" ${value===current?'selected':''}>${value}</option>`;
+}
+
+async function submitComplianceAmendment(){
+
+ const modal=document.getElementById('controllerModal');
+ const requestId=modal.dataset.requestId;
+
+ const notesField=modal.querySelector('.section textarea');
+ const controllerNotes=notesField ? notesField.value.trim() : '';
+
+ const amendments={
+  title:document.getElementById('amendTitle').value.trim(),
+  description:document.getElementById('amendDescription').value.trim(),
+  compliance_type:document.getElementById('amendType').value,
+  applicability_type:document.getElementById('amendApplicability').value,
+  applicability_name:document.getElementById('amendApplicabilityName').value.trim(),
+  frequency:document.getElementById('amendFrequency').value.trim(),
+  source_name:document.getElementById('amendSource').value.trim(),
+  source_reference:document.getElementById('amendReference').value.trim(),
+  evidence_required:document.getElementById('amendEvidence').value.trim()
+ };
+
+ if(!amendments.title){
+  alert('Obligation title is required.');
+  return;
+ }
+
+ if(!confirm('Approve this amended requirement as a controlled Compliance Obligation?')){
+  return;
+ }
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+
+   '/compliance/requests/'+
+   requestId+
+   '/decision',
+   {
+    method:'POST',
+    headers:{
+     ...complianceAuthHeaders(),
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     decision:'Approved with Amendments',
+     controller_notes:controllerNotes,
+     amendments:amendments
+    })
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to approve amended obligation.'
+   );
+  }
+
+  alert(
+   `${data.request.request_code} approved with amendments.\n\n`+
+   `Controlled obligation created: ${data.obligation.obligation_code}`
+  );
+
+  closeModal('controllerModal');
+
+  history.replaceState({},'','compliance.html');
+
+  await loadComplianceRegister();
+
+ }catch(error){
+
+  console.error(
+   'Amend and approve failed',
    error
   );
 
