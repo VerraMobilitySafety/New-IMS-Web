@@ -520,7 +520,7 @@
       </div>
 
       <div class="action-detail-field">
-       <label for="publicationReviewDate">Next Review Date</label>
+       <label for="publicationReviewDate">Next Review Date *</label>
        <input id="publicationReviewDate" type="date" style="width:100%;box-sizing:border-box;border:1px solid #d8d4d1;border-radius:7px;padding:9px;background:#fff">
       </div>
      </div>
@@ -602,7 +602,7 @@ function renderActions(){
   return `<div class="full-action" onclick="openActionDetail(${originalIndex})" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openActionDetail(${originalIndex})">
    <span class="action-dot ${dotClass(a)}"></span>
    <div class="full-action-main"><b>${escapeHtml(a.title||'Action required')}</b><small>${escapeHtml(a.description||'')}${meta?' · '+escapeHtml(meta):''}</small></div>
-   <div class="full-action-meta">${a.due_at?`Due ${escapeHtml(formatDate(a.due_at))}`:escapeHtml(formatDate(a.created_at))}</div>
+   <div class="full-action-meta">${a.due_at?`${a.status==='Overdue'?'Overdue':'Due'} ${escapeHtml(formatDate(a.due_at))}`:escapeHtml(formatDate(a.created_at))}</div>
    <span class="full-action-status">${escapeHtml(a.status||'Open')}</span>
    <span class="full-action-go">›</span>
   </div>`;
@@ -890,6 +890,9 @@ function openActionDetail(index){
    document.getElementById('publicationPdf').value='';
    document.getElementById('publicationEffectiveDate').value='';
    document.getElementById('publicationReviewDate').value='';
+
+   document.getElementById('publicationEffectiveDate').onchange=
+    setDefaultPublicationReviewDate;
 
    const publicationMessage=document.getElementById('publicationMessage');
    publicationMessage.textContent='';
@@ -1258,6 +1261,32 @@ async function withdrawControlledDocument(){
  }
 }
 
+function setDefaultPublicationReviewDate(){
+ const effective=document.getElementById('publicationEffectiveDate');
+ const review=document.getElementById('publicationReviewDate');
+
+ if(!effective||!review||!effective.value)return;
+
+ const parts=effective.value.split('-').map(Number);
+ if(parts.length!==3)return;
+
+ const [year,month,day]=parts;
+
+ // Same calendar date next year where possible.
+ const target=new Date(year+1,month-1,day);
+
+ // Handle dates such as 29 February cleanly.
+ if(target.getMonth()!==month-1){
+  target.setDate(0);
+ }
+
+ const yyyy=target.getFullYear();
+ const mm=String(target.getMonth()+1).padStart(2,'0');
+ const dd=String(target.getDate()).padStart(2,'0');
+
+ review.value=`${yyyy}-${mm}-${dd}`;
+}
+
 async function publishControlledDocument(){
  const action=currentAction;
  const token=localStorage.getItem(TOKEN_KEY);
@@ -1289,6 +1318,19 @@ async function publishControlledDocument(){
 
  if(!effectiveDate){
   showPublicationMessage('Select the Effective Date.','error');
+  return;
+ }
+
+ if(!reviewDate){
+  showPublicationMessage('Select the Next Review Date.','error');
+  return;
+ }
+
+ if(reviewDate<=effectiveDate){
+  showPublicationMessage(
+   'Next Review Date must be after the Effective Date.',
+   'error'
+  );
   return;
  }
 
