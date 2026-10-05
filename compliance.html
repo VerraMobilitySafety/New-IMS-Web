@@ -1058,158 +1058,11 @@ button,input,select,textarea{font-family:inherit}
    </thead>
 
    <tbody id="registerBody">
-
-    <tr
-     data-type="Client"
-     data-applicability="Project"
-     data-status="Not Assessed"
-     onclick="openObligation(1)"
-    >
-     <td class="code">TEST-CLI-001</td>
-     <td>
-      <div class="row-title">
-       Monthly Client Performance Report
-      </div>
-      <div class="row-meta">
-       Monthly reporting requirement
-      </div>
+    <tr id="complianceLoadingRow">
+     <td colspan="7" style="padding:28px;text-align:center;color:#857874;">
+      Loading compliance obligations...
      </td>
-     <td>
-      <span class="pill client">Client</span>
-     </td>
-     <td>BigMac Contract</td>
-     <td>
-      <b>Project</b>
-      <div class="row-meta">
-       Project 7 (External) - BigMac
-      </div>
-     </td>
-     <td>
-      <span class="pill pending">Not Assessed</span>
-     </td>
-     <td>—</td>
     </tr>
-
-    <tr
-     data-type="Client"
-     data-applicability="Maintenance"
-     data-status="Not Assessed"
-     onclick="openObligation(2)"
-    >
-     <td class="code">TEST-CLI-002</td>
-     <td>
-      <div class="row-title">
-       Preventive Maintenance Completion
-      </div>
-      <div class="row-meta">
-       Monthly maintenance obligation
-      </div>
-     </td>
-     <td>
-      <span class="pill client">Client</span>
-     </td>
-     <td>BigMac Maintenance Contract</td>
-     <td>
-      <b>Maintenance</b>
-      <div class="row-meta">
-       BigMac - Maintenance / BAU
-      </div>
-     </td>
-     <td>
-      <span class="pill pending">Not Assessed</span>
-     </td>
-     <td>—</td>
-    </tr>
-
-    <tr
-     data-type="Regulatory"
-     data-applicability="Jurisdiction"
-     data-status="Not Assessed"
-     onclick="openObligation(3)"
-    >
-     <td class="code">TEST-REG-001</td>
-     <td>
-      <div class="row-title">
-       Provide and Maintain a Safe Working Environment
-      </div>
-      <div class="row-meta">
-       Victorian regulatory obligation
-      </div>
-     </td>
-     <td>
-      <span class="pill regulatory">Regulatory</span>
-     </td>
-     <td>Occupational Health and Safety Act 2004 (Vic)</td>
-     <td>
-      <b>Jurisdiction</b>
-      <div class="row-meta">Victoria</div>
-     </td>
-     <td>
-      <span class="pill pending">Not Assessed</span>
-     </td>
-     <td>—</td>
-    </tr>
-
-    <tr
-     data-type="Internal"
-     data-applicability="Organisation"
-     data-status="Compliant"
-     onclick="openObligation(4)"
-    >
-     <td class="code">TEST-INT-001</td>
-     <td>
-      <div class="row-title">
-       Periodic Review of Operational Risks
-      </div>
-      <div class="row-meta">
-       Quarterly internal governance requirement
-      </div>
-     </td>
-     <td>
-      <span class="pill internal">Internal</span>
-     </td>
-     <td>Integrated Management System</td>
-     <td>
-      <b>Organisation</b>
-      <div class="row-meta">Verra Mobility</div>
-     </td>
-     <td>
-      <span class="pill compliant">Compliant</span>
-     </td>
-     <td>6 Jan 2027</td>
-    </tr>
-
-    <tr
-     data-type="Client"
-     data-applicability="Maintenance"
-     data-status="Not Assessed"
-     onclick="openObligation(5)"
-    >
-     <td class="code">TEST-CLI-003</td>
-     <td>
-      <div class="row-title">
-       Annual Field Technician Competency Training
-      </div>
-      <div class="row-meta">
-       Approved through Compliance Controller
-      </div>
-     </td>
-     <td>
-      <span class="pill client">Client</span>
-     </td>
-     <td>Test Client Correspondence</td>
-     <td>
-      <b>Maintenance</b>
-      <div class="row-meta">
-       BigMac - Maintenance / BAU
-      </div>
-     </td>
-     <td>
-      <span class="pill pending">Not Assessed</span>
-     </td>
-     <td>—</td>
-    </tr>
-
    </tbody>
   </table>
 
@@ -2705,6 +2558,18 @@ async function loadComplianceRegister(){
    'Unable to load compliance register',
    error
   );
+
+  const body=document.getElementById('registerBody');
+
+  if(body){
+   body.innerHTML=`
+    <tr>
+     <td colspan="7"
+         style="padding:28px;text-align:center;color:#857874;">
+      Unable to load compliance obligations.
+     </td>
+    </tr>`;
+  }
  }
 }
 
