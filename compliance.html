@@ -2759,3 +2759,231 @@ document.addEventListener(
  loadComplianceRegister
 );
 </script>
+
+<script>
+/* LIVE COMPLIANCE OBLIGATION DETAIL */
+
+async function openLiveObligation(id){
+
+ try{
+
+  const modal=document.getElementById('obligationModal');
+
+  document.getElementById('obligationCode').textContent=
+   'LOADING';
+
+  document.getElementById('obligationTitle').textContent=
+   'Loading obligation...';
+
+  modal.classList.add('show');
+
+  const response=await fetch(
+   COMPLIANCE_API+'/compliance/obligations/'+id,
+   {
+    headers:complianceAuthHeaders(),
+    cache:'no-store'
+   }
+  );
+
+  if(response.status===401){
+   location.replace(
+    'login.html?return=compliance.html'
+   );
+   return;
+  }
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to load compliance obligation.'
+   );
+  }
+
+  const o=data.obligation;
+  const apps=data.applicability||[];
+  const controls=data.controls||[];
+  const assessments=data.assessments||[];
+  const evidence=data.evidence||[];
+  const actions=data.actions||[];
+
+  document.getElementById('obligationCode').textContent=
+   o.obligation_code||'OBLIGATION';
+
+  document.getElementById('obligationTitle').textContent=
+   o.obligation_title||'Compliance Obligation';
+
+  document.getElementById('obligationSubtitle').textContent=
+   (o.compliance_type||'Compliance')+
+   ' compliance obligation';
+
+  document.getElementById('detailType').textContent=
+   o.compliance_type||'—';
+
+  document.getElementById('detailStatus').textContent=
+   assessments.length
+   ? assessments[0].assessment_status
+   : 'Not Assessed';
+
+  document.getElementById('detailSource').textContent=
+   o.source_name||'—';
+
+  document.getElementById('detailReference').textContent=
+   o.source_reference||'—';
+
+  document.getElementById('detailApplicability').textContent=
+   apps.length
+   ? apps.map(a=>
+      a.type+' — '+(a.name||'')
+     ).join('; ')
+   : '—';
+
+  document.getElementById('detailFrequency').textContent=
+   o.obligation_frequency||'—';
+
+  document.getElementById('detailDescription').textContent=
+   o.description||'No description recorded.';
+
+
+  /* CONTROLS */
+
+  document.getElementById('detailControl').innerHTML=
+   controls.length
+   ? controls.map(c=>
+      `${c.control_code||''} — ${c.control_title}
+       <br>
+       <small>
+        ${c.relationship_type} ·
+        ${c.control_type} ·
+        ${c.status}
+       </small>`
+     ).join('<br><br>')
+   : 'No controls linked.';
+
+
+  /* ASSESSMENTS */
+
+  const timeline=
+   document.getElementById('assessmentTimeline');
+
+  if(!assessments.length){
+
+   timeline.innerHTML=
+    `<div class="event">
+      <b>Not yet assessed</b>
+      <small>
+       No assessment history is currently recorded.
+      </small>
+     </div>`;
+
+  }else{
+
+   timeline.innerHTML=
+    assessments.map(a=>
+     `<div class="event">
+       <b>
+        ${formatComplianceDate(a.assessment_date)}
+        — ${a.assessment_status}
+       </b>
+
+       <small>
+        ${a.assessed_by
+          ? 'Assessed by '+a.assessed_by+'. '
+          : ''
+        }
+        ${a.rationale||''}
+       </small>
+
+       ${
+        a.gaps_identified
+        ? `<small>
+            <strong>Gap:</strong>
+            ${a.gaps_identified}
+           </small>`
+        : ''
+       }
+      </div>`
+    ).join('');
+  }
+
+
+  /* EVIDENCE */
+
+  const evidenceDetail=
+   document.getElementById('evidenceDetail');
+
+  if(!evidence.length){
+
+   evidenceDetail.innerHTML=
+    '<strong>No evidence recorded.</strong>';
+
+  }else{
+
+   evidenceDetail.innerHTML=
+    evidence.map(e=>
+     `<div style="margin-bottom:10px">
+       <strong>${e.evidence_title}</strong>
+       <div class="row-meta">
+        ${e.evidence_type}
+        ${e.evidence_date
+          ? ' · '+formatComplianceDate(e.evidence_date)
+          : ''
+        }
+        · ${e.verified ? 'Verified' : 'Not Verified'}
+        ${e.verified_by
+          ? ' by '+e.verified_by
+          : ''
+        }
+       </div>
+      </div>`
+    ).join('');
+  }
+
+
+  /* ACTIONS */
+
+  const actionDetail=
+   document.getElementById('actionDetail');
+
+  if(!actions.length){
+
+   actionDetail.innerHTML=
+    '<strong>No compliance actions recorded.</strong>';
+
+  }else{
+
+   actionDetail.innerHTML=
+    actions.map(a=>
+     `<div style="margin-bottom:10px">
+       <strong>${a.action_title}</strong>
+       <div class="row-meta">
+        ${a.priority} · ${a.status}
+        ${a.owner_name
+          ? ' · '+a.owner_name
+          : ''
+        }
+        ${a.due_date
+          ? ' · Due '+formatComplianceDate(a.due_date)
+          : ''
+        }
+       </div>
+      </div>`
+    ).join('');
+  }
+
+ }catch(error){
+
+  console.error(
+   'Unable to load compliance obligation',
+   error
+  );
+
+  document.getElementById('obligationCode').textContent=
+   'ERROR';
+
+  document.getElementById('obligationTitle').textContent=
+   'Unable to load obligation';
+ }
+}
+</script>
