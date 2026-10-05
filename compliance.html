@@ -2274,3 +2274,24 @@ document.addEventListener('keydown',e=>{
 
 </body>
 </html>
+
+<style>
+/* MODAL VISIBILITY FIX */
+.modal-back{
+ display:none !important;
+ position:fixed !important;
+ inset:0 !important;
+ z-index:1000 !important;
+ background:rgba(35,32,29,.50) !important;
+}
+
+.modal-back.show{
+ display:flex !important;
+ justify-content:flex-end !important;
+}
+
+.modal-back .drawer{
+ height:100vh !important;
+ position:relative !important;
+}
+</style>
