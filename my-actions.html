@@ -1871,3 +1871,136 @@ document.addEventListener('DOMContentLoaded',()=>{
  line-height:1.45 !important;
 }
 </style>
+
+<script>
+/* COMPLIANCE ACTIVITY RECORD COMPLETION */
+
+function selectComplianceRecordMethod(method){
+
+ document.querySelectorAll('.compliance-record-methods button')
+  .forEach(b=>b.classList.remove('active'));
+
+ const content=document.getElementById('complianceRecordMethodContent');
+
+ if(method==='system'){
+
+  event.currentTarget.classList.add('active');
+
+  content.innerHTML=`
+   <div class="form-note">
+    New IMS will create the required compliance record automatically
+    and link it to this activity occurrence.
+   </div>
+
+   <button
+    type="button"
+    class="action-btn-approve"
+    onclick="completeComplianceWithSystemRecord()"
+    style="width:auto;padding:10px 14px"
+   >
+    Complete Activity & Create Record
+   </button>
+  `;
+
+  return;
+ }
+
+ if(method==='existing'){
+
+  event.currentTarget.classList.add('active');
+
+  content.innerHTML=`
+   <div class="form-note">
+    Existing Records Register search will be connected next.
+   </div>
+  `;
+
+  return;
+ }
+
+ if(method==='upload'){
+
+  event.currentTarget.classList.add('active');
+
+  content.innerHTML=`
+   <div class="form-note">
+    Record upload will be connected to secure Blob Storage next.
+   </div>
+  `;
+ }
+}
+
+
+async function completeComplianceWithSystemRecord(){
+
+ if(!currentAction || currentAction.action_type!=='Compliance Activity'){
+  alert('Compliance activity is not loaded.');
+  return;
+ }
+
+ const notes=document.getElementById('complianceActivityNotes')
+  .value.trim();
+
+ if(!confirm(
+  'Complete this compliance activity and create the required record?'
+ )){
+  return;
+ }
+
+ const message=document.getElementById('complianceActivityMessage');
+
+ message.textContent='Creating record and completing activity...';
+ message.className='action-decision-message';
+
+ try{
+
+  const response=await fetch(
+   API+
+   '/compliance/activities/'+
+   currentAction.occurrence_id+
+   '/complete',
+   {
+    method:'POST',
+    headers:{
+     'Authorization':'Bearer '+localStorage.getItem('vero_session_token'),
+     'Accept':'application/json',
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     record_method:'System Generated',
+     completion_notes:notes
+    })
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to complete compliance activity.'
+   );
+  }
+
+  message.textContent=
+   `Activity completed. ${data.record.record_code} created successfully.`;
+
+  message.className='action-decision-message success';
+
+  setTimeout(()=>{
+   closeActionDetail();
+   loadActions();
+  },1200);
+
+ }catch(error){
+
+  console.error(
+   'Compliance activity completion failed',
+   error
+  );
+
+  message.textContent=error.message;
+  message.className='action-decision-message error';
+ }
+}
+</script>
