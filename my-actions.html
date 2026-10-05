@@ -337,7 +337,7 @@
        <option value="">Select outcome…</option>
        <option value="No Change Required">No Change Required</option>
        <option value="Revision Required" disabled>Revision Required — coming next</option>
-       <option value="Withdrawal Required" disabled>Withdrawal Required — coming next</option>
+       <option value="Withdrawal Required">Withdrawal Required</option>
       </select>
      </div>
 
@@ -1121,10 +1121,12 @@ async function completeDocumentReview(){
    throw new Error(d.message||'Unable to complete document review');
   }
 
-  showReviewMessage(
-   `Review completed. Next review: ${formatActionDate(d.review?.next_review_date)}.`,
-   'success'
-  );
+  const successText=
+   outcome==='Withdrawal Required'
+    ? `Review completed. Withdrawal Request #${d.review?.resulting_document_request_id||'—'} submitted to Document Control.`
+    : `Review completed. Next review: ${formatActionDate(d.review?.next_review_date)}.`;
+
+  showReviewMessage(successText,'success');
 
   setTimeout(()=>{
    closeActionDetail();
