@@ -336,7 +336,7 @@
       <select id="reviewOutcome" onchange="updateDocumentReviewOutcome()" style="width:100%;box-sizing:border-box;border:1px solid #d8d4d1;border-radius:7px;padding:10px;background:#fff">
        <option value="">Select outcome…</option>
        <option value="No Change Required">No Change Required</option>
-       <option value="Revision Required" disabled>Revision Required — coming next</option>
+       <option value="Revision Required">Revision Required</option>
        <option value="Withdrawal Required">Withdrawal Required</option>
       </select>
      </div>
@@ -344,6 +344,19 @@
      <div class="action-detail-field" style="margin-bottom:12px">
       <label for="reviewNotes">Review Notes *</label>
       <textarea id="reviewNotes" placeholder="Record the review outcome and any relevant observations…" style="width:100%;box-sizing:border-box;min-height:95px;border:1px solid #d8d4d1;border-radius:7px;padding:10px;background:#fff;font:500 11px Montserrat,Verdana,Arial,sans-serif"></textarea>
+     </div>
+
+     <div id="reviewRevisionDraftField" class="action-detail-field" style="display:none;margin-bottom:12px">
+      <label for="reviewRevisionDraft">Revised Word Draft (.docx) *</label>
+      <input
+       id="reviewRevisionDraft"
+       type="file"
+       accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+       style="width:100%;box-sizing:border-box;margin-top:5px"
+      >
+      <small style="display:block;margin-top:6px;color:var(--grey)">
+       Upload the revised draft that will enter Document Control review.
+      </small>
      </div>
 
      <div id="reviewNextDateField" class="action-detail-field" style="display:none;margin-bottom:12px">
@@ -809,6 +822,8 @@ function openActionDetail(index){
    document.getElementById('reviewNotes').value='';
    document.getElementById('reviewNextDate').value='';
    document.getElementById('reviewNextDateField').style.display='none';
+   document.getElementById('reviewRevisionDraft').value='';
+   document.getElementById('reviewRevisionDraftField').style.display='none';
 
    const reviewMessage=document.getElementById('documentReviewMessage');
    reviewMessage.textContent='';
@@ -1054,12 +1069,20 @@ async function sendActionDecision(decision,notes){
 function updateDocumentReviewOutcome(){
  const outcome=document.getElementById('reviewOutcome').value;
  const nextDateField=document.getElementById('reviewNextDateField');
+ const revisionDraftField=document.getElementById('reviewRevisionDraftField');
 
  nextDateField.style.display=
   outcome==='No Change Required' ? 'block' : 'none';
 
+ revisionDraftField.style.display=
+  outcome==='Revision Required' ? 'block' : 'none';
+
  if(outcome!=='No Change Required'){
   document.getElementById('reviewNextDate').value='';
+ }
+
+ if(outcome!=='Revision Required'){
+  document.getElementById('reviewRevisionDraft').value='';
  }
 }
 
@@ -1069,6 +1092,7 @@ async function completeDocumentReview(){
  const outcome=document.getElementById('reviewOutcome').value;
  const notes=document.getElementById('reviewNotes').value.trim();
  const nextReviewDate=document.getElementById('reviewNextDate').value;
+ const revisionDraft=document.getElementById('reviewRevisionDraft').files[0];
  const message=document.getElementById('documentReviewMessage');
  const button=document.getElementById('completeDocumentReviewButton');
 
@@ -1094,24 +1118,41 @@ async function completeDocumentReview(){
   return;
  }
 
+ if(outcome==='Revision Required'&&!revisionDraft){
+  showReviewMessage('Upload the revised Word draft.','error');
+  return;
+ }
+
+ if(
+  outcome==='Revision Required' &&
+  !revisionDraft.name.toLowerCase().endsWith('.docx')
+ ){
+  showReviewMessage('The revised draft must be a .docx Word document.','error');
+  return;
+ }
+
  button.disabled=true;
  showReviewMessage('Completing document review…','success');
 
  try{
+  const form=new FormData();
+  form.append('outcome',outcome);
+  form.append('review_notes',notes);
+  form.append('next_review_date',nextReviewDate);
+
+  if(outcome==='Revision Required'&&revisionDraft){
+   form.append('file',revisionDraft);
+  }
+
   const r=await fetch(
    `${API}/documents/${encodeURIComponent(action.source_id)}/review`,
    {
     method:'POST',
     headers:{
      Authorization:'Bearer '+token,
-     'Content-Type':'application/json',
      Accept:'application/json'
     },
-    body:JSON.stringify({
-     outcome,
-     review_notes:notes,
-     next_review_date:nextReviewDate
-    })
+    body:form
    }
   );
 
@@ -1124,7 +1165,9 @@ async function completeDocumentReview(){
   const successText=
    outcome==='Withdrawal Required'
     ? `Review completed. Withdrawal Request #${d.review?.resulting_document_request_id||'—'} submitted to Document Control.`
-    : `Review completed. Next review: ${formatActionDate(d.review?.next_review_date)}.`;
+    : outcome==='Revision Required'
+     ? `Review completed. Revision Request #${d.review?.resulting_document_request_id||'—'} submitted to Document Control.`
+     : `Review completed. Next review: ${formatActionDate(d.review?.next_review_date)}.`;
 
   showReviewMessage(successText,'success');
 
