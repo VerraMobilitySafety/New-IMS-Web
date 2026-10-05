@@ -315,6 +315,59 @@
    <div class="action-detail-section"><h3>Additional information</h3><div class="detail-copy" id="actionDetailAdditional">—</div></div>
    <div class="action-draft-card" id="actionDraftCard"><div class="action-draft-icon">📄</div><div class="action-draft-info"><label>Completed Word Draft</label><strong id="actionDraftName">—</strong><small id="actionDraftMeta"></small></div><button class="action-draft-open" id="actionDraftOpen" type="button" onclick="openDocumentDraft()">Open Draft Document</button></div>
 
+   <div id="documentReviewPanel" style="display:none;margin-top:20px">
+    <div class="action-detail-section">
+     <h3>Document Review</h3>
+
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="action-detail-field">
+       <label>Current Version</label>
+       <strong id="reviewCurrentVersion">—</strong>
+      </div>
+
+      <div class="action-detail-field">
+       <label>Review Due</label>
+       <strong id="reviewDueDate">—</strong>
+      </div>
+     </div>
+
+     <div class="action-detail-field" style="margin-bottom:12px">
+      <label for="reviewOutcome">Review Outcome *</label>
+      <select id="reviewOutcome" onchange="updateDocumentReviewOutcome()" style="width:100%;box-sizing:border-box;border:1px solid #d8d4d1;border-radius:7px;padding:10px;background:#fff">
+       <option value="">Select outcome…</option>
+       <option value="No Change Required">No Change Required</option>
+       <option value="Revision Required" disabled>Revision Required — coming next</option>
+       <option value="Withdrawal Required" disabled>Withdrawal Required — coming next</option>
+      </select>
+     </div>
+
+     <div class="action-detail-field" style="margin-bottom:12px">
+      <label for="reviewNotes">Review Notes *</label>
+      <textarea id="reviewNotes" placeholder="Record the review outcome and any relevant observations…" style="width:100%;box-sizing:border-box;min-height:95px;border:1px solid #d8d4d1;border-radius:7px;padding:10px;background:#fff;font:500 11px Montserrat,Verdana,Arial,sans-serif"></textarea>
+     </div>
+
+     <div id="reviewNextDateField" class="action-detail-field" style="display:none;margin-bottom:12px">
+      <label for="reviewNextDate">Next Review Date *</label>
+      <input id="reviewNextDate" type="date" style="width:100%;box-sizing:border-box;border:1px solid #d8d4d1;border-radius:7px;padding:10px;background:#fff">
+     </div>
+
+     <button
+      class="action-btn-approve"
+      id="completeDocumentReviewButton"
+      type="button"
+      onclick="completeDocumentReview()"
+     >
+      Complete Review
+     </button>
+
+     <div
+      class="action-decision-message"
+      id="documentReviewMessage"
+      style="margin-top:10px"
+     ></div>
+    </div>
+   </div>
+
    <div id="newDocumentGovernance" style="display:none;margin-top:20px">
     <div class="action-detail-section">
      <h3>Document Control</h3>
@@ -568,6 +621,11 @@ function openActionDetail(index){
  const isDocumentApproval=
   action.source==='Documents' &&
   action.action_type==='Document Approval';
+
+ const isDocumentReview=
+  action.source==='Documents' &&
+  action.action_type==='Document Review';
+
  const isProject=action.source==='Projects';
  const requestType=action.request_type||'New Document';
 
@@ -586,12 +644,18 @@ function openActionDetail(index){
  };
 
  document.getElementById('actionDetailKicker').textContent=
-  isDocumentRequest?'DOCUMENT CONTROL':(action.source||'MY ACTION');
+  isDocumentReview
+   ? 'DOCUMENT REVIEW'
+   : isDocumentRequest
+    ? 'DOCUMENT CONTROL'
+    : (action.source||'MY ACTION');
 
  document.getElementById('actionDetailTitle').textContent=
-  isDocumentRequest
-   ? `${requestLabels[requestType]||requestType}: ${action.document_title||action.description||action.title||'Document'}`
-   : (action.description||action.title||'Action');
+  isDocumentReview
+   ? `${action.document_number||'Document'} ${action.document_title||action.description||''}`.trim()
+   : isDocumentRequest
+    ? `${requestLabels[requestType]||requestType}: ${action.document_title||action.description||action.title||'Document'}`
+    : (action.description||action.title||'Action');
 
  document.getElementById('actionDetailSubtitle').textContent=
   isDocumentRequest
@@ -612,6 +676,23 @@ function openActionDetail(index){
 
   document.getElementById('actionDetailReason').textContent=action.next_step||action.title||'—';
   document.getElementById('actionDetailAdditional').textContent='Continue this action in the Project Workspace.';
+
+ }else if(isDocumentReview){
+
+  document.getElementById('actionDetailGrid').innerHTML=[
+   actionField('Document reference',action.document_number),
+   actionField('Current version',`v${action.current_version||'—'}`),
+   actionField('Document type',action.document_type),
+   actionField('Document owner',action.document_owner),
+   actionField('Effective date',formatActionDate(action.effective_date)),
+   actionField('Review due',formatActionDate(action.review_date))
+  ].join('');
+
+  document.getElementById('actionDetailReason').textContent=
+   'Confirm whether the current controlled document remains suitable and effective.';
+
+  document.getElementById('actionDetailAdditional').textContent=
+   'Record the outcome of the review below.';
 
  }else if(isDocumentRequest){
 
@@ -706,10 +787,36 @@ function openActionDetail(index){
 
  decisionActions.style.display=
   isDocumentRequest &&
+  !isDocumentReview &&
   !isPublicationStage &&
   !isWithdrawalStage
    ? 'block'
    : 'none';
+
+ const reviewPanel=document.getElementById('documentReviewPanel');
+
+ if(reviewPanel){
+  reviewPanel.style.display=isDocumentReview ? 'block' : 'none';
+
+  if(isDocumentReview){
+   document.getElementById('reviewCurrentVersion').textContent=
+    `v${action.current_version||'—'}`;
+
+   document.getElementById('reviewDueDate').textContent=
+    formatActionDate(action.review_date);
+
+   document.getElementById('reviewOutcome').value='';
+   document.getElementById('reviewNotes').value='';
+   document.getElementById('reviewNextDate').value='';
+   document.getElementById('reviewNextDateField').style.display='none';
+
+   const reviewMessage=document.getElementById('documentReviewMessage');
+   reviewMessage.textContent='';
+   reviewMessage.className='action-decision-message';
+
+   document.getElementById('completeDocumentReviewButton').disabled=false;
+  }
+ }
 
  const withdrawalPanel=document.getElementById('documentWithdrawalPanel');
 
@@ -944,6 +1051,95 @@ async function sendActionDecision(decision,notes){
   setTimeout(()=>{closeActionDetail();loadActions();},700);
  }catch(e){showDecisionMessage(e.message||'Unable to process decision.','error');buttons.forEach(b=>b.disabled=false);}
 }
+function updateDocumentReviewOutcome(){
+ const outcome=document.getElementById('reviewOutcome').value;
+ const nextDateField=document.getElementById('reviewNextDateField');
+
+ nextDateField.style.display=
+  outcome==='No Change Required' ? 'block' : 'none';
+
+ if(outcome!=='No Change Required'){
+  document.getElementById('reviewNextDate').value='';
+ }
+}
+
+async function completeDocumentReview(){
+ const action=currentAction;
+ const token=localStorage.getItem(TOKEN_KEY);
+ const outcome=document.getElementById('reviewOutcome').value;
+ const notes=document.getElementById('reviewNotes').value.trim();
+ const nextReviewDate=document.getElementById('reviewNextDate').value;
+ const message=document.getElementById('documentReviewMessage');
+ const button=document.getElementById('completeDocumentReviewButton');
+
+ if(!action||!action.source_id||!token)return;
+
+ const showReviewMessage=(text,type)=>{
+  message.textContent=text;
+  message.className='action-decision-message show '+type;
+ };
+
+ if(!outcome){
+  showReviewMessage('Select the Review Outcome.','error');
+  return;
+ }
+
+ if(!notes){
+  showReviewMessage('Enter Review Notes.','error');
+  return;
+ }
+
+ if(outcome==='No Change Required'&&!nextReviewDate){
+  showReviewMessage('Select the Next Review Date.','error');
+  return;
+ }
+
+ button.disabled=true;
+ showReviewMessage('Completing document review…','success');
+
+ try{
+  const r=await fetch(
+   `${API}/documents/${encodeURIComponent(action.source_id)}/review`,
+   {
+    method:'POST',
+    headers:{
+     Authorization:'Bearer '+token,
+     'Content-Type':'application/json',
+     Accept:'application/json'
+    },
+    body:JSON.stringify({
+     outcome,
+     review_notes:notes,
+     next_review_date:nextReviewDate
+    })
+   }
+  );
+
+  const d=await r.json().catch(()=>({}));
+
+  if(!r.ok){
+   throw new Error(d.message||'Unable to complete document review');
+  }
+
+  showReviewMessage(
+   `Review completed. Next review: ${formatActionDate(d.review?.next_review_date)}.`,
+   'success'
+  );
+
+  setTimeout(()=>{
+   closeActionDetail();
+   loadActions();
+  },900);
+
+ }catch(e){
+  showReviewMessage(
+   e.message||'Unable to complete document review.',
+   'error'
+  );
+  button.disabled=false;
+ }
+}
+
 async function withdrawControlledDocument(){
  const action=currentAction;
  const token=localStorage.getItem(TOKEN_KEY);
