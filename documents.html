@@ -261,8 +261,21 @@
   <div class="section"><h3>Purpose</h3><p id="dPurpose" style="font-size:13px;color:#625d59"></p></div>
   <div class="section"><h3>What changed?</h3><div style="background:#f2f5e8;padding:13px;border-radius:8px;font-size:13px"><span id="dChangeSummary">No change summary recorded.</span></div></div>
   <div class="section"><h3>Governance</h3><div class="detail-grid"><div class="detail"><label>Approval</label><strong>✓ Approved and controlled</strong></div><div class="detail"><label>Reviewers</label><strong>Authorised governance view</strong></div></div></div>
-  <div class="drawer-actions"><button class="btn green" onclick="openSelectedDocument()">View Controlled Document</button><button class="btn outline" onclick="alert('Review workflow will open here.')">View History</button></div>
-  <div class="section"><h3>Version history</h3><div class="timeline"><div class="event"><b>v4.0 — Current</b><small>Published 16 Sep 2026</small></div><div class="event"><b>v3.1 — Superseded</b><small>Published 03 Feb 2026</small></div><div class="event"><b>v3.0 — Superseded</b><small>Published 01 Jul 2025</small></div></div></div>
+  <div class="drawer-actions"><button class="btn green" onclick="openSelectedDocument()">View Controlled Document</button><button class="btn outline" id="historyToggleButton" onclick="toggleDocumentHistory()">View History</button></div>
+
+  <div class="section">
+   <h3>Version history</h3>
+   <div class="timeline" id="documentVersionHistory">
+    <div class="event"><small>Loading version history…</small></div>
+   </div>
+  </div>
+
+  <div class="section" id="documentGovernanceHistorySection" style="display:none">
+   <h3>Governance history</h3>
+   <div class="timeline" id="documentGovernanceHistory">
+    <div class="event"><small>Loading governance history…</small></div>
+   </div>
+  </div>
  </div>
 </div></div>
 
@@ -408,8 +421,124 @@ function openDocById(id){
  document.getElementById('dEffective').textContent=fmtDate(d.effectiveDate);
  document.getElementById('dChangeSummary').textContent=d.changeSummary||'No change summary recorded.';
  document.getElementById('dPurpose').textContent=d.purpose;
+
+ document.getElementById('documentVersionHistory').innerHTML=
+  '<div class="event"><small>Loading version history…</small></div>';
+
+ document.getElementById('documentGovernanceHistory').innerHTML=
+  '<div class="event"><small>Loading governance history…</small></div>';
+
+ document.getElementById('documentGovernanceHistorySection').style.display='none';
+ document.getElementById('historyToggleButton').textContent='View History';
+
  document.getElementById('drawerBack').classList.add('show');
+ loadDocumentHistory(d.id);
 }
+function formatHistoryDate(value){
+ if(!value)return '—';
+ const d=new Date(value);
+ if(Number.isNaN(d.getTime()))return value;
+ return d.toLocaleDateString('en-AU',{
+  day:'2-digit',
+  month:'short',
+  year:'numeric'
+ });
+}
+
+async function loadDocumentHistory(documentId){
+ const versionEl=document.getElementById('documentVersionHistory');
+ const governanceEl=document.getElementById('documentGovernanceHistory');
+
+ try{
+  const response=await fetch(
+   `${API_BASE}/documents/${encodeURIComponent(documentId)}/history`,
+   {
+    headers:authHeaders({Accept:'application/json'}),
+    cache:'no-store'
+   }
+  );
+
+  if(response.status===401){
+   location.replace(
+    'login.html?return='+
+    encodeURIComponent(location.pathname.split('/').pop()||'documents.html')
+   );
+   return;
+  }
+
+  const data=await response.json().catch(()=>({}));
+
+  if(!response.ok){
+   throw new Error(data.message||`History API returned ${response.status}`);
+  }
+
+  const versions=Array.isArray(data.versions)?data.versions:[];
+  const history=Array.isArray(data.governance_history)
+   ? data.governance_history
+   : [];
+
+  if(versions.length){
+   versionEl.innerHTML=versions.map(v=>{
+    const revision=v.revision_type
+     ? ` · ${esc(v.revision_type)} revision`
+     : '';
+
+    return `<div class="event">
+     <b>v${esc(v.version_number||'—')} — ${esc(v.status||'—')}</b>
+     <small>${esc(v.request_type||'Controlled document')}${revision} · Published ${esc(formatHistoryDate(v.created_at))}${v.published_by?' · '+esc(v.published_by):''}</small>
+    </div>`;
+   }).join('');
+  }else{
+   versionEl.innerHTML=
+    '<div class="event"><small>No version history is available.</small></div>';
+  }
+
+  if(history.length){
+   governanceEl.innerHTML=history.map(h=>{
+    const transition=[
+     h.from_status,
+     h.to_status
+    ].filter(Boolean).join(' → ');
+
+    const meta=[
+     formatHistoryDate(h.performed_at),
+     h.performed_by,
+     transition
+    ].filter(Boolean).join(' · ');
+
+    return `<div class="event">
+     <b>${esc(h.action||'Document action')}</b>
+     <small>${esc(meta||'—')}</small>
+     ${h.notes?`<small>${esc(h.notes)}</small>`:''}
+    </div>`;
+   }).join('');
+  }else{
+   governanceEl.innerHTML=
+    '<div class="event"><small>No governance history is available.</small></div>';
+  }
+
+ }catch(err){
+  console.error('Unable to load controlled document history',err);
+
+  versionEl.innerHTML=
+   '<div class="event"><small>Unable to load version history.</small></div>';
+
+  governanceEl.innerHTML=
+   '<div class="event"><small>Unable to load governance history.</small></div>';
+ }
+}
+
+function toggleDocumentHistory(){
+ const section=document.getElementById('documentGovernanceHistorySection');
+ const button=document.getElementById('historyToggleButton');
+
+ if(!section||!button)return;
+
+ const opening=section.style.display==='none';
+ section.style.display=opening?'block':'none';
+ button.textContent=opening?'Hide History':'View History';
+}
+
 function renderDocuments(){
  const body=document.getElementById('documentsBody');
  if(!liveDocuments.length){body.innerHTML='<tr><td colspan="6" class="empty">No Governance documents are currently registered in VERO.</td></tr>';return;}
