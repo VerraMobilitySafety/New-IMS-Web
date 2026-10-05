@@ -2806,3 +2806,87 @@ async function openLiveObligation(id){
  }
 }
 </script>
+
+<script>
+/* OPEN COMPLIANCE CONTROLLER REVIEW FROM MY ACTIONS */
+
+async function openComplianceRequestFromAction(requestId){
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+'/compliance/requests/'+requestId,
+   {
+    headers:complianceAuthHeaders(),
+    cache:'no-store'
+   }
+  );
+
+  if(response.status===401){
+   location.replace('login.html?return='+encodeURIComponent(location.href));
+   return;
+  }
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(data.message||'Unable to load compliance request.');
+  }
+
+  const request=data.request;
+  const item=(data.items||[])[0];
+
+  if(!item){
+   throw new Error('No compliance requirement was found in this request.');
+  }
+
+  document.querySelector('#controllerModal .drawer-head p').textContent=
+   `${request.request_code} · ${request.submission_type} · Submitted by ${request.submitted_by}`;
+
+  document.querySelector('#controllerModal .drawer-head h2').textContent=
+   item.proposed_title||request.request_title;
+
+  const details=document.querySelectorAll('#controllerModal .detail-grid .detail strong');
+
+  if(details[0]) details[0].textContent=item.proposed_compliance_type||'—';
+  if(details[1]) details[1].textContent=item.proposed_applicability_type||'—';
+  if(details[2]) details[2].textContent=item.proposed_source_name||'—';
+  if(details[3]) details[3].textContent=item.proposed_frequency||'—';
+
+  const sections=document.querySelectorAll('#controllerModal .section');
+
+  if(sections[0]){
+   const strong=sections[0].querySelector('strong');
+   const para=sections[0].querySelector('p');
+
+   if(strong)strong.textContent=item.proposed_title||'—';
+   if(para)para.textContent=item.proposed_description||'No description provided.';
+  }
+
+  if(sections[1]){
+   const strong=sections[1].querySelector('strong');
+   if(strong)strong.textContent=item.proposed_evidence_required||'Not specified.';
+  }
+
+  document.getElementById('controllerModal').dataset.requestId=request.id;
+  document.getElementById('controllerModal').dataset.itemId=item.id;
+
+  openControllerReview();
+
+ }catch(error){
+
+  console.error('Unable to open compliance review',error);
+  alert(error.message);
+ }
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+
+ const params=new URLSearchParams(location.search);
+ const requestId=params.get('request');
+
+ if(requestId){
+  openComplianceRequestFromAction(requestId);
+ }
+});
+</script>
