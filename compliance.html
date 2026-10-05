@@ -2479,3 +2479,283 @@ function setComplianceType(button,type){
  font-weight:800 !important;
 }
 </style>
+
+<script>
+/* LIVE COMPLIANCE REGISTER */
+
+const COMPLIANCE_API =
+ 'https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+
+function complianceAuthHeaders(){
+ const token=localStorage.getItem('vero_session_token');
+
+ return {
+  'Accept':'application/json',
+  ...(token ? {'Authorization':'Bearer '+token} : {})
+ };
+}
+
+function compliancePill(type){
+
+ const cls=(type||'').toLowerCase();
+
+ return `<span class="pill ${cls}">${type||'—'}</span>`;
+}
+
+function assessmentPill(status){
+
+ if(!status){
+  return '<span class="pill pending">Not Assessed</span>';
+ }
+
+ let cls='pending';
+
+ if(status==='Compliant') cls='compliant';
+ if(status==='Partially Compliant') cls='partial';
+ if(status==='Non-Compliant') cls='noncompliant';
+
+ return `<span class="pill ${cls}">${status}</span>`;
+}
+
+function formatComplianceDate(value){
+
+ if(!value) return '—';
+
+ const d=new Date(value+'T00:00:00');
+
+ return d.toLocaleDateString(
+  'en-AU',
+  {
+   day:'numeric',
+   month:'short',
+   year:'numeric'
+  }
+ );
+}
+
+function renderComplianceRegister(items){
+
+ const body=document.getElementById('registerBody');
+
+ body.innerHTML='';
+
+ obligationsLive={};
+
+ items.forEach(item=>{
+
+  obligationsLive[item.id]=item;
+
+  const app=item.applicability||{};
+  const assessment=item.current_assessment||{};
+
+  const tr=document.createElement('tr');
+
+  tr.dataset.type=item.compliance_type||'';
+  tr.dataset.applicability=app.type||'';
+  tr.dataset.status=assessment.status||'Not Assessed';
+
+  tr.onclick=()=>openLiveObligation(item.id);
+
+  tr.innerHTML=`
+   <td class="code">
+    ${item.obligation_code||'—'}
+   </td>
+
+   <td>
+    <div class="row-title">
+     ${item.obligation_title||'Untitled obligation'}
+    </div>
+
+    <div class="row-meta">
+     ${item.obligation_frequency||'Ongoing'}
+    </div>
+   </td>
+
+   <td>
+    ${compliancePill(item.compliance_type)}
+   </td>
+
+   <td>
+    ${item.source_name||'—'}
+   </td>
+
+   <td>
+    <b>${app.type||'—'}</b>
+
+    <div class="row-meta">
+     ${app.name||''}
+    </div>
+   </td>
+
+   <td>
+    ${assessmentPill(assessment.status)}
+   </td>
+
+   <td>
+    ${formatComplianceDate(
+      assessment.next_assessment_date ||
+      item.next_review_date
+    )}
+   </td>
+  `;
+
+  body.appendChild(tr);
+ });
+
+ const registerCount=document.getElementById('registerCount');
+
+ if(registerCount){
+  registerCount.textContent=
+   items.length+
+   ' obligation'+
+   (items.length===1?'':'s');
+ }
+
+ updateComplianceCounts(items);
+}
+
+function updateComplianceCounts(items){
+
+ const counts={
+  Client:0,
+  Regulatory:0,
+  Internal:0
+ };
+
+ items.forEach(i=>{
+  if(counts[i.compliance_type]!==undefined){
+   counts[i.compliance_type]++;
+  }
+ });
+
+ document.querySelectorAll('.compliance-view')
+  .forEach(button=>{
+
+   const type=button.dataset.type;
+
+   const span=button.querySelector('span');
+
+   if(!span)return;
+
+   span.textContent=
+    type
+    ? counts[type]||0
+    : items.length;
+  });
+}
+
+let obligationsLive={};
+
+function openLiveObligation(id){
+
+ const item=obligationsLive[id];
+
+ if(!item)return;
+
+ const app=item.applicability||{};
+ const assessment=item.current_assessment||{};
+
+ document.getElementById('obligationCode').textContent=
+  item.obligation_code||'OBLIGATION';
+
+ document.getElementById('obligationTitle').textContent=
+  item.obligation_title||'Compliance Obligation';
+
+ document.getElementById('obligationSubtitle').textContent=
+  (item.compliance_type||'Compliance')+
+  ' compliance obligation';
+
+ document.getElementById('detailType').textContent=
+  item.compliance_type||'—';
+
+ document.getElementById('detailStatus').textContent=
+  assessment.status||'Not Assessed';
+
+ document.getElementById('detailSource').textContent=
+  item.source_name||'—';
+
+ document.getElementById('detailReference').textContent=
+  item.source_reference||'—';
+
+ document.getElementById('detailApplicability').textContent=
+  app.type
+  ? app.type+' — '+(app.name||'')
+  : '—';
+
+ document.getElementById('detailFrequency').textContent=
+  item.obligation_frequency||'—';
+
+ document.getElementById('detailDescription').textContent=
+  item.description||'';
+
+ document.getElementById('detailControl').textContent=
+  'Control details will load from the obligation detail API.';
+
+ document.getElementById('assessmentTimeline').innerHTML=
+  assessment.id
+  ? `<div class="event">
+      <b>${formatComplianceDate(assessment.assessment_date)}
+      — ${assessment.status}</b>
+      <small>Current compliance assessment</small>
+     </div>`
+  : `<div class="event">
+      <b>Not yet assessed</b>
+      <small>No assessment has been recorded.</small>
+     </div>`;
+
+ document.getElementById('evidenceDetail').innerHTML=
+  '<strong>Evidence details will load from the obligation detail API.</strong>';
+
+ document.getElementById('actionDetail').innerHTML=
+  `<strong>${item.open_action_count||0} open action(s)</strong>`;
+
+ document.getElementById('obligationModal')
+  .classList.add('show');
+}
+
+async function loadComplianceRegister(){
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+'/compliance/obligations',
+   {
+    headers:complianceAuthHeaders(),
+    cache:'no-store'
+   }
+  );
+
+  if(response.status===401){
+   location.replace(
+    'login.html?return=compliance.html'
+   );
+   return;
+  }
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to load compliance register.'
+   );
+  }
+
+  renderComplianceRegister(
+   data.obligations||[]
+  );
+
+ }catch(error){
+
+  console.error(
+   'Unable to load compliance register',
+   error
+  );
+ }
+}
+
+document.addEventListener(
+ 'DOMContentLoaded',
+ loadComplianceRegister
+);
+</script>
