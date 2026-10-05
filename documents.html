@@ -234,7 +234,7 @@
   </div>
 
   <table class="table">
-   <thead><tr><th>Document</th><th>Type</th><th>Owner</th><th>Version</th><th>Review</th></tr></thead>
+   <thead><tr><th>Document</th><th>Version</th><th>Document Owner</th><th>Current Version</th><th>Next Review</th></tr></thead>
    <tbody id="documentsBody">
     <tr><td colspan="5" class="empty">Loading documents from VERO…</td></tr>
    </tbody>
@@ -687,7 +687,7 @@ function renderDocuments(documents=currentDocuments()){
    </td>
    <td>${esc(documentTypeShort(d.documentType))}</td>
    <td>${esc(d.documentOwner)}</td>
-   <td>${esc(d.controlledVersion)}</td>
+   <td>v${esc(d.controlledVersion)}</td>
    <td>${esc(fmtDate(d.nextReviewDate))}</td>
   </tr>
  `).join('');
