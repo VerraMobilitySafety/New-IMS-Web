@@ -681,9 +681,8 @@ function renderDocuments(documents=currentDocuments()){
  body.innerHTML=documents.map(d=>`
   <tr class="data" onclick="openDocById('${esc(d.id)}')">
    <td>
-    <div class="docno">${esc(d.documentNumber)}</div>
-    <div class="title">${esc(d.documentTitle)}</div>
-    <div class="meta">${esc(d.changeSummary||'Controlled document managed in VERO.')}</div>
+    <span class="docno">${esc(d.documentNumber)}</span>
+    <span class="title"> ${esc(d.documentTitle)}</span>
    </td>
    <td>${esc(documentTypeShort(d.documentType))}</td>
    <td>${esc(d.documentOwner)}</td>
