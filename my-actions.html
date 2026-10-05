@@ -1933,8 +1933,26 @@ function selectComplianceRecordMethod(method){
 
   content.innerHTML=`
    <div class="form-note">
-    Record upload will be connected to secure Blob Storage next.
+    Upload the evidence that proves this compliance activity was completed.
+    The file will be stored as a controlled IMS record.
    </div>
+
+   <div style="margin:12px 0">
+    <input
+     id="complianceEvidenceFile"
+     type="file"
+     style="font:600 10px Montserrat,Verdana,Arial,sans-serif"
+    >
+   </div>
+
+   <button
+    type="button"
+    class="action-btn-approve"
+    onclick="uploadComplianceEvidence()"
+    style="width:auto;padding:10px 14px"
+   >
+    Upload Evidence & Complete Activity
+   </button>
   `;
  }
 }
@@ -2051,3 +2069,78 @@ async function completeComplianceWithSystemRecord(){
  filter:brightness(.96);
 }
 </style>
+
+<script>
+async function uploadComplianceEvidence(){
+
+ if(!currentAction || currentAction.action_type!=='Compliance Activity'){
+  alert('Compliance activity is not loaded.');
+  return;
+ }
+
+ const input=document.getElementById('complianceEvidenceFile');
+ const file=input?.files?.[0];
+
+ if(!file){
+  alert('Select the evidence file first.');
+  return;
+ }
+
+ const notes=document.getElementById('complianceActivityNotes')
+  .value.trim();
+
+ const form=new FormData();
+
+ form.append('file',file);
+ form.append('completion_notes',notes);
+
+ const message=document.getElementById('complianceActivityMessage');
+
+ message.textContent='Uploading evidence and creating record...';
+ message.className='action-decision-message';
+
+ try{
+
+  const response=await fetch(
+   API+
+   '/compliance/activities/'+
+   currentAction.occurrence_id+
+   '/evidence',
+   {
+    method:'POST',
+    headers:{
+     'Authorization':
+      'Bearer '+localStorage.getItem('vero_session_token')
+    },
+    body:form
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to upload compliance evidence.'
+   );
+  }
+
+  message.textContent=
+   `Activity completed. ${data.record.record_code} created from ${data.record.file_name}.`;
+
+  message.className='action-decision-message success';
+
+  setTimeout(()=>{
+   closeActionDetail();
+   loadActions();
+  },1400);
+
+ }catch(error){
+
+  console.error('Compliance evidence upload failed',error);
+
+  message.textContent=error.message;
+  message.className='action-decision-message error';
+ }
+}
+</script>
