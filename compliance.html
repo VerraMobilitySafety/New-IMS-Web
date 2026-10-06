@@ -1292,6 +1292,7 @@ button,input,select,textarea{font-family:inherit}
 
     <button
      class="btn green"
+     id="complianceReviewButton"
      onclick="openReviewAssessment()"
     >
      Review &amp; Assess
@@ -1299,6 +1300,7 @@ button,input,select,textarea{font-family:inherit}
 
     <button
      class="btn outline"
+     id="complianceActivitiesButton"
      onclick="openManageActivities()"
     >
      Manage Activities
@@ -1306,6 +1308,7 @@ button,input,select,textarea{font-family:inherit}
 
     <button
      class="btn outline"
+     id="complianceCorrectiveActionButton"
      onclick="openCorrectiveAction()"
     >
      Create Corrective Action
@@ -3197,6 +3200,32 @@ async function openLiveObligation(id){
   }
 
   const o=data.obligation;
+  const permissions=data.permissions||{};
+
+  const reviewButton=
+   document.getElementById('complianceReviewButton');
+
+  const activitiesButton=
+   document.getElementById('complianceActivitiesButton');
+
+  const correctiveButton=
+   document.getElementById('complianceCorrectiveActionButton');
+
+  if(reviewButton){
+   reviewButton.style.display=
+    permissions.can_assess ? '' : 'none';
+  }
+
+  if(activitiesButton){
+   activitiesButton.style.display=
+    permissions.can_manage_activities ? '' : 'none';
+  }
+
+  if(correctiveButton){
+   correctiveButton.style.display=
+    permissions.can_create_corrective_action ? '' : 'none';
+  }
+
   const apps=data.applicability||[];
   const controls=data.controls||[];
 
