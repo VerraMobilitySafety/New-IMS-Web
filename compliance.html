@@ -1306,7 +1306,7 @@ button,input,select,textarea{font-family:inherit}
 
     <button
      class="btn outline"
-     onclick="prototypeAction('Create corrective action')"
+     onclick="openCorrectiveAction()"
     >
      Create Corrective Action
     </button>
@@ -1629,6 +1629,123 @@ button,input,select,textarea{font-family:inherit}
      onclick="submitComplianceAssessment()"
     >
      Save Assessment
+    </button>
+
+   </div>
+
+  </div>
+ </div>
+</div>
+
+
+<!-- CORRECTIVE ACTION DRAWER -->
+
+<div
+ class="modal-back"
+ id="correctiveActionModal"
+ onclick="backdropClose(event,'correctiveActionModal')"
+>
+ <div class="drawer compliance-requirement-drawer">
+
+  <div class="drawer-head">
+   <div>
+    <p>COMPLIANCE ACTION</p>
+    <h2>Create Corrective Action</h2>
+    <small id="correctiveActionRequirement">Compliance Requirement</small>
+   </div>
+
+   <button
+    class="close"
+    onclick="closeModal('correctiveActionModal')"
+   >×</button>
+  </div>
+
+  <div class="drawer-body">
+
+   <div class="section compliance-section">
+
+    <div class="compliance-section-head">
+     <div>
+      <h3>Action Details</h3>
+      <small>Assign work to address a compliance gap or improvement</small>
+     </div>
+    </div>
+
+    <div class="manage-activity-form">
+
+     <div class="field full">
+      <label>Action Title</label>
+      <input
+       id="correctiveActionTitle"
+       type="text"
+       placeholder="What needs to be done?"
+      >
+     </div>
+
+     <div class="field full">
+      <label>Description</label>
+      <textarea
+       id="correctiveActionDescription"
+       placeholder="Describe the required action..."
+      ></textarea>
+     </div>
+
+     <div class="field">
+      <label>Action Type</label>
+      <select id="correctiveActionType">
+       <option value="Corrective Action">Corrective Action</option>
+       <option value="Preventive Action">Preventive Action</option>
+       <option value="Improvement">Improvement</option>
+       <option value="Remediation">Remediation</option>
+       <option value="Review">Review</option>
+      </select>
+     </div>
+
+     <div class="field">
+      <label>Priority</label>
+      <select id="correctiveActionPriority">
+       <option value="Low">Low</option>
+       <option value="Medium" selected>Medium</option>
+       <option value="High">High</option>
+       <option value="Critical">Critical</option>
+      </select>
+     </div>
+
+     <div class="field">
+      <label>Assigned To</label>
+      <select id="correctiveActionOwner">
+       <option value="">Loading users...</option>
+      </select>
+     </div>
+
+     <div class="field">
+      <label>Due Date</label>
+      <input id="correctiveActionDueDate" type="date">
+     </div>
+
+    </div>
+
+   </div>
+
+   <div
+    id="correctiveActionMessage"
+    class="action-decision-message"
+   ></div>
+
+   <div class="drawer-actions">
+
+    <button
+     class="btn outline"
+     onclick="closeModal('correctiveActionModal')"
+    >
+     Cancel
+    </button>
+
+    <button
+     class="btn green"
+     onclick="submitCorrectiveAction()"
+    >
+     Create Action
     </button>
 
    </div>
@@ -5562,6 +5679,178 @@ async function submitComplianceAssessment(){
 
   console.error(
    'Unable to save Compliance assessment',
+   error
+  );
+
+  message.textContent=error.message;
+  message.className='action-decision-message error';
+ }
+}
+</script>
+
+<script>
+async function openCorrectiveAction(){
+
+ if(!currentLiveObligationId){
+  alert('Compliance requirement is not loaded.');
+  return;
+ }
+
+ const title=
+  document.getElementById('obligationTitle')?.textContent||'';
+
+ document.getElementById(
+  'correctiveActionRequirement'
+ ).textContent=title;
+
+ document.getElementById('correctiveActionTitle').value='';
+ document.getElementById('correctiveActionDescription').value='';
+ document.getElementById('correctiveActionType').value='Corrective Action';
+ document.getElementById('correctiveActionPriority').value='Medium';
+ document.getElementById('correctiveActionDueDate').value='';
+
+ const message=document.getElementById('correctiveActionMessage');
+ message.textContent='';
+ message.className='action-decision-message';
+
+ document.getElementById('correctiveActionModal')
+  .classList.add('show');
+
+ await loadCorrectiveActionUsers();
+}
+
+
+async function loadCorrectiveActionUsers(){
+
+ const select=document.getElementById('correctiveActionOwner');
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+'/users/active',
+   {
+    headers:complianceAuthHeaders(),
+    cache:'no-store'
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(data.message||'Unable to load users.');
+  }
+
+  select.innerHTML=
+   '<option value="">Select person...</option>'+
+   (data.users||[]).map(u=>
+    `<option value="${u.id}">
+      ${escapeComplianceText(u.name)}
+      ${u.email?' — '+escapeComplianceText(u.email):''}
+     </option>`
+   ).join('');
+
+ }catch(error){
+
+  console.error('Unable to load corrective action users',error);
+
+  select.innerHTML=
+   '<option value="">Unable to load users</option>';
+ }
+}
+
+
+async function submitCorrectiveAction(){
+
+ const title=
+  document.getElementById('correctiveActionTitle').value.trim();
+
+ const description=
+  document.getElementById('correctiveActionDescription').value.trim();
+
+ const type=
+  document.getElementById('correctiveActionType').value;
+
+ const priority=
+  document.getElementById('correctiveActionPriority').value;
+
+ const owner=
+  document.getElementById('correctiveActionOwner').value;
+
+ const dueDate=
+  document.getElementById('correctiveActionDueDate').value;
+
+ if(!title){
+  alert('Enter an action title.');
+  return;
+ }
+
+ if(!owner){
+  alert('Select who is responsible for the action.');
+  return;
+ }
+
+ if(!dueDate){
+  alert('Select the action due date.');
+  return;
+ }
+
+ const message=document.getElementById('correctiveActionMessage');
+
+ message.textContent='Creating corrective action...';
+ message.className='action-decision-message';
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+
+   '/compliance/obligations/'+
+   currentLiveObligationId+
+   '/actions',
+   {
+    method:'POST',
+    headers:{
+     ...complianceAuthHeaders(),
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     action_title:title,
+     description:description,
+     action_type:type,
+     priority:priority,
+     owner_user_id:Number(owner),
+     due_date:dueDate
+    })
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to create corrective action.'
+   );
+  }
+
+  message.textContent=
+   `${data.action.action_type} created and assigned to ${data.action.owner_name}.`;
+
+  message.className='action-decision-message success';
+
+  setTimeout(async()=>{
+
+   closeModal('correctiveActionModal');
+
+   await openLiveObligation(
+    currentLiveObligationId
+   );
+
+  },900);
+
+ }catch(error){
+
+  console.error(
+   'Unable to create Compliance corrective action',
    error
   );
 
