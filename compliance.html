@@ -3462,10 +3462,8 @@ async function openLiveObligation(id){
   document.getElementById('detailType').textContent=
    o.compliance_type||'—';
 
-  document.getElementById('detailStatus').textContent=
-   assessments.length
-   ? assessments[0].assessment_status
-   : 'Not Assessed';
+  document.getElementById('detailOwner').textContent=
+   o.owner_name||'Not Assigned';
 
   document.getElementById('detailSource').textContent=
    o.source_name||'—';
