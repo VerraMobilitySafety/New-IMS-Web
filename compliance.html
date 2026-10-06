@@ -1171,6 +1171,15 @@ button,input,select,textarea{font-family:inherit}
       <h3>Controls</h3>
       <small>How the requirement is controlled and verified</small>
      </div>
+
+     <button
+      class="btn outline"
+      id="manageControlsButton"
+      onclick="openManageControls()"
+      style="display:none"
+     >
+      Manage Controls
+     </button>
     </div>
 
     <div id="detailControl">
@@ -1924,6 +1933,199 @@ button,input,select,textarea{font-family:inherit}
     </button>
 
    </div>
+
+  </div>
+ </div>
+</div>
+
+
+<!-- MANAGE CONTROLS DRAWER -->
+
+<div
+ class="modal-back"
+ id="manageControlsModal"
+ onclick="backdropClose(event,'manageControlsModal')"
+>
+ <div class="drawer compliance-requirement-drawer">
+
+  <div class="drawer-head">
+   <div>
+    <p>COMPLIANCE CONTROLLER</p>
+    <h2>Manage Controls</h2>
+    <small id="manageControlsRequirement">Compliance Requirement</small>
+   </div>
+
+   <button
+    class="close"
+    onclick="closeModal('manageControlsModal')"
+   >×</button>
+  </div>
+
+  <div class="drawer-body">
+
+   <div class="manage-activity-options">
+
+    <button
+     class="manage-activity-option active"
+     type="button"
+     onclick="showLinkExistingControl(this)"
+    >
+     <strong>Link Existing Control</strong>
+     <span>Reuse a Control from the enterprise Control library</span>
+    </button>
+
+    <button
+     class="manage-activity-option"
+     type="button"
+     onclick="showCreateControl(this)"
+    >
+     <strong>＋ Create Control</strong>
+     <span>Create a new reusable enterprise Control</span>
+    </button>
+
+   </div>
+
+
+   <div id="linkExistingControlPanel">
+
+    <div class="section compliance-section">
+
+     <div class="compliance-section-head">
+      <div>
+       <h3>Control Library</h3>
+       <small>Select an existing enterprise Control</small>
+      </div>
+     </div>
+
+     <div class="manage-activity-form">
+
+      <div class="field full">
+       <label>Control</label>
+       <select id="existingControlSelect">
+        <option value="">Loading Controls...</option>
+       </select>
+      </div>
+
+      <div class="field">
+       <label>Relationship</label>
+       <select id="existingControlRelationship">
+        <option value="Primary">Primary</option>
+        <option value="Supporting">Supporting</option>
+       </select>
+      </div>
+
+      <div class="field full">
+       <label>Notes</label>
+       <textarea
+        id="existingControlNotes"
+        placeholder="Optional relationship notes..."
+       ></textarea>
+      </div>
+
+     </div>
+
+    </div>
+
+    <div class="drawer-actions">
+     <button
+      class="btn green"
+      onclick="linkExistingComplianceControl()"
+     >
+      Link Control
+     </button>
+    </div>
+
+   </div>
+
+
+   <div id="createControlPanel" style="display:none">
+
+    <div class="section compliance-section">
+
+     <div class="compliance-section-head">
+      <div>
+       <h3>Create Enterprise Control</h3>
+       <small>The Control can be reused across multiple requirements</small>
+      </div>
+     </div>
+
+     <div class="manage-activity-form">
+
+      <div class="field full">
+       <label>Control Title</label>
+       <input
+        id="newControlTitle"
+        type="text"
+        placeholder="e.g. Operational Risk Review Process"
+       >
+      </div>
+
+      <div class="field full">
+       <label>Description</label>
+       <textarea
+        id="newControlDescription"
+        placeholder="Describe how the Control operates..."
+       ></textarea>
+      </div>
+
+      <div class="field">
+       <label>Control Type</label>
+       <select id="newControlType">
+        <option value="">Select type...</option>
+        <option>Policy</option>
+        <option>Procedure</option>
+        <option>Process</option>
+        <option>System</option>
+        <option>Training</option>
+        <option>Inspection</option>
+        <option>Audit</option>
+        <option>Monitoring</option>
+        <option>Technical</option>
+        <option>Operational</option>
+        <option>Other</option>
+       </select>
+      </div>
+
+      <div class="field">
+       <label>Control Owner</label>
+       <select id="newControlOwner">
+        <option value="">Select owner...</option>
+       </select>
+      </div>
+
+      <div class="field">
+       <label>Business Area</label>
+       <input id="newControlBusinessArea" type="text">
+      </div>
+
+      <div class="field">
+       <label>Control Frequency</label>
+       <input
+        id="newControlFrequency"
+        type="text"
+        placeholder="e.g. Quarterly"
+       >
+      </div>
+
+     </div>
+
+    </div>
+
+    <div class="drawer-actions">
+     <button
+      class="btn green"
+      onclick="createAndLinkComplianceControl()"
+     >
+      Create &amp; Link Control
+     </button>
+    </div>
+
+   </div>
+
+   <div
+    id="manageControlsMessage"
+    class="action-decision-message"
+   ></div>
 
   </div>
  </div>
@@ -3427,6 +3629,14 @@ async function openLiveObligation(id){
 
   if(editButton){
    editButton.style.display=
+    permissions.is_controller ? '' : 'none';
+  }
+
+  const manageControlsButton=
+   document.getElementById('manageControlsButton');
+
+  if(manageControlsButton){
+   manageControlsButton.style.display=
     permissions.is_controller ? '' : 'none';
   }
 
@@ -6559,6 +6769,300 @@ async function saveComplianceRequirement(){
    'Unable to update Compliance requirement',
    error
   );
+
+  message.textContent=error.message;
+  message.className='action-decision-message error';
+ }
+}
+</script>
+
+<script>
+async function openManageControls(){
+
+ if(!currentLiveObligationId){
+  alert('Compliance requirement is not loaded.');
+  return;
+ }
+
+ document.getElementById('manageControlsRequirement').textContent=
+  currentLiveObligation?.obligation_title||'Compliance Requirement';
+
+ document.getElementById('manageControlsMessage').textContent='';
+
+ document.getElementById('manageControlsModal')
+  .classList.add('show');
+
+ showLinkExistingControl(
+  document.querySelector(
+   '#manageControlsModal .manage-activity-option'
+  )
+ );
+
+ await Promise.all([
+  loadComplianceControlLibrary(),
+  loadManageControlUsers()
+ ]);
+}
+
+
+function showLinkExistingControl(button){
+
+ document.getElementById('linkExistingControlPanel').style.display='block';
+ document.getElementById('createControlPanel').style.display='none';
+
+ document.querySelectorAll(
+  '#manageControlsModal .manage-activity-option'
+ ).forEach(b=>b.classList.remove('active'));
+
+ if(button)button.classList.add('active');
+}
+
+
+function showCreateControl(button){
+
+ document.getElementById('linkExistingControlPanel').style.display='none';
+ document.getElementById('createControlPanel').style.display='block';
+
+ document.querySelectorAll(
+  '#manageControlsModal .manage-activity-option'
+ ).forEach(b=>b.classList.remove('active'));
+
+ if(button)button.classList.add('active');
+}
+
+
+async function loadComplianceControlLibrary(){
+
+ const select=document.getElementById('existingControlSelect');
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+'/compliance/controls',
+   {
+    headers:complianceAuthHeaders(),
+    cache:'no-store'
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(data.message||'Unable to load Controls.');
+  }
+
+  select.innerHTML=
+   '<option value="">Select Control...</option>'+
+   (data.controls||[]).map(c=>
+    `<option value="${c.id}">
+     ${escapeComplianceText(c.control_code||'')} — ${escapeComplianceText(c.control_title)}
+    </option>`
+   ).join('');
+
+ }catch(error){
+
+  console.error('Unable to load Control library',error);
+
+  select.innerHTML=
+   '<option value="">Unable to load Controls</option>';
+ }
+}
+
+
+async function loadManageControlUsers(){
+
+ const select=document.getElementById('newControlOwner');
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+'/users/active',
+   {
+    headers:complianceAuthHeaders(),
+    cache:'no-store'
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(data.message||'Unable to load users.');
+  }
+
+  select.innerHTML=
+   '<option value="">Select owner...</option>'+
+   (data.users||[]).map(u=>
+    `<option value="${u.id}">
+     ${escapeComplianceText(u.name)}
+    </option>`
+   ).join('');
+
+ }catch(error){
+
+  console.error('Unable to load Control owners',error);
+
+  select.innerHTML=
+   '<option value="">Unable to load users</option>';
+ }
+}
+
+
+async function linkExistingComplianceControl(){
+
+ const controlId=
+  document.getElementById('existingControlSelect').value;
+
+ if(!controlId){
+  alert('Select a Control.');
+  return;
+ }
+
+ const message=document.getElementById('manageControlsMessage');
+
+ message.textContent='Linking Control...';
+ message.className='action-decision-message';
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+
+   '/compliance/obligations/'+
+   currentLiveObligationId+
+   '/controls',
+   {
+    method:'POST',
+    headers:{
+     ...complianceAuthHeaders(),
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     control_id:Number(controlId),
+     relationship_type:
+      document.getElementById('existingControlRelationship').value,
+     notes:
+      document.getElementById('existingControlNotes').value.trim()||null
+    })
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(data.message||'Unable to link Control.');
+  }
+
+  message.textContent='Control linked successfully.';
+  message.className='action-decision-message success';
+
+  setTimeout(async()=>{
+   closeModal('manageControlsModal');
+   await openLiveObligation(currentLiveObligationId);
+  },700);
+
+ }catch(error){
+
+  message.textContent=error.message;
+  message.className='action-decision-message error';
+ }
+}
+
+
+async function createAndLinkComplianceControl(){
+
+ const title=
+  document.getElementById('newControlTitle').value.trim();
+
+ const type=
+  document.getElementById('newControlType').value;
+
+ if(!title){
+  alert('Enter the Control title.');
+  return;
+ }
+
+ if(!type){
+  alert('Select the Control type.');
+  return;
+ }
+
+ const message=document.getElementById('manageControlsMessage');
+
+ message.textContent='Creating Control...';
+ message.className='action-decision-message';
+
+ try{
+
+  let response=await fetch(
+   COMPLIANCE_API+'/compliance/controls',
+   {
+    method:'POST',
+    headers:{
+     ...complianceAuthHeaders(),
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     control_title:title,
+     description:
+      document.getElementById('newControlDescription').value.trim()||null,
+     control_type:type,
+     owner_user_id:
+      document.getElementById('newControlOwner').value
+       ? Number(document.getElementById('newControlOwner').value)
+       : null,
+     owner_business_area:
+      document.getElementById('newControlBusinessArea').value.trim()||null,
+     control_frequency:
+      document.getElementById('newControlFrequency').value.trim()||null
+    })
+   }
+  );
+
+  let data=await response.json();
+
+  if(!response.ok){
+   throw new Error(data.message||'Unable to create Control.');
+  }
+
+  const control=data.control;
+
+  response=await fetch(
+   COMPLIANCE_API+
+   '/compliance/obligations/'+
+   currentLiveObligationId+
+   '/controls',
+   {
+    method:'POST',
+    headers:{
+     ...complianceAuthHeaders(),
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     control_id:control.id,
+     relationship_type:'Primary'
+    })
+   }
+  );
+
+  data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Control created but could not be linked.'
+   );
+  }
+
+  message.textContent=
+   `${control.control_code} created and linked.`;
+
+  message.className='action-decision-message success';
+
+  setTimeout(async()=>{
+   closeModal('manageControlsModal');
+   await openLiveObligation(currentLiveObligationId);
+  },700);
+
+ }catch(error){
 
   message.textContent=error.message;
   message.className='action-decision-message error';
