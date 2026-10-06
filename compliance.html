@@ -3554,6 +3554,7 @@ document.addEventListener(
 
 let currentLiveObligationId=null;
 let currentLiveObligation=null;
+let currentLiveControls=[];
 
 async function openLiveObligation(id){
 
@@ -3650,6 +3651,7 @@ async function openLiveObligation(id){
 
   const apps=data.applicability||[];
   const controls=data.controls||[];
+  currentLiveControls=controls;
 
   renderControlGovernanceDocuments(controls);
   renderControlVerifications(controls);
@@ -3701,16 +3703,37 @@ async function openLiveObligation(id){
 
   document.getElementById('detailControl').innerHTML=
    controls.length
-   ? controls.map(c=>
-      `${c.control_code||''} — ${c.control_title}
-       <br>
-       <small>
-        ${c.relationship_type} ·
-        ${c.control_type} ·
-        ${c.status}
-       </small>`
-     ).join('<br><br>')
-   : 'No controls linked.';
+   ? controls.map(c=>`
+      <div class="linked-control-card">
+
+       <div class="linked-control-main">
+        <strong>
+         ${escapeComplianceText(c.control_code||'')} —
+         ${escapeComplianceText(c.control_title||'')}
+        </strong>
+
+        <small>
+         ${escapeComplianceText(c.relationship_type||'')} ·
+         ${escapeComplianceText(c.control_type||'')} ·
+         ${escapeComplianceText(c.status||'')}
+        </small>
+       </div>
+
+       ${
+        permissions.is_controller
+         ? `<button
+             type="button"
+             class="btn outline linked-control-manage"
+             onclick="manageLinkedControl(${c.id})"
+            >
+             Manage
+            </button>`
+         : ''
+       }
+
+      </div>
+     `).join('')
+   : '<div class="compliance-empty-state">No controls linked.</div>';
 
 
   /* ASSESSMENTS */
@@ -7067,5 +7090,69 @@ async function createAndLinkComplianceControl(){
   message.textContent=error.message;
   message.className='action-decision-message error';
  }
+}
+</script>
+
+<style>
+.linked-control-card{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:16px;
+
+ padding:12px 0;
+ border-bottom:1px solid var(--line);
+}
+
+.linked-control-card:last-child{
+ border-bottom:0;
+}
+
+.linked-control-main{
+ min-width:0;
+}
+
+.linked-control-main strong{
+ display:block;
+ font:700 10px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--charcoal);
+ line-height:1.4;
+}
+
+.linked-control-main small{
+ display:block;
+ margin-top:4px;
+ font:500 8px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--grey);
+}
+
+.linked-control-manage{
+ flex:0 0 auto;
+ padding:7px 11px !important;
+ font-size:8px !important;
+}
+</style>
+
+<script>
+async function manageLinkedControl(controlId){
+
+ const control=(currentLiveControls||[])
+  .find(c=>Number(c.id)===Number(controlId));
+
+ if(!control){
+  alert('Control could not be loaded.');
+  return;
+ }
+
+ await openManageControls();
+
+ const select=document.getElementById('existingControlSelect');
+
+ if(select){
+  select.value=String(controlId);
+ }
+
+ document.getElementById('manageControlsRequirement').textContent=
+  `${control.control_code||''} — ${control.control_title||''}`;
 }
 </script>
