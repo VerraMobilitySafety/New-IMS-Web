@@ -1489,6 +1489,14 @@ button,input,select,textarea{font-family:inherit}
       </div>
 
       <div class="field">
+       <label>Allow System Generated Record</label>
+       <select id="activitySystemRecordAllowed">
+        <option value="true" selected>Yes</option>
+        <option value="false">No</option>
+       </select>
+      </div>
+
+      <div class="field">
        <label>Required Record Type</label>
        <input
         id="activityRecordType"
@@ -6286,6 +6294,9 @@ async function createComplianceActivity(){
      next_due_date:nextDue||null,
      lead_time_days:leadTime,
      record_required:recordRequired,
+     system_record_allowed:
+      recordRequired &&
+      document.getElementById('activitySystemRecordAllowed').value==='true',
      required_record_type:recordRequired?recordType:null,
      required_record_title:recordRequired?recordTitle:null,
      security_classification:security,
