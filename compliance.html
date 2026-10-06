@@ -6982,6 +6982,12 @@ async function saveComplianceRequirement(){
 
  try{
 
+  console.log(
+   'PATCH Compliance Requirement',
+   currentLiveObligationId,
+   payload
+  );
+
   const response=await fetch(
    COMPLIANCE_API+
    '/compliance/obligations/'+
