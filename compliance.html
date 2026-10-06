@@ -1292,7 +1292,7 @@ button,input,select,textarea{font-family:inherit}
 
     <button
      class="btn green"
-     onclick="prototypeAction('Review and assess')"
+     onclick="openReviewAssessment()"
     >
      Review &amp; Assess
     </button>
@@ -1528,6 +1528,108 @@ button,input,select,textarea{font-family:inherit}
      </div>
 
     </div>
+
+   </div>
+
+  </div>
+ </div>
+</div>
+
+
+<!-- REVIEW & ASSESS DRAWER -->
+
+<div
+ class="modal-back"
+ id="reviewAssessmentModal"
+ onclick="backdropClose(event,'reviewAssessmentModal')"
+>
+ <div class="drawer compliance-requirement-drawer">
+
+  <div class="drawer-head">
+   <div>
+    <p>COMPLIANCE REVIEW</p>
+    <h2>Review &amp; Assess</h2>
+    <small id="reviewAssessmentRequirement">Compliance Requirement</small>
+   </div>
+
+   <button
+    class="close"
+    onclick="closeModal('reviewAssessmentModal')"
+   >×</button>
+  </div>
+
+  <div class="drawer-body">
+
+   <div class="section compliance-section">
+
+    <div class="compliance-section-head">
+     <div>
+      <h3>Compliance Assessment</h3>
+      <small>Record the formal assessment of this requirement</small>
+     </div>
+    </div>
+
+    <div class="manage-activity-form">
+
+     <div class="field full">
+      <label>Assessment Result</label>
+      <select id="reviewAssessmentStatus">
+       <option value="">Select assessment...</option>
+       <option value="Compliant">Compliant</option>
+       <option value="Partially Compliant">Partially Compliant</option>
+       <option value="Non-Compliant">Non-Compliant</option>
+       <option value="Not Applicable">Not Applicable</option>
+      </select>
+     </div>
+
+     <div class="field full">
+      <label>Assessment Rationale</label>
+      <textarea
+       id="reviewAssessmentRationale"
+       placeholder="Explain the basis for this assessment..."
+      ></textarea>
+     </div>
+
+     <div class="field full">
+      <label>Gaps Identified</label>
+      <textarea
+       id="reviewAssessmentGaps"
+       placeholder="Record any gaps identified, or leave blank if none..."
+      ></textarea>
+     </div>
+
+     <div class="field">
+      <label>Next Assessment Date</label>
+      <input
+       id="reviewAssessmentNextDate"
+       type="date"
+      >
+     </div>
+
+    </div>
+
+   </div>
+
+   <div
+    id="reviewAssessmentMessage"
+    class="action-decision-message"
+   ></div>
+
+   <div class="drawer-actions">
+
+    <button
+     class="btn outline"
+     onclick="closeModal('reviewAssessmentModal')"
+    >
+     Cancel
+    </button>
+
+    <button
+     class="btn green"
+     onclick="submitComplianceAssessment()"
+    >
+     Save Assessment
+    </button>
 
    </div>
 
@@ -5346,3 +5448,125 @@ async function createComplianceActivity(){
  }
 }
 </style>
+
+<script>
+function openReviewAssessment(){
+
+ if(!currentLiveObligationId){
+  alert('Compliance requirement is not loaded.');
+  return;
+ }
+
+ const title=
+  document.getElementById('obligationTitle')?.textContent||'';
+
+ document.getElementById(
+  'reviewAssessmentRequirement'
+ ).textContent=title;
+
+ document.getElementById('reviewAssessmentStatus').value='';
+ document.getElementById('reviewAssessmentRationale').value='';
+ document.getElementById('reviewAssessmentGaps').value='';
+ document.getElementById('reviewAssessmentNextDate').value='';
+
+ const message=
+  document.getElementById('reviewAssessmentMessage');
+
+ message.textContent='';
+ message.className='action-decision-message';
+
+ document.getElementById('reviewAssessmentModal')
+  .classList.add('show');
+}
+
+
+async function submitComplianceAssessment(){
+
+ const status=
+  document.getElementById('reviewAssessmentStatus').value;
+
+ const rationale=
+  document.getElementById('reviewAssessmentRationale')
+   .value.trim();
+
+ const gaps=
+  document.getElementById('reviewAssessmentGaps')
+   .value.trim();
+
+ const nextDate=
+  document.getElementById('reviewAssessmentNextDate').value;
+
+ if(!status){
+  alert('Select the assessment result.');
+  return;
+ }
+
+ if(!rationale){
+  alert('Enter the assessment rationale.');
+  return;
+ }
+
+ const message=
+  document.getElementById('reviewAssessmentMessage');
+
+ message.textContent='Saving assessment...';
+ message.className='action-decision-message';
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+
+   '/compliance/obligations/'+
+   currentLiveObligationId+
+   '/assessments',
+   {
+    method:'POST',
+    headers:{
+     ...complianceAuthHeaders(),
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     assessment_status:status,
+     rationale:rationale,
+     gaps_identified:gaps||null,
+     next_assessment_date:nextDate||null
+    })
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to save assessment.'
+   );
+  }
+
+  message.textContent=
+   `${status} assessment recorded successfully.`;
+
+  message.className='action-decision-message success';
+
+  setTimeout(async()=>{
+
+   closeModal('reviewAssessmentModal');
+
+   await openLiveObligation(
+    currentLiveObligationId
+   );
+
+  },900);
+
+ }catch(error){
+
+  console.error(
+   'Unable to save Compliance assessment',
+   error
+  );
+
+  message.textContent=error.message;
+  message.className='action-decision-message error';
+ }
+}
+</script>
