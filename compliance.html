@@ -2096,6 +2096,24 @@ button,input,select,textarea{font-family:inherit}
 
    </div>
 
+   <div class="section" id="controllerOwnerSection">
+
+    <h3>Compliance Owner</h3>
+
+    <div class="field">
+     <label>Accountable Person *</label>
+     <select id="controllerComplianceOwner">
+      <option value="">Select Compliance Owner...</option>
+     </select>
+    </div>
+
+    <small style="display:block;margin-top:7px;color:var(--grey);font:500 8px Montserrat,Verdana,Arial,sans-serif;line-height:1.5">
+     The Compliance Owner is accountable for this requirement,
+     scheduled reviews and ongoing compliance oversight.
+    </small>
+
+   </div>
+
    <div class="section">
 
     <h3>Controller Notes</h3>
@@ -2411,9 +2429,12 @@ function showAIForm(){
 }
 
 
-function openControllerReview(){
+async function openControllerReview(){
 
- document.getElementById('controllerModal').classList.add('show');
+ document.getElementById('controllerModal')
+  .classList.add('show');
+
+ await loadControllerComplianceOwners();
 }
 
 
@@ -3532,6 +3553,14 @@ async function controllerDecision(decision){
  const controllerNotes=
   notesField ? notesField.value.trim() : '';
 
+ const ownerField=
+  document.getElementById('controllerComplianceOwner');
+
+ const complianceOwnerUserId=
+  ownerField && ownerField.value
+   ? Number(ownerField.value)
+   : null;
+
  let rejectionReason=null;
 
  if(decision==='Returned' && !controllerNotes){
@@ -3555,7 +3584,15 @@ async function controllerDecision(decision){
   if(!rejectionReason)return;
  }
 
- if(decision==='Approved'){
+ if(
+  decision==='Approved' ||
+  decision==='Approved with Amendments'
+ ){
+
+  if(!complianceOwnerUserId){
+   alert('Select the Compliance Owner before approving this requirement.');
+   return;
+  }
 
   const confirmed=confirm(
    'Approve this requirement and create it as a controlled Compliance Obligation?'
@@ -3580,7 +3617,8 @@ async function controllerDecision(decision){
     body:JSON.stringify({
      decision:decision,
      controller_notes:controllerNotes,
-     rejection_reason:rejectionReason
+     rejection_reason:rejectionReason,
+     compliance_owner_user_id:complianceOwnerUserId
     })
    }
   );
@@ -5963,3 +6001,58 @@ function renderLiveCompliancePosition(live){
  color:var(--grey) !important;
 }
 </style>
+
+<script>
+async function loadControllerComplianceOwners(){
+
+ const select=document.getElementById(
+  'controllerComplianceOwner'
+ );
+
+ if(!select)return;
+
+ select.innerHTML=
+  '<option value="">Loading users...</option>';
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+'/users/active',
+   {
+    headers:complianceAuthHeaders(),
+    cache:'no-store'
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to load Compliance Owners.'
+   );
+  }
+
+  select.innerHTML=
+   '<option value="">Select Compliance Owner...</option>'+
+   (data.users||[]).map(u=>
+    `<option value="${u.id}">
+      ${escapeComplianceText(u.name)}
+      ${u.email
+       ? ' — '+escapeComplianceText(u.email)
+       : ''}
+     </option>`
+   ).join('');
+
+ }catch(error){
+
+  console.error(
+   'Unable to load Compliance Owners',
+   error
+  );
+
+  select.innerHTML=
+   '<option value="">Unable to load users</option>';
+ }
+}
+</script>
