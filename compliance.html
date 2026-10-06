@@ -2760,6 +2760,7 @@ async function openLiveObligation(id){
   const controls=data.controls||[];
 
   renderControlGovernanceDocuments(controls);
+  renderControlVerifications(controls);
 
   const assessments=data.assessments||[];
   const evidence=data.evidence||[];
@@ -4666,5 +4667,59 @@ function openGovernanceDocument(documentId){
  display:block;
  font:500 8px Montserrat,Verdana,Arial,sans-serif;
  color:var(--grey);
+}
+</style>
+
+<style>
+.control-verification-card{
+ border:1px solid var(--line);
+ border-radius:8px;
+ overflow:hidden;
+ background:#fff;
+}
+
+.control-verification-head{
+ padding:11px 12px;
+ background:#fafbf8;
+ border-bottom:1px solid var(--line);
+}
+
+.control-verification-head strong{
+ display:block;
+ font:700 9px Montserrat,Verdana,Arial,sans-serif;
+ margin-bottom:4px;
+}
+
+.control-verification-head small{
+ display:block;
+ font:500 8px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--grey);
+}
+
+.control-verification-grid{
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+}
+
+.control-verification-grid > div{
+ padding:10px 12px;
+ border-right:1px solid var(--line);
+}
+
+.control-verification-grid > div:last-child{
+ border-right:0;
+}
+
+.control-verification-grid span{
+ display:block;
+ color:var(--grey);
+ font:700 7px Montserrat,Verdana,Arial,sans-serif;
+ text-transform:uppercase;
+ letter-spacing:.6px;
+ margin-bottom:4px;
+}
+
+.control-verification-grid strong{
+ font:700 9px Montserrat,Verdana,Arial,sans-serif;
 }
 </style>
