@@ -1154,6 +1154,16 @@ button,input,select,textarea{font-family:inherit}
    </div>
 
    <div class="section">
+    <h3>Activities & Records</h3>
+
+    <div id="complianceActivitiesDetail">
+     <div class="detail">
+      <strong>No compliance activities configured.</strong>
+     </div>
+    </div>
+   </div>
+
+   <div class="section">
     <h3>Assessment History</h3>
 
     <div
@@ -2660,6 +2670,9 @@ async function openLiveObligation(id){
   const assessments=data.assessments||[];
   const evidence=data.evidence||[];
   const actions=data.actions||[];
+  const activities=data.activities||[];
+
+  renderComplianceActivities(activities);
 
   document.getElementById('obligationCode').textContent=
    o.obligation_code||'OBLIGATION';
@@ -3731,5 +3744,182 @@ async function submitLinkExisting(){
 
   alert(error.message);
  }
+}
+</script>
+
+<style>
+.compliance-activity-card{
+ border:1px solid var(--line);
+ border-radius:9px;
+ margin-bottom:12px;
+ overflow:hidden;
+ background:#fff;
+}
+
+.compliance-activity-head{
+ padding:13px 14px;
+ background:#fafbf8;
+ border-bottom:1px solid var(--line);
+}
+
+.compliance-activity-head strong{
+ display:block;
+ font-size:10px;
+ margin-bottom:4px;
+}
+
+.compliance-activity-head small{
+ font-size:8px;
+ color:var(--grey);
+}
+
+.compliance-occurrence{
+ display:grid;
+ grid-template-columns:1.5fr .8fr .8fr 1.2fr;
+ gap:10px;
+ align-items:center;
+ padding:11px 14px;
+ border-bottom:1px solid var(--line);
+ font-size:9px;
+}
+
+.compliance-occurrence:last-child{
+ border-bottom:0;
+}
+
+.compliance-record-link{
+ border:0;
+ background:none;
+ padding:0;
+ color:var(--teal);
+ font:800 9px Montserrat,Verdana,Arial,sans-serif;
+ cursor:pointer;
+ text-align:left;
+}
+
+.compliance-record-locked{
+ color:var(--grey);
+ font-size:8px;
+}
+</style>
+
+<script>
+function renderComplianceActivities(activities){
+
+ const target=document.getElementById(
+  'complianceActivitiesDetail'
+ );
+
+ if(!target)return;
+
+ if(!activities || !activities.length){
+
+  target.innerHTML=`
+   <div class="detail">
+    <strong>No compliance activities configured.</strong>
+   </div>`;
+
+  return;
+ }
+
+ target.innerHTML=activities.map(activity=>{
+
+  const occurrences=activity.occurrences||[];
+
+  const rows=occurrences.length
+   ? occurrences.map(o=>{
+
+      let recordHtml=
+       '<span class="compliance-record-locked">Record required</span>';
+
+      if(o.record){
+
+       if(o.record.can_view){
+
+        recordHtml=`
+         <button
+          class="compliance-record-link"
+          onclick="openComplianceRecord(${o.record.id})"
+         >
+          ${escapeComplianceText(o.record.record_code)}
+          ${o.record.file_name
+           ? ' · '+escapeComplianceText(o.record.file_name)
+           : ''
+          }
+         </button>`;
+
+       }else{
+
+        recordHtml=`
+         <span class="compliance-record-locked">
+          ${escapeComplianceText(o.record.record_code)}
+          · Restricted
+         </span>`;
+       }
+      }
+
+      return `
+       <div class="compliance-occurrence">
+
+        <div>
+         <strong>
+          ${escapeComplianceText(o.period_label||'Activity')}
+         </strong>
+        </div>
+
+        <div>
+         ${formatComplianceDate(o.due_date)}
+        </div>
+
+        <div>
+         ${escapeComplianceText(o.status||'—')}
+        </div>
+
+        <div>
+         ${recordHtml}
+        </div>
+
+       </div>`;
+     }).join('')
+   : `<div class="compliance-occurrence">
+       <div>No activity occurrences yet.</div>
+      </div>`;
+
+  return `
+   <div class="compliance-activity-card">
+
+    <div class="compliance-activity-head">
+
+     <strong>
+      ${escapeComplianceText(activity.activity_title)}
+     </strong>
+
+     <small>
+      ${escapeComplianceText(activity.frequency||'')}
+      ${activity.owner_name
+       ? ' · '+escapeComplianceText(activity.owner_name)
+       : ''
+      }
+      ${activity.record_required
+       ? ' · Record required'
+       : ''
+      }
+     </small>
+
+    </div>
+
+    ${rows}
+
+   </div>`;
+ }).join('');
+}
+
+
+function openComplianceRecord(recordId){
+
+ alert(
+  'Record '+recordId+
+  ' is linked correctly. Secure evidence viewing is the next connection.'
+ );
 }
 </script>
