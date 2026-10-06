@@ -2935,7 +2935,11 @@ document.addEventListener(
 <script>
 /* LIVE COMPLIANCE OBLIGATION DETAIL */
 
+let currentLiveObligationId=null;
+
 async function openLiveObligation(id){
+
+ currentLiveObligationId=id;
 
  try{
 
