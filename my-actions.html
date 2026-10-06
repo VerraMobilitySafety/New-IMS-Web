@@ -2699,7 +2699,25 @@ async function submitControlVerification(){
    }
   );
 
-  const data=await response.json();
+  const raw=await response.text();
+
+  console.log(
+   'Control Verification API response',
+   response.status,
+   raw
+  );
+
+  let data={};
+
+  try{
+   data=raw ? JSON.parse(raw) : {};
+  }catch(parseError){
+   data={
+    message:
+     raw||
+     `API returned HTTP ${response.status}`
+   };
+  }
 
   if(!response.ok){
    throw new Error(
