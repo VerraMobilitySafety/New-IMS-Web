@@ -4723,3 +4723,106 @@ function openGovernanceDocument(documentId){
  font:700 9px Montserrat,Verdana,Arial,sans-serif;
 }
 </style>
+
+<script>
+function renderControlVerifications(controls){
+
+ const target=document.getElementById('controlVerificationDetail');
+ if(!target)return;
+
+ const items=[];
+
+ (controls||[]).forEach(control=>{
+  (control.verifications||[]).forEach(v=>{
+   items.push({
+    ...v,
+    control_code:control.control_code,
+    control_title:control.control_title
+   });
+  });
+ });
+
+ if(!items.length){
+  target.innerHTML=`
+   <div class="compliance-empty-state">
+    No control verification activities configured.
+   </div>`;
+  return;
+ }
+
+ target.innerHTML=items.map(v=>{
+
+  const o=v.latest_occurrence;
+  let actionDate='—';
+
+  if(o?.due_date){
+   const d=new Date(o.due_date+'T00:00:00');
+   d.setDate(d.getDate()-14);
+
+   actionDate=d.toLocaleDateString(
+    'en-AU',
+    {
+     day:'numeric',
+     month:'short',
+     year:'numeric'
+    }
+   );
+  }
+
+  return `
+   <div class="control-verification-card">
+
+    <div class="control-verification-head">
+     <strong>
+      ${escapeComplianceText(v.verification_title)}
+     </strong>
+
+     <small>
+      ${escapeComplianceText(v.frequency||'')}
+      ${v.owner_name
+       ? ' · '+escapeComplianceText(v.owner_name)
+       : ''}
+     </small>
+    </div>
+
+    <div class="control-verification-grid">
+
+     <div>
+      <span>Next Due</span>
+      <strong>
+       ${o?.due_date
+        ? formatComplianceDate(o.due_date)
+        : '—'}
+      </strong>
+     </div>
+
+     <div>
+      <span>Status</span>
+      <strong>
+       ${escapeComplianceText(
+        o?.status||'Not Scheduled'
+       )}
+      </strong>
+     </div>
+
+     <div>
+      <span>My Actions From</span>
+      <strong>${actionDate}</strong>
+     </div>
+
+     <div>
+      <span>Result</span>
+      <strong>
+       ${escapeComplianceText(
+        o?.verification_result||
+        'Not Yet Verified'
+       )}
+      </strong>
+     </div>
+
+    </div>
+
+   </div>`;
+ }).join('');
+}
+</script>
