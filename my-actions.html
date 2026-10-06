@@ -2732,3 +2732,103 @@ async function submitControlVerification(){
  }
 }
 </script>
+
+<style>
+/* =========================================
+   CONTROL VERIFICATION FORM
+========================================= */
+
+#controlVerificationPanel{
+ font-family:Montserrat,Verdana,Arial,sans-serif !important;
+}
+
+#controlVerificationPanel .field{
+ margin:0 0 14px !important;
+}
+
+#controlVerificationPanel .field > label{
+ display:block !important;
+ margin:0 0 7px !important;
+
+ color:var(--grey) !important;
+ font:700 8px Montserrat,Verdana,Arial,sans-serif !important;
+ letter-spacing:.7px !important;
+ text-transform:uppercase !important;
+}
+
+#controlVerificationPanel select,
+#controlVerificationPanel textarea{
+ display:block !important;
+ width:100% !important;
+ box-sizing:border-box !important;
+
+ margin:0 !important;
+ padding:11px 12px !important;
+
+ border:1px solid var(--line) !important;
+ border-radius:8px !important;
+
+ background:#fff !important;
+ color:var(--charcoal) !important;
+
+ font:500 10px Montserrat,Verdana,Arial,sans-serif !important;
+ line-height:1.5 !important;
+
+ outline:none !important;
+}
+
+#controlVerificationPanel select{
+ height:42px !important;
+}
+
+#controlVerificationPanel textarea{
+ min-height:110px !important;
+ resize:vertical !important;
+}
+
+#controlVerificationPanel select:focus,
+#controlVerificationPanel textarea:focus{
+ border-color:var(--green) !important;
+}
+
+#controlVerificationPanel .compliance-empty-state{
+ margin:4px 0 14px !important;
+ padding:11px 12px !important;
+
+ border:1px dashed var(--line) !important;
+ border-radius:8px !important;
+
+ background:#fafbf8 !important;
+ color:var(--grey) !important;
+
+ font:500 9px Montserrat,Verdana,Arial,sans-serif !important;
+ line-height:1.5 !important;
+}
+
+#controlVerificationPanel .action-btn-approve{
+ display:inline-flex !important;
+ align-items:center !important;
+ justify-content:center !important;
+
+ width:auto !important;
+ min-width:165px !important;
+
+ margin:0 !important;
+ padding:11px 16px !important;
+
+ border:1px solid var(--green) !important;
+ border-radius:8px !important;
+
+ background:var(--green) !important;
+ color:var(--charcoal) !important;
+
+ font:800 10px Montserrat,Verdana,Arial,sans-serif !important;
+
+ box-shadow:none !important;
+ cursor:pointer !important;
+}
+
+#controlVerificationPanel .action-btn-approve:hover{
+ filter:brightness(.96);
+}
+</style>
