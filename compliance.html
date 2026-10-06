@@ -1270,6 +1270,29 @@ button,input,select,textarea{font-family:inherit}
    </div>
 
 
+   <!-- CHANGE HISTORY -->
+
+   <div class="section compliance-section">
+
+    <div class="compliance-section-head">
+     <div>
+      <h3>Change History</h3>
+      <small>Administrative changes to this controlled requirement</small>
+     </div>
+    </div>
+
+    <div
+     class="timeline"
+     id="complianceChangeTimeline"
+    >
+     <div class="compliance-empty-state">
+      No administrative changes recorded.
+     </div>
+    </div>
+
+   </div>
+
+
    <!-- LEGACY EVIDENCE HOOK - HIDDEN
         Kept temporarily so existing JS does not break.
         Evidence is now represented through Records. -->
@@ -3891,8 +3914,10 @@ async function openLiveObligation(id){
   const evidence=data.evidence||[];
   const actions=data.actions||[];
   const activities=data.activities||[];
+  const changeHistory=data.change_history||[];
 
   renderComplianceActivities(activities,controls);
+  renderComplianceChangeHistory(changeHistory);
 
   document.getElementById('obligationCode').textContent=
    o.obligation_code||'OBLIGATION';
@@ -7856,5 +7881,84 @@ async function createManagedControlVerification(){
   message.textContent=error.message;
   message.className='action-decision-message error';
  }
+}
+</script>
+
+<script>
+function renderComplianceChangeHistory(history){
+
+ const target=
+  document.getElementById('complianceChangeTimeline');
+
+ if(!target)return;
+
+ if(!history || !history.length){
+
+  target.innerHTML=
+   '<div class="compliance-empty-state">No administrative changes recorded.</div>';
+
+  return;
+ }
+
+ const labels={
+  obligation_title:'Requirement Title',
+  description:'Description',
+  compliance_type:'Compliance Type',
+  source_name:'Source',
+  source_reference:'Source Reference',
+  jurisdiction:'Jurisdiction',
+  owner_user_id:'Compliance Owner',
+  owner_business_area:'Owner Business Area',
+  obligation_frequency:'Obligation Frequency',
+  effective_date:'Effective Date',
+  expiry_date:'Expiry Date',
+  review_frequency_months:'Review Frequency',
+  next_review_date:'Next Review Date',
+  evidence_required:'Evidence Requirement',
+  status:'Status'
+ };
+
+ target.innerHTML=history.map(item=>{
+
+  const label=
+   labels[item.field_name]||
+   item.field_name||
+   'Requirement';
+
+  const changedDate=item.changed_at
+   ? new Date(item.changed_at).toLocaleString(
+      'en-AU',
+      {
+       day:'numeric',
+       month:'short',
+       year:'numeric',
+       hour:'numeric',
+       minute:'2-digit'
+      }
+     )
+   : '';
+
+  return `
+   <div class="event">
+
+    <b>
+     ${escapeComplianceText(label)} changed
+    </b>
+
+    <div style="margin-top:5px">
+     ${escapeComplianceText(item.old_value||'—')}
+     →
+     ${escapeComplianceText(item.new_value||'—')}
+    </div>
+
+    <small>
+     ${escapeComplianceText(item.changed_by||'System')}
+     ${changedDate
+      ? ' · '+escapeComplianceText(changedDate)
+      : ''}
+    </small>
+
+   </div>`;
+ }).join('');
 }
 </script>
