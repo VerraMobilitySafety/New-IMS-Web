@@ -1181,8 +1181,10 @@ button,input,select,textarea{font-family:inherit}
      <div class="compliance-subsection-title">
       Governance Documents
      </div>
-     <div class="compliance-empty-state">
-      No governance documents linked.
+     <div id="controlGovernanceDocuments">
+      <div class="compliance-empty-state">
+       No governance documents linked.
+      </div>
      </div>
     </div>
 
@@ -2756,6 +2758,9 @@ async function openLiveObligation(id){
   const o=data.obligation;
   const apps=data.applicability||[];
   const controls=data.controls||[];
+
+  renderControlGovernanceDocuments(controls);
+
   const assessments=data.assessments||[];
   const evidence=data.evidence||[];
   const actions=data.actions||[];
@@ -4540,5 +4545,126 @@ async function openComplianceRecord(recordId){
 
 .compliance-section > .detail-grid{
  padding-bottom:0 !important;
+}
+</style>
+
+<script>
+function renderControlGovernanceDocuments(controls){
+
+ const target=document.getElementById(
+  'controlGovernanceDocuments'
+ );
+
+ if(!target)return;
+
+ const documents=[];
+
+ (controls||[]).forEach(control=>{
+
+  (control.governance_documents||[]).forEach(doc=>{
+
+   documents.push({
+    ...doc,
+    control_code:control.control_code,
+    control_title:control.control_title
+   });
+
+  });
+
+ });
+
+ if(!documents.length){
+
+  target.innerHTML=`
+   <div class="compliance-empty-state">
+    No governance documents linked.
+   </div>`;
+
+  return;
+ }
+
+ target.innerHTML=documents.map(doc=>`
+
+  <div class="control-document-row">
+
+   <div class="control-document-main">
+
+    <strong>
+     ${escapeComplianceText(doc.document_number)}
+     ${doc.document_title
+      ? ' — '+escapeComplianceText(doc.document_title)
+      : ''}
+    </strong>
+
+    <small>
+     ${escapeComplianceText(doc.relationship_type)}
+     ${doc.version_number
+      ? ' · v'+escapeComplianceText(doc.version_number)
+      : ''}
+     ${doc.control_code
+      ? ' · '+escapeComplianceText(doc.control_code)
+      : ''}
+    </small>
+
+   </div>
+
+   ${
+    doc.document_id
+    ? `<button
+        class="compliance-record-link"
+        onclick="openGovernanceDocument(${doc.document_id})">
+        View Document →
+       </button>`
+    : `<span class="compliance-record-locked">
+        Current version unavailable
+       </span>`
+   }
+
+  </div>
+
+ `).join('');
+}
+
+
+function openGovernanceDocument(documentId){
+
+ location.href=
+  'documents.html?id='+
+  encodeURIComponent(documentId);
+}
+</script>
+
+<style>
+.control-document-row{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:14px;
+ padding:10px 12px;
+ border:1px solid var(--line);
+ border-radius:8px;
+ background:#fff;
+ margin-bottom:7px;
+}
+
+.control-document-row:last-child{
+ margin-bottom:0;
+}
+
+.control-document-main{
+ min-width:0;
+}
+
+.control-document-main strong{
+ display:block;
+ font:700 9px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--charcoal);
+ margin-bottom:4px;
+}
+
+.control-document-main small{
+ display:block;
+ font:500 8px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--grey);
 }
 </style>
