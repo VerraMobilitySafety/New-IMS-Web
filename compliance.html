@@ -1314,6 +1314,15 @@ button,input,select,textarea{font-family:inherit}
      Create Corrective Action
     </button>
 
+    <button
+     class="btn outline"
+     id="complianceEditButton"
+     onclick="openEditComplianceRequirement()"
+     style="display:none"
+    >
+     Edit Requirement
+    </button>
+
    </div>
 
   </div>
@@ -1749,6 +1758,167 @@ button,input,select,textarea{font-family:inherit}
      onclick="submitCorrectiveAction()"
     >
      Create Action
+    </button>
+
+   </div>
+
+  </div>
+ </div>
+</div>
+
+
+<!-- EDIT COMPLIANCE REQUIREMENT DRAWER -->
+
+<div
+ class="modal-back"
+ id="editComplianceModal"
+ onclick="backdropClose(event,'editComplianceModal')"
+>
+ <div class="drawer compliance-requirement-drawer">
+
+  <div class="drawer-head">
+   <div>
+    <p>COMPLIANCE CONTROLLER</p>
+    <h2>Edit Requirement</h2>
+    <small id="editComplianceCode">Controlled Compliance Requirement</small>
+   </div>
+
+   <button
+    class="close"
+    onclick="closeModal('editComplianceModal')"
+   >×</button>
+  </div>
+
+  <div class="drawer-body">
+
+   <div class="section compliance-section">
+
+    <div class="compliance-section-head">
+     <div>
+      <h3>Requirement Details</h3>
+      <small>Controller administration of the controlled requirement</small>
+     </div>
+    </div>
+
+    <div class="manage-activity-form">
+
+     <div class="field full">
+      <label>Requirement Title</label>
+      <input id="editComplianceTitle" type="text">
+     </div>
+
+     <div class="field full">
+      <label>Description</label>
+      <textarea id="editComplianceDescription"></textarea>
+     </div>
+
+     <div class="field">
+      <label>Compliance Type</label>
+      <select id="editComplianceType">
+       <option>Client</option>
+       <option>Regulatory</option>
+       <option>Internal</option>
+      </select>
+     </div>
+
+     <div class="field">
+      <label>Compliance Owner</label>
+      <select id="editComplianceOwner">
+       <option value="">Loading users...</option>
+      </select>
+     </div>
+
+     <div class="field">
+      <label>Source</label>
+      <input id="editComplianceSource" type="text">
+     </div>
+
+     <div class="field">
+      <label>Source Reference</label>
+      <input id="editComplianceReference" type="text">
+     </div>
+
+     <div class="field">
+      <label>Jurisdiction</label>
+      <input id="editComplianceJurisdiction" type="text">
+     </div>
+
+     <div class="field">
+      <label>Owner Business Area</label>
+      <input id="editComplianceBusinessArea" type="text">
+     </div>
+
+     <div class="field">
+      <label>Obligation Frequency</label>
+      <input id="editComplianceFrequency" type="text">
+     </div>
+
+     <div class="field">
+      <label>Review Frequency</label>
+      <select id="editComplianceReviewFrequency">
+       <option value="">Not specified</option>
+       <option value="1">Monthly</option>
+       <option value="3">Quarterly</option>
+       <option value="6">Six Monthly</option>
+       <option value="12">Annual</option>
+       <option value="24">Every 2 Years</option>
+       <option value="36">Every 3 Years</option>
+      </select>
+     </div>
+
+     <div class="field">
+      <label>Effective Date</label>
+      <input id="editComplianceEffectiveDate" type="date">
+     </div>
+
+     <div class="field">
+      <label>Expiry Date</label>
+      <input id="editComplianceExpiryDate" type="date">
+     </div>
+
+     <div class="field">
+      <label>Next Review Date</label>
+      <input id="editComplianceNextReview" type="date">
+     </div>
+
+     <div class="field">
+      <label>Status</label>
+      <select id="editComplianceStatus">
+       <option>Active</option>
+       <option>Superseded</option>
+       <option>Expired</option>
+       <option>Archived</option>
+      </select>
+     </div>
+
+     <div class="field full">
+      <label>Evidence Requirement</label>
+      <textarea id="editComplianceEvidence"></textarea>
+     </div>
+
+    </div>
+
+   </div>
+
+   <div
+    id="editComplianceMessage"
+    class="action-decision-message"
+   ></div>
+
+   <div class="drawer-actions">
+
+    <button
+     class="btn outline"
+     onclick="closeModal('editComplianceModal')"
+    >
+     Cancel
+    </button>
+
+    <button
+     class="btn green"
+     onclick="saveComplianceRequirement()"
+    >
+     Save Changes
     </button>
 
    </div>
@@ -3179,6 +3349,7 @@ document.addEventListener(
 /* LIVE COMPLIANCE OBLIGATION DETAIL */
 
 let currentLiveObligationId=null;
+let currentLiveObligation=null;
 
 async function openLiveObligation(id){
 
@@ -3221,6 +3392,8 @@ async function openLiveObligation(id){
   }
 
   const o=data.obligation;
+  currentLiveObligation=o;
+
   const permissions=data.permissions||{};
 
   const reviewButton=
@@ -3245,6 +3418,14 @@ async function openLiveObligation(id){
   if(correctiveButton){
    correctiveButton.style.display=
     permissions.can_create_corrective_action ? '' : 'none';
+  }
+
+  const editButton=
+   document.getElementById('complianceEditButton');
+
+  if(editButton){
+   editButton.style.display=
+    permissions.is_controller ? '' : 'none';
   }
 
   const liveCompliance=data.live_compliance||{};
@@ -6053,6 +6234,234 @@ async function loadControllerComplianceOwners(){
 
   select.innerHTML=
    '<option value="">Unable to load users</option>';
+ }
+}
+</script>
+
+<script>
+async function openEditComplianceRequirement(){
+
+ if(!currentLiveObligationId || !currentLiveObligation){
+  alert('Compliance requirement is not loaded.');
+  return;
+ }
+
+ const o=currentLiveObligation;
+
+ document.getElementById('editComplianceCode').textContent=
+  o.obligation_code||'Controlled Compliance Requirement';
+
+ document.getElementById('editComplianceTitle').value=
+  o.obligation_title||'';
+
+ document.getElementById('editComplianceDescription').value=
+  o.description||'';
+
+ document.getElementById('editComplianceType').value=
+  o.compliance_type||'Internal';
+
+ document.getElementById('editComplianceSource').value=
+  o.source_name||'';
+
+ document.getElementById('editComplianceReference').value=
+  o.source_reference||'';
+
+ document.getElementById('editComplianceJurisdiction').value=
+  o.jurisdiction||'';
+
+ document.getElementById('editComplianceBusinessArea').value=
+  o.owner_business_area||'';
+
+ document.getElementById('editComplianceFrequency').value=
+  o.obligation_frequency||'';
+
+ document.getElementById('editComplianceReviewFrequency').value=
+  o.review_frequency_months||'';
+
+ document.getElementById('editComplianceEffectiveDate').value=
+  o.effective_date||'';
+
+ document.getElementById('editComplianceExpiryDate').value=
+  o.expiry_date||'';
+
+ document.getElementById('editComplianceNextReview').value=
+  o.next_review_date||'';
+
+ document.getElementById('editComplianceStatus').value=
+  o.status||'Active';
+
+ document.getElementById('editComplianceEvidence').value=
+  o.evidence_required||'';
+
+ document.getElementById('editComplianceMessage').textContent='';
+
+ document.getElementById('editComplianceModal')
+  .classList.add('show');
+
+ await loadEditComplianceOwners(o.owner_user_id);
+}
+
+
+async function loadEditComplianceOwners(selectedId){
+
+ const select=document.getElementById('editComplianceOwner');
+
+ select.innerHTML=
+  '<option value="">Loading users...</option>';
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+'/users/active',
+   {
+    headers:complianceAuthHeaders(),
+    cache:'no-store'
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(data.message||'Unable to load users.');
+  }
+
+  select.innerHTML=
+   '<option value="">Select Compliance Owner...</option>'+
+   (data.users||[]).map(u=>
+    `<option value="${u.id}">
+      ${escapeComplianceText(u.name)}
+      ${u.email?' — '+escapeComplianceText(u.email):''}
+     </option>`
+   ).join('');
+
+  if(selectedId){
+   select.value=String(selectedId);
+  }
+
+ }catch(error){
+
+  console.error('Unable to load Compliance Owners',error);
+
+  select.innerHTML=
+   '<option value="">Unable to load users</option>';
+ }
+}
+
+
+async function saveComplianceRequirement(){
+
+ const ownerId=
+  document.getElementById('editComplianceOwner').value;
+
+ if(!ownerId){
+  alert('Select the Compliance Owner.');
+  return;
+ }
+
+ const title=
+  document.getElementById('editComplianceTitle').value.trim();
+
+ if(!title){
+  alert('Requirement title is required.');
+  return;
+ }
+
+ const message=
+  document.getElementById('editComplianceMessage');
+
+ message.textContent='Saving changes...';
+ message.className='action-decision-message';
+
+ const payload={
+  obligation_title:title,
+  description:
+   document.getElementById('editComplianceDescription').value.trim()||null,
+
+  compliance_type:
+   document.getElementById('editComplianceType').value,
+
+  owner_user_id:Number(ownerId),
+
+  source_name:
+   document.getElementById('editComplianceSource').value.trim()||null,
+
+  source_reference:
+   document.getElementById('editComplianceReference').value.trim()||null,
+
+  jurisdiction:
+   document.getElementById('editComplianceJurisdiction').value.trim()||null,
+
+  owner_business_area:
+   document.getElementById('editComplianceBusinessArea').value.trim()||null,
+
+  obligation_frequency:
+   document.getElementById('editComplianceFrequency').value.trim()||null,
+
+  review_frequency_months:
+   document.getElementById('editComplianceReviewFrequency').value||null,
+
+  effective_date:
+   document.getElementById('editComplianceEffectiveDate').value||null,
+
+  expiry_date:
+   document.getElementById('editComplianceExpiryDate').value||null,
+
+  next_review_date:
+   document.getElementById('editComplianceNextReview').value||null,
+
+  evidence_required:
+   document.getElementById('editComplianceEvidence').value.trim()||null,
+
+  status:
+   document.getElementById('editComplianceStatus').value
+ };
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+
+   '/compliance/obligations/'+
+   currentLiveObligationId,
+   {
+    method:'PATCH',
+    headers:{
+     ...complianceAuthHeaders(),
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify(payload)
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to update Compliance requirement.'
+   );
+  }
+
+  message.textContent='Compliance requirement updated.';
+  message.className='action-decision-message success';
+
+  setTimeout(async()=>{
+
+   closeModal('editComplianceModal');
+
+   await loadComplianceRegister();
+   await openLiveObligation(currentLiveObligationId);
+
+  },800);
+
+ }catch(error){
+
+  console.error(
+   'Unable to update Compliance requirement',
+   error
+  );
+
+  message.textContent=error.message;
+  message.className='action-decision-message error';
  }
 }
 </script>
