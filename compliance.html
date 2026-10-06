@@ -3226,6 +3226,14 @@ async function openLiveObligation(id){
     permissions.can_create_corrective_action ? '' : 'none';
   }
 
+  const liveCompliance=data.live_compliance||{};
+  const liveStatus=liveCompliance.status||'Not Assessed';
+
+  document.getElementById('detailStatus').textContent=
+   liveStatus;
+
+  renderLiveCompliancePosition(liveCompliance);
+
   const apps=data.applicability||[];
   const controls=data.controls||[];
 
@@ -5888,3 +5896,70 @@ async function submitCorrectiveAction(){
  }
 }
 </script>
+
+<script>
+function renderLiveCompliancePosition(live){
+
+ const status=document.getElementById('detailStatus');
+ if(!status)return;
+
+ const container=status.closest('.compliance-position-primary');
+ if(!container)return;
+
+ let reasonBox=document.getElementById('liveComplianceReasons');
+
+ if(!reasonBox){
+  reasonBox=document.createElement('div');
+  reasonBox.id='liveComplianceReasons';
+  reasonBox.className='live-compliance-reasons';
+  container.appendChild(reasonBox);
+ }
+
+ const reasons=live.reasons||[];
+
+ status.dataset.status=live.status||'Not Assessed';
+
+ if(!reasons.length){
+  reasonBox.innerHTML='';
+  reasonBox.style.display='none';
+  return;
+ }
+
+ reasonBox.style.display='block';
+
+ reasonBox.innerHTML=reasons.map(reason=>
+  `<div>${escapeComplianceText(reason)}</div>`
+ ).join('');
+}
+</script>
+
+<style>
+.live-compliance-reasons{
+ margin-top:10px;
+ padding-top:10px;
+ border-top:1px solid var(--line);
+ font:600 8px Montserrat,Verdana,Arial,sans-serif;
+ line-height:1.5;
+ color:var(--grey);
+}
+
+.live-compliance-reasons div + div{
+ margin-top:4px;
+}
+
+#detailStatus[data-status="Compliant"]{
+ color:#2c8259 !important;
+}
+
+#detailStatus[data-status="Partially Compliant"]{
+ color:#a86b00 !important;
+}
+
+#detailStatus[data-status="Non-Compliant"]{
+ color:#b42318 !important;
+}
+
+#detailStatus[data-status="Not Assessed"]{
+ color:var(--grey) !important;
+}
+</style>
