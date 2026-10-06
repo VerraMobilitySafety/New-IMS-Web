@@ -1299,7 +1299,7 @@ button,input,select,textarea{font-family:inherit}
 
     <button
      class="btn outline"
-     onclick="prototypeAction('Manage activities')"
+     onclick="openManageActivities()"
     >
      Manage Activities
     </button>
@@ -1310,6 +1310,224 @@ button,input,select,textarea{font-family:inherit}
     >
      Create Corrective Action
     </button>
+
+   </div>
+
+  </div>
+ </div>
+</div>
+
+
+<!-- MANAGE COMPLIANCE ACTIVITIES DRAWER -->
+
+<div
+ class="modal-back"
+ id="manageActivitiesModal"
+ onclick="backdropClose(event,'manageActivitiesModal')"
+>
+ <div class="drawer compliance-requirement-drawer">
+
+  <div class="drawer-head">
+   <div>
+    <p>COMPLIANCE MANAGEMENT</p>
+    <h2>Manage Activities</h2>
+    <small id="manageActivitiesRequirement">Compliance Requirement</small>
+   </div>
+
+   <button
+    class="close"
+    onclick="closeModal('manageActivitiesModal')"
+   >×</button>
+  </div>
+
+  <div class="drawer-body">
+
+   <div class="manage-activity-options">
+
+    <button
+     class="manage-activity-option active"
+     type="button"
+     onclick="showCreateComplianceActivity(this)"
+    >
+     <strong>＋ Create Activity</strong>
+     <span>Create scheduled work for this requirement</span>
+    </button>
+
+    <button
+     class="manage-activity-option"
+     type="button"
+     onclick="showLinkComplianceActivity(this)"
+    >
+     <strong>Link Existing Activity</strong>
+     <span>Use work managed elsewhere in New IMS</span>
+    </button>
+
+   </div>
+
+   <div id="createComplianceActivityPanel">
+
+    <div class="section compliance-section">
+
+     <div class="compliance-section-head">
+      <div>
+       <h3>Create Compliance Activity</h3>
+       <small>Define what must happen and when</small>
+      </div>
+     </div>
+
+     <div class="manage-activity-form">
+
+      <div class="field full">
+       <label>Activity Title</label>
+       <input
+        id="activityTitle"
+        type="text"
+        placeholder="e.g. Conduct quarterly operational risk review"
+       >
+      </div>
+
+      <div class="field full">
+       <label>Description</label>
+       <textarea
+        id="activityDescription"
+        placeholder="Describe what needs to be completed..."
+       ></textarea>
+      </div>
+
+      <div class="field">
+       <label>Assigned To</label>
+       <select id="activityOwner">
+        <option value="">Loading users...</option>
+       </select>
+      </div>
+
+      <div class="field">
+       <label>Frequency</label>
+       <select id="activityFrequency">
+        <option value="">Select frequency...</option>
+        <option>Once</option>
+        <option>Monthly</option>
+        <option>Quarterly</option>
+        <option>Six Monthly</option>
+        <option>Annual</option>
+        <option>Ongoing</option>
+        <option>Event Driven</option>
+       </select>
+      </div>
+
+      <div class="field">
+       <label>Next Due Date</label>
+       <input id="activityNextDue" type="date">
+      </div>
+
+      <div class="field">
+       <label>My Actions Lead Time</label>
+       <select id="activityLeadTime">
+        <option value="7">7 days</option>
+        <option value="14" selected>14 days</option>
+        <option value="30">30 days</option>
+        <option value="60">60 days</option>
+        <option value="90">90 days</option>
+       </select>
+      </div>
+
+      <div class="field">
+       <label>Record Required</label>
+       <select
+        id="activityRecordRequired"
+        onchange="toggleActivityRecordFields()"
+       >
+        <option value="true" selected>Yes</option>
+        <option value="false">No</option>
+       </select>
+      </div>
+
+      <div class="field">
+       <label>Required Record Type</label>
+       <input
+        id="activityRecordType"
+        type="text"
+        placeholder="e.g. Risk Review"
+       >
+      </div>
+
+      <div class="field full">
+       <label>Required Record Title</label>
+       <input
+        id="activityRecordTitle"
+        type="text"
+        placeholder="e.g. Quarterly Operational Risk Review Record"
+       >
+      </div>
+
+      <div class="field">
+       <label>Security Classification</label>
+       <select id="activitySecurity">
+        <option>Internal</option>
+        <option>Public</option>
+        <option>Confidential</option>
+        <option>Restricted</option>
+       </select>
+      </div>
+
+      <div class="field">
+       <label>Retention Period</label>
+       <select id="activityRetention">
+        <option value="">Not specified</option>
+        <option value="12">1 year</option>
+        <option value="36">3 years</option>
+        <option value="60">5 years</option>
+        <option value="84">7 years</option>
+        <option value="120">10 years</option>
+       </select>
+      </div>
+
+     </div>
+
+    </div>
+
+    <div
+     id="manageActivityMessage"
+     class="action-decision-message"
+    ></div>
+
+    <div class="drawer-actions">
+     <button
+      class="btn outline"
+      onclick="closeModal('manageActivitiesModal')"
+     >
+      Cancel
+     </button>
+
+     <button
+      class="btn green"
+      onclick="createComplianceActivity()"
+     >
+      Create Activity
+     </button>
+    </div>
+
+   </div>
+
+   <div id="linkComplianceActivityPanel" style="display:none">
+
+    <div class="section compliance-section">
+     <div class="compliance-section-head">
+      <div>
+       <h3>Link Existing Activity</h3>
+       <small>Use an activity already managed elsewhere in New IMS</small>
+      </div>
+     </div>
+
+     <div style="padding:16px">
+      <div class="compliance-empty-state">
+       Link Existing Activity will become available as Risk,
+       Assurance, Training, Maintenance and other IMS modules
+       expose their managed activities.
+      </div>
+     </div>
+
+    </div>
 
    </div>
 
@@ -4826,3 +5044,300 @@ function renderControlVerifications(controls){
  }).join('');
 }
 </script>
+
+<script>
+let manageActivitiesObligationId=null;
+let activeComplianceUsers=[];
+
+async function openManageActivities(){
+
+ if(!currentLiveObligationId){
+  alert('Compliance requirement is not loaded.');
+  return;
+ }
+
+ manageActivitiesObligationId=currentLiveObligationId;
+
+ const title=document.getElementById('obligationTitle')?.textContent||'';
+
+ document.getElementById('manageActivitiesRequirement').textContent=title;
+
+ openModal('manageActivitiesModal');
+
+ showCreateComplianceActivity(
+  document.querySelector('.manage-activity-option')
+ );
+
+ await loadComplianceActivityUsers();
+}
+
+
+function showCreateComplianceActivity(button){
+
+ document.getElementById('createComplianceActivityPanel').style.display='block';
+ document.getElementById('linkComplianceActivityPanel').style.display='none';
+
+ document.querySelectorAll('.manage-activity-option')
+  .forEach(b=>b.classList.remove('active'));
+
+ if(button)button.classList.add('active');
+}
+
+
+function showLinkComplianceActivity(button){
+
+ document.getElementById('createComplianceActivityPanel').style.display='none';
+ document.getElementById('linkComplianceActivityPanel').style.display='block';
+
+ document.querySelectorAll('.manage-activity-option')
+  .forEach(b=>b.classList.remove('active'));
+
+ if(button)button.classList.add('active');
+}
+
+
+async function loadComplianceActivityUsers(){
+
+ const select=document.getElementById('activityOwner');
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+'/users/active',
+   {
+    headers:complianceAuthHeaders(),
+    cache:'no-store'
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(data.message||'Unable to load users.');
+  }
+
+  activeComplianceUsers=data.users||[];
+
+  select.innerHTML=
+   '<option value="">Select person...</option>'+
+   activeComplianceUsers.map(u=>
+    `<option value="${u.id}">
+      ${escapeComplianceText(u.name)}
+      ${u.email?' — '+escapeComplianceText(u.email):''}
+     </option>`
+   ).join('');
+
+ }catch(error){
+
+  console.error('Unable to load activity users',error);
+
+  select.innerHTML=
+   '<option value="">Unable to load users</option>';
+ }
+}
+
+
+function toggleActivityRecordFields(){
+
+ const required=
+  document.getElementById('activityRecordRequired').value==='true';
+
+ document.getElementById('activityRecordType').disabled=!required;
+ document.getElementById('activityRecordTitle').disabled=!required;
+}
+
+
+async function createComplianceActivity(){
+
+ const title=document.getElementById('activityTitle').value.trim();
+ const description=document.getElementById('activityDescription').value.trim();
+ const owner=document.getElementById('activityOwner').value;
+ const frequency=document.getElementById('activityFrequency').value;
+ const nextDue=document.getElementById('activityNextDue').value;
+ const leadTime=Number(document.getElementById('activityLeadTime').value);
+ const recordRequired=
+  document.getElementById('activityRecordRequired').value==='true';
+
+ const recordType=document.getElementById('activityRecordType').value.trim();
+ const recordTitle=document.getElementById('activityRecordTitle').value.trim();
+ const security=document.getElementById('activitySecurity').value;
+ const retention=document.getElementById('activityRetention').value;
+
+ if(!title){
+  alert('Enter an activity title.');
+  return;
+ }
+
+ if(!owner){
+  alert('Select who is responsible for the activity.');
+  return;
+ }
+
+ if(!frequency){
+  alert('Select the activity frequency.');
+  return;
+ }
+
+ if(
+  !['Ongoing','Event Driven'].includes(frequency)
+  && !nextDue
+ ){
+  alert('Select the next due date.');
+  return;
+ }
+
+ if(recordRequired && !recordType){
+  alert('Enter the required record type.');
+  return;
+ }
+
+ const message=document.getElementById('manageActivityMessage');
+
+ message.textContent='Creating activity...';
+ message.className='action-decision-message';
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+
+   '/compliance/obligations/'+
+   manageActivitiesObligationId+
+   '/activities',
+   {
+    method:'POST',
+    headers:{
+     ...complianceAuthHeaders(),
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     activity_title:title,
+     description:description,
+     owner_user_id:Number(owner),
+     frequency:frequency,
+     next_due_date:nextDue||null,
+     lead_time_days:leadTime,
+     record_required:recordRequired,
+     required_record_type:recordRequired?recordType:null,
+     required_record_title:recordRequired?recordTitle:null,
+     security_classification:security,
+     retention_period_months:retention?Number(retention):null
+    })
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(data.message||'Unable to create activity.');
+  }
+
+  message.textContent=
+   `${data.activity.activity_code} created successfully.`;
+
+  message.className='action-decision-message success';
+
+  setTimeout(async()=>{
+
+   closeModal('manageActivitiesModal');
+
+   await openLiveObligation(
+    manageActivitiesObligationId
+   );
+
+  },900);
+
+ }catch(error){
+
+  console.error('Unable to create Compliance activity',error);
+
+  message.textContent=error.message;
+  message.className='action-decision-message error';
+ }
+}
+</script>
+
+<style>
+.manage-activity-options{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:10px;
+ margin-bottom:16px;
+}
+
+.manage-activity-option{
+ border:1px solid var(--line);
+ border-radius:9px;
+ background:#fff;
+ padding:13px 14px;
+ text-align:left;
+ cursor:pointer;
+}
+
+.manage-activity-option.active{
+ border-color:var(--green);
+ box-shadow:inset 0 0 0 1px var(--green);
+ background:#f7f9ed;
+}
+
+.manage-activity-option strong{
+ display:block;
+ font:800 10px Montserrat,Verdana,Arial,sans-serif;
+ margin-bottom:4px;
+}
+
+.manage-activity-option span{
+ display:block;
+ font:500 8px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--grey);
+ line-height:1.4;
+}
+
+.manage-activity-form{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:13px;
+ padding:16px;
+}
+
+.manage-activity-form .full{
+ grid-column:1/-1;
+}
+
+.manage-activity-form label{
+ display:block;
+ font:700 8px Montserrat,Verdana,Arial,sans-serif;
+ text-transform:uppercase;
+ letter-spacing:.6px;
+ color:var(--grey);
+ margin-bottom:6px;
+}
+
+.manage-activity-form input,
+.manage-activity-form select,
+.manage-activity-form textarea{
+ width:100%;
+ box-sizing:border-box;
+ border:1px solid var(--line);
+ border-radius:8px;
+ padding:10px 11px;
+ background:#fff;
+ color:var(--charcoal);
+ font:600 10px Montserrat,Verdana,Arial,sans-serif;
+}
+
+.manage-activity-form textarea{
+ min-height:80px;
+ resize:vertical;
+}
+
+@media(max-width:700px){
+ .manage-activity-options,
+ .manage-activity-form{
+  grid-template-columns:1fr;
+ }
+
+ .manage-activity-form .full{
+  grid-column:auto;
+ }
+}
+</style>
