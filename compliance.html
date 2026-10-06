@@ -1077,94 +1077,177 @@ button,input,select,textarea{font-family:inherit}
  id="obligationModal"
  onclick="backdropClose(event,'obligationModal')"
 >
-
- <div class="drawer">
+ <div class="drawer compliance-requirement-drawer">
 
   <div class="drawer-head">
+   <div>
+    <p id="obligationCode">COMPLIANCE REQUIREMENT</p>
+    <h2 id="obligationTitle">Compliance Requirement</h2>
+    <small id="obligationSubtitle">Controlled compliance requirement</small>
+   </div>
 
    <button
     class="close"
     onclick="closeModal('obligationModal')"
-   >
-    ×
-   </button>
-
-   <small id="obligationCode">OBLIGATION</small>
-
-   <h2 id="obligationTitle">
-    Compliance Obligation
-   </h2>
-
-   <p id="obligationSubtitle"></p>
-
+    aria-label="Close"
+   >×</button>
   </div>
 
   <div class="drawer-body">
 
-   <div class="detail-grid">
+   <!-- COMPLIANCE POSITION -->
 
-    <div class="detail">
-     <label>Compliance Type</label>
-     <strong id="detailType">—</strong>
+   <div class="compliance-position">
+
+    <div class="compliance-position-primary">
+     <span>Current Compliance Status</span>
+     <strong id="detailStatus">Not Assessed</strong>
     </div>
 
-    <div class="detail">
-     <label>Current Assessment</label>
-     <strong id="detailStatus">—</strong>
-    </div>
+    <div class="compliance-position-meta">
+     <div>
+      <span>Compliance Owner</span>
+      <strong id="detailOwner">—</strong>
+     </div>
 
-    <div class="detail">
-     <label>Source</label>
-     <strong id="detailSource">—</strong>
-    </div>
-
-    <div class="detail">
-     <label>Source Reference</label>
-     <strong id="detailReference">—</strong>
-    </div>
-
-    <div class="detail">
-     <label>Applicability</label>
-     <strong id="detailApplicability">—</strong>
-    </div>
-
-    <div class="detail">
-     <label>Frequency</label>
-     <strong id="detailFrequency">—</strong>
-    </div>
-
-   </div>
-
-   <div class="section">
-    <h3>Description</h3>
-    <p
-     id="detailDescription"
-     style="font-size:10px;line-height:1.6;color:#625d59"
-    ></p>
-   </div>
-
-   <div class="section" id="controlSection">
-    <h3>Controls</h3>
-
-    <div class="detail">
-     <label>Primary Control</label>
-     <strong id="detailControl">—</strong>
-    </div>
-
-   </div>
-
-   <div class="section">
-    <h3>Activities & Records</h3>
-
-    <div id="complianceActivitiesDetail">
-     <div class="detail">
-      <strong>No compliance activities configured.</strong>
+     <div>
+      <span>Type</span>
+      <strong id="detailType">—</strong>
      </div>
     </div>
+
    </div>
 
-   <div class="section">
-    <h3>Assessment History</h3>
+
+   <!-- REQUIREMENT OVERVIEW -->
+
+   <div class="section compliance-section">
+
+    <div class="compliance-section-head">
+     <div>
+      <h3>Requirement</h3>
+      <small>What we are required to comply with</small>
+     </div>
+    </div>
+
+    <div class="detail-grid">
+
+     <div class="detail">
+      <span>Source</span>
+      <strong id="detailSource">—</strong>
+     </div>
+
+     <div class="detail">
+      <span>Reference</span>
+      <strong id="detailReference">—</strong>
+     </div>
+
+     <div class="detail">
+      <span>Applies To</span>
+      <strong id="detailApplicability">—</strong>
+     </div>
+
+     <div class="detail">
+      <span>Review Frequency</span>
+      <strong id="detailFrequency">—</strong>
+     </div>
+
+    </div>
+
+    <div class="detail compliance-description">
+     <span>Requirement Description</span>
+     <strong id="detailDescription">—</strong>
+    </div>
+
+   </div>
+
+
+   <!-- CONTROLS -->
+
+   <div class="section compliance-section">
+
+    <div class="compliance-section-head">
+     <div>
+      <h3>Controls</h3>
+      <small>How the requirement is controlled and verified</small>
+     </div>
+    </div>
+
+    <div id="detailControl">
+     No controls linked.
+    </div>
+
+    <div class="compliance-subsection">
+     <div class="compliance-subsection-title">
+      Governance Documents
+     </div>
+     <div class="compliance-empty-state">
+      No governance documents linked.
+     </div>
+    </div>
+
+    <div class="compliance-subsection">
+     <div class="compliance-subsection-title">
+      Control Verification
+     </div>
+     <div class="compliance-empty-state">
+      No control verification activities configured.
+     </div>
+    </div>
+
+   </div>
+
+
+   <!-- ACTIVITIES -->
+
+   <div class="section compliance-section">
+
+    <div class="compliance-section-head">
+     <div>
+      <h3>Activities</h3>
+      <small>What must happen to maintain compliance</small>
+     </div>
+    </div>
+
+    <div id="complianceActivitiesDetail">
+     <div class="compliance-empty-state">
+      No compliance activities configured.
+     </div>
+    </div>
+
+   </div>
+
+
+   <!-- RECORDS -->
+
+   <div class="section compliance-section">
+
+    <div class="compliance-section-head">
+     <div>
+      <h3>Records</h3>
+      <small>Proof that required compliance activities were completed</small>
+     </div>
+    </div>
+
+    <div id="complianceRecordsDetail">
+     <div class="compliance-empty-state">
+      No compliance records available.
+     </div>
+    </div>
+
+   </div>
+
+
+   <!-- ASSESSMENT HISTORY -->
+
+   <div class="section compliance-section">
+
+    <div class="compliance-section-head">
+     <div>
+      <h3>Assessment History</h3>
+      <small>Formal assessments of this requirement</small>
+     </div>
+    </div>
 
     <div
      class="timeline"
@@ -1173,51 +1256,57 @@ button,input,select,textarea{font-family:inherit}
 
    </div>
 
-   <div class="section">
-    <h3>Evidence</h3>
 
-    <div
-     class="detail"
-     id="evidenceDetail"
-    >
-     <strong>—</strong>
+   <!-- LEGACY EVIDENCE HOOK - HIDDEN
+        Kept temporarily so existing JS does not break.
+        Evidence is now represented through Records. -->
+
+   <div id="evidenceDetail" style="display:none"></div>
+
+
+   <!-- CORRECTIVE ACTIONS -->
+
+   <div class="section compliance-section">
+
+    <div class="compliance-section-head">
+     <div>
+      <h3>Corrective Actions</h3>
+      <small>Actions raised to address compliance gaps</small>
+     </div>
+    </div>
+
+    <div id="actionDetail">
+     <div class="compliance-empty-state">
+      No corrective actions recorded.
+     </div>
     </div>
 
    </div>
 
-   <div class="section">
-    <h3>Actions</h3>
 
-    <div
-     class="detail"
-     id="actionDetail"
-    >
-     <strong>—</strong>
-    </div>
+   <!-- GOVERNANCE ACTIONS -->
 
-   </div>
-
-   <div class="drawer-actions">
+   <div class="drawer-actions compliance-governance-actions">
 
     <button
      class="btn green"
-     onclick="prototypeAction('New assessment')"
+     onclick="prototypeAction('Review and assess')"
     >
-     ＋ New Assessment
+     Review &amp; Assess
     </button>
 
     <button
      class="btn outline"
-     onclick="prototypeAction('Add evidence')"
+     onclick="prototypeAction('Manage activities')"
     >
-     Add Evidence
+     Manage Activities
     </button>
 
     <button
      class="btn outline"
-     onclick="prototypeAction('Create action')"
+     onclick="prototypeAction('Create corrective action')"
     >
-     Create Action
+     Create Corrective Action
     </button>
 
    </div>
@@ -3806,115 +3895,163 @@ async function submitLinkExisting(){
 <script>
 function renderComplianceActivities(activities){
 
- const target=document.getElementById(
-  'complianceActivitiesDetail'
- );
+ const activityTarget=
+  document.getElementById('complianceActivitiesDetail');
 
- if(!target)return;
+ const recordTarget=
+  document.getElementById('complianceRecordsDetail');
+
+ if(!activityTarget || !recordTarget)return;
 
  if(!activities || !activities.length){
 
-  target.innerHTML=`
-   <div class="detail">
-    <strong>No compliance activities configured.</strong>
-   </div>`;
+  activityTarget.innerHTML=
+   '<div class="compliance-empty-state">No compliance activities configured.</div>';
+
+  recordTarget.innerHTML=
+   '<div class="compliance-empty-state">No compliance records available.</div>';
 
   return;
  }
 
- target.innerHTML=activities.map(activity=>{
+ activityTarget.innerHTML=activities.map(activity=>{
 
   const occurrences=activity.occurrences||[];
 
-  const rows=occurrences.length
-   ? occurrences.map(o=>{
-
-      let recordHtml=
-       '<span class="compliance-record-locked">Record required</span>';
-
-      if(o.record){
-
-       if(o.record.can_view){
-
-        recordHtml=`
-         <button
-          class="compliance-record-link"
-          onclick="openComplianceRecord(${o.record.id})"
-         >
-          ${escapeComplianceText(o.record.record_code)}
-          ${o.record.file_name
-           ? ' · '+escapeComplianceText(o.record.file_name)
-           : ''
-          }
-         </button>`;
-
-       }else{
-
-        recordHtml=`
-         <span class="compliance-record-locked">
-          ${escapeComplianceText(o.record.record_code)}
-          · Restricted
-         </span>`;
-       }
-      }
-
-      return `
-       <div class="compliance-occurrence">
-
-        <div>
-         <strong>
-          ${escapeComplianceText(o.period_label||'Activity')}
-         </strong>
-        </div>
-
-        <div>
-         ${formatComplianceDate(o.due_date)}
-        </div>
-
-        <div>
-         ${escapeComplianceText(o.status||'—')}
-        </div>
-
-        <div>
-         ${recordHtml}
-        </div>
-
-       </div>`;
-     }).join('')
-   : `<div class="compliance-occurrence">
-       <div>No activity occurrences yet.</div>
-      </div>`;
+  const next=occurrences
+   .filter(o=>!['Completed','Cancelled','Not Required'].includes(o.status))
+   .sort((a,b)=>String(a.due_date||'').localeCompare(String(b.due_date||'')))[0];
 
   return `
    <div class="compliance-activity-card">
 
     <div class="compliance-activity-head">
-
-     <strong>
-      ${escapeComplianceText(activity.activity_title)}
-     </strong>
-
+     <strong>${escapeComplianceText(activity.activity_title)}</strong>
      <small>
       ${escapeComplianceText(activity.frequency||'')}
       ${activity.owner_name
        ? ' · '+escapeComplianceText(activity.owner_name)
-       : ''
-      }
-      ${activity.record_required
-       ? ' · Record required'
-       : ''
-      }
+       : ''}
+     </small>
+    </div>
+
+    <div class="compliance-activity-summary">
+
+     <div>
+      <span>Next Due</span>
+      <strong>
+       ${next
+        ? formatComplianceDate(next.due_date)
+        : 'No upcoming occurrence'}
+      </strong>
+     </div>
+
+     <div>
+      <span>Status</span>
+      <strong>
+       ${next
+        ? escapeComplianceText(next.status)
+        : 'Up to date'}
+      </strong>
+     </div>
+
+     <div>
+      <span>Required Record</span>
+      <strong>
+       ${escapeComplianceText(
+        activity.required_record_type||
+        activity.required_record_title||
+        (activity.record_required?'Required':'Not Required')
+       )}
+      </strong>
+     </div>
+
+    </div>
+
+   </div>`;
+ }).join('');
+
+
+ const records=[];
+
+ activities.forEach(activity=>{
+  (activity.occurrences||[]).forEach(occurrence=>{
+   if(occurrence.record){
+    records.push({
+     activity,
+     occurrence,
+     record:occurrence.record
+    });
+   }
+  });
+ });
+
+ if(!records.length){
+
+  recordTarget.innerHTML=
+   '<div class="compliance-empty-state">No compliance records available.</div>';
+
+  return;
+ }
+
+ recordTarget.innerHTML=records.map(item=>{
+
+  const r=item.record;
+  const o=item.occurrence;
+
+  const action=r.can_view
+   ? `<button
+       class="compliance-record-link"
+       onclick="openComplianceRecord(${r.id})">
+       View Record →
+      </button>`
+   : `<span class="compliance-record-locked">
+       Restricted
+      </span>`;
+
+  return `
+   <div class="compliance-record-card">
+
+    <div class="compliance-record-code">
+     ${escapeComplianceText(r.record_code)}
+    </div>
+
+    <div class="compliance-record-main">
+
+     <strong>
+      ${escapeComplianceText(
+       r.record_title||'Compliance Record'
+      )}
+     </strong>
+
+     <small>
+      ${escapeComplianceText(
+       item.activity.activity_title||''
+      )}
+      ${o.period_label
+       ? ' · '+escapeComplianceText(o.period_label)
+       : ''}
+      ${o.completed_date
+       ? ' · '+formatComplianceDate(o.completed_date)
+       : ''}
+     </small>
+
+     <small>
+      ${escapeComplianceText(
+       r.security_classification||'Internal'
+      )}
+      ${r.file_name
+       ? ' · '+escapeComplianceText(r.file_name)
+       : ' · System Record'}
      </small>
 
     </div>
 
-    ${rows}
+    <div>${action}</div>
 
    </div>`;
  }).join('');
 }
-
-
 async function openComplianceRecord(recordId){
 
  try{
@@ -3966,3 +4103,229 @@ async function openComplianceRecord(recordId){
  }
 }
 </script>
+
+<style>
+/* COMPLIANCE REQUIREMENT DRAWER */
+
+.compliance-requirement-drawer{
+ width:min(820px,94vw) !important;
+}
+
+.compliance-position{
+ display:grid;
+ grid-template-columns:1.15fr 1fr;
+ gap:12px;
+ margin-bottom:18px;
+}
+
+.compliance-position-primary,
+.compliance-position-meta{
+ border:1px solid var(--line);
+ border-radius:10px;
+ background:#fff;
+}
+
+.compliance-position-primary{
+ padding:17px 18px;
+}
+
+.compliance-position-primary span,
+.compliance-position-meta span{
+ display:block;
+ color:var(--grey);
+ font:700 8px Montserrat,Verdana,Arial,sans-serif;
+ letter-spacing:.7px;
+ text-transform:uppercase;
+ margin-bottom:6px;
+}
+
+.compliance-position-primary strong{
+ display:block;
+ color:var(--charcoal);
+ font:800 17px Montserrat,Verdana,Arial,sans-serif;
+}
+
+.compliance-position-meta{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+}
+
+.compliance-position-meta > div{
+ padding:15px 16px;
+}
+
+.compliance-position-meta > div + div{
+ border-left:1px solid var(--line);
+}
+
+.compliance-position-meta strong{
+ font:700 10px Montserrat,Verdana,Arial,sans-serif;
+}
+
+.compliance-section{
+ margin-bottom:14px !important;
+ padding:0 !important;
+ border:1px solid var(--line);
+ border-radius:10px;
+ overflow:hidden;
+ background:#fff;
+}
+
+.compliance-section-head{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ padding:14px 16px;
+ border-bottom:1px solid var(--line);
+ background:#fafbf8;
+}
+
+.compliance-section-head h3{
+ margin:0 0 3px !important;
+ font:800 11px Montserrat,Verdana,Arial,sans-serif !important;
+ color:var(--charcoal);
+}
+
+.compliance-section-head small{
+ display:block;
+ color:var(--grey);
+ font:500 8px Montserrat,Verdana,Arial,sans-serif;
+}
+
+.compliance-section > .detail-grid{
+ padding:14px 16px 0;
+}
+
+.compliance-description{
+ margin:0 16px 16px;
+}
+
+.compliance-section > #detailControl,
+.compliance-section > #complianceActivitiesDetail,
+.compliance-section > #complianceRecordsDetail,
+.compliance-section > #assessmentTimeline,
+.compliance-section > #actionDetail{
+ padding:14px 16px;
+}
+
+.compliance-subsection{
+ margin:0 16px 14px;
+ padding-top:13px;
+ border-top:1px solid var(--line);
+}
+
+.compliance-subsection-title{
+ font:800 9px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--charcoal);
+ margin-bottom:8px;
+}
+
+.compliance-empty-state{
+ padding:11px 12px;
+ border:1px dashed var(--line);
+ border-radius:8px;
+ color:var(--grey);
+ font:500 9px Montserrat,Verdana,Arial,sans-serif;
+ background:#fbfbfa;
+}
+
+.compliance-governance-actions{
+ position:sticky;
+ bottom:0;
+ background:#fff;
+ border-top:1px solid var(--line);
+ margin:20px -24px -24px !important;
+ padding:15px 24px !important;
+ z-index:3;
+}
+
+@media(max-width:700px){
+ .compliance-position{
+  grid-template-columns:1fr;
+ }
+
+ .compliance-position-meta{
+  grid-template-columns:1fr;
+ }
+
+ .compliance-position-meta > div + div{
+  border-left:0;
+  border-top:1px solid var(--line);
+ }
+}
+</style>
+
+<style>
+.compliance-activity-summary{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+}
+
+.compliance-activity-summary > div{
+ padding:11px 14px;
+ border-right:1px solid var(--line);
+}
+
+.compliance-activity-summary > div:last-child{
+ border-right:0;
+}
+
+.compliance-activity-summary span{
+ display:block;
+ color:var(--grey);
+ font:700 7px Montserrat,Verdana,Arial,sans-serif;
+ text-transform:uppercase;
+ letter-spacing:.6px;
+ margin-bottom:4px;
+}
+
+.compliance-activity-summary strong{
+ font:700 9px Montserrat,Verdana,Arial,sans-serif;
+}
+
+.compliance-record-card{
+ display:grid;
+ grid-template-columns:100px 1fr auto;
+ gap:14px;
+ align-items:center;
+ padding:12px 0;
+ border-bottom:1px solid var(--line);
+}
+
+.compliance-record-card:last-child{
+ border-bottom:0;
+}
+
+.compliance-record-code{
+ font:800 9px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--teal);
+}
+
+.compliance-record-main strong{
+ display:block;
+ font:700 10px Montserrat,Verdana,Arial,sans-serif;
+ margin-bottom:4px;
+}
+
+.compliance-record-main small{
+ display:block;
+ color:var(--grey);
+ font:500 8px Montserrat,Verdana,Arial,sans-serif;
+ line-height:1.5;
+}
+
+@media(max-width:700px){
+ .compliance-activity-summary{
+  grid-template-columns:1fr;
+ }
+
+ .compliance-activity-summary > div{
+  border-right:0;
+  border-bottom:1px solid var(--line);
+ }
+
+ .compliance-record-card{
+  grid-template-columns:1fr;
+ }
+}
+</style>
