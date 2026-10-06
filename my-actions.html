@@ -617,6 +617,57 @@
     </div>
 
 
+    <div id="controlVerificationPanel" style="display:none;margin-top:20px">
+
+     <div style="border-top:1px solid var(--line);padding-top:18px">
+
+      <div style="font:800 10px Montserrat,Verdana,Arial,sans-serif;margin-bottom:14px">
+       COMPLETE CONTROL VERIFICATION
+      </div>
+
+      <div class="field">
+       <label>Verification Result</label>
+       <select id="controlVerificationResult">
+        <option value="">Select result...</option>
+        <option value="Effective">Effective</option>
+        <option value="Partially Effective">Partially Effective</option>
+        <option value="Ineffective">Ineffective</option>
+       </select>
+      </div>
+
+      <div class="field" style="margin-top:12px">
+       <label>Verification Notes</label>
+       <textarea
+        id="controlVerificationNotes"
+        placeholder="Describe what was checked, the evidence considered and the basis for the result..."
+        style="width:100%;min-height:100px"
+       ></textarea>
+      </div>
+
+      <div class="compliance-empty-state" style="margin-top:12px">
+       A governed system record will be created automatically
+       when this verification is completed.
+      </div>
+
+      <button
+       type="button"
+       class="action-btn-approve"
+       onclick="submitControlVerification()"
+       style="margin-top:12px"
+      >
+       Complete Verification
+      </button>
+
+      <div
+       id="controlVerificationMessage"
+       class="action-decision-message"
+      ></div>
+
+     </div>
+
+    </div>
+
+
     <div id="complianceActivityPanel" style="display:none;margin-top:20px">
 
      <div style="border-top:1px solid var(--line);padding-top:18px">
@@ -812,6 +863,10 @@ function openActionDetail(index){
   action.source==='Compliance' &&
   action.action_type==='Corrective Action Verification';
 
+ const isControlVerification=
+  action.source==='Compliance' &&
+  action.action_type==='Control Verification';
+
  const requestType=action.request_type||'New Document';
 
  const requestLabels={
@@ -958,6 +1013,49 @@ function openActionDetail(index){
   document.getElementById('actionDetailAdditional').textContent=
    action.completion_notes||'No completion notes supplied.';
 
+ }else if(isControlVerification){
+
+  document.getElementById('actionDetailGrid').innerHTML=[
+   actionField(
+    'Control',
+    (action.control_code||'')+
+    (action.control_title
+     ? ' — '+action.control_title
+     : '')
+   ),
+   actionField(
+    'Verification',
+    action.title
+   ),
+   actionField(
+    'Frequency',
+    action.frequency
+   ),
+   actionField(
+    'Period',
+    action.period_label
+   ),
+   actionField(
+    'Due date',
+    formatActionDate(action.due_date)
+   ),
+   actionField(
+    'Status',
+    action.status
+   )
+  ].join('');
+
+  document.getElementById('actionDetailReason').textContent=
+   action.verification_description||
+   'Verify that the control is operating effectively.';
+
+  document.getElementById('actionDetailAdditional').textContent=
+   action.record_required
+    ? `Completion will create a ${
+       action.required_record_type||'Control Verification'
+      } record.`
+    : 'No completion record is required.';
+
  }else if(isComplianceActivity){
 
   document.getElementById('actionDetailGrid').innerHTML=[
@@ -1062,6 +1160,30 @@ function openActionDetail(index){
   if(isComplianceActionVerification){
    document.getElementById('complianceVerificationNotes').value='';
    document.getElementById('complianceVerificationMessage').textContent='';
+  }
+ }
+
+ const controlVerificationPanel=
+  document.getElementById('controlVerificationPanel');
+
+ if(controlVerificationPanel){
+
+  controlVerificationPanel.style.display=
+   isControlVerification ? 'block' : 'none';
+
+  if(isControlVerification){
+
+   document.getElementById(
+    'controlVerificationResult'
+   ).value='';
+
+   document.getElementById(
+    'controlVerificationNotes'
+   ).value='';
+
+   document.getElementById(
+    'controlVerificationMessage'
+   ).textContent='';
   }
  }
 
@@ -2514,3 +2636,99 @@ async function verifyCorrectiveAction(decision){
  background:#f7f7f5 !important;
 }
 </style>
+
+<script>
+async function submitControlVerification(){
+
+ if(
+  !currentAction ||
+  currentAction.action_type!=='Control Verification'
+ ){
+  alert('Control Verification is not loaded.');
+  return;
+ }
+
+ const result=
+  document.getElementById('controlVerificationResult').value;
+
+ const notes=
+  document.getElementById('controlVerificationNotes')
+   .value.trim();
+
+ if(!result){
+  alert('Select the verification result.');
+  return;
+ }
+
+ if(!notes){
+  alert('Enter verification notes.');
+  return;
+ }
+
+ const confirmed=confirm(
+  `Complete this verification as "${result}"?`
+ );
+
+ if(!confirmed)return;
+
+ const message=
+  document.getElementById('controlVerificationMessage');
+
+ message.textContent='Completing verification...';
+ message.className='action-decision-message';
+
+ try{
+
+  const response=await fetch(
+   API+
+   '/compliance/control-verifications/'+
+   currentAction.source_id+
+   '/complete',
+   {
+    method:'POST',
+    headers:{
+     'Authorization':
+      'Bearer '+localStorage.getItem('vero_session_token'),
+     'Accept':'application/json',
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     verification_result:result,
+     verification_notes:notes
+    })
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to complete Control Verification.'
+   );
+  }
+
+  message.textContent=
+   data.verification.record_code
+    ? `Verification completed. ${data.verification.record_code} created.`
+    : 'Verification completed.';
+
+  message.className='action-decision-message success';
+
+  setTimeout(()=>{
+   closeActionDetail();
+   loadActions();
+  },900);
+
+ }catch(error){
+
+  console.error(
+   'Control Verification completion failed',
+   error
+  );
+
+  message.textContent=error.message;
+  message.className='action-decision-message error';
+ }
+}
+</script>
