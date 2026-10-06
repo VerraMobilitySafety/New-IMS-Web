@@ -7973,3 +7973,75 @@ function renderComplianceChangeHistory(history){
  }).join('');
 }
 </script>
+
+<style>
+/* =========================================
+   COMPLIANCE DRAWER FINAL UI CLEANUP
+========================================= */
+
+/* Never render modal backdrops until explicitly opened */
+.modal-back{
+ display:none !important;
+ visibility:hidden !important;
+ opacity:0 !important;
+}
+
+.modal-back.show{
+ display:flex !important;
+ visibility:visible !important;
+ opacity:1 !important;
+ justify-content:flex-end !important;
+}
+
+/* Header layout */
+.drawer-head{
+ display:flex !important;
+ align-items:flex-start !important;
+ justify-content:space-between !important;
+ gap:20px !important;
+ padding:23px !important;
+}
+
+.drawer-head > div{
+ flex:1 1 auto !important;
+ min-width:0 !important;
+}
+
+/* Proper close button */
+.drawer-head .close{
+ float:none !important;
+ flex:0 0 auto !important;
+
+ display:flex !important;
+ align-items:center !important;
+ justify-content:center !important;
+
+ width:34px !important;
+ height:34px !important;
+ padding:0 !important;
+ margin:0 !important;
+
+ border:1px solid rgba(255,255,255,.22) !important;
+ border-radius:8px !important;
+
+ background:rgba(255,255,255,.06) !important;
+ color:#fff !important;
+
+ font:400 22px/1 Arial,sans-serif !important;
+
+ cursor:pointer !important;
+ transition:
+  background .15s ease,
+  border-color .15s ease !important;
+}
+
+.drawer-head .close:hover{
+ background:rgba(255,255,255,.14) !important;
+ border-color:rgba(255,255,255,.4) !important;
+}
+
+.drawer-head .close:focus-visible{
+ outline:2px solid var(--green) !important;
+ outline-offset:2px !important;
+}
+</style>
