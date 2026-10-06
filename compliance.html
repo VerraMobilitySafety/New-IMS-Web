@@ -2038,6 +2038,93 @@ button,input,select,textarea{font-family:inherit}
    </div>
 
 
+   <div id="manageLinkedControlPanel" style="display:none">
+
+    <div class="section compliance-section">
+
+     <div class="compliance-section-head">
+      <div>
+       <h3 id="managedControlTitle">Control</h3>
+       <small id="managedControlMeta">Enterprise Control</small>
+      </div>
+     </div>
+
+
+     <div class="compliance-subsection">
+
+      <div class="compliance-subsection-title">
+       Governance Documents
+      </div>
+
+      <div id="managedControlDocuments">
+       <div class="compliance-empty-state">
+        No governance documents linked.
+       </div>
+      </div>
+
+      <div class="manage-activity-form" style="margin-top:14px">
+
+       <div class="field full">
+        <label>Link Governance Document</label>
+        <select id="managedControlDocumentSelect">
+         <option value="">Loading documents...</option>
+        </select>
+       </div>
+
+       <div class="field">
+        <label>Relationship</label>
+        <select id="managedControlDocumentRelationship">
+         <option value="Governing">Governing</option>
+         <option value="Supporting">Supporting</option>
+         <option value="Reference">Reference</option>
+        </select>
+       </div>
+
+       <div class="field full">
+        <label>Notes</label>
+        <textarea
+         id="managedControlDocumentNotes"
+         placeholder="Optional document relationship notes..."
+        ></textarea>
+       </div>
+
+      </div>
+
+      <button
+       type="button"
+       class="btn green"
+       onclick="linkManagedControlDocument()"
+      >
+       Link Governance Document
+      </button>
+
+     </div>
+
+
+     <div class="compliance-subsection">
+
+      <div class="compliance-subsection-title">
+       Control Verification
+      </div>
+
+      <div id="managedControlVerification">
+       <div class="compliance-empty-state">
+        No verification configured.
+       </div>
+      </div>
+
+     </div>
+
+    </div>
+
+    <div
+     id="managedControlMessage"
+     class="action-decision-message"
+    ></div>
+
+   </div>
+
+
    <div id="createControlPanel" style="display:none">
 
     <div class="section compliance-section">
@@ -7144,15 +7231,265 @@ async function manageLinkedControl(controlId){
   return;
  }
 
- await openManageControls();
-
- const select=document.getElementById('existingControlSelect');
-
- if(select){
-  select.value=String(controlId);
- }
+ document.getElementById('manageControlsModal')
+  .classList.add('show');
 
  document.getElementById('manageControlsRequirement').textContent=
   `${control.control_code||''} — ${control.control_title||''}`;
+
+ document.querySelector(
+  '#manageControlsModal .manage-activity-options'
+ ).style.display='none';
+
+ document.getElementById(
+  'linkExistingControlPanel'
+ ).style.display='none';
+
+ document.getElementById(
+  'createControlPanel'
+ ).style.display='none';
+
+ document.getElementById(
+  'manageLinkedControlPanel'
+ ).style.display='block';
+
+ document.getElementById('managedControlTitle').textContent=
+  `${control.control_code||''} — ${control.control_title||''}`;
+
+ document.getElementById('managedControlMeta').textContent=
+  `${control.relationship_type||''} · ${control.control_type||''} · ${control.status||''}`;
+
+ renderManagedControlDocuments(control);
+
+ renderManagedControlVerification(control);
+
+ await loadGovernanceDocumentLibrary();
+
+ window.managedComplianceControlId=control.id;
+}
+</script>
+
+<script>
+async function loadGovernanceDocumentLibrary(){
+
+ const select=
+  document.getElementById('managedControlDocumentSelect');
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+'/compliance/governance-documents',
+   {
+    headers:complianceAuthHeaders(),
+    cache:'no-store'
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to load Governance Documents.'
+   );
+  }
+
+  select.innerHTML=
+   '<option value="">Select Governance Document...</option>'+
+   (data.documents||[]).map(d=>
+    `<option value="${escapeComplianceText(d.document_number)}">
+      ${escapeComplianceText(d.document_number)} —
+      ${escapeComplianceText(d.document_title)}
+      · v${escapeComplianceText(d.version_number||'')}
+     </option>`
+   ).join('');
+
+ }catch(error){
+
+  console.error(
+   'Unable to load Governance Documents',
+   error
+  );
+
+  select.innerHTML=
+   '<option value="">Unable to load documents</option>';
+ }
+}
+
+
+function renderManagedControlDocuments(control){
+
+ const target=
+  document.getElementById('managedControlDocuments');
+
+ const documents=control.governance_documents||[];
+
+ if(!documents.length){
+  target.innerHTML=
+   '<div class="compliance-empty-state">No governance documents linked.</div>';
+  return;
+ }
+
+ target.innerHTML=documents.map(doc=>`
+  <div class="compliance-record-card">
+
+   <div class="compliance-record-code">
+    ${escapeComplianceText(doc.document_number||'')}
+   </div>
+
+   <div class="compliance-record-main">
+    <strong>
+     ${escapeComplianceText(doc.document_title||'Governance Document')}
+    </strong>
+
+    <small>
+     ${escapeComplianceText(doc.relationship_type||'')}
+     ${doc.version_number
+      ? ' · Current v'+escapeComplianceText(doc.version_number)
+      : ''}
+    </small>
+   </div>
+
+  </div>
+ `).join('');
+}
+
+
+function renderManagedControlVerification(control){
+
+ const target=
+  document.getElementById('managedControlVerification');
+
+ const verifications=control.verifications||[];
+
+ if(!verifications.length){
+  target.innerHTML=
+   '<div class="compliance-empty-state">No verification configured.</div>';
+  return;
+ }
+
+ target.innerHTML=verifications.map(v=>{
+
+  const o=v.latest_occurrence;
+
+  return `
+   <div class="control-verification-card">
+
+    <div class="control-verification-head">
+     <strong>
+      ${escapeComplianceText(v.verification_title||'')}
+     </strong>
+
+     <small>
+      ${escapeComplianceText(v.frequency||'')}
+      ${v.owner_name
+       ? ' · '+escapeComplianceText(v.owner_name)
+       : ''}
+     </small>
+    </div>
+
+    <div class="control-verification-grid">
+
+     <div>
+      <span>Status</span>
+      <strong>
+       ${escapeComplianceText(o?.status||'Not Scheduled')}
+      </strong>
+     </div>
+
+     <div>
+      <span>Result</span>
+      <strong>
+       ${escapeComplianceText(
+        o?.verification_result||'Not Yet Verified'
+       )}
+      </strong>
+     </div>
+
+    </div>
+
+   </div>`;
+ }).join('');
+}
+
+
+async function linkManagedControlDocument(){
+
+ const controlId=window.managedComplianceControlId;
+
+ const documentNumber=
+  document.getElementById(
+   'managedControlDocumentSelect'
+  ).value;
+
+ if(!controlId){
+  alert('Control is not loaded.');
+  return;
+ }
+
+ if(!documentNumber){
+  alert('Select a Governance Document.');
+  return;
+ }
+
+ const message=
+  document.getElementById('managedControlMessage');
+
+ message.textContent='Linking Governance Document...';
+ message.className='action-decision-message';
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+
+   '/compliance/controls/'+
+   controlId+
+   '/documents',
+   {
+    method:'POST',
+    headers:{
+     ...complianceAuthHeaders(),
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     document_number:documentNumber,
+     relationship_type:
+      document.getElementById(
+       'managedControlDocumentRelationship'
+      ).value,
+     notes:
+      document.getElementById(
+       'managedControlDocumentNotes'
+      ).value.trim()||null
+    })
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to link Governance Document.'
+   );
+  }
+
+  message.textContent='Governance Document linked.';
+  message.className='action-decision-message success';
+
+  await openLiveObligation(currentLiveObligationId);
+
+  const refreshed=(currentLiveControls||[])
+   .find(c=>Number(c.id)===Number(controlId));
+
+  if(refreshed){
+   renderManagedControlDocuments(refreshed);
+  }
+
+ }catch(error){
+
+  message.textContent=error.message;
+  message.className='action-decision-message error';
+ }
 }
 </script>
