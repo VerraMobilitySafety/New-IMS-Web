@@ -3915,11 +3915,54 @@ function renderComplianceActivities(activities){
 }
 
 
-function openComplianceRecord(recordId){
+async function openComplianceRecord(recordId){
 
- alert(
-  'Record '+recordId+
-  ' is linked correctly. Secure evidence viewing is the next connection.'
- );
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+'/records/'+recordId+'/content',
+   {
+    headers:complianceAuthHeaders(),
+    cache:'no-store'
+   }
+  );
+
+  if(response.status===401){
+   location.replace(
+    'login.html?return='+encodeURIComponent(location.href)
+   );
+   return;
+  }
+
+  if(!response.ok){
+
+   let message='Unable to open record evidence.';
+
+   try{
+    const data=await response.json();
+    message=data.message||message;
+   }catch(e){}
+
+   throw new Error(message);
+  }
+
+  const blob=await response.blob();
+  const url=URL.createObjectURL(blob);
+
+  window.open(url,'_blank','noopener');
+
+  setTimeout(()=>{
+   URL.revokeObjectURL(url);
+  },60000);
+
+ }catch(error){
+
+  console.error(
+   'Unable to open Compliance record',
+   error
+  );
+
+  alert(error.message);
+ }
 }
 </script>
