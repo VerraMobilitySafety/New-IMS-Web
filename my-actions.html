@@ -534,6 +534,89 @@
     </div>
    </div>
 
+    <div id="complianceCorrectiveActionPanel" style="display:none;margin-top:20px">
+
+     <div style="border-top:1px solid var(--line);padding-top:18px">
+
+      <div style="font:800 10px Montserrat,Verdana,Arial,sans-serif;margin-bottom:12px">
+       COMPLETE CORRECTIVE ACTION
+      </div>
+
+      <div class="field">
+       <label>Completion Notes</label>
+       <textarea
+        id="complianceCorrectiveActionNotes"
+        placeholder="Describe what was completed and the outcome..."
+        style="width:100%;min-height:90px;border:1px solid var(--line);border-radius:8px;padding:10px;font:500 10px Montserrat,Verdana,Arial,sans-serif"
+       ></textarea>
+      </div>
+
+      <button
+       type="button"
+       class="action-btn-approve"
+       onclick="submitCorrectiveActionCompletion()"
+       style="margin-top:12px"
+      >
+       Submit for Verification
+      </button>
+
+      <div
+       id="complianceCorrectiveActionMessage"
+       class="action-decision-message"
+      ></div>
+
+     </div>
+
+    </div>
+
+
+    <div id="complianceActionVerificationPanel" style="display:none;margin-top:20px">
+
+     <div style="border-top:1px solid var(--line);padding-top:18px">
+
+      <div style="font:800 10px Montserrat,Verdana,Arial,sans-serif;margin-bottom:12px">
+       VERIFY CORRECTIVE ACTION
+      </div>
+
+      <div class="field">
+       <label>Verification Notes</label>
+       <textarea
+        id="complianceVerificationNotes"
+        placeholder="Required if returning the action..."
+        style="width:100%;min-height:80px;border:1px solid var(--line);border-radius:8px;padding:10px;font:500 10px Montserrat,Verdana,Arial,sans-serif"
+       ></textarea>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:12px">
+
+       <button
+        type="button"
+        class="action-btn-approve"
+        onclick="verifyCorrectiveAction('Verified')"
+       >
+        Verify &amp; Close
+       </button>
+
+       <button
+        type="button"
+        class="action-btn-more"
+        onclick="verifyCorrectiveAction('Returned')"
+       >
+        Return Action
+       </button>
+
+      </div>
+
+      <div
+       id="complianceVerificationMessage"
+       class="action-decision-message"
+      ></div>
+
+     </div>
+
+    </div>
+
+
     <div id="complianceActivityPanel" style="display:none;margin-top:20px">
 
      <div style="border-top:1px solid var(--line);padding-top:18px">
@@ -721,6 +804,14 @@ function openActionDetail(index){
   action.source==='Compliance' &&
   action.action_type==='Compliance Activity';
 
+ const isComplianceCorrectiveAction=
+  action.source==='Compliance' &&
+  action.action_type==='Corrective Action';
+
+ const isComplianceActionVerification=
+  action.source==='Compliance' &&
+  action.action_type==='Corrective Action Verification';
+
  const requestType=action.request_type||'New Document';
 
  const requestLabels={
@@ -834,6 +925,39 @@ function openActionDetail(index){
   document.getElementById('actionDetailReason').textContent=action.business_reason||'—';
   document.getElementById('actionDetailAdditional').textContent=action.additional_information||'—';
 
+ }else if(isComplianceCorrectiveAction){
+
+  document.getElementById('actionDetailGrid').innerHTML=[
+   actionField('Requirement',action.obligation_code),
+   actionField('Action type',action.compliance_action_type),
+   actionField('Priority',action.priority),
+   actionField('Due date',formatActionDate(action.due_date)),
+   actionField('Status',action.status)
+  ].join('');
+
+  document.getElementById('actionDetailReason').textContent=
+   action.action_description||'—';
+
+  document.getElementById('actionDetailAdditional').textContent=
+   'Complete the assigned work and submit it for verification.';
+
+ }else if(isComplianceActionVerification){
+
+  document.getElementById('actionDetailGrid').innerHTML=[
+   actionField('Requirement',action.obligation_code),
+   actionField('Corrective action',action.corrective_action_title),
+   actionField('Action type',action.compliance_action_type),
+   actionField('Priority',action.priority),
+   actionField('Completed by',action.action_owner_name),
+   actionField('Status','Pending Verification')
+  ].join('');
+
+  document.getElementById('actionDetailReason').textContent=
+   action.action_description||'—';
+
+  document.getElementById('actionDetailAdditional').textContent=
+   action.completion_notes||'No completion notes supplied.';
+
  }else if(isComplianceActivity){
 
   document.getElementById('actionDetailGrid').innerHTML=[
@@ -914,6 +1038,32 @@ function openActionDetail(index){
 
  document.getElementById('actionDetailFooter').textContent=
   `Action ID: ${action.id} · Priority: ${action.priority||'Normal'}`;
+
+ const correctivePanel=
+  document.getElementById('complianceCorrectiveActionPanel');
+
+ const verificationPanel=
+  document.getElementById('complianceActionVerificationPanel');
+
+ if(correctivePanel){
+  correctivePanel.style.display=
+   isComplianceCorrectiveAction ? 'block' : 'none';
+
+  if(isComplianceCorrectiveAction){
+   document.getElementById('complianceCorrectiveActionNotes').value='';
+   document.getElementById('complianceCorrectiveActionMessage').textContent='';
+  }
+ }
+
+ if(verificationPanel){
+  verificationPanel.style.display=
+   isComplianceActionVerification ? 'block' : 'none';
+
+  if(isComplianceActionVerification){
+   document.getElementById('complianceVerificationNotes').value='';
+   document.getElementById('complianceVerificationMessage').textContent='';
+  }
+ }
 
  const complianceActivityPanel=
   document.getElementById('complianceActivityPanel');
@@ -2138,6 +2288,178 @@ async function uploadComplianceEvidence(){
  }catch(error){
 
   console.error('Compliance evidence upload failed',error);
+
+  message.textContent=error.message;
+  message.className='action-decision-message error';
+ }
+}
+</script>
+
+<script>
+async function submitCorrectiveActionCompletion(){
+
+ if(
+  !currentAction ||
+  currentAction.action_type!=='Corrective Action'
+ ){
+  alert('Corrective action is not loaded.');
+  return;
+ }
+
+ const notes=
+  document.getElementById('complianceCorrectiveActionNotes')
+   .value.trim();
+
+ if(!notes){
+  alert('Enter completion notes.');
+  return;
+ }
+
+ const message=
+  document.getElementById('complianceCorrectiveActionMessage');
+
+ message.textContent='Submitting for verification...';
+ message.className='action-decision-message';
+
+ try{
+
+  const response=await fetch(
+   API+
+   '/compliance/actions/'+
+   currentAction.source_id+
+   '/complete',
+   {
+    method:'POST',
+    headers:{
+     'Authorization':
+      'Bearer '+localStorage.getItem('vero_session_token'),
+     'Accept':'application/json',
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     completion_notes:notes
+    })
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to submit corrective action.'
+   );
+  }
+
+  message.textContent=
+   'Corrective action submitted for verification.';
+
+  message.className='action-decision-message success';
+
+  setTimeout(()=>{
+   closeActionDetail();
+   loadActions();
+  },900);
+
+ }catch(error){
+
+  console.error(
+   'Corrective action completion failed',
+   error
+  );
+
+  message.textContent=error.message;
+  message.className='action-decision-message error';
+ }
+}
+
+
+async function verifyCorrectiveAction(decision){
+
+ if(
+  !currentAction ||
+  currentAction.action_type!=='Corrective Action Verification'
+ ){
+  alert('Corrective action verification is not loaded.');
+  return;
+ }
+
+ const notes=
+  document.getElementById('complianceVerificationNotes')
+   .value.trim();
+
+ if(decision==='Returned' && !notes){
+  alert('Enter a reason for returning the action.');
+  return;
+ }
+
+ const confirmed=confirm(
+  decision==='Verified'
+   ? 'Verify this corrective action and close it?'
+   : 'Return this corrective action to the assignee?'
+ );
+
+ if(!confirmed)return;
+
+ const message=
+  document.getElementById('complianceVerificationMessage');
+
+ message.textContent=
+  decision==='Verified'
+   ? 'Verifying corrective action...'
+   : 'Returning corrective action...';
+
+ message.className='action-decision-message';
+
+ try{
+
+  const response=await fetch(
+   API+
+   '/compliance/actions/'+
+   currentAction.source_id+
+   '/verify',
+   {
+    method:'POST',
+    headers:{
+     'Authorization':
+      'Bearer '+localStorage.getItem('vero_session_token'),
+     'Accept':'application/json',
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     decision:decision,
+     verification_notes:notes
+    })
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to verify corrective action.'
+   );
+  }
+
+  message.textContent=
+   decision==='Verified'
+    ? 'Corrective action verified and closed.'
+    : 'Corrective action returned to the assignee.';
+
+  message.className='action-decision-message success';
+
+  setTimeout(()=>{
+   closeActionDetail();
+   loadActions();
+  },900);
+
+ }catch(error){
+
+  console.error(
+   'Corrective action verification failed',
+   error
+  );
 
   message.textContent=error.message;
   message.className='action-decision-message error';
