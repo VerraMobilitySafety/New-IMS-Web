@@ -5450,11 +5450,13 @@ function renderControlVerifications(controls){
  target.innerHTML=items.map(v=>{
 
   const o=v.latest_occurrence;
+  const completed=o?.status==='Completed';
+
   let actionDate='—';
 
-  if(o?.due_date){
+  if(o?.due_date && !completed){
    const d=new Date(o.due_date+'T00:00:00');
-   d.setDate(d.getDate()-14);
+   d.setDate(d.getDate()-(v.lead_time_days||14));
 
    actionDate=d.toLocaleDateString(
     'en-AU',
@@ -5464,6 +5466,35 @@ function renderControlVerifications(controls){
      year:'numeric'
     }
    );
+  }
+
+  let fourthColumn='';
+
+  if(completed && o?.record_id){
+
+   fourthColumn=`
+    <div>
+     <span>Record</span>
+     <button
+      class="compliance-record-link"
+      onclick="openComplianceRecord(${o.record_id})"
+     >
+      ${escapeComplianceText(o.record_code||'View Record')} →
+     </button>
+    </div>`;
+
+  }else{
+
+   fourthColumn=`
+    <div>
+     <span>Result</span>
+     <strong>
+      ${escapeComplianceText(
+       o?.verification_result||
+       'Not Yet Verified'
+      )}
+     </strong>
+    </div>`;
   }
 
   return `
@@ -5485,11 +5516,21 @@ function renderControlVerifications(controls){
     <div class="control-verification-grid">
 
      <div>
-      <span>Next Due</span>
+      <span>${completed?'Last Verified':'Next Due'}</span>
       <strong>
-       ${o?.due_date
-        ? formatComplianceDate(o.due_date)
-        : '—'}
+       ${
+        completed
+         ? (
+            o?.completed_date
+             ? formatComplianceDate(o.completed_date)
+             : '—'
+           )
+         : (
+            o?.due_date
+             ? formatComplianceDate(o.due_date)
+             : '—'
+           )
+       }
       </strong>
      </div>
 
@@ -5503,19 +5544,19 @@ function renderControlVerifications(controls){
      </div>
 
      <div>
-      <span>My Actions From</span>
-      <strong>${actionDate}</strong>
-     </div>
-
-     <div>
-      <span>Result</span>
+      <span>${completed?'Result':'My Actions From'}</span>
       <strong>
-       ${escapeComplianceText(
-        o?.verification_result||
-        'Not Yet Verified'
-       )}
+       ${
+        completed
+         ? escapeComplianceText(
+            o?.verification_result||'—'
+           )
+         : actionDate
+       }
       </strong>
      </div>
+
+     ${fourthColumn}
 
     </div>
 
