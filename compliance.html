@@ -2113,6 +2113,150 @@ button,input,select,textarea{font-family:inherit}
        </div>
       </div>
 
+      <button
+       type="button"
+       class="btn outline"
+       style="margin-top:12px"
+       onclick="showAddControlVerification()"
+      >
+       + Add Verification
+      </button>
+
+      <div
+       id="addControlVerificationPanel"
+       style="display:none;margin-top:16px"
+      >
+
+       <div class="manage-activity-form">
+
+        <div class="field full">
+         <label>Verification Title</label>
+         <input
+          id="newVerificationTitle"
+          type="text"
+          placeholder="e.g. Verify Operational Risk Reviews"
+         >
+        </div>
+
+        <div class="field full">
+         <label>Description</label>
+         <textarea
+          id="newVerificationDescription"
+          placeholder="Describe how the Control will be verified..."
+         ></textarea>
+        </div>
+
+        <div class="field">
+         <label>Verification Owner</label>
+         <select id="newVerificationOwner">
+          <option value="">Select owner...</option>
+         </select>
+        </div>
+
+        <div class="field">
+         <label>Business Area</label>
+         <input id="newVerificationBusinessArea" type="text">
+        </div>
+
+        <div class="field">
+         <label>Frequency</label>
+         <select id="newVerificationFrequency">
+          <option value="">Select frequency...</option>
+          <option>Once</option>
+          <option>Monthly</option>
+          <option>Quarterly</option>
+          <option>Six Monthly</option>
+          <option>Annual</option>
+          <option>Ongoing</option>
+          <option>Event Driven</option>
+         </select>
+        </div>
+
+        <div class="field">
+         <label>Next Due Date</label>
+         <input id="newVerificationDueDate" type="date">
+        </div>
+
+        <div class="field">
+         <label>My Actions Lead Time</label>
+         <input
+          id="newVerificationLeadTime"
+          type="number"
+          min="0"
+          value="14"
+         >
+        </div>
+
+        <div class="field">
+         <label>Security Classification</label>
+         <select id="newVerificationSecurity">
+          <option>Public</option>
+          <option selected>Internal</option>
+          <option>Confidential</option>
+          <option>Restricted</option>
+         </select>
+        </div>
+
+        <div class="field full">
+         <label>
+          <input
+           id="newVerificationRecordRequired"
+           type="checkbox"
+           checked
+          >
+          Verification record required
+         </label>
+        </div>
+
+        <div class="field">
+         <label>Record Type</label>
+         <input
+          id="newVerificationRecordType"
+          type="text"
+          value="Control Verification"
+         >
+        </div>
+
+        <div class="field">
+         <label>Record Title</label>
+         <input
+          id="newVerificationRecordTitle"
+          type="text"
+          placeholder="Optional — generated if blank"
+         >
+        </div>
+
+        <div class="field">
+         <label>Retention Period (Months)</label>
+         <input
+          id="newVerificationRetention"
+          type="number"
+          min="0"
+         >
+        </div>
+
+       </div>
+
+       <div class="drawer-actions">
+        <button
+         type="button"
+         class="btn outline"
+         onclick="hideAddControlVerification()"
+        >
+         Cancel
+        </button>
+
+        <button
+         type="button"
+         class="btn green"
+         onclick="createManagedControlVerification()"
+        >
+         Create Verification
+        </button>
+       </div>
+
+      </div>
+
      </div>
 
     </div>
@@ -7485,6 +7629,219 @@ async function linkManagedControlDocument(){
   if(refreshed){
    renderManagedControlDocuments(refreshed);
   }
+
+ }catch(error){
+
+  message.textContent=error.message;
+  message.className='action-decision-message error';
+ }
+}
+</script>
+
+<script>
+async function showAddControlVerification(){
+
+ const panel=
+  document.getElementById('addControlVerificationPanel');
+
+ panel.style.display='block';
+
+ const owner=
+  document.getElementById('newVerificationOwner');
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+'/users/active',
+   {
+    headers:complianceAuthHeaders(),
+    cache:'no-store'
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(data.message||'Unable to load users.');
+  }
+
+  owner.innerHTML=
+   '<option value="">Select owner...</option>'+
+   (data.users||[]).map(u=>
+    `<option value="${u.id}">
+     ${escapeComplianceText(u.name)}
+    </option>`
+   ).join('');
+
+ }catch(error){
+
+  console.error(
+   'Unable to load Verification owners',
+   error
+  );
+
+  owner.innerHTML=
+   '<option value="">Unable to load users</option>';
+ }
+}
+
+
+function hideAddControlVerification(){
+
+ document.getElementById(
+  'addControlVerificationPanel'
+ ).style.display='none';
+}
+
+
+async function createManagedControlVerification(){
+
+ const controlId=window.managedComplianceControlId;
+
+ if(!controlId){
+  alert('Control is not loaded.');
+  return;
+ }
+
+ const title=
+  document.getElementById(
+   'newVerificationTitle'
+  ).value.trim();
+
+ const owner=
+  document.getElementById(
+   'newVerificationOwner'
+  ).value;
+
+ const frequency=
+  document.getElementById(
+   'newVerificationFrequency'
+  ).value;
+
+ const dueDate=
+  document.getElementById(
+   'newVerificationDueDate'
+  ).value;
+
+ if(!title){
+  alert('Enter the Verification title.');
+  return;
+ }
+
+ if(!owner){
+  alert('Select the Verification Owner.');
+  return;
+ }
+
+ if(!frequency){
+  alert('Select the Verification frequency.');
+  return;
+ }
+
+ if(
+  !['Ongoing','Event Driven'].includes(frequency)
+  && !dueDate
+ ){
+  alert('Select the next due date.');
+  return;
+ }
+
+ const message=
+  document.getElementById('managedControlMessage');
+
+ message.textContent='Creating Control Verification...';
+ message.className='action-decision-message';
+
+ try{
+
+  const response=await fetch(
+   COMPLIANCE_API+
+   '/compliance/controls/'+
+   controlId+
+   '/verifications',
+   {
+    method:'POST',
+    headers:{
+     ...complianceAuthHeaders(),
+     'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+     verification_title:title,
+
+     description:
+      document.getElementById(
+       'newVerificationDescription'
+      ).value.trim()||null,
+
+     owner_user_id:Number(owner),
+
+     owner_business_area:
+      document.getElementById(
+       'newVerificationBusinessArea'
+      ).value.trim()||null,
+
+     frequency:frequency,
+
+     next_due_date:dueDate||null,
+
+     lead_time_days:Number(
+      document.getElementById(
+       'newVerificationLeadTime'
+      ).value||14
+     ),
+
+     record_required:
+      document.getElementById(
+       'newVerificationRecordRequired'
+      ).checked,
+
+     required_record_type:
+      document.getElementById(
+       'newVerificationRecordType'
+      ).value.trim()||null,
+
+     required_record_title:
+      document.getElementById(
+       'newVerificationRecordTitle'
+      ).value.trim()||null,
+
+     default_security_classification:
+      document.getElementById(
+       'newVerificationSecurity'
+      ).value,
+
+     retention_period_months:
+      document.getElementById(
+       'newVerificationRetention'
+      ).value||null
+    })
+   }
+  );
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(
+    data.message||
+    'Unable to create Control Verification.'
+   );
+  }
+
+  message.textContent=
+   `${data.verification.verification_code} created.`;
+
+  message.className='action-decision-message success';
+
+  await openLiveObligation(currentLiveObligationId);
+
+  const refreshed=(currentLiveControls||[])
+   .find(c=>Number(c.id)===Number(controlId));
+
+  if(refreshed){
+   renderManagedControlVerification(refreshed);
+  }
+
+  hideAddControlVerification();
 
  }catch(error){
 
