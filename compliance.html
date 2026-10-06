@@ -3449,7 +3449,7 @@ async function openLiveObligation(id){
   const actions=data.actions||[];
   const activities=data.activities||[];
 
-  renderComplianceActivities(activities);
+  renderComplianceActivities(activities,controls);
 
   document.getElementById('obligationCode').textContent=
    o.obligation_code||'OBLIGATION';
@@ -4596,7 +4596,7 @@ async function submitLinkExisting(){
 </style>
 
 <script>
-function renderComplianceActivities(activities){
+function renderComplianceActivities(activities,controls){
 
  const activityTarget=
   document.getElementById('complianceActivitiesDetail');
@@ -4689,6 +4689,56 @@ function renderComplianceActivities(activities){
   });
  });
 
+ (controls||[]).forEach(control=>{
+
+  (control.verifications||[]).forEach(verification=>{
+
+   const occurrence=verification.latest_occurrence;
+
+   if(
+    occurrence &&
+    occurrence.record_id
+   ){
+
+    records.push({
+     activity:{
+      activity_title:
+       verification.verification_title
+     },
+
+     occurrence:{
+      period_label:
+       occurrence.period_label,
+      completed_date:
+       occurrence.completed_date
+     },
+
+     record:{
+      id:occurrence.record_id,
+      record_code:
+       occurrence.record_code,
+      record_title:
+       occurrence.record_title||
+       'Control Verification Record',
+
+      can_view:true,
+
+      security_classification:
+       'Internal',
+
+      file_name:null
+     },
+
+     record_source:
+      'Control Verification',
+
+     control_code:
+      control.control_code
+    });
+   }
+  });
+ });
+
  if(!records.length){
 
   recordTarget.innerHTML=
@@ -4728,9 +4778,18 @@ function renderComplianceActivities(activities){
      </strong>
 
      <small>
-      ${escapeComplianceText(
-       item.activity.activity_title||''
-      )}
+      ${
+       item.record_source==='Control Verification'
+        ? (
+           'Control Verification'+
+           (item.control_code
+            ? ' · '+escapeComplianceText(item.control_code)
+            : '')
+          )
+        : escapeComplianceText(
+           item.activity.activity_title||''
+          )
+      }
       ${o.period_label
        ? ' · '+escapeComplianceText(o.period_label)
        : ''}
