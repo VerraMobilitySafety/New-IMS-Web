@@ -5066,7 +5066,8 @@ async function openManageActivities(){
 
  document.getElementById('manageActivitiesRequirement').textContent=title;
 
- openModal('manageActivitiesModal');
+ document.getElementById('manageActivitiesModal')
+  .classList.add('show');
 
  showCreateComplianceActivity(
   document.querySelector('.manage-activity-option')
