@@ -1035,6 +1035,99 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  }
 }
 
+
+.record-request-form{
+ display:none;
+ margin-top:14px;
+ padding:15px;
+ border:1px solid var(--line);
+ border-radius:9px;
+ background:#f8f7f6;
+}
+
+.record-request-form.open{
+ display:block;
+}
+
+.record-request-form h4{
+ margin:0 0 5px;
+ font-size:11px;
+ color:var(--charcoal);
+}
+
+.record-request-form p{
+ margin:0 0 12px;
+ color:var(--grey);
+ font-size:9px;
+ line-height:1.5;
+}
+
+.record-request-form label{
+ display:block;
+ color:var(--grey);
+ font-size:8px;
+ text-transform:uppercase;
+ letter-spacing:.6px;
+ font-weight:800;
+ margin-bottom:5px;
+}
+
+.record-request-form textarea{
+ width:100%;
+ min-height:90px;
+ box-sizing:border-box;
+ resize:vertical;
+ border:1px solid var(--line);
+ border-radius:7px;
+ padding:10px;
+ background:#fff;
+ font:500 9px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--charcoal);
+ outline:none;
+}
+
+.record-request-form textarea:focus{
+ border-color:var(--teal);
+}
+
+.record-request-actions{
+ display:flex;
+ justify-content:flex-end;
+ gap:8px;
+ margin-top:10px;
+}
+
+.record-request-cancel{
+ border:1px solid var(--line);
+ border-radius:8px;
+ background:#fff;
+ color:var(--charcoal);
+ padding:10px 15px;
+ font:700 9px Montserrat,Verdana,Arial,sans-serif;
+ cursor:pointer;
+}
+
+.record-request-message{
+ display:none;
+ margin-top:10px;
+ padding:9px 10px;
+ border-radius:7px;
+ font-size:9px;
+ line-height:1.45;
+}
+
+.record-request-message.success{
+ display:block;
+ background:#eef4d8;
+ color:#52610e;
+}
+
+.record-request-message.error{
+ display:block;
+ background:#f8e2e2;
+ color:#8d3030;
+}
+
 </style></head><body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
@@ -1284,6 +1377,39 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
      >
       Request Record
      </button>
+    </div>
+
+    <div class="record-request-form" id="recordRequestForm">
+     <h4>Request Controlled Copy</h4>
+     <p>
+      Tell the record owner why you require this record.
+     </p>
+
+     <label for="recordRequestReason">Business reason</label>
+     <textarea
+      id="recordRequestReason"
+      placeholder="Explain why you require this record..."
+     ></textarea>
+
+     <div class="record-request-message" id="recordRequestMessage"></div>
+
+     <div class="record-request-actions">
+      <button
+       class="record-request-cancel"
+       id="cancelRecordRequest"
+       type="button"
+      >
+       Cancel
+      </button>
+
+      <button
+       class="request-record-btn"
+       id="submitRecordRequest"
+       type="button"
+      >
+       Submit Request
+      </button>
+     </div>
     </div>
    </section>
 
@@ -1564,6 +1690,33 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
 
+  const requestBtn =
+   document.getElementById('requestRecordBtn');
+
+  const requestForm =
+   document.getElementById('recordRequestForm');
+
+  const requestReason =
+   document.getElementById('recordRequestReason');
+
+  const requestMessage =
+   document.getElementById('recordRequestMessage');
+
+  if(requestBtn){
+   requestBtn.style.display = '';
+  }
+
+  requestForm?.classList.remove('open');
+
+  if(requestReason){
+   requestReason.value = '';
+  }
+
+  if(requestMessage){
+   requestMessage.className = 'record-request-message';
+   requestMessage.textContent = '';
+  }
+
   document.getElementById('drawerRecordCode').textContent =
    'ENTERPRISE RECORD';
 
@@ -1648,26 +1801,75 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
      ? 'Active hold'
      : 'No active hold';
 
-   document.getElementById('drawerFileName').textContent =
-    r.file_name || 'System-generated record';
+   const fileNameEl =
+    document.getElementById('drawerFileName');
 
-   const fileMeta = [];
+   const fileMetaEl =
+    document.getElementById('drawerFileMeta');
 
-   if(r.content_type){
-    fileMeta.push(r.content_type);
+   const friendlyContentType = type => {
+    const types = {
+     'application/pdf':
+      'PDF document',
+     'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+      'Microsoft Word document',
+     'application/msword':
+      'Microsoft Word document',
+     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+      'Microsoft Excel workbook',
+     'application/vnd.ms-excel':
+      'Microsoft Excel workbook',
+     'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+      'Microsoft PowerPoint presentation',
+     'text/plain':
+      'Text document',
+     'text/csv':
+      'CSV file'
+    };
+
+    return types[type] || type || 'File';
+   };
+
+   const formatFileSize = bytes => {
+    if(bytes == null) return null;
+
+    const kb = bytes / 1024;
+
+    return kb >= 1024
+     ? (kb / 1024).toFixed(1) + ' MB'
+     : kb.toFixed(1) + ' KB';
+   };
+
+   if(r.file_name){
+    fileNameEl.textContent = r.file_name;
+
+    const meta = [
+     friendlyContentType(r.content_type),
+     formatFileSize(r.file_size_bytes)
+    ].filter(Boolean);
+
+    fileMetaEl.textContent = meta.join(' • ');
+
+   }else if(r.storage_type === 'System'){
+    fileNameEl.textContent = 'System-generated record';
+    fileMetaEl.textContent =
+     'Authoritative record maintained within Vero.';
+
+   }else if(r.storage_type === 'External System'){
+    fileNameEl.textContent = 'Externally maintained record';
+    fileMetaEl.textContent =
+     'Authoritative record maintained in an external business system.';
+
+   }else if(r.storage_type === 'External Reference'){
+    fileNameEl.textContent = 'Externally referenced record';
+    fileMetaEl.textContent =
+     'Authoritative record maintained outside Vero.';
+
+   }else{
+    fileNameEl.textContent = 'Record content';
+    fileMetaEl.textContent =
+     'Content is managed through Records Management.';
    }
-
-   if(r.file_size_bytes != null){
-    const kb = r.file_size_bytes / 1024;
-    fileMeta.push(
-     kb >= 1024
-      ? (kb / 1024).toFixed(1) + ' MB'
-      : kb.toFixed(1) + ' KB'
-    );
-   }
-
-   document.getElementById('drawerFileMeta').textContent =
-    fileMeta.join(' • ');
 
    document.getElementById('requestRecordBtn').dataset.recordId =
     r.id;
@@ -1772,6 +1974,116 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    const row = event.target.closest('tr[data-record-id]');
    if(!row) return;
    openRecordDrawer(row.dataset.recordId);
+  });
+
+ const requestBtn =
+  document.getElementById('requestRecordBtn');
+
+ const requestForm =
+  document.getElementById('recordRequestForm');
+
+ const requestReason =
+  document.getElementById('recordRequestReason');
+
+ const requestMessage =
+  document.getElementById('recordRequestMessage');
+
+ requestBtn?.addEventListener('click',()=>{
+  requestForm?.classList.add('open');
+
+  if(requestMessage){
+   requestMessage.className = 'record-request-message';
+   requestMessage.textContent = '';
+  }
+
+  requestReason?.focus();
+ });
+
+ document.getElementById('cancelRecordRequest')
+  ?.addEventListener('click',()=>{
+   requestForm?.classList.remove('open');
+
+   if(requestReason){
+    requestReason.value = '';
+   }
+
+   if(requestMessage){
+    requestMessage.className = 'record-request-message';
+    requestMessage.textContent = '';
+   }
+  });
+
+ document.getElementById('submitRecordRequest')
+  ?.addEventListener('click',async()=>{
+   const recordId = requestBtn?.dataset.recordId;
+   const reason = (requestReason?.value || '').trim();
+   const submitBtn =
+    document.getElementById('submitRecordRequest');
+
+   if(!recordId) return;
+
+   if(!reason){
+    requestMessage.className =
+     'record-request-message error';
+
+    requestMessage.textContent =
+     'Enter a business reason for requesting this record.';
+
+    return;
+   }
+
+   try{
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+
+    const token =
+     localStorage.getItem('vero_session_token');
+
+    const response = await fetch(
+     RECORDS_API + '/records/' + recordId + '/requests',
+     {
+      method:'POST',
+      headers:{
+       'Authorization':'Bearer ' + token,
+       'Accept':'application/json',
+       'Content-Type':'application/json'
+      },
+      body:JSON.stringify({
+       business_reason:reason
+      })
+     }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+     throw new Error(
+      data.message || 'Unable to submit record request.'
+     );
+    }
+
+    requestMessage.className =
+     'record-request-message success';
+
+    requestMessage.textContent =
+     'Request submitted. The record owner will review your request.';
+
+    requestReason.value = '';
+    requestBtn.style.display = 'none';
+
+   }catch(error){
+    console.error(error);
+
+    requestMessage.className =
+     'record-request-message error';
+
+    requestMessage.textContent =
+     error.message || 'Unable to submit record request.';
+
+   }finally{
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Request';
+   }
   });
 
  loadRecords();
