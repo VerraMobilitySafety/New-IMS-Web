@@ -7,7 +7,7 @@
      SHARED VERO SIDEBAR WIDTH
      Change this one value to resize the sidebar everywhere.
   ========================================================= */
-  const SIDEBAR_WIDTH = '300px';
+  const SIDEBAR_WIDTH = '260px';
 
   document.documentElement.style.setProperty(
     '--vero-sidebar-width',
