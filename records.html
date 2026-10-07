@@ -2080,6 +2080,10 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     requestBtn.textContent = '✓ Request Submitted';
     requestBtn.classList.add('submitted');
 
+    setTimeout(()=>{
+     window.closeRecordDrawer();
+    },700);
+
    }catch(error){
     console.error(error);
 
