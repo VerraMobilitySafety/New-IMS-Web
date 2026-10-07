@@ -1128,6 +1128,13 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  color:#8d3030;
 }
 
+
+.request-record-btn.submitted{
+ background:#eef4d8;
+ color:#52610e;
+ cursor:default;
+}
+
 </style></head><body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
@@ -1704,6 +1711,9 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
   if(requestBtn){
    requestBtn.style.display = '';
+   requestBtn.disabled = false;
+   requestBtn.textContent = 'Request Record';
+   requestBtn.classList.remove('submitted');
   }
 
   requestForm?.classList.remove('open');
@@ -2062,14 +2072,13 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
      );
     }
 
-    requestMessage.className =
-     'record-request-message success';
-
-    requestMessage.textContent =
-     'Request submitted. The record owner will review your request.';
-
     requestReason.value = '';
-    requestBtn.style.display = 'none';
+    requestForm?.classList.remove('open');
+
+    requestBtn.style.display = '';
+    requestBtn.disabled = true;
+    requestBtn.textContent = '✓ Request Submitted';
+    requestBtn.classList.add('submitted');
 
    }catch(error){
     console.error(error);
