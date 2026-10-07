@@ -171,6 +171,14 @@
       </a>
 
       <a
+        class="${isActive('records.html') ? 'active' : ''}"
+        href="records.html"
+      >
+        <span class="ico">▤</span>
+        <span>Records Management</span>
+      </a>
+
+      <a
         class="${isActive('risk.html') ? 'active' : ''}"
         href="risk.html"
       >
