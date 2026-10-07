@@ -297,6 +297,36 @@
  .full-action-meta{display:none}
 }
 
+
+.action-search{
+ margin-left:auto;
+ width:260px;
+ min-width:220px;
+ border:1px solid var(--line);
+ border-radius:7px;
+ background:#fff;
+ padding:9px 12px;
+ font:500 10px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--charcoal);
+ outline:none;
+}
+
+.action-search:focus{
+ border-color:var(--green);
+ box-shadow:0 0 0 2px rgba(169,194,63,.12);
+}
+
+.action-search::placeholder{
+ color:#aaa39e;
+}
+
+@media(max-width:900px){
+ .action-search{
+  width:100%;
+  margin-left:0;
+ }
+}
+
 </style></head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -341,13 +371,21 @@
 
    <div class="action-toolbar">
     <button class="action-filter active" data-filter="all" onclick="setActionFilter('all',this)">All</button>
-    <button class="action-filter" data-filter="due" onclick="setActionFilter('due',this)">Due / Overdue</button>
+    <button class="action-filter" data-filter="overdue" onclick="setActionFilter('overdue',this)">Overdue</button>
     <button class="action-filter" data-filter="documents" onclick="setActionFilter('documents',this)">Documents</button>
     <button class="action-filter" data-filter="compliance" onclick="setActionFilter('compliance',this)">Compliance</button>
     <button class="action-filter" data-filter="risks" onclick="setActionFilter('risks',this)">Risks</button>
     <button class="action-filter" data-filter="incidents" onclick="setActionFilter('incidents',this)">Incidents</button>
     <button class="action-filter" data-filter="projects" onclick="setActionFilter('projects',this)">Projects</button>
     <button class="action-filter" data-filter="records" onclick="setActionFilter('records',this)">Records</button>
+
+    <input
+     class="action-search"
+     id="actionSearch"
+     type="search"
+     placeholder="Search actions..."
+     oninput="renderActions()"
+    >
    </div>
 
    <div class="action-list-panel">
@@ -845,18 +883,86 @@ function dotClass(action){
  return '';
 }
 function filteredActions(){
- if(currentFilter==='all')return allActions;
- if(currentFilter==='documents')return allActions.filter(a=>(a.source||'').toLowerCase()==='documents');
- if(currentFilter==='compliance')return allActions.filter(a=>(a.source||'').toLowerCase()==='compliance');
- if(currentFilter==='risks')return allActions.filter(a=>(a.source||'').toLowerCase()==='risks');
- if(currentFilter==='incidents')return allActions.filter(a=>(a.source||'').toLowerCase()==='incidents');
- if(currentFilter==='projects')return allActions.filter(a=>(a.source||'').toLowerCase()==='projects');
- if(currentFilter==='records')return allActions.filter(a=>(a.source||'').toLowerCase()==='records');
- if(currentFilter==='due'){
-  const now=Date.now();
-  return allActions.filter(a=>a.due_at && new Date(a.due_at).getTime()<=now+7*86400000);
+ let actions=allActions;
+
+ if(currentFilter==='documents'){
+  actions=actions.filter(
+   a=>(a.source||'').toLowerCase()==='documents'
+  );
  }
- return allActions;
+
+ if(currentFilter==='compliance'){
+  actions=actions.filter(
+   a=>(a.source||'').toLowerCase()==='compliance'
+  );
+ }
+
+ if(currentFilter==='risks'){
+  actions=actions.filter(
+   a=>(a.source||'').toLowerCase()==='risks'
+  );
+ }
+
+ if(currentFilter==='incidents'){
+  actions=actions.filter(
+   a=>(a.source||'').toLowerCase()==='incidents'
+  );
+ }
+
+ if(currentFilter==='projects'){
+  actions=actions.filter(
+   a=>(a.source||'').toLowerCase()==='projects'
+  );
+ }
+
+ if(currentFilter==='records'){
+  actions=actions.filter(
+   a=>(a.source||'').toLowerCase()==='records'
+  );
+ }
+
+ if(currentFilter==='overdue'){
+  const now=Date.now();
+
+  actions=actions.filter(
+   a=>a.due_at &&
+      new Date(a.due_at).getTime()<now
+  );
+ }
+
+ const search=(
+  document.getElementById('actionSearch')?.value || ''
+ ).trim().toLowerCase();
+
+ if(search){
+  actions=actions.filter(a=>{
+   const from=
+    a.requested_by ||
+    a.submitted_by ||
+    a.initiated_by ||
+    a.created_by ||
+    'VERO';
+
+   return [
+    a.title,
+    a.description,
+    a.source,
+    a.action_type,
+    a.status,
+    a.record_code,
+    a.request_code,
+    a.project_code,
+    a.document_number,
+    from
+   ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+    .includes(search);
+  });
+ }
+
+ return actions;
 }
 function renderActions(){
  const list=document.getElementById('fullActionList');
