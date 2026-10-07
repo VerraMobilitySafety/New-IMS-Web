@@ -1,0 +1,1324 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><title>VERRA | VERO — Records Management</title><style>
+
+:root {
+    --verra-navy: #00263E;
+    --verra-navy-light: #073B55;
+    --verra-teal: #00A6A6;
+    --verra-teal-dark: #008A8A;
+    --verra-purple: #6B4C9A;
+    --background: #F4F6F8;
+    --surface: #FFFFFF;
+    --text: #1F2933;
+    --muted: #6B7280;
+    --border: #E5E7EB;
+
+    --significant: #DC2626;
+    --high: #F97316;
+    --moderate: #3B82F6;
+    --low: #22C55E;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--background);
+    color: var(--text);
+}
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 250px;
+    height: 100vh;
+    background: linear-gradient(
+        180deg,
+        var(--verra-navy) 0%,
+        #001C2E 100%
+    );
+    color: white;
+    padding: 28px 20px;
+    overflow: hidden;
+}
+
+/* subtle decorative Verra-style shapes */
+
+.sidebar::before {
+    content: "";
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    border: 35px solid rgba(0,166,166,.08);
+    transform: rotate(45deg);
+    bottom: -120px;
+    left: -90px;
+}
+
+.sidebar::after {
+    content: "";
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border: 25px solid rgba(255,255,255,.03);
+    transform: rotate(45deg);
+    top: 120px;
+    right: -120px;
+}
+
+.brand {
+    position: relative;
+    z-index: 2;
+    margin-bottom: 42px;
+}
+
+.brand-main {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+
+.brand-main span {
+    color: var(--verra-teal);
+}
+
+.brand-sub {
+    font-size: 10px;
+    color: rgba(255,255,255,.55);
+    letter-spacing: 1.6px;
+    margin-top: 6px;
+    text-transform: uppercase;
+}
+
+.nav-section {
+    position: relative;
+    z-index: 2;
+}
+
+.nav-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,.38);
+    margin: 24px 12px 10px;
+}
+
+.nav-item {
+    padding: 13px 15px;
+    margin-bottom: 6px;
+    border-radius: 9px;
+    cursor: pointer;
+    color: rgba(255,255,255,.72);
+    transition: .2s;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-size: 14px;
+}
+
+.nav-item:hover {
+    background: rgba(255,255,255,.08);
+    color: white;
+    transform: translateX(2px);
+}
+
+.nav-item.active {
+    background: var(--verra-teal);
+    color: white;
+    box-shadow: 0 6px 18px rgba(0,166,166,.20);
+}
+
+.nav-icon {
+    width: 18px;
+    text-align: center;
+}
+
+/* =========================================
+   MAIN
+========================================= */
+
+.main {
+    margin-left: 250px;
+    padding: 38px 42px;
+    min-height: 100vh;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.eyebrow {
+    color: var(--verra-teal-dark);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    margin-bottom: 7px;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 29px;
+    font-weight: 650;
+    color: var(--verra-navy);
+}
+
+.subtitle {
+    color: var(--muted);
+    margin-top: 7px;
+    font-size: 14px;
+}
+
+.header-right {
+    text-align: right;
+}
+
+.date {
+    color: var(--verra-navy);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.updated {
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+/* =========================================
+   KPI CARDS
+========================================= */
+
+.kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.card {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 21px 22px;
+    box-shadow: 0 3px 14px rgba(0,38,62,.06);
+    border: 1px solid rgba(0,38,62,.04);
+    position: relative;
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0,38,62,.10);
+}
+
+.card::after {
+    content: "";
+    position: absolute;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    right: -18px;
+    top: -18px;
+    opacity: .08;
+}
+
+.card.significant::after {
+    background: var(--significant);
+}
+
+.card.high::after {
+    background: var(--high);
+}
+
+.card.moderate::after {
+    background: var(--moderate);
+}
+
+.card.control::after {
+    background: var(--verra-teal);
+}
+
+.card-title {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .9px;
+    font-weight: 650;
+}
+
+.card-number {
+    font-size: 35px;
+    font-weight: 700;
+    margin-top: 7px;
+    color: var(--verra-navy);
+}
+
+.card-footer {
+    font-size: 12px;
+    margin-top: 6px;
+    color: var(--muted);
+}
+
+.significant {
+    border-top: 4px solid var(--significant);
+}
+
+.high {
+    border-top: 4px solid var(--high);
+}
+
+.moderate {
+    border-top: 4px solid var(--moderate);
+}
+
+.control {
+    border-top: 4px solid var(--verra-teal);
+}
+
+.good {
+    color: #159447;
+    font-weight: 600;
+}
+
+.bad {
+    color: var(--significant);
+    font-weight: 600;
+}
+
+/* =========================================
+   MAIN GRID
+========================================= */
+
+.grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 18px;
+}
+
+.panel {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 3px 14px rgba(0,38,62,.06);
+    border: 1px solid rgba(0,38,62,.04);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.panel h2 {
+    margin: 0;
+    font-size: 17px;
+    color: var(--verra-navy);
+}
+
+.view-link {
+    color: var(--verra-teal-dark);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.view-link:hover {
+    text-decoration: underline;
+}
+
+/* =========================================
+   RISK LANDSCAPE
+========================================= */
+
+.risk-row {
+    display: grid;
+    grid-template-columns: 135px 1fr 45px;
+    align-items: center;
+    margin: 18px 0;
+}
+
+.risk-category {
+    font-weight: 600;
+    font-size: 13px;
+    color: #374151;
+}
+
+.dots {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+}
+
+.dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform .15s;
+}
+
+.dot:hover {
+    transform: scale(1.35);
+}
+
+.red { background: var(--significant); }
+.orange { background: var(--high); }
+.blue { background: var(--moderate); }
+.green { background: var(--low); }
+
+.risk-count {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: right;
+}
+
+/* =========================================
+   ATTENTION
+========================================= */
+
+.attention-item {
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: padding-left .2s;
+}
+
+.attention-item:hover {
+    padding-left: 5px;
+}
+
+.attention-item:last-child {
+    border-bottom: none;
+}
+
+.attention-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.attention-title {
+    font-weight: 650;
+    font-size: 13px;
+    color: var(--verra-navy);
+}
+
+.risk-badge {
+    font-size: 9px;
+    font-weight: 700;
+    color: white;
+    padding: 4px 7px;
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+
+.badge-red {
+    background: var(--significant);
+}
+
+.badge-orange {
+    background: var(--high);
+}
+
+.attention-detail {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+/* =========================================
+   LOWER METRICS
+========================================= */
+
+.lower-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 18px;
+}
+
+.metric-panel {
+    background: white;
+    border-radius: 14px;
+    padding: 20px 22px;
+    box-shadow: 0 3px 14px rgba(0,38,62,.06);
+}
+
+.metric-label {
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    margin-bottom: 12px;
+}
+
+.metric-main {
+    font-size: 23px;
+    font-weight: 700;
+    color: var(--verra-navy);
+}
+
+.progress {
+    height: 7px;
+    background: #E9EEF1;
+    border-radius: 20px;
+    margin-top: 13px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--verra-teal);
+    width: 82%;
+    border-radius: 20px;
+}
+
+/* =========================================
+   RISK INTELLIGENCE
+========================================= */
+
+.ai {
+    margin-top: 18px;
+    background:
+        linear-gradient(
+            115deg,
+            var(--verra-navy) 0%,
+            #004C62 100%
+        );
+    color: white;
+    border-radius: 14px;
+    padding: 22px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 8px 25px rgba(0,38,62,.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.ai::after {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border: 28px solid rgba(0,166,166,.10);
+    transform: rotate(45deg);
+    right: 100px;
+    top: -115px;
+}
+
+.ai-content {
+    position: relative;
+    z-index: 2;
+}
+
+.ai-title {
+    color: #58D5D0;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    margin-bottom: 7px;
+}
+
+.ai-text {
+    font-size: 14px;
+}
+
+.ai button {
+    position: relative;
+    z-index: 2;
+    border: 0;
+    background: var(--verra-teal);
+    color: white;
+    padding: 11px 20px;
+    border-radius: 8px;
+    font-weight: 650;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.ai button:hover {
+    background: #00BABA;
+    transform: translateY(-1px);
+}
+
+/* =========================================
+   FOOTER
+========================================= */
+
+.footer {
+    margin-top: 18px;
+    color: #9CA3AF;
+    font-size: 10px;
+    text-align: right;
+}
+
+@media(max-width: 1000px) {
+
+    .kpis {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .lower-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* VERO GLOBAL ACCOUNT MENU */
+.vero-account{position:relative;display:inline-block;margin-left:14px;vertical-align:middle;z-index:50}
+.vero-account-trigger{display:flex;align-items:center;gap:9px;border:0;background:transparent;padding:0;cursor:pointer;font-family:inherit}
+.vero-account .avatar{width:38px;height:38px;border-radius:50%;background:#00263E;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:700}
+.vero-account-name{font-size:12px;font-weight:700;color:#00263E;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vero-account-caret{font-size:9px;color:#6B7280;transition:transform .16s ease}
+.vero-account.open .vero-account-caret{transform:rotate(180deg)}
+.vero-account-menu{position:absolute;right:0;top:48px;width:250px;background:#fff;border:1px solid #E5E7EB;border-radius:11px;box-shadow:0 16px 38px rgba(0,38,62,.16);overflow:hidden;display:none;text-align:left;color:#1F2933}
+.vero-account.open .vero-account-menu{display:block}
+.vero-account-profile{padding:15px 16px 13px;border-bottom:1px solid #E5E7EB}.vero-account-profile b{display:block;font-size:12px;margin-bottom:4px}.vero-account-profile small{display:block;font-size:9px;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vero-account-item{width:100%;display:flex;align-items:center;gap:9px;border:0;background:#fff;padding:12px 16px;font:700 10px 'Segoe UI',Arial,sans-serif;color:#00263E;text-decoration:none;cursor:pointer}.vero-account-item:hover{background:#F4F6F8}.vero-account-item.admin{display:none}.vero-account-item.signout{border-top:1px solid #E5E7EB;color:#b42318}.vero-account-icon{width:18px;text-align:center;font-size:13px}
+
+
+
+/* VERO RISK — canonical shell v2.8 */
+:root{--charcoal:#3D3935;--green:#A9C23F;--grey:#857874;--teal:#1D8296;--purple:#464E7E;--bg:#F7F8F7;--white:#fff;--line:#E5E1DE;--ink:#292725;--red:#C94A4A;--amber:#D49B35}
+body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.app{display:flex;min-height:100vh}.sidebar{width:260px;position:fixed;inset:0 auto 0 0;background:#252321;color:#fff;padding:22px 24px;overflow:hidden;height:100vh}
+.sidebar:before,.sidebar:after{content:none}.chev{position:absolute;z-index:1;opacity:.13;pointer-events:none}.chev.c1{width:110px;right:-32px;top:150px}.chev.c2{width:70px;left:14px;top:48%}.chev.c3{width:145px;right:-42px;bottom:65px}
+.brand,.nav,.side-foot{position:relative;z-index:2}.brand{margin-bottom:28px;height:82px;position:relative}.brand img{position:absolute;width:96px;max-height:56px;object-fit:contain;right:calc(50% + 16px);top:0}.vero-lockup{position:absolute;left:50%;top:0;height:56px;display:flex;align-items:center}.vero-divider{position:absolute;left:0;width:1px;height:34px;background:rgba(255,255,255,.42);transform:translateX(-.5px)}.vero-name{position:absolute;left:16px;color:var(--green);font-weight:800;letter-spacing:1.8px;font-size:18px;white-space:nowrap}
+.nav{display:block}.nav-section{margin:0 0 16px}.nav-label{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#9f9994;margin:0 0 6px 14px}.nav a,.nav-group-toggle{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:7px;border-left:3px solid transparent;color:#f7f7f6;text-decoration:none;font-size:12px;cursor:pointer}.nav a:hover,.nav a.active,.nav-group-toggle:hover,.nav-group.open>.nav-group-toggle{background:rgba(255,255,255,.08);border-left-color:var(--green)}.nav a.placeholder{opacity:.72;cursor:default}.nav a.placeholder:hover{background:rgba(255,255,255,.04);border-left-color:transparent}.nav-caret{margin-left:auto;font-size:10px;transition:transform .18s}.nav-group.open .nav-caret{transform:rotate(90deg)}.nav-sub{display:none;margin:2px 0 5px 34px}.nav-group.open .nav-sub{display:block}.nav-sub a{padding:7px 10px;font-size:11px}.ico{width:20px;text-align:center;font-size:15px}.side-foot{position:absolute;left:24px;bottom:24px;font-size:11px;line-height:1.7;color:#e4e1de}
+.main{margin-left:260px;width:calc(100% - 260px);padding:0 28px 35px;min-height:100vh}.global-hero{position:relative;height:245px;margin:0 -28px 24px;overflow:hidden;background-image:linear-gradient(90deg,rgba(9,49,63,.58),rgba(9,49,63,.12)),url("verra-governance-header.png");background-size:cover;background-position:center}.hero-content{position:absolute;left:48px;top:50%;transform:translateY(-50%);color:#fff;z-index:2}.hero-kicker{font-size:10px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase;margin-bottom:10px}.hero-content h1{font-size:32px;line-height:1.08;margin:0 0 8px;font-weight:800}.hero-content p{font-size:14px;margin:0;color:rgba(255,255,255,.94)}.hero-rule{width:64px;height:4px;background:var(--green);margin-top:18px}.hero-tools{position:absolute;right:28px;top:22px;display:flex;align-items:center;gap:12px;z-index:3}.hero-search{width:280px;height:44px;background:#fff;border:1px solid rgba(255,255,255,.7);border-radius:10px;padding:0 14px;font:500 11px Montserrat;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.dashboard-content{padding:0 0 0}.kpis{margin-top:0}.card,.panel{border:1px solid var(--line);box-shadow:0 3px 10px rgba(61,57,53,.05)}.header{display:none}.footer{margin-top:25px;border-top:1px solid var(--line);padding-top:15px;color:var(--grey);font-size:11px;display:flex;justify-content:space-between}
+.vero-account-name{color:#fff}.vero-account-item{font-family:Montserrat,Verdana,Arial,sans-serif}
+
+/* CANONICAL VERO SIDEBAR v2.9 — copied verbatim from index.html */
+.sidebar{width:260px;position:fixed;inset:0 auto 0 0;background:#252321;color:#fff;padding:22px 24px;overflow:hidden}
+.sidebar:after{content:none}.chev{position:absolute;z-index:1;opacity:.13;pointer-events:none}.chev.c1{width:110px;right:-32px;top:150px}.chev.c2{width:70px;left:14px;top:48%}.chev.c3{width:145px;right:-42px;bottom:65px}
+.brand,.nav,.side-foot{position:relative;z-index:2}.brand{margin-bottom:28px;height:82px;position:relative}.brand img{position:absolute;width:96px;max-height:56px;object-fit:contain;right:calc(50% + 16px);top:28px;transform:translateY(-50%)}.vero-lockup{position:absolute;left:50%;top:0;height:56px}.vero-divider{position:absolute;left:0;top:28px;width:1px;height:34px;background:rgba(255,255,255,.42);transform:translate(-.5px,-50%)}.vero-name{position:absolute;left:16px;top:28px;transform:translateY(-50%);color:var(--green);font-weight:800;letter-spacing:1.8px;font-size:18px;line-height:1;white-space:nowrap}
+.nav{display:block}.nav-section{margin:0 0 16px}.nav-label{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#9f9994;margin:0 0 6px 14px}.nav a{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:7px;border-left:3px solid transparent;color:#f7f7f6;text-decoration:none;font-size:12px}.nav a:hover,.nav a.active{background:rgba(255,255,255,.08);border-left-color:var(--green)}.nav a.placeholder{opacity:.72;cursor:default}.nav a.placeholder:hover{background:rgba(255,255,255,.04);border-left-color:transparent}.nav-group-toggle{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:7px;border-left:3px solid transparent;color:#f7f7f6;font-size:12px;cursor:pointer}.nav-group-toggle:hover,.nav-group.open>.nav-group-toggle{background:rgba(255,255,255,.08);border-left-color:var(--green)}.nav-caret{margin-left:auto;font-size:10px;transition:transform .18s ease}.nav-group.open .nav-caret{transform:rotate(90deg)}.nav-sub{display:none;margin:2px 0 5px 34px}.nav-group.open .nav-sub{display:block}.nav-sub a{padding:7px 10px;font-size:11px;color:#e7e4e1}.ico{width:20px;text-align:center;font-size:15px}.side-foot{position:absolute;left:24px;bottom:24px;font-size:11px;line-height:1.7;color:#e4e1de}
+
+
+/* =========================================
+   RECORDS MANAGEMENT
+========================================= */
+
+.records-toolbar{
+ display:flex;
+ justify-content:space-between;
+ align-items:flex-end;
+ gap:20px;
+ margin-bottom:18px;
+}
+
+.records-toolbar h2{
+ margin:0 0 5px;
+ font-size:20px;
+ color:var(--charcoal);
+}
+
+.records-toolbar p{
+ margin:0;
+ font-size:11px;
+ color:var(--grey);
+}
+
+.primary-action{
+ border:0;
+ border-radius:8px;
+ background:var(--green);
+ color:var(--charcoal);
+ padding:11px 17px;
+ font:700 10px Montserrat,Verdana,Arial,sans-serif;
+ cursor:pointer;
+ white-space:nowrap;
+}
+
+.primary-action:hover{
+ filter:brightness(.97);
+ transform:translateY(-1px);
+}
+
+.records-kpis{
+ display:grid;
+ grid-template-columns:repeat(5,minmax(0,1fr));
+ gap:14px;
+ margin-bottom:18px;
+}
+
+.records-kpi{
+ background:#fff;
+ border:1px solid var(--line);
+ border-radius:12px;
+ padding:17px 18px;
+ min-height:105px;
+ box-shadow:0 3px 10px rgba(61,57,53,.05);
+}
+
+.records-kpi span{
+ display:block;
+ color:var(--grey);
+ font-size:9px;
+ font-weight:700;
+ text-transform:uppercase;
+ letter-spacing:.7px;
+ margin-bottom:9px;
+}
+
+.records-kpi strong{
+ display:block;
+ color:var(--charcoal);
+ font-size:27px;
+ line-height:1;
+ margin-bottom:9px;
+}
+
+.records-kpi small{
+ color:var(--grey);
+ font-size:8px;
+ line-height:1.4;
+}
+
+.records-panel{
+ background:#fff;
+ border:1px solid var(--line);
+ border-radius:12px;
+ overflow:hidden;
+ box-shadow:0 3px 10px rgba(61,57,53,.05);
+}
+
+.records-tabs{
+ display:flex;
+ gap:4px;
+ padding:14px 16px 0;
+ border-bottom:1px solid var(--line);
+}
+
+.records-tab{
+ border:0;
+ background:transparent;
+ color:var(--grey);
+ padding:10px 13px 12px;
+ font:700 9px Montserrat,Verdana,Arial,sans-serif;
+ cursor:pointer;
+ border-bottom:3px solid transparent;
+}
+
+.records-tab:hover{
+ color:var(--charcoal);
+}
+
+.records-tab.active{
+ color:var(--charcoal);
+ border-bottom-color:var(--green);
+}
+
+.records-filters{
+ display:grid;
+ grid-template-columns:minmax(260px,1fr) 190px 170px 160px;
+ gap:10px;
+ padding:16px;
+ background:#fafafa;
+ border-bottom:1px solid var(--line);
+}
+
+.records-filters input,
+.records-filters select{
+ width:100%;
+ height:38px;
+ border:1px solid var(--line);
+ border-radius:7px;
+ background:#fff;
+ padding:0 11px;
+ color:var(--charcoal);
+ font:500 9px Montserrat,Verdana,Arial,sans-serif;
+ outline:none;
+}
+
+.records-filters input:focus,
+.records-filters select:focus{
+ border-color:var(--teal);
+}
+
+.records-table-wrap{
+ width:100%;
+ overflow:auto;
+}
+
+.records-table{
+ width:100%;
+ border-collapse:collapse;
+ min-width:1100px;
+}
+
+.records-table th{
+ text-align:left;
+ padding:11px 12px;
+ background:#f5f5f4;
+ color:var(--grey);
+ font-size:8px;
+ font-weight:800;
+ text-transform:uppercase;
+ letter-spacing:.55px;
+ border-bottom:1px solid var(--line);
+ white-space:nowrap;
+}
+
+.records-table td{
+ padding:12px;
+ border-bottom:1px solid #eeeae7;
+ font-size:9px;
+ color:var(--charcoal);
+ vertical-align:middle;
+}
+
+.records-table tbody tr{
+ cursor:pointer;
+ transition:background .12s ease;
+}
+
+.records-table tbody tr:hover{
+ background:#f7f9f2;
+}
+
+.records-code{
+ font-weight:800;
+ color:var(--teal);
+ white-space:nowrap;
+}
+
+.records-title{
+ font-weight:700;
+ min-width:220px;
+}
+
+.records-muted{
+ color:var(--grey);
+}
+
+.records-badge{
+ display:inline-flex;
+ align-items:center;
+ border-radius:999px;
+ padding:5px 8px;
+ font-size:8px;
+ font-weight:800;
+ white-space:nowrap;
+}
+
+.records-badge.active{
+ background:#eef4d8;
+ color:#52610e;
+}
+
+.records-badge.archived{
+ background:#ecebea;
+ color:#615c58;
+}
+
+.records-badge.disposed{
+ background:#f5dddd;
+ color:#8d3030;
+}
+
+.records-badge.pending{
+ background:#f7ead1;
+ color:#815c17;
+}
+
+.records-empty{
+ text-align:center;
+ color:var(--grey) !important;
+ padding:34px !important;
+ cursor:default;
+}
+
+@media(max-width:1200px){
+ .records-kpis{
+  grid-template-columns:repeat(3,1fr);
+ }
+ .records-filters{
+  grid-template-columns:1fr 1fr;
+ }
+}
+
+@media(max-width:800px){
+ .records-kpis{
+  grid-template-columns:repeat(2,1fr);
+ }
+ .records-toolbar{
+  align-items:flex-start;
+  flex-direction:column;
+ }
+ .records-filters{
+  grid-template-columns:1fr;
+ }
+}
+
+</style></head><body><div class="app"><aside class="sidebar">
+ <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
+ <img class="chev c1" src="verra-chevron.png" alt="">
+ <img class="chev c2" src="verra-chevron.png" alt="">
+ <img class="chev c3" src="verra-chevron.png" alt="">
+ <nav class="nav"><div id="vero-nav"></div></nav>
+ <div class="side-foot">VERRA | VERO • v2.9<br>Prototype environment</div>
+</aside><main class="main"><section class="global-hero"><div class="hero-content"><div class="hero-kicker">Governance</div><h1>Records Management</h1><p>Manage enterprise records throughout their lifecycle, from creation and classification through retention, hold and disposition.</p><div class="hero-rule"></div></div><div class="hero-tools"><input class="hero-search" placeholder="⌕   Search VERO..."><div class="vero-account" id="veroAccount"><button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false"><div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span></button><div class="vero-account-menu" id="veroAccountMenu"><div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div><a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a><button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button></div></div></div></section><div class="dashboard-content">
+
+<section class="records-toolbar">
+ <div>
+  <h2>Enterprise Records Register</h2>
+  <p>Central register of organisational records across Vero.</p>
+ </div>
+ <button class="primary-action" id="addRecordBtn" type="button">
+  + Add Record
+ </button>
+</section>
+
+<section class="records-kpis">
+ <div class="records-kpi">
+  <span>Total Records</span>
+  <strong id="kpiTotalRecords">—</strong>
+  <small>Enterprise records</small>
+ </div>
+
+ <div class="records-kpi">
+  <span>Unclassified</span>
+  <strong id="kpiUnclassified">—</strong>
+  <small>Require retention classification</small>
+ </div>
+
+ <div class="records-kpi">
+  <span>Due for Disposal</span>
+  <strong id="kpiDueDisposal">—</strong>
+  <small>Retention period reached</small>
+ </div>
+
+ <div class="records-kpi">
+  <span>Active Holds</span>
+  <strong id="kpiActiveHolds">—</strong>
+  <small>Disposition suspended</small>
+ </div>
+
+ <div class="records-kpi">
+  <span>Pending Disposition</span>
+  <strong id="kpiPendingDisposition">—</strong>
+  <small>Awaiting governance decision</small>
+ </div>
+</section>
+
+<section class="records-panel">
+
+ <div class="records-tabs">
+  <button class="records-tab active" data-tab="register">
+   Records Register
+  </button>
+  <button class="records-tab" data-tab="retention">
+   Retention Schedule
+  </button>
+  <button class="records-tab" data-tab="disposition">
+   Disposition
+  </button>
+  <button class="records-tab" data-tab="holds">
+   Holds
+  </button>
+ </div>
+
+ <div class="records-filters">
+  <input
+   id="recordSearch"
+   type="search"
+   placeholder="Search records..."
+  >
+
+  <select id="categoryFilter">
+   <option value="">All Categories</option>
+  </select>
+
+  <select id="sourceFilter">
+   <option value="">All Sources</option>
+  </select>
+
+  <select id="statusFilter">
+   <option value="">All Statuses</option>
+  </select>
+ </div>
+
+ <div class="records-table-wrap">
+  <table class="records-table">
+   <thead>
+    <tr>
+     <th>Record</th>
+     <th>Title</th>
+     <th>Type</th>
+     <th>Business Area</th>
+     <th>Source</th>
+     <th>Owner</th>
+     <th>Retention</th>
+     <th>Disposal Due</th>
+     <th>Status</th>
+    </tr>
+   </thead>
+   <tbody id="recordsTableBody">
+    <tr>
+     <td colspan="9" class="records-empty">
+      Loading enterprise records...
+     </td>
+    </tr>
+   </tbody>
+  </table>
+ </div>
+
+</section>
+
+<div class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Records Management • v2.9</span></div></div></main></div><script>function toggleNavGroup(id){const g=document.getElementById(id);if(g)g.classList.toggle('open');}
+/* VERO GLOBAL ACCOUNT MENU */
+(()=>{
+ const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+ const TOKEN='vero_session_token', USER='vero_current_user';
+ const account=document.getElementById('veroAccount'); if(!account)return;
+ const trigger=document.getElementById('veroAccountTrigger');
+ const avatar=document.getElementById('veroAccountAvatar');
+ const name=document.getElementById('veroAccountName');
+ const full=document.getElementById('veroAccountFullName');
+ const email=document.getElementById('veroAccountEmail');
+ const admin=document.getElementById('veroUserManagement');
+ const signout=document.getElementById('veroAccountSignOut');
+ const initials=u=>(((u?.first_name||'').charAt(0)+(u?.last_name||'').charAt(0)).toUpperCase()||'U');
+ const fullName=u=>[u?.first_name,u?.last_name].filter(Boolean).join(' ').trim()||u?.email||'Signed in user';
+ function render(u){avatar.textContent=initials(u);name.textContent=fullName(u);full.textContent=fullName(u);email.textContent=u?.email||'';admin.style.display=u?.vero_role==='Administrator'?'flex':'none';}
+ async function load(){
+  const t=localStorage.getItem(TOKEN); if(!t){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));return;}
+  try{const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t,Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('auth');const d=await r.json();const u=d.user||d;localStorage.setItem(USER,JSON.stringify(u));render(u);}
+  catch(e){localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));}
+ }
+ trigger.addEventListener('click',e=>{e.stopPropagation();const open=account.classList.toggle('open');trigger.setAttribute('aria-expanded',String(open));});
+ document.addEventListener('click',e=>{if(!account.contains(e.target)){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
+ signout.addEventListener('click',async()=>{const t=localStorage.getItem(TOKEN);try{if(t)await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+t}})}catch(e){}localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html');});
+ load();
+})();
+</script>
+<script>
+(() => {
+ const RECORDS_API =
+  'https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+
+ let enterpriseRecords = [];
+
+ const esc = value => String(value ?? '')
+  .replaceAll('&','&amp;')
+  .replaceAll('<','&lt;')
+  .replaceAll('>','&gt;')
+  .replaceAll('"','&quot;')
+  .replaceAll("'","&#039;");
+
+ const formatDate = value => {
+  if(!value) return '—';
+  const d = new Date(value + (value.length === 10 ? 'T00:00:00' : ''));
+  if(Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString('en-AU',{
+   day:'2-digit',
+   month:'short',
+   year:'numeric'
+  });
+ };
+
+ const ownerName = record => {
+  const o = record.owner || {};
+  const name = [o.first_name,o.last_name].filter(Boolean).join(' ');
+  return name || o.email || '—';
+ };
+
+ const statusClass = status => {
+  const s = String(status || '').toLowerCase();
+  if(s === 'active') return 'active';
+  if(s === 'archived') return 'archived';
+  if(s === 'disposed') return 'disposed';
+  return 'pending';
+ };
+
+ async function recordsFetch(path){
+  const token = localStorage.getItem('vero_session_token');
+
+  if(!token){
+   location.replace('login.html');
+   throw new Error('Authentication required');
+  }
+
+  const response = await fetch(RECORDS_API + path,{
+   headers:{
+    'Authorization':'Bearer ' + token,
+    'Accept':'application/json'
+   },
+   cache:'no-store'
+  });
+
+  if(response.status === 401){
+   localStorage.removeItem('vero_session_token');
+   localStorage.removeItem('vero_current_user');
+   location.replace('login.html');
+   throw new Error('Session expired');
+  }
+
+  const data = await response.json();
+
+  if(!response.ok){
+   throw new Error(data.message || 'Unable to load records');
+  }
+
+  return data;
+ }
+
+ function populateFilter(id,values,label){
+  const select = document.getElementById(id);
+  if(!select) return;
+
+  const current = select.value;
+
+  select.innerHTML =
+   `<option value="">${label}</option>` +
+   [...new Set(values.filter(Boolean))]
+    .sort((a,b)=>String(a).localeCompare(String(b)))
+    .map(v=>`<option value="${esc(v)}">${esc(v)}</option>`)
+    .join('');
+
+  if([...select.options].some(o=>o.value===current)){
+   select.value=current;
+  }
+ }
+
+ function updateKpis(records){
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const unclassified = records.filter(r =>
+   !r.retention ||
+   !r.retention.rule_id
+  ).length;
+
+  const due = records.filter(r => {
+   const date = r.retention?.disposal_due_date;
+   if(!date || r.status === 'Disposed' || r.has_active_hold) return false;
+   const d = new Date(date + 'T00:00:00');
+   return d <= today;
+  }).length;
+
+  const activeHolds = records.filter(
+   r => r.has_active_hold
+  ).length;
+
+  const pendingDisposition = records.filter(
+   r => r.has_open_disposition
+  ).length;
+
+  document.getElementById('kpiTotalRecords').textContent =
+   records.length;
+
+  document.getElementById('kpiUnclassified').textContent =
+   unclassified;
+
+  document.getElementById('kpiDueDisposal').textContent =
+   due;
+
+  document.getElementById('kpiActiveHolds').textContent =
+   activeHolds;
+
+  document.getElementById('kpiPendingDisposition').textContent =
+   pendingDisposition;
+ }
+
+ function filteredRecords(){
+  const q = (
+   document.getElementById('recordSearch')?.value || ''
+  ).trim().toLowerCase();
+
+  const category =
+   document.getElementById('categoryFilter')?.value || '';
+
+  const source =
+   document.getElementById('sourceFilter')?.value || '';
+
+  const status =
+   document.getElementById('statusFilter')?.value || '';
+
+  return enterpriseRecords.filter(r => {
+   const haystack = [
+    r.record_code,
+    r.record_title,
+    r.record_type,
+    r.record_category,
+    r.source_module,
+    r.owner?.business_area,
+    r.owner?.first_name,
+    r.owner?.last_name,
+    r.owner?.email,
+    r.retention?.rule_code,
+    r.status
+   ].filter(Boolean).join(' ').toLowerCase();
+
+   if(q && !haystack.includes(q)) return false;
+   if(category && r.record_category !== category) return false;
+   if(source && r.source_module !== source) return false;
+   if(status && r.status !== status) return false;
+
+   return true;
+  });
+ }
+
+ function renderRecords(){
+  const body = document.getElementById('recordsTableBody');
+  if(!body) return;
+
+  const records = filteredRecords();
+
+  if(!records.length){
+   body.innerHTML = `
+    <tr>
+     <td colspan="9" class="records-empty">
+      No records match the selected filters.
+     </td>
+    </tr>
+   `;
+   return;
+  }
+
+  body.innerHTML = records.map(r => {
+   const retention = r.retention || {};
+
+   return `
+    <tr data-record-id="${r.id}">
+     <td>
+      <span class="records-code">
+       ${esc(r.record_code)}
+      </span>
+     </td>
+
+     <td class="records-title">
+      ${esc(r.record_title)}
+     </td>
+
+     <td>
+      ${esc(r.record_type || '—')}
+     </td>
+
+     <td>
+      ${esc(r.owner?.business_area || '—')}
+     </td>
+
+     <td>
+      ${esc(r.source_module || '—')}
+     </td>
+
+     <td>
+      ${esc(ownerName(r))}
+     </td>
+
+     <td>
+      ${
+       retention.rule_code
+        ? `<b>${esc(retention.rule_code)}</b>`
+        : '<span class="records-muted">Unclassified</span>'
+      }
+     </td>
+
+     <td>
+      ${esc(formatDate(retention.disposal_due_date))}
+     </td>
+
+     <td>
+      <span class="records-badge ${statusClass(r.status)}">
+       ${esc(r.status || '—')}
+      </span>
+     </td>
+    </tr>
+   `;
+  }).join('');
+ }
+
+ async function loadRecords(){
+  const body = document.getElementById('recordsTableBody');
+
+  try{
+   const data = await recordsFetch('/records');
+   enterpriseRecords = data.records || [];
+
+   updateKpis(enterpriseRecords);
+
+   populateFilter(
+    'categoryFilter',
+    enterpriseRecords.map(r=>r.record_category),
+    'All Categories'
+   );
+
+   populateFilter(
+    'sourceFilter',
+    enterpriseRecords.map(r=>r.source_module),
+    'All Sources'
+   );
+
+   populateFilter(
+    'statusFilter',
+    enterpriseRecords.map(r=>r.status),
+    'All Statuses'
+   );
+
+   renderRecords();
+
+  }catch(error){
+   console.error(error);
+
+   if(body){
+    body.innerHTML = `
+     <tr>
+      <td colspan="9" class="records-empty">
+       Unable to load enterprise records.
+      </td>
+     </tr>
+    `;
+   }
+  }
+ }
+
+ document.getElementById('recordSearch')
+  ?.addEventListener('input',renderRecords);
+
+ ['categoryFilter','sourceFilter','statusFilter']
+  .forEach(id=>{
+   document.getElementById(id)
+    ?.addEventListener('change',renderRecords);
+  });
+
+ document.querySelectorAll('.records-tab').forEach(button=>{
+  button.addEventListener('click',()=>{
+   document.querySelectorAll('.records-tab')
+    .forEach(b=>b.classList.remove('active'));
+
+   button.classList.add('active');
+  });
+ });
+
+ document.getElementById('addRecordBtn')
+  ?.addEventListener('click',()=>{
+   alert('Add Record workflow is next.');
+  });
+
+ loadRecords();
+})();
+</script>
+
+<script src="nav.js"></script>
+</body></html>
