@@ -869,6 +869,172 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  }
 }
 
+
+/* RECORD DETAIL DRAWER */
+.record-modal{
+ position:fixed;
+ inset:0;
+ background:rgba(0,0,0,.42);
+ display:none;
+ justify-content:flex-end;
+ z-index:1000;
+}
+
+.record-modal.open{
+ display:flex;
+}
+
+.record-drawer{
+ width:min(690px,95vw);
+ height:100%;
+ background:#fff;
+ box-shadow:-15px 0 35px rgba(0,0,0,.2);
+ overflow:auto;
+}
+
+.record-drawer-head{
+ background:var(--charcoal);
+ color:#fff;
+ padding:23px;
+ position:sticky;
+ top:0;
+ z-index:2;
+}
+
+.record-drawer-close{
+ float:right;
+ background:transparent;
+ border:0;
+ color:#fff;
+ font-size:24px;
+ cursor:pointer;
+}
+
+.record-drawer-head small{
+ color:var(--green);
+ font-weight:800;
+}
+
+.record-drawer-head h2{
+ margin:6px 0;
+ font-size:21px;
+}
+
+.record-drawer-head p{
+ margin:0;
+ font-size:10px;
+ color:#ddd;
+}
+
+.record-drawer-body{
+ padding:21px;
+}
+
+.record-section{
+ margin-top:20px;
+}
+
+.record-section:first-child{
+ margin-top:0;
+}
+
+.record-section h3{
+ font-size:12px;
+ margin:0 0 9px;
+ color:var(--charcoal);
+}
+
+.record-detail-grid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:10px;
+}
+
+.record-detail{
+ background:#f8f7f6;
+ border-radius:8px;
+ padding:11px;
+}
+
+.record-detail label{
+ display:block;
+ color:var(--grey);
+ font-size:8px;
+ text-transform:uppercase;
+ letter-spacing:.6px;
+ font-weight:800;
+ margin-bottom:5px;
+}
+
+.record-detail strong{
+ display:block;
+ font-size:10px;
+ line-height:1.45;
+}
+
+.controlled-record{
+ margin-top:12px;
+ border:1px solid #ddd7d1;
+ border-left:4px solid var(--green);
+ border-radius:8px;
+ padding:14px;
+ background:#fafafa;
+}
+
+.controlled-record-title{
+ font-size:10px;
+ font-weight:800;
+ margin-bottom:5px;
+}
+
+.controlled-record p{
+ margin:0;
+ color:var(--grey);
+ font-size:9px;
+ line-height:1.55;
+}
+
+.record-file{
+ background:#f8f7f6;
+ border-radius:8px;
+ padding:12px;
+}
+
+.record-file strong{
+ display:block;
+ font-size:10px;
+ word-break:break-word;
+}
+
+.record-file small{
+ display:block;
+ margin-top:5px;
+ color:var(--grey);
+ font-size:8px;
+}
+
+.record-drawer-actions{
+ display:flex;
+ gap:8px;
+ margin-top:18px;
+}
+
+.request-record-btn{
+ border:0;
+ border-radius:8px;
+ background:var(--green);
+ color:var(--charcoal);
+ padding:11px 17px;
+ font:700 10px Montserrat,Verdana,Arial,sans-serif;
+ cursor:pointer;
+}
+
+@media(max-width:720px){
+ .record-detail-grid{
+  grid-template-columns:1fr;
+ }
+}
+
 </style></head><body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
@@ -984,7 +1150,148 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
 </section>
 
-<div class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Records Management • v2.9</span></div></div></main></div><script>function toggleNavGroup(id){const g=document.getElementById(id);if(g)g.classList.toggle('open');}
+<div class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Records Management • v2.9</span></div></div>
+</main></div>
+
+<div
+ class="record-modal"
+ id="recordModal"
+ onclick="recordBackdropClose(event)"
+>
+ <div class="record-drawer">
+
+  <div class="record-drawer-head">
+   <button
+    class="record-drawer-close"
+    type="button"
+    onclick="closeRecordDrawer()"
+   >×</button>
+
+   <small id="drawerRecordCode">ENTERPRISE RECORD</small>
+   <h2 id="drawerRecordTitle">Record Details</h2>
+   <p id="drawerRecordSubtitle">
+    Enterprise Records Management
+   </p>
+  </div>
+
+  <div class="record-drawer-body">
+
+   <section class="record-section">
+    <h3>Record Details</h3>
+
+    <div class="record-detail-grid">
+     <div class="record-detail">
+      <label>Record Type</label>
+      <strong id="drawerRecordType">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Category</label>
+      <strong id="drawerRecordCategory">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Business Area</label>
+      <strong id="drawerBusinessArea">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Source</label>
+      <strong id="drawerSource">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Owner</label>
+      <strong id="drawerOwner">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Record Date</label>
+      <strong id="drawerRecordDate">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Security Classification</label>
+      <strong id="drawerClassification">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Status</label>
+      <strong id="drawerStatus">—</strong>
+     </div>
+    </div>
+   </section>
+
+   <section class="record-section">
+    <h3>Retention</h3>
+
+    <div class="record-detail-grid">
+     <div class="record-detail">
+      <label>Retention Rule</label>
+      <strong id="drawerRetentionRule">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Retention Period</label>
+      <strong id="drawerRetentionPeriod">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Trigger</label>
+      <strong id="drawerRetentionTrigger">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Trigger Date</label>
+      <strong id="drawerTriggerDate">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Disposal Due</label>
+      <strong id="drawerDisposalDate">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Hold Status</label>
+      <strong id="drawerHoldStatus">No active hold</strong>
+     </div>
+    </div>
+   </section>
+
+   <section class="record-section">
+    <h3>Record Content</h3>
+
+    <div class="record-file">
+     <strong id="drawerFileName">No uploaded file</strong>
+     <small id="drawerFileMeta"></small>
+    </div>
+
+    <div class="controlled-record">
+     <div class="controlled-record-title">
+      🔒 Controlled Record
+     </div>
+     <p>
+      This record is subject to controlled distribution.
+      Request a copy through the approved Records Management process.
+     </p>
+    </div>
+
+    <div class="record-drawer-actions">
+     <button
+      class="request-record-btn"
+      id="requestRecordBtn"
+      type="button"
+     >
+      Request Record
+     </button>
+    </div>
+   </section>
+
+  </div>
+ </div>
+</div>
+
+<script>function toggleNavGroup(id){const g=document.getElementById(id);if(g)g.classList.toggle('open');}
 /* VERO GLOBAL ACCOUNT MENU */
 (()=>{
  const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
@@ -1249,6 +1556,150 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   }).join('');
  }
 
+
+ async function openRecordDrawer(recordId){
+  const modal = document.getElementById('recordModal');
+  if(!modal) return;
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  document.getElementById('drawerRecordCode').textContent =
+   'ENTERPRISE RECORD';
+
+  document.getElementById('drawerRecordTitle').textContent =
+   'Loading record...';
+
+  try{
+   const data = await recordsFetch('/records/' + recordId);
+   const r = data.record;
+   const retention = r.retention || {};
+   const owner = r.owner || {};
+
+   const ownerText =
+    [owner.first_name,owner.last_name]
+     .filter(Boolean)
+     .join(' ')
+    || owner.email
+    || '—';
+
+   document.getElementById('drawerRecordCode').textContent =
+    r.record_code || 'ENTERPRISE RECORD';
+
+   document.getElementById('drawerRecordTitle').textContent =
+    r.record_title || 'Record Details';
+
+   document.getElementById('drawerRecordSubtitle').textContent =
+    [
+     r.record_category,
+     r.source_module
+    ].filter(Boolean).join(' • ') || 'Enterprise Records Management';
+
+   document.getElementById('drawerRecordType').textContent =
+    r.record_type || '—';
+
+   document.getElementById('drawerRecordCategory').textContent =
+    r.record_category || '—';
+
+   document.getElementById('drawerBusinessArea').textContent =
+    owner.business_area || '—';
+
+   document.getElementById('drawerSource').textContent =
+    r.source_module || '—';
+
+   document.getElementById('drawerOwner').textContent =
+    ownerText;
+
+   document.getElementById('drawerRecordDate').textContent =
+    formatDate(r.record_date);
+
+   document.getElementById('drawerClassification').textContent =
+    r.security_classification || '—';
+
+   document.getElementById('drawerStatus').textContent =
+    r.status || '—';
+
+   document.getElementById('drawerRetentionRule').textContent =
+    retention.rule_code
+     ? retention.rule_code +
+       (retention.rule_name ? ' — ' + retention.rule_name : '')
+     : 'Unclassified';
+
+   document.getElementById('drawerRetentionPeriod').textContent =
+    retention.period_months != null
+     ? (retention.period_months / 12) + ' years'
+     : '—';
+
+   document.getElementById('drawerRetentionTrigger').textContent =
+    retention.trigger || '—';
+
+   document.getElementById('drawerTriggerDate').textContent =
+    formatDate(retention.trigger_date);
+
+   document.getElementById('drawerDisposalDate').textContent =
+    formatDate(retention.disposal_due_date);
+
+   const registerRecord = enterpriseRecords.find(
+    x => String(x.id) === String(recordId)
+   );
+
+   document.getElementById('drawerHoldStatus').textContent =
+    registerRecord?.has_active_hold
+     ? 'Active hold'
+     : 'No active hold';
+
+   document.getElementById('drawerFileName').textContent =
+    r.file_name || 'System-generated record';
+
+   const fileMeta = [];
+
+   if(r.content_type){
+    fileMeta.push(r.content_type);
+   }
+
+   if(r.file_size_bytes != null){
+    const kb = r.file_size_bytes / 1024;
+    fileMeta.push(
+     kb >= 1024
+      ? (kb / 1024).toFixed(1) + ' MB'
+      : kb.toFixed(1) + ' KB'
+    );
+   }
+
+   document.getElementById('drawerFileMeta').textContent =
+    fileMeta.join(' • ');
+
+   document.getElementById('requestRecordBtn').dataset.recordId =
+    r.id;
+
+  }catch(error){
+   console.error(error);
+
+   document.getElementById('drawerRecordTitle').textContent =
+    'Unable to load record';
+
+   document.getElementById('drawerRecordSubtitle').textContent =
+    error.message || 'Record details could not be retrieved.';
+  }
+ }
+
+ window.closeRecordDrawer = function(){
+  document.getElementById('recordModal')?.classList.remove('open');
+  document.body.style.overflow = '';
+ };
+
+ window.recordBackdropClose = function(event){
+  if(event.target.id === 'recordModal'){
+   window.closeRecordDrawer();
+  }
+ };
+
+ document.addEventListener('keydown',event=>{
+  if(event.key === 'Escape'){
+   window.closeRecordDrawer();
+  }
+ });
+
  async function loadRecords(){
   const body = document.getElementById('recordsTableBody');
 
@@ -1314,6 +1765,13 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  document.getElementById('addRecordBtn')
   ?.addEventListener('click',()=>{
    alert('Add Record workflow is next.');
+  });
+
+ document.getElementById('recordsTableBody')
+  ?.addEventListener('click',event=>{
+   const row = event.target.closest('tr[data-record-id]');
+   if(!row) return;
+   openRecordDrawer(row.dataset.recordId);
   });
 
  loadRecords();
