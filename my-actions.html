@@ -867,6 +867,10 @@ function openActionDetail(index){
   action.source==='Compliance' &&
   action.action_type==='Control Verification';
 
+ const isRecordRequest=
+  action.source==='Records' &&
+  action.action_type==='Record Request';
+
  const requestType=action.request_type||'New Document';
 
  const requestLabels={
@@ -890,7 +894,9 @@ function openActionDetail(index){
     ? 'DOCUMENT CONTROL'
     : isCompliance
      ? 'COMPLIANCE CONTROL'
-     : (action.source||'MY ACTION');
+     : isRecordRequest
+      ? 'RECORDS MANAGEMENT'
+      : (action.source||'MY ACTION');
 
  document.getElementById('actionDetailTitle').textContent=
   isDocumentReview
@@ -899,14 +905,18 @@ function openActionDetail(index){
     ? `${requestLabels[requestType]||requestType}: ${action.document_title||action.description||action.title||'Document'}`
     : isCompliance
      ? `${action.request_code||'Compliance Request'} — ${action.description||action.request_title||'Requirement'}`
-     : (action.description||action.title||'Action');
+     : isRecordRequest
+      ? `${action.record_code||'Record'} — ${action.record_title||'Record Request'}`
+      : (action.description||action.title||'Action');
 
  document.getElementById('actionDetailSubtitle').textContent=
   isDocumentRequest
    ? `${requestType}${action.source_id?` · Request #${action.source_id}`:''}`
    : isCompliance
     ? `${action.submission_type||'Compliance Requirement'} · ${action.request_code||''}`
-    : `${action.action_type||'Action'}${action.source_id?` · #${action.source_id}`:''}`;
+    : isRecordRequest
+     ? `Record Request · Request #${action.record_request_id||action.source_id}`
+     : `${action.action_type||'Action'}${action.source_id?` · #${action.source_id}`:''}`;
 
  document.getElementById('actionDetailStatus').textContent=action.status||'Open';
 
@@ -1077,6 +1087,27 @@ function openActionDetail(index){
     ? `Completion requires a ${action.required_record_type||'record'}.`
     : 'No completion record is required.';
 
+ }else if(isRecordRequest){
+
+  document.getElementById('actionDetailGrid').innerHTML=[
+   actionField('Record',action.record_code),
+   actionField('Record type',action.record_type),
+   actionField('Category',action.record_category),
+   actionField('Requested by',action.requested_by),
+   actionField('Submitted',formatActionDate(action.created_at)),
+   actionField('Status',action.status)
+  ].join('');
+
+  document.getElementById('actionDetailReason').textContent=
+   action.business_reason||'—';
+
+  document.getElementById('actionDetailAdditional').innerHTML=
+   `<button class="action-btn-more"
+            type="button"
+            onclick="openRecordFromAction()">
+      View Record Details →
+    </button>`;
+
  }else if(isCompliance){
 
   document.getElementById('actionDetailGrid').innerHTML=[
@@ -1246,12 +1277,17 @@ function openActionDetail(index){
   action.status==='Ready for Withdrawal';
 
  decisionActions.style.display=
-  !isCompliance &&
-  !isComplianceActivity &&
-  isDocumentRequest &&
-  !isDocumentReview &&
-  !isPublicationStage &&
-  !isWithdrawalStage
+  (
+   (
+    !isCompliance &&
+    !isComplianceActivity &&
+    isDocumentRequest &&
+    !isDocumentReview &&
+    !isPublicationStage &&
+    !isWithdrawalStage
+   )
+   || isRecordRequest
+  )
    ? 'block'
    : 'none';
 
@@ -1414,6 +1450,29 @@ function openActionDetail(index){
   }
  }
 
+ if(isRecordRequest){
+  const approveButton=
+   decisionActions.querySelector('.action-btn-approve');
+
+  const moreButton=
+   decisionActions.querySelector('.action-btn-more');
+
+  const rejectButton=
+   decisionActions.querySelector('.action-btn-reject');
+
+  if(approveButton){
+   approveButton.textContent='Approve Request';
+  }
+
+  if(moreButton){
+   moreButton.style.display='none';
+  }
+
+  if(rejectButton){
+   rejectButton.textContent='Reject Request';
+  }
+ }
+
  const projectActions=document.getElementById('projectActionActions');
 
  if(projectActions){
@@ -1436,6 +1495,19 @@ function openComplianceAction(){
 
  location.href=
   `compliance.html?request=${encodeURIComponent(currentAction.source_id)}`;
+}
+
+function openRecordFromAction(){
+ const action=currentAction;
+
+ if(
+  !action ||
+  action.source!=='Records' ||
+  !action.record_id
+ ) return;
+
+ location.href=
+  `records.html?record=${encodeURIComponent(action.record_id)}`;
 }
 
 function openProjectAction(){
@@ -1519,7 +1591,43 @@ async function sendActionDecision(decision,notes){
     ? 'approval'
     : 'decision';
 
-  const r=await fetch(`${API}/document-requests/${encodeURIComponent(action.source_id)}/${decisionEndpoint}`,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(payload)});
+  let endpoint;
+ let requestPayload;
+
+ if(
+  action.source==='Records' &&
+  action.action_type==='Record Request'
+ ){
+  endpoint=
+   `${API}/record-requests/${encodeURIComponent(action.source_id)}/decision`;
+
+  requestPayload={
+   decision:
+    decision==='approve'
+     ? 'Approved'
+     : 'Rejected',
+   decision_notes:notes||null
+  };
+
+ }else{
+  endpoint=
+   `${API}/document-requests/${encodeURIComponent(action.source_id)}/${decisionEndpoint}`;
+
+  requestPayload=payload;
+ }
+
+ const r=await fetch(
+  endpoint,
+  {
+   method:'POST',
+   headers:{
+    Authorization:'Bearer '+token,
+    'Content-Type':'application/json',
+    Accept:'application/json'
+   },
+   body:JSON.stringify(requestPayload)
+  }
+ );
   const d=await r.json().catch(()=>({})); if(!r.ok)throw new Error(d.message||'Unable to process decision');
   showDecisionMessage(d.message||'Decision completed successfully.','success');
   setTimeout(()=>{closeActionDetail();loadActions();},700);
