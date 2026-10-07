@@ -299,6 +299,58 @@
 
 
 
+
+/* MY ACTIONS — SEARCH / FILTER TOOLBAR */
+.action-toolbar{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:18px;
+ flex-wrap:wrap;
+}
+
+.action-toolbar-search{
+ width:280px;
+ height:36px;
+ box-sizing:border-box;
+ border:1px solid var(--line);
+ border-radius:7px;
+ background:#fff;
+ padding:0 12px;
+ font:500 10px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--charcoal);
+ outline:none;
+}
+
+.action-toolbar-search:focus{
+ border-color:var(--green);
+ box-shadow:0 0 0 2px rgba(169,194,63,.12);
+}
+
+.action-toolbar-search::placeholder{
+ color:#aaa39e;
+}
+
+.action-toolbar-filters{
+ display:flex;
+ align-items:center;
+ justify-content:flex-end;
+ gap:9px;
+ flex-wrap:wrap;
+ margin-left:auto;
+}
+
+@media(max-width:1050px){
+ .action-toolbar-search{
+  width:100%;
+ }
+ .action-toolbar-filters{
+  width:100%;
+  justify-content:flex-start;
+  margin-left:0;
+ }
+}
+
 </style></head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -318,13 +370,7 @@
     <div class="hero-rule"></div>
    </div>
    <div class="hero-tools">
-    <input
-     class="hero-search"
-     id="actionSearch"
-     type="search"
-     placeholder="⌕   Search actions..."
-     oninput="renderActions()"
-    >
+
     <div class="vero-account" id="veroAccount">
      <button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false">
       <div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span>
@@ -341,6 +387,16 @@
   <div class="actions-page">
 
    <div class="action-toolbar">
+
+    <input
+     class="action-toolbar-search"
+     id="actionSearch"
+     type="search"
+     placeholder="⌕   Search actions..."
+     oninput="renderActions()"
+    >
+
+    <div class="action-toolbar-filters">
     <button class="action-filter active" data-filter="all" onclick="setActionFilter('all',this)">All</button>
     <button class="action-filter" data-filter="overdue" onclick="setActionFilter('overdue',this)">Overdue</button>
     <button class="action-filter" data-filter="documents" onclick="setActionFilter('documents',this)">Documents</button>
@@ -349,6 +405,7 @@
     <button class="action-filter" data-filter="incidents" onclick="setActionFilter('incidents',this)">Incidents</button>
     <button class="action-filter" data-filter="projects" onclick="setActionFilter('projects',this)">Projects</button>
     <button class="action-filter" data-filter="records" onclick="setActionFilter('records',this)">Records</button>
+    </div>
    </div>
 
    <div class="action-list-panel">
