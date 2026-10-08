@@ -1203,6 +1203,8 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   </button>
  </div>
 
+ <div id="recordsRegisterPanel">
+
  <div class="records-filters">
   <input
    id="recordSearch"
@@ -1247,6 +1249,52 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    </tbody>
   </table>
  </div>
+
+</div>
+
+<div id="retentionSchedulePanel" style="display:none">
+
+ <div class="records-filters">
+  <input
+   id="retentionSearch"
+   type="search"
+   placeholder="Search retention rules..."
+  >
+
+  <select id="retentionStatusFilter">
+   <option value="">All Statuses</option>
+   <option value="Draft">Draft</option>
+   <option value="Active">Active</option>
+   <option value="Superseded">Superseded</option>
+   <option value="Archived">Archived</option>
+  </select>
+ </div>
+
+ <div class="records-table-wrap">
+  <table class="records-table">
+   <thead>
+    <tr>
+     <th>Rule</th>
+     <th>Rule Name</th>
+     <th>Category</th>
+     <th>Retention</th>
+     <th>Trigger</th>
+     <th>Business Area</th>
+     <th>Records</th>
+     <th>Status</th>
+    </tr>
+   </thead>
+   <tbody id="retentionTableBody">
+    <tr>
+     <td colspan="8" class="records-empty">
+      Loading retention schedule...
+     </td>
+    </tr>
+   </tbody>
+  </table>
+ </div>
+
+</div>
 
 </section>
 
@@ -1956,6 +2004,148 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   }
  }
 
+
+ // ============================================================
+ // RETENTION SCHEDULE
+ // ============================================================
+
+ let retentionRules = [];
+ let retentionLoaded = false;
+
+ function escapeHtml(value){
+  return String(value ?? '').replace(
+   /[&<>"']/g,
+   ch => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+   }[ch])
+  );
+ }
+
+ function formatRetentionPeriod(months){
+  const n = Number(months);
+
+  if(!Number.isFinite(n)) return '—';
+  if(n === 0) return '0 months';
+
+  const years = Math.floor(n / 12);
+  const remaining = n % 12;
+
+  const parts = [];
+
+  if(years){
+   parts.push(years + (years === 1 ? ' year' : ' years'));
+  }
+
+  if(remaining){
+   parts.push(
+    remaining + (remaining === 1 ? ' month' : ' months')
+   );
+  }
+
+  return parts.join(', ');
+ }
+
+ function renderRetentionRules(){
+  const body = document.getElementById('retentionTableBody');
+  if(!body) return;
+
+  const search = (
+   document.getElementById('retentionSearch')?.value || ''
+  ).trim().toLowerCase();
+
+  const status = (
+   document.getElementById('retentionStatusFilter')?.value || ''
+  );
+
+  const filtered = retentionRules.filter(rule=>{
+   if(status && rule.status !== status) return false;
+
+   const searchable = [
+    rule.rule_code,
+    rule.rule_name,
+    rule.record_category,
+    rule.record_type,
+    rule.retention_trigger,
+    rule.business_area,
+    rule.authority,
+    rule.description
+   ].filter(Boolean).join(' ').toLowerCase();
+
+   return !search || searchable.includes(search);
+  });
+
+  if(!filtered.length){
+   body.innerHTML = `
+    <tr>
+     <td colspan="8" class="records-empty">
+      No retention rules match your filters.
+     </td>
+    </tr>
+   `;
+   return;
+  }
+
+  body.innerHTML = filtered.map(rule=>`
+   <tr data-retention-id="${Number(rule.id)}">
+    <td><strong>${escapeHtml(rule.rule_code)}</strong></td>
+    <td>${escapeHtml(rule.rule_name)}</td>
+    <td>${escapeHtml(rule.record_category || '—')}</td>
+    <td>${escapeHtml(formatRetentionPeriod(rule.retention_period_months))}</td>
+    <td>${escapeHtml(rule.retention_trigger || '—')}</td>
+    <td>${escapeHtml(rule.business_area || '—')}</td>
+    <td>${Number(rule.record_count || 0)}</td>
+    <td>${escapeHtml(rule.status || '—')}</td>
+   </tr>
+  `).join('');
+ }
+
+ async function loadRetentionRules(){
+  const body = document.getElementById('retentionTableBody');
+
+  if(body){
+   body.innerHTML = `
+    <tr>
+     <td colspan="8" class="records-empty">
+      Loading retention schedule...
+     </td>
+    </tr>
+   `;
+  }
+
+  try{
+   const data = await recordsFetch('/records/retention-rules');
+
+   retentionRules = data.rules || [];
+   retentionLoaded = true;
+
+   renderRetentionRules();
+
+  }catch(error){
+   console.error('Unable to load retention schedule:',error);
+
+   if(body){
+    body.innerHTML = `
+     <tr>
+      <td colspan="8" class="records-empty">
+       Unable to load retention schedule.
+      </td>
+     </tr>
+    `;
+   }
+  }
+ }
+
+ document.getElementById('retentionSearch')
+  ?.addEventListener('input',renderRetentionRules);
+
+ document.getElementById('retentionStatusFilter')
+  ?.addEventListener('change',renderRetentionRules);
+
+
  document.getElementById('recordSearch')
   ?.addEventListener('input',renderRecords);
 
@@ -1967,10 +2157,32 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
  document.querySelectorAll('.records-tab').forEach(button=>{
   button.addEventListener('click',()=>{
+   const selected = button.dataset.tab;
+
    document.querySelectorAll('.records-tab')
     .forEach(b=>b.classList.remove('active'));
 
    button.classList.add('active');
+
+   const registerPanel =
+    document.getElementById('recordsRegisterPanel');
+
+   const retentionPanel =
+    document.getElementById('retentionSchedulePanel');
+
+   if(registerPanel){
+    registerPanel.style.display =
+     selected === 'register' ? '' : 'none';
+   }
+
+   if(retentionPanel){
+    retentionPanel.style.display =
+     selected === 'retention' ? '' : 'none';
+   }
+
+   if(selected === 'retention' && !retentionLoaded){
+    loadRetentionRules();
+   }
   });
  });
 
