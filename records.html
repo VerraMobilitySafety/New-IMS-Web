@@ -1301,6 +1301,109 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 <div class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Records Management • v2.9</span></div></div>
 </main></div>
 
+
+<!-- RETENTION RULE DETAIL DRAWER -->
+<div
+ class="record-modal"
+ id="retentionModal"
+ onclick="retentionBackdropClose(event)"
+>
+ <div class="record-drawer">
+
+  <div class="record-drawer-head">
+   <button
+    class="record-drawer-close"
+    type="button"
+    onclick="closeRetentionDrawer()"
+   >×</button>
+
+   <small id="retentionDrawerCode">RETENTION RULE</small>
+   <h2 id="retentionDrawerTitle">Retention Rule Details</h2>
+   <p>Records Management — Retention Schedule</p>
+  </div>
+
+  <div class="record-drawer-body">
+
+   <section class="record-section">
+    <h3>Rule Details</h3>
+
+    <div class="record-detail-grid">
+
+     <div class="record-detail">
+      <label>Record Category</label>
+      <strong id="retentionDrawerCategory">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Record Type</label>
+      <strong id="retentionDrawerType">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Retention Period</label>
+      <strong id="retentionDrawerPeriod">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Retention Trigger</label>
+      <strong id="retentionDrawerTrigger">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Business Area</label>
+      <strong id="retentionDrawerBusinessArea">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Status</label>
+      <strong id="retentionDrawerStatus">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Effective Date</label>
+      <strong id="retentionDrawerEffective">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Review Date</label>
+      <strong id="retentionDrawerReview">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Linked Records</label>
+      <strong id="retentionDrawerCount">—</strong>
+     </div>
+
+    </div>
+   </section>
+
+   <section class="record-section">
+    <h3>Description</h3>
+    <p id="retentionDrawerDescription">—</p>
+   </section>
+
+   <section class="record-section">
+    <h3>Retention Authority</h3>
+
+    <div class="record-detail-grid">
+
+     <div class="record-detail">
+      <label>Authority</label>
+      <strong id="retentionDrawerAuthority">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Authority Reference</label>
+      <strong id="retentionDrawerAuthorityRef">—</strong>
+     </div>
+
+    </div>
+   </section>
+
+  </div>
+ </div>
+</div>
+
 <div
  class="record-modal"
  id="recordModal"
@@ -1956,6 +2059,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
  document.addEventListener('keydown',event=>{
   if(event.key === 'Escape'){
+   window.closeRetentionDrawer();
    window.closeRecordDrawer();
   }
  });
@@ -2102,6 +2206,76 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    </tr>
   `).join('');
  }
+
+
+ // ============================================================
+ // RETENTION RULE DETAIL DRAWER
+ // ============================================================
+
+ function openRetentionDrawer(ruleId){
+  const rule = retentionRules.find(
+   r => String(r.id) === String(ruleId)
+  );
+
+  if(!rule) return;
+
+  const fields = {
+   retentionDrawerCode: rule.rule_code,
+   retentionDrawerTitle: rule.rule_name,
+   retentionDrawerCategory: rule.record_category,
+   retentionDrawerType: rule.record_type,
+   retentionDrawerPeriod: formatRetentionPeriod(
+    rule.retention_period_months
+   ),
+   retentionDrawerTrigger: rule.retention_trigger,
+   retentionDrawerBusinessArea: rule.business_area,
+   retentionDrawerStatus: rule.status,
+   retentionDrawerEffective: rule.effective_date,
+   retentionDrawerReview: rule.review_date,
+   retentionDrawerCount: rule.record_count,
+   retentionDrawerDescription: rule.description,
+   retentionDrawerAuthority: rule.authority,
+   retentionDrawerAuthorityRef: rule.authority_reference
+  };
+
+  Object.entries(fields).forEach(([id,value])=>{
+   const element = document.getElementById(id);
+
+   if(element){
+    element.textContent =
+     value === null || value === undefined || value === ''
+      ? '—'
+      : String(value);
+   }
+  });
+
+  document.getElementById('retentionModal')
+   ?.classList.add('open');
+
+  document.body.style.overflow = 'hidden';
+ }
+
+ window.closeRetentionDrawer = function(){
+  document.getElementById('retentionModal')
+   ?.classList.remove('open');
+
+  document.body.style.overflow = '';
+ };
+
+ window.retentionBackdropClose = function(event){
+  if(event.target.id === 'retentionModal'){
+   window.closeRetentionDrawer();
+  }
+ };
+
+ document.getElementById('retentionTableBody')
+  ?.addEventListener('click',event=>{
+   const row = event.target.closest('tr[data-retention-id]');
+
+   if(!row) return;
+
+   openRetentionDrawer(row.dataset.retentionId);
+  });
 
  async function loadRetentionRules(){
   const body = document.getElementById('retentionTableBody');
