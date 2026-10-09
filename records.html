@@ -1154,6 +1154,73 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  filter:brightness(.95);
 }
 
+
+/* RETENTION RULE FORM */
+.retention-form-grid{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:16px;
+ margin-top:15px;
+}
+.retention-form-grid label,
+.retention-form-field{
+ display:flex;
+ flex-direction:column;
+ gap:7px;
+ font-size:10px;
+ font-weight:700;
+ color:var(--charcoal);
+}
+.retention-form-field{
+ margin-top:16px;
+}
+.retention-form-grid input,
+.retention-form-grid select,
+.retention-form-field textarea{
+ width:100%;
+ box-sizing:border-box;
+ padding:11px;
+ border:1px solid var(--line);
+ border-radius:7px;
+ background:#fff;
+ font:500 11px Montserrat,Verdana,Arial,sans-serif;
+ color:var(--charcoal);
+}
+.retention-form-grid input:focus,
+.retention-form-grid select:focus,
+.retention-form-field textarea:focus{
+ outline:none;
+ border-color:var(--green);
+}
+.retention-form-actions{
+ display:flex;
+ justify-content:flex-end;
+ gap:10px;
+ margin-top:25px;
+}
+.retention-form-actions button{
+ border:1px solid var(--line);
+ border-radius:7px;
+ padding:11px 18px;
+ font:800 10px Montserrat,Verdana,Arial,sans-serif;
+ cursor:pointer;
+ background:#fff;
+ color:var(--charcoal);
+}
+#saveRetentionRule{
+ background:var(--green);
+ border-color:var(--green);
+}
+.retention-form-message{
+ margin-top:15px;
+ font-size:11px;
+}
+@media(max-width:600px){
+ .retention-form-grid{
+  grid-template-columns:1fr;
+ }
+}
+
 </style></head><body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
@@ -1327,6 +1394,104 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 <div class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Records Management • v2.9</span></div></div>
 </main></div>
 
+
+
+<!-- RETENTION RULE FORM -->
+<div class="record-modal" id="retentionFormModal">
+ <div class="record-drawer">
+
+  <div class="record-drawer-head">
+   <button class="record-drawer-close"
+    type="button" id="closeRetentionForm">×</button>
+   <small>RECORDS MANAGEMENT</small>
+   <h2 id="retentionFormTitle">Add Retention Rule</h2>
+   <p>Enterprise Retention Schedule</p>
+  </div>
+
+  <div class="record-drawer-body">
+   <form id="retentionRuleForm">
+
+    <section class="record-section">
+     <h3>Rule Classification</h3>
+
+     <div class="retention-form-grid">
+      <label>Rule Name *
+       <input name="rule_name" required maxlength="255">
+      </label>
+
+      <label>Record Category *
+       <input name="record_category" required maxlength="100">
+      </label>
+
+      <label>Record Type
+       <input name="record_type" maxlength="100">
+      </label>
+
+      <label>Business Area
+       <input name="business_area" maxlength="255">
+      </label>
+     </div>
+
+     <label class="retention-form-field">
+      Description
+      <textarea name="description" rows="3"></textarea>
+     </label>
+    </section>
+
+    <section class="record-section">
+     <h3>Retention Requirements</h3>
+
+     <div class="retention-form-grid">
+      <label>Retention Period (Months) *
+       <input name="retention_period_months"
+        type="number" min="0" step="1" required>
+      </label>
+
+      <label>Retention Trigger *
+       <select name="retention_trigger" required>
+        <option value="Record Date">Record Date</option>
+        <option value="Completion Date">Completion Date</option>
+        <option value="Closure Date">Closure Date</option>
+        <option value="Expiry Date">Expiry Date</option>
+       </select>
+      </label>
+
+      <label>Review Date
+       <input name="review_date" type="date">
+      </label>
+     </div>
+    </section>
+
+    <section class="record-section">
+     <h3>Retention Authority</h3>
+
+     <div class="retention-form-grid">
+      <label>Authority
+       <input name="authority" maxlength="255">
+      </label>
+
+      <label>Authority Reference
+       <input name="authority_reference" maxlength="255">
+      </label>
+     </div>
+    </section>
+
+    <div id="retentionFormMessage"
+     class="retention-form-message" role="status"></div>
+
+    <div class="retention-form-actions">
+     <button type="button" id="cancelRetentionForm">
+      Cancel
+     </button>
+     <button type="submit" id="saveRetentionRule">
+      Save Draft
+     </button>
+    </div>
+
+   </form>
+  </div>
+ </div>
+</div>
 
 <!-- RETENTION RULE DETAIL DRAWER -->
 <div
@@ -2348,6 +2513,124 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    }
   }
  }
+
+
+ // RETENTION RULE FORM CONTROLS
+ function closeRetentionForm(){
+  document.getElementById('retentionFormModal')
+   ?.classList.remove('open');
+
+  document.body.style.overflow = '';
+ }
+
+ document.getElementById('addRetentionRuleBtn')
+  ?.addEventListener('click',()=>{
+   if(!canManageRetention) return;
+
+   const form = document.getElementById('retentionRuleForm');
+   form?.reset();
+
+   const message =
+    document.getElementById('retentionFormMessage');
+
+   if(message) message.textContent = '';
+
+   document.getElementById('retentionFormTitle')
+    .textContent = 'Add Retention Rule';
+
+   document.getElementById('retentionFormModal')
+    ?.classList.add('open');
+
+   document.body.style.overflow = 'hidden';
+  });
+
+ document.getElementById('closeRetentionForm')
+  ?.addEventListener('click',closeRetentionForm);
+
+ document.getElementById('cancelRetentionForm')
+  ?.addEventListener('click',closeRetentionForm);
+
+ document.getElementById('retentionFormModal')
+  ?.addEventListener('click',event=>{
+   if(event.target.id === 'retentionFormModal'){
+    closeRetentionForm();
+   }
+  });
+
+
+ // SAVE RETENTION RULE DRAFT
+ document.getElementById('retentionRuleForm')
+  ?.addEventListener('submit',async event=>{
+   event.preventDefault();
+
+   if(!canManageRetention) return;
+
+   const form = event.currentTarget;
+   const button = document.getElementById('saveRetentionRule');
+   const message = document.getElementById('retentionFormMessage');
+
+   const values = Object.fromEntries(
+    new FormData(form).entries()
+   );
+
+   const payload = {
+    rule_name: values.rule_name.trim(),
+    record_category: values.record_category.trim(),
+    record_type: values.record_type.trim(),
+    description: values.description.trim(),
+    retention_period_months:
+     Number(values.retention_period_months),
+    retention_trigger: values.retention_trigger,
+    business_area: values.business_area.trim(),
+    authority: values.authority.trim(),
+    authority_reference: values.authority_reference.trim(),
+    review_date: values.review_date || null
+   };
+
+   button.disabled = true;
+   button.textContent = 'Saving...';
+   message.textContent = '';
+
+   try{
+    const token = localStorage.getItem('vero_session_token');
+
+    const response = await fetch(
+     RECORDS_API + '/records/retention-rules',
+     {
+      method:'POST',
+      headers:{
+       Authorization:'Bearer ' + token,
+       'Content-Type':'application/json',
+       Accept:'application/json'
+      },
+      body:JSON.stringify(payload)
+     }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+     throw new Error(
+      data.message || 'Unable to create retention rule.'
+     );
+    }
+
+    closeRetentionForm();
+    await loadRetentionRules();
+
+    if(data.rule?.id){
+     openRetentionDrawer(data.rule.id);
+    }
+
+   }catch(error){
+    message.textContent =
+     error.message || 'Unable to save retention rule.';
+    message.style.color = '#a12b2b';
+   }finally{
+    button.disabled = false;
+    button.textContent = 'Save Draft';
+   }
+  });
 
  document.getElementById('retentionSearch')
   ?.addEventListener('input',renderRetentionRules);
