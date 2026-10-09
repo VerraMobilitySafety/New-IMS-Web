@@ -1389,6 +1389,60 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
 </div>
 
+
+<!-- RECORDS HOLDS PANEL -->
+<div id="recordsHoldsPanel" style="display:none">
+
+ <div class="records-filters">
+  <input
+   id="holdsSearch"
+   type="search"
+   placeholder="Search record holds..."
+  >
+
+  <select id="holdsStatusFilter">
+   <option value="">All Statuses</option>
+   <option value="Active">Active</option>
+   <option value="Released">Released</option>
+  </select>
+
+  <select id="holdsTypeFilter">
+   <option value="">All Hold Types</option>
+   <option value="Legal">Legal</option>
+   <option value="Investigation">Investigation</option>
+   <option value="Regulatory">Regulatory</option>
+   <option value="Audit">Audit</option>
+   <option value="Insurance">Insurance</option>
+   <option value="Management">Management</option>
+  </select>
+ </div>
+
+ <div class="records-table-wrap">
+  <table class="records-table">
+   <thead>
+    <tr>
+     <th>Record</th>
+     <th>Hold Type</th>
+     <th>Reference</th>
+     <th>Placed</th>
+     <th>Review Due</th>
+     <th>Placed By</th>
+     <th>Status</th>
+    </tr>
+   </thead>
+
+   <tbody id="holdsTableBody">
+    <tr>
+     <td colspan="7" class="records-empty">
+      Loading record holds...
+     </td>
+    </tr>
+   </tbody>
+  </table>
+ </div>
+
+</div>
+
 </section>
 
 <div class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Records Management • v2.9</span></div></div>
@@ -1489,6 +1543,176 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     </div>
 
    </form>
+  </div>
+ </div>
+</div>
+
+
+
+<!-- PLACE RECORD HOLD FORM -->
+<div class="record-modal" id="placeHoldModal">
+ <div class="record-drawer">
+
+  <div class="record-drawer-head">
+   <button class="record-drawer-close"
+    id="closePlaceHoldForm" type="button">×</button>
+   <small>RECORDS MANAGEMENT</small>
+   <h2>Place Record Hold</h2>
+   <p id="placeHoldRecordLabel">Enterprise Record</p>
+  </div>
+
+  <div class="record-drawer-body">
+   <form id="placeHoldForm">
+
+    <section class="record-section">
+     <h3>Hold Information</h3>
+
+     <div class="retention-form-grid">
+      <label>Hold Type *
+       <select name="hold_type" required>
+        <option value="">Select hold type</option>
+        <option value="Legal">Legal</option>
+        <option value="Investigation">Investigation</option>
+        <option value="Regulatory">Regulatory</option>
+        <option value="Audit">Audit</option>
+        <option value="Insurance">Insurance</option>
+        <option value="Management">Management</option>
+       </select>
+      </label>
+
+      <label>Reference
+       <input name="reference" maxlength="255">
+      </label>
+
+      <label>Review Date
+       <input name="review_date" type="date">
+      </label>
+     </div>
+
+     <label class="retention-form-field">
+      Hold Reason *
+      <textarea name="hold_reason"
+       rows="4" required
+       placeholder="Explain why this record must be preserved..."
+      ></textarea>
+     </label>
+    </section>
+
+    <div id="placeHoldMessage"
+     class="retention-form-message" role="status"></div>
+
+    <div class="retention-form-actions">
+     <button type="button" id="cancelPlaceHold">
+      Cancel
+     </button>
+     <button type="submit" id="submitPlaceHold">
+      Place Hold
+     </button>
+    </div>
+
+   </form>
+  </div>
+ </div>
+</div>
+
+<!-- RECORD HOLD DETAIL DRAWER -->
+<div
+ class="record-modal"
+ id="holdModal"
+ onclick="holdBackdropClose(event)"
+>
+ <div class="record-drawer">
+
+  <div class="record-drawer-head">
+   <button
+    class="record-drawer-close"
+    type="button"
+    onclick="closeHoldDrawer()"
+   >×</button>
+
+   <small id="holdDrawerRecord">RECORD HOLD</small>
+   <h2 id="holdDrawerTitle">Hold Details</h2>
+   <p>Records Management — Holds Register</p>
+  </div>
+
+  <div class="record-drawer-body">
+
+   <section class="record-section">
+    <h3>Hold Details</h3>
+
+    <div class="record-detail-grid">
+     <div class="record-detail">
+      <label>Record</label>
+      <strong id="holdDrawerRecordTitle">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Hold Type</label>
+      <strong id="holdDrawerType">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Reference</label>
+      <strong id="holdDrawerReference">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Status</label>
+      <strong id="holdDrawerStatus">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Placed By</label>
+      <strong id="holdDrawerPlacedBy">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Placed Date</label>
+      <strong id="holdDrawerPlacedAt">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Review Date</label>
+      <strong id="holdDrawerReviewDate">—</strong>
+     </div>
+    </div>
+   </section>
+
+   <section class="record-section">
+    <h3>Hold Reason</h3>
+    <p id="holdDrawerReason">—</p>
+   </section>
+
+   <section class="record-section" id="holdReleaseDetails"
+    style="display:none">
+    <h3>Release Details</h3>
+
+    <div class="record-detail-grid">
+     <div class="record-detail">
+      <label>Released By</label>
+      <strong id="holdDrawerReleasedBy">—</strong>
+     </div>
+
+     <div class="record-detail">
+      <label>Released Date</label>
+      <strong id="holdDrawerReleasedAt">—</strong>
+     </div>
+    </div>
+
+    <div class="record-detail" style="margin-top:15px">
+     <label>Release Reason</label>
+     <p id="holdDrawerReleaseReason">—</p>
+    </div>
+   </section>
+
+   <div class="retention-form-actions"
+        id="holdDrawerActions"
+        style="display:none">
+    <button id="releaseHoldBtn" type="button">
+     Release Hold
+    </button>
+   </div>
+
   </div>
  </div>
 </div>
@@ -1730,6 +1954,23 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
       <label>Hold Status</label>
       <strong id="drawerHoldStatus">No active hold</strong>
      </div>
+    </div>
+   </section>
+
+   <section class="record-section" id="recordHoldSection">
+    <h3>Record Holds</h3>
+    <p>
+     Holds suspend disposal while a legal, regulatory,
+     investigation or other authorised requirement remains active.
+    </p>
+
+    <div class="retention-form-actions"
+         id="recordHoldActions"
+         style="display:none">
+     <button
+      id="placeRecordHoldBtn"
+      type="button"
+     >+ Place Hold</button>
     </div>
    </section>
 
@@ -2069,6 +2310,16 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   const modal = document.getElementById('recordModal');
   if(!modal) return;
 
+  const holdActions =
+   document.getElementById('recordHoldActions');
+
+  // Track the record currently being displayed.
+  modal.dataset.activeRecordId = String(recordId);
+
+  if(holdActions){
+   holdActions.style.display = 'none';
+  }
+
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
 
@@ -2259,6 +2510,44 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    document.getElementById('requestRecordBtn').dataset.recordId =
     r.id;
 
+   // Resolve Document Controller permission independently.
+   const placeHoldButton =
+    document.getElementById('placeRecordHoldBtn');
+
+   if(placeHoldButton){
+    placeHoldButton.dataset.recordId = String(r.id);
+   }
+
+   try{
+    const permissionData = await recordsFetch(
+     '/records/retention-rules'
+    );
+
+    const canManageHolds =
+     permissionData.permissions?.can_manage === true;
+
+    if(
+     holdActions &&
+     modal.classList.contains('open') &&
+     modal.dataset.activeRecordId === String(r.id)
+    ){
+     holdActions.style.display =
+      canManageHolds && r.status !== 'Disposed'
+       ? 'flex'
+       : 'none';
+    }
+
+   }catch(permissionError){
+    console.warn(
+     'Unable to verify Records Controller permission:',
+     permissionError
+    );
+
+    if(holdActions){
+     holdActions.style.display = 'none';
+    }
+   }
+
   }catch(error){
    console.error(error);
 
@@ -2271,7 +2560,20 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  }
 
  window.closeRecordDrawer = function(){
-  document.getElementById('recordModal')?.classList.remove('open');
+  const modal = document.getElementById('recordModal');
+
+  if(modal){
+   modal.classList.remove('open');
+   delete modal.dataset.activeRecordId;
+  }
+
+  const actions =
+   document.getElementById('recordHoldActions');
+
+  if(actions){
+   actions.style.display = 'none';
+  }
+
   document.body.style.overflow = '';
  };
 
@@ -3032,6 +3334,435 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     ?.addEventListener('change',renderRecords);
   });
 
+
+ // ============================================================
+
+ // PLACE HOLD FORM CONTROLS
+ let placingHoldRecordId = null;
+
+ function closePlaceHoldForm(){
+  document.getElementById('placeHoldModal')
+   ?.classList.remove('open');
+
+  placingHoldRecordId = null;
+  document.body.style.overflow = '';
+ }
+
+ document.getElementById('placeRecordHoldBtn')
+  ?.addEventListener('click',event=>{
+   const actions =
+    document.getElementById('recordHoldActions');
+
+   if(actions?.style.display === 'none') return;
+
+   const recordId = event.currentTarget.dataset.recordId;
+   if(!recordId) return;
+
+   placingHoldRecordId = recordId;
+
+   const form = document.getElementById('placeHoldForm');
+   form?.reset();
+
+   const message =
+    document.getElementById('placeHoldMessage');
+
+   if(message) message.textContent = '';
+
+   const recordCode =
+    document.getElementById('drawerRecordCode')
+     ?.textContent || 'Enterprise Record';
+
+   document.getElementById('placeHoldRecordLabel')
+    .textContent = recordCode;
+
+   window.closeRecordDrawer();
+
+   document.getElementById('placeHoldModal')
+    ?.classList.add('open');
+
+   document.body.style.overflow = 'hidden';
+  });
+
+ document.getElementById('closePlaceHoldForm')
+  ?.addEventListener('click',closePlaceHoldForm);
+
+ document.getElementById('cancelPlaceHold')
+  ?.addEventListener('click',closePlaceHoldForm);
+
+ document.getElementById('placeHoldModal')
+  ?.addEventListener('click',event=>{
+   if(event.target.id === 'placeHoldModal'){
+    closePlaceHoldForm();
+   }
+  });
+
+
+ // SUBMIT RECORD HOLD
+ document.getElementById('placeHoldForm')
+  ?.addEventListener('submit',async event=>{
+   event.preventDefault();
+
+   const recordId = placingHoldRecordId;
+   if(!recordId) return;
+
+   const form = event.currentTarget;
+   const button = document.getElementById('submitPlaceHold');
+   const message = document.getElementById('placeHoldMessage');
+
+   const values = Object.fromEntries(
+    new FormData(form).entries()
+   );
+
+   const payload = {
+    hold_type: values.hold_type,
+    hold_reason: values.hold_reason.trim(),
+    reference: values.reference.trim(),
+    review_date: values.review_date || null
+   };
+
+   if(!payload.hold_type || !payload.hold_reason){
+    message.textContent = 'Hold type and reason are required.';
+    return;
+   }
+
+   button.disabled = true;
+   button.textContent = 'Placing Hold...';
+   message.textContent = '';
+
+   try{
+    const token = localStorage.getItem('vero_session_token');
+
+    if(!token){
+     throw new Error('Authentication required.');
+    }
+
+    const response = await fetch(
+     RECORDS_API + '/records/' +
+     encodeURIComponent(recordId) + '/holds',
+     {
+      method:'POST',
+      headers:{
+       Authorization:'Bearer ' + token,
+       'Content-Type':'application/json',
+       Accept:'application/json'
+      },
+      body:JSON.stringify(payload)
+     }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+     throw new Error(
+      data.message || 'Unable to place record hold.'
+     );
+    }
+
+    closePlaceHoldForm();
+
+    await loadRecords();
+    holdsLoaded = false;
+    await loadEnterpriseHolds();
+
+    await openRecordDrawer(recordId);
+
+   }catch(error){
+    console.error(error);
+    message.textContent =
+     error.message || 'Unable to place record hold.';
+    message.style.color = '#a12b2b';
+   }finally{
+    button.disabled = false;
+    button.textContent = 'Place Hold';
+   }
+  });
+
+ // ENTERPRISE RECORD HOLDS REGISTER
+ // ============================================================
+
+ let enterpriseHolds = [];
+ let holdsLoaded = false;
+
+ function renderHolds(){
+  const body = document.getElementById('holdsTableBody');
+  if(!body) return;
+
+  const search = (
+   document.getElementById('holdsSearch')?.value || ''
+  ).trim().toLowerCase();
+
+  const status =
+   document.getElementById('holdsStatusFilter')?.value || '';
+
+  const type =
+   document.getElementById('holdsTypeFilter')?.value || '';
+
+  const filtered = enterpriseHolds.filter(hold=>{
+   if(status && hold.status !== status) return false;
+   if(type && hold.hold_type !== type) return false;
+
+   const searchable = [
+    hold.record_code,
+    hold.record_title,
+    hold.hold_type,
+    hold.reference,
+    hold.hold_reason,
+    hold.placed_by_name
+   ].filter(Boolean).join(' ').toLowerCase();
+
+   return !search || searchable.includes(search);
+  });
+
+  if(!filtered.length){
+   body.innerHTML = `
+    <tr>
+     <td colspan="7" class="records-empty">
+      No record holds match your filters.
+     </td>
+    </tr>
+   `;
+   return;
+  }
+
+  body.innerHTML = filtered.map(hold=>`
+   <tr data-hold-id="${Number(hold.id)}">
+    <td><strong>${esc(hold.record_code)}</strong></td>
+    <td>${esc(hold.hold_type)}</td>
+    <td>${esc(hold.reference || '—')}</td>
+    <td>${esc(formatDate(hold.placed_at))}</td>
+    <td>${esc(formatDate(hold.review_date))}</td>
+    <td>${esc(hold.placed_by_name || '—')}</td>
+    <td>${esc(hold.status)}</td>
+   </tr>
+  `).join('');
+ }
+
+
+ // ============================================================
+ // RECORD HOLD DETAIL DRAWER
+ // ============================================================
+
+ function openHoldDrawer(holdId){
+  const hold = enterpriseHolds.find(
+   h => String(h.id) === String(holdId)
+  );
+
+  if(!hold) return;
+
+  const fields = {
+   holdDrawerRecord: hold.record_code,
+   holdDrawerTitle: hold.hold_type + ' Hold',
+   holdDrawerRecordTitle: hold.record_title,
+   holdDrawerType: hold.hold_type,
+   holdDrawerReference: hold.reference,
+   holdDrawerStatus: hold.status,
+   holdDrawerPlacedBy: hold.placed_by_name,
+   holdDrawerPlacedAt: formatDate(hold.placed_at),
+   holdDrawerReviewDate: formatDate(hold.review_date),
+   holdDrawerReason: hold.hold_reason,
+   holdDrawerReleasedBy: hold.released_by_name,
+   holdDrawerReleasedAt: formatDate(hold.released_at),
+   holdDrawerReleaseReason: hold.release_reason
+  };
+
+  Object.entries(fields).forEach(([id,value])=>{
+   const element = document.getElementById(id);
+
+   if(element){
+    element.textContent =
+     value === null || value === undefined || value === ''
+      ? '—'
+      : String(value);
+   }
+  });
+
+  const isReleased = hold.status === 'Released';
+
+  const releaseDetails =
+   document.getElementById('holdReleaseDetails');
+
+  if(releaseDetails){
+   releaseDetails.style.display =
+    isReleased ? '' : 'none';
+  }
+
+  const actions =
+   document.getElementById('holdDrawerActions');
+
+  if(actions){
+   actions.style.display =
+    hold.status === 'Active' ? 'flex' : 'none';
+  }
+
+  const releaseButton =
+   document.getElementById('releaseHoldBtn');
+
+  if(releaseButton){
+   releaseButton.dataset.holdId = String(hold.id);
+   releaseButton.dataset.recordId = String(hold.record_id);
+  }
+
+  document.getElementById('holdModal')
+   ?.classList.add('open');
+
+  document.body.style.overflow = 'hidden';
+ }
+
+ window.closeHoldDrawer = function(){
+  document.getElementById('holdModal')
+   ?.classList.remove('open');
+
+  document.body.style.overflow = '';
+ };
+
+ window.holdBackdropClose = function(event){
+  if(event.target.id === 'holdModal'){
+   window.closeHoldDrawer();
+  }
+ };
+
+ document.getElementById('holdsTableBody')
+  ?.addEventListener('click',event=>{
+   const row = event.target.closest('tr[data-hold-id]');
+   if(!row) return;
+
+   openHoldDrawer(row.dataset.holdId);
+  });
+
+
+ // ============================================================
+ // RELEASE RECORD HOLD
+ // ============================================================
+
+ document.getElementById('releaseHoldBtn')
+  ?.addEventListener('click',async event=>{
+
+   const button = event.currentTarget;
+   const holdId = button.dataset.holdId;
+   const recordId = button.dataset.recordId;
+
+   const hold = enterpriseHolds.find(
+    h => String(h.id) === String(holdId)
+   );
+
+   if(!hold || hold.status !== 'Active') return;
+
+   const reason = window.prompt(
+    'Enter the reason for releasing this ' +
+    hold.hold_type + ' Hold:'
+   );
+
+   if(reason === null) return;
+
+   if(!reason.trim()){
+    window.alert('A release reason is required.');
+    return;
+   }
+
+   if(!window.confirm(
+    'Release ' + hold.hold_type +
+    ' Hold on ' + hold.record_code + '?'
+   )) return;
+
+   button.disabled = true;
+   button.textContent = 'Releasing...';
+
+   try{
+    const token =
+     localStorage.getItem('vero_session_token');
+
+    const response = await fetch(
+     RECORDS_API + '/records/' + recordId +
+     '/holds/' + holdId + '/release',
+     {
+      method:'POST',
+      headers:{
+       Authorization:'Bearer ' + token,
+       'Content-Type':'application/json',
+       Accept:'application/json'
+      },
+      body:JSON.stringify({
+       release_reason:reason.trim()
+      })
+     }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+     throw new Error(
+      data.message || 'Unable to release hold.'
+     );
+    }
+
+    window.closeHoldDrawer();
+
+    await loadEnterpriseHolds();
+    await loadRecords();
+
+    openHoldDrawer(holdId);
+
+   }catch(error){
+    console.error(error);
+    window.alert(
+     error.message || 'Unable to release hold.'
+    );
+   }finally{
+    button.disabled = false;
+    button.textContent = 'Release Hold';
+   }
+  });
+
+ async function loadEnterpriseHolds(){
+  const body = document.getElementById('holdsTableBody');
+
+  if(body){
+   body.innerHTML = `
+    <tr>
+     <td colspan="7" class="records-empty">
+      Loading record holds...
+     </td>
+    </tr>
+   `;
+  }
+
+  try{
+   const data = await recordsFetch('/records/holds');
+
+   enterpriseHolds = data.holds || [];
+   holdsLoaded = true;
+
+   renderHolds();
+
+  }catch(error){
+   holdsLoaded = false;
+   console.error('Unable to load holds:',error);
+
+   if(body){
+    body.innerHTML = `
+     <tr>
+      <td colspan="7" class="records-empty">
+       Record Holds are restricted to authorised
+       Document Controllers, or the register
+       could not be loaded.
+      </td>
+     </tr>
+    `;
+   }
+  }
+ }
+
+ ['holdsSearch','holdsStatusFilter','holdsTypeFilter']
+  .forEach(id=>{
+   const element = document.getElementById(id);
+   if(!element) return;
+
+   element.addEventListener(
+    id === 'holdsSearch' ? 'input' : 'change',
+    renderHolds
+   );
+  });
+
  document.querySelectorAll('.records-tab').forEach(button=>{
   button.addEventListener('click',()=>{
    const selected = button.dataset.tab;
@@ -3055,6 +3786,14 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    if(retentionPanel){
     retentionPanel.style.display =
      selected === 'retention' ? '' : 'none';
+   }
+
+   const holdsPanel =
+    document.getElementById('recordsHoldsPanel');
+
+   if(holdsPanel){
+    holdsPanel.style.display =
+     selected === 'holds' ? '' : 'none';
    }
 
    if(selected === 'retention' && !retentionLoaded){
