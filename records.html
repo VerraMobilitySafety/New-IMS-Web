@@ -1591,6 +1591,15 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     </div>
    </section>
 
+   <div class="retention-form-actions"
+        id="retentionDrawerActions"
+        style="display:none">
+    <button
+     id="editRetentionRuleBtn"
+     type="button"
+    >Edit Draft</button>
+   </div>
+
   </div>
  </div>
 </div>
@@ -2441,6 +2450,23 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    }
   });
 
+  const canEdit =
+   canManageRetention && rule.status === 'Draft';
+
+  const actions =
+   document.getElementById('retentionDrawerActions');
+
+  if(actions){
+   actions.style.display = canEdit ? 'flex' : 'none';
+  }
+
+  const editButton =
+   document.getElementById('editRetentionRuleBtn');
+
+  if(editButton){
+   editButton.dataset.ruleId = String(rule.id);
+  }
+
   document.getElementById('retentionModal')
    ?.classList.add('open');
 
@@ -2520,6 +2546,8 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   document.getElementById('retentionFormModal')
    ?.classList.remove('open');
 
+  editingRetentionRuleId = null;
+
   document.body.style.overflow = '';
  }
 
@@ -2527,8 +2555,13 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   ?.addEventListener('click',()=>{
    if(!canManageRetention) return;
 
+   editingRetentionRuleId = null;
+
    const form = document.getElementById('retentionRuleForm');
    form?.reset();
+
+   document.getElementById('saveRetentionRule')
+    .textContent = 'Save Draft';
 
    const message =
     document.getElementById('retentionFormMessage');
@@ -2537,6 +2570,66 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
    document.getElementById('retentionFormTitle')
     .textContent = 'Add Retention Rule';
+
+   document.getElementById('retentionFormModal')
+    ?.classList.add('open');
+
+   document.body.style.overflow = 'hidden';
+  });
+
+
+ // EDIT EXISTING DRAFT RETENTION RULE
+ let editingRetentionRuleId = null;
+
+ document.getElementById('editRetentionRuleBtn')
+  ?.addEventListener('click',event=>{
+   if(!canManageRetention) return;
+
+   const ruleId = event.currentTarget.dataset.ruleId;
+
+   const rule = retentionRules.find(
+    r => String(r.id) === String(ruleId)
+   );
+
+   if(!rule || rule.status !== 'Draft') return;
+
+   const form = document.getElementById('retentionRuleForm');
+   if(!form) return;
+
+   form.reset();
+   editingRetentionRuleId = rule.id;
+
+   const values = {
+    rule_name: rule.rule_name,
+    record_category: rule.record_category,
+    record_type: rule.record_type,
+    business_area: rule.business_area,
+    description: rule.description,
+    retention_period_months: rule.retention_period_months,
+    retention_trigger: rule.retention_trigger,
+    review_date: rule.review_date,
+    authority: rule.authority,
+    authority_reference: rule.authority_reference
+   };
+
+   Object.entries(values).forEach(([name,value])=>{
+    const field = form.elements.namedItem(name);
+
+    if(field){
+     field.value = value ?? '';
+    }
+   });
+
+   document.getElementById('retentionFormTitle')
+    .textContent = 'Edit ' + rule.rule_code;
+
+   document.getElementById('saveRetentionRule')
+    .textContent = 'Save Changes';
+
+   document.getElementById('retentionFormMessage')
+    .textContent = '';
+
+   window.closeRetentionDrawer();
 
    document.getElementById('retentionFormModal')
     ?.classList.add('open');
@@ -2594,18 +2687,22 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    try{
     const token = localStorage.getItem('vero_session_token');
 
-    const response = await fetch(
-     RECORDS_API + '/records/retention-rules',
-     {
-      method:'POST',
-      headers:{
-       Authorization:'Bearer ' + token,
-       'Content-Type':'application/json',
-       Accept:'application/json'
-      },
-      body:JSON.stringify(payload)
-     }
-    );
+    const isEditing = editingRetentionRuleId !== null;
+
+    const endpoint = isEditing
+     ? RECORDS_API + '/records/retention-rules/'
+       + editingRetentionRuleId
+     : RECORDS_API + '/records/retention-rules';
+
+    const response = await fetch(endpoint,{
+     method:isEditing ? 'PATCH' : 'POST',
+     headers:{
+      Authorization:'Bearer ' + token,
+      'Content-Type':'application/json',
+      Accept:'application/json'
+     },
+     body:JSON.stringify(payload)
+    });
 
     const data = await response.json();
 
@@ -2615,11 +2712,15 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
      );
     }
 
+    const savedRuleId = data.rule?.id;
+
     closeRetentionForm();
+    editingRetentionRuleId = null;
+
     await loadRetentionRules();
 
-    if(data.rule?.id){
-     openRetentionDrawer(data.rule.id);
+    if(savedRuleId){
+     openRetentionDrawer(savedRuleId);
     }
 
    }catch(error){
