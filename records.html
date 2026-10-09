@@ -1598,6 +1598,30 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
      id="editRetentionRuleBtn"
      type="button"
     >Edit Draft</button>
+
+    <button
+     id="activateRetentionRuleBtn"
+     type="button"
+     style="display:none"
+    >Activate</button>
+
+    <button
+     id="replaceRetentionRuleBtn"
+     type="button"
+     style="display:none"
+    >Create Replacement</button>
+
+    <button
+     id="confirmReplaceRetentionBtn"
+     type="button"
+     style="display:none"
+    >Replace Original</button>
+
+    <button
+     id="archiveRetentionRuleBtn"
+     type="button"
+     style="display:none"
+    >Archive</button>
    </div>
 
   </div>
@@ -2450,21 +2474,41 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    }
   });
 
-  const canEdit =
-   canManageRetention && rule.status === 'Draft';
+  const isDraft = rule.status === 'Draft';
+  const isActive = rule.status === 'Active';
+  const isSuperseded = rule.status === 'Superseded';
+  const hasRecords = Number(rule.record_count || 0) > 0;
+
+  const availableActions = {
+   editRetentionRuleBtn: isDraft,
+   activateRetentionRuleBtn:
+    isDraft && rule.replaces_rule_id == null,
+   replaceRetentionRuleBtn: isActive,
+   confirmReplaceRetentionBtn:
+    isDraft && rule.replaces_rule_id != null,
+   archiveRetentionRuleBtn:
+    (isDraft || isSuperseded) && !hasRecords
+  };
+
+  let visibleCount = 0;
+
+  Object.entries(availableActions).forEach(([id,allowed])=>{
+   const button = document.getElementById(id);
+   if(!button) return;
+
+   const visible = canManageRetention && allowed;
+
+   button.style.display = visible ? 'inline-flex' : 'none';
+   button.dataset.ruleId = String(rule.id);
+
+   if(visible) visibleCount++;
+  });
 
   const actions =
    document.getElementById('retentionDrawerActions');
 
   if(actions){
-   actions.style.display = canEdit ? 'flex' : 'none';
-  }
-
-  const editButton =
-   document.getElementById('editRetentionRuleBtn');
-
-  if(editButton){
-   editButton.dataset.ruleId = String(rule.id);
+   actions.style.display = visibleCount ? 'flex' : 'none';
   }
 
   document.getElementById('retentionModal')
@@ -2547,6 +2591,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    ?.classList.remove('open');
 
   editingRetentionRuleId = null;
+  replacingRetentionRuleId = null;
 
   document.body.style.overflow = '';
  }
@@ -2556,6 +2601,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    if(!canManageRetention) return;
 
    editingRetentionRuleId = null;
+   replacingRetentionRuleId = null;
 
    const form = document.getElementById('retentionRuleForm');
    form?.reset();
@@ -2580,6 +2626,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
  // EDIT EXISTING DRAFT RETENTION RULE
  let editingRetentionRuleId = null;
+ let replacingRetentionRuleId = null;
 
  document.getElementById('editRetentionRuleBtn')
   ?.addEventListener('click',event=>{
@@ -2637,6 +2684,64 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    document.body.style.overflow = 'hidden';
   });
 
+
+ // CREATE REPLACEMENT DRAFT
+ document.getElementById('replaceRetentionRuleBtn')
+  ?.addEventListener('click',event=>{
+   if(!canManageRetention) return;
+
+   const ruleId = event.currentTarget.dataset.ruleId;
+   const rule = retentionRules.find(
+    r => String(r.id) === String(ruleId)
+   );
+
+   if(!rule || rule.status !== 'Active') return;
+
+   const form = document.getElementById('retentionRuleForm');
+   if(!form) return;
+
+   form.reset();
+
+   editingRetentionRuleId = null;
+   replacingRetentionRuleId = rule.id;
+
+   const values = {
+    rule_name: rule.rule_name + ' - Replacement',
+    record_category: rule.record_category,
+    record_type: rule.record_type,
+    business_area: rule.business_area,
+    description: rule.description,
+    retention_period_months: rule.retention_period_months,
+    retention_trigger: rule.retention_trigger,
+    review_date: rule.review_date,
+    authority: rule.authority,
+    authority_reference: rule.authority_reference
+   };
+
+   Object.entries(values).forEach(([name,value])=>{
+    const field = form.elements.namedItem(name);
+    if(field) field.value = value ?? '';
+   });
+
+   document.getElementById('retentionFormTitle')
+    .textContent = 'Replace ' + rule.rule_code;
+
+   document.getElementById('saveRetentionRule')
+    .textContent = 'Save Replacement Draft';
+
+   const message =
+    document.getElementById('retentionFormMessage');
+
+   if(message) message.textContent = '';
+
+   window.closeRetentionDrawer();
+
+   document.getElementById('retentionFormModal')
+    ?.classList.add('open');
+
+   document.body.style.overflow = 'hidden';
+  });
+
  document.getElementById('closeRetentionForm')
   ?.addEventListener('click',closeRetentionForm);
 
@@ -2679,6 +2784,10 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     authority_reference: values.authority_reference.trim(),
     review_date: values.review_date || null
    };
+
+   if(replacingRetentionRuleId !== null){
+    payload.replaces_rule_id = replacingRetentionRuleId;
+   }
 
    button.disabled = true;
    button.textContent = 'Saving...';
@@ -2732,6 +2841,180 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     button.textContent = 'Save Draft';
    }
   });
+
+
+
+ // CONFIRM RETENTION RULE REPLACEMENT
+ document.getElementById('confirmReplaceRetentionBtn')
+  ?.addEventListener('click',async event=>{
+   if(!canManageRetention) return;
+
+   const button = event.currentTarget;
+   const ruleId = button.dataset.ruleId;
+
+   const rule = retentionRules.find(
+    r => String(r.id) === String(ruleId)
+   );
+
+   if(
+    !rule ||
+    rule.status !== 'Draft' ||
+    rule.replaces_rule_id == null
+   ) return;
+
+   const original = retentionRules.find(
+    r => String(r.id) === String(rule.replaces_rule_id)
+   );
+
+   if(!original || original.status !== 'Active'){
+    window.alert('Original rule is no longer Active.');
+    return;
+   }
+
+   const confirmed = window.confirm(
+    'Replace ' + original.rule_code +
+    ' with ' + rule.rule_code + '?\n\n' +
+    'The original rule will become Superseded. ' +
+    'The replacement will become Active. ' +
+    'Existing records will retain their original ' +
+    'retention assignments.'
+   );
+
+   if(!confirmed) return;
+
+   button.disabled = true;
+   button.textContent = 'Replacing...';
+
+   try{
+    const token = localStorage.getItem('vero_session_token');
+
+    const response = await fetch(
+     RECORDS_API + '/records/retention-rules/' +
+     rule.id + '/lifecycle',
+     {
+      method:'POST',
+      headers:{
+       Authorization:'Bearer ' + token,
+       'Content-Type':'application/json',
+       Accept:'application/json'
+      },
+      body:JSON.stringify({
+       action:'replace',
+       original_rule_id:original.id
+      })
+     }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+     throw new Error(
+      data.message || 'Unable to replace retention rule.'
+     );
+    }
+
+    window.closeRetentionDrawer();
+    await loadRetentionRules();
+    openRetentionDrawer(rule.id);
+
+   }catch(error){
+    console.error(error);
+    window.alert(
+     error.message || 'Unable to replace retention rule.'
+    );
+   }finally{
+    button.disabled = false;
+    button.textContent = 'Replace Original';
+   }
+  });
+
+ // RETENTION RULE LIFECYCLE ACTIONS
+ async function executeRetentionLifecycle(ruleId,action){
+  if(!canManageRetention) return;
+
+  const rule = retentionRules.find(
+   r => String(r.id) === String(ruleId)
+  );
+
+  if(!rule) return;
+
+  const allowed =
+   action === 'activate'
+    ? rule.status === 'Draft'
+    : action === 'archive' &&
+      (rule.status === 'Draft' ||
+       rule.status === 'Superseded') &&
+      Number(rule.record_count || 0) === 0;
+
+  if(!allowed) return;
+
+  const prompt = action === 'activate'
+   ? `Activate ${rule.rule_code} - ${rule.rule_name}?`
+   : `Archive ${rule.rule_code} - ${rule.rule_name}?`;
+
+  if(!window.confirm(prompt)) return;
+
+  const button = document.getElementById(
+   action === 'activate'
+    ? 'activateRetentionRuleBtn'
+    : 'archiveRetentionRuleBtn'
+  );
+
+  if(button) button.disabled = true;
+
+  try{
+   const token = localStorage.getItem('vero_session_token');
+
+   const response = await fetch(
+    RECORDS_API + '/records/retention-rules/'
+     + ruleId + '/lifecycle',
+    {
+     method:'POST',
+     headers:{
+      Authorization:'Bearer ' + token,
+      'Content-Type':'application/json',
+      Accept:'application/json'
+     },
+     body:JSON.stringify({action})
+    }
+   );
+
+   const data = await response.json();
+
+   if(!response.ok){
+    throw new Error(
+     data.message || 'Unable to update retention rule.'
+    );
+   }
+
+   window.closeRetentionDrawer();
+   await loadRetentionRules();
+
+   openRetentionDrawer(ruleId);
+
+  }catch(error){
+   console.error(error);
+   window.alert(
+    error.message || 'Unable to update retention rule.'
+   );
+  }finally{
+   if(button) button.disabled = false;
+  }
+ }
+
+ ['activate','archive'].forEach(action=>{
+  const id = action === 'activate'
+   ? 'activateRetentionRuleBtn'
+   : 'archiveRetentionRuleBtn';
+
+  document.getElementById(id)
+   ?.addEventListener('click',event=>{
+    executeRetentionLifecycle(
+     event.currentTarget.dataset.ruleId,
+     action
+    );
+   });
+ });
 
  document.getElementById('retentionSearch')
   ?.addEventListener('input',renderRetentionRules);
