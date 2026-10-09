@@ -3799,6 +3799,10 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    if(selected === 'retention' && !retentionLoaded){
     loadRetentionRules();
    }
+
+   if(selected === 'holds' && !holdsLoaded){
+    loadEnterpriseHolds();
+   }
   });
  });
 
