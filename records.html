@@ -1390,6 +1390,68 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 </div>
 
 
+
+<!-- RECORDS DISPOSITION PANEL -->
+<div id="recordsDispositionPanel" style="display:none">
+
+ <div class="records-filters">
+  <input
+   id="dispositionSearch"
+   type="search"
+   placeholder="Search dispositions..."
+  >
+
+  <select id="dispositionStatusFilter">
+   <option value="">All Statuses</option>
+   <option value="Pending Review">Pending Review</option>
+   <option value="Approved">Approved</option>
+   <option value="Rejected">Rejected</option>
+   <option value="Completed">Completed</option>
+   <option value="Cancelled">Cancelled</option>
+  </select>
+
+  <select id="dispositionTypeFilter">
+   <option value="">All Decisions</option>
+   <option value="Disposal">Disposal</option>
+   <option value="Retain">Retain</option>
+   <option value="Extend">Extend</option>
+   <option value="Release Retain">Release Retain</option>
+  </select>
+
+  <button
+   id="proposeDispositionBtn"
+   class="retention-add-btn"
+   type="button"
+   style="display:none"
+  >+ Propose Disposition</button>
+ </div>
+
+ <div class="records-table-wrap">
+  <table class="records-table">
+   <thead>
+    <tr>
+     <th>Record</th>
+     <th>Decision</th>
+     <th>Reason</th>
+     <th>Proposed By</th>
+     <th>Proposed Date</th>
+     <th>Approved By</th>
+     <th>Status</th>
+    </tr>
+   </thead>
+
+   <tbody id="dispositionTableBody">
+    <tr>
+     <td colspan="7" class="records-empty">
+      Loading dispositions...
+     </td>
+    </tr>
+   </tbody>
+  </table>
+ </div>
+
+</div>
+
 <!-- RECORDS HOLDS PANEL -->
 <div id="recordsHoldsPanel" style="display:none">
 
@@ -1711,6 +1773,250 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     <button id="releaseHoldBtn" type="button">
      Release Hold
     </button>
+   </div>
+
+  </div>
+ </div>
+</div>
+
+
+
+<!-- DISPOSITION PROPOSAL FORM -->
+<div class="record-modal" id="dispositionFormModal">
+ <div class="record-drawer">
+
+  <div class="record-drawer-head">
+   <button class="record-drawer-close"
+    id="closeDispositionForm"
+    type="button">×</button>
+
+   <small>RECORDS MANAGEMENT</small>
+   <h2>Propose Disposition</h2>
+   <p>Submit a record disposition for independent review.</p>
+  </div>
+
+  <div class="record-drawer-body">
+   <form id="dispositionProposalForm">
+
+    <section class="record-section">
+     <h3>Record and Decision</h3>
+
+     <div class="retention-form-grid">
+
+      <label>Enterprise Record *
+       <select name="record_id"
+        id="dispositionRecordSelect" required>
+        <option value="">Select a record</option>
+       </select>
+      </label>
+
+      <label>Disposition Type *
+       <select name="disposition_type"
+        id="dispositionProposalType" required>
+        <option value="">Select decision</option>
+        <option value="Retain">Retain</option>
+        <option value="Extend">Extend</option>
+        <option value="Release Retain">Release Retain</option>
+        <option value="Disposal">Disposal</option>
+       </select>
+      </label>
+
+     </div>
+
+     <label class="retention-form-field">
+      Reason *
+      <textarea name="reason"
+       rows="4" required
+       placeholder="Explain the proposed disposition decision..."
+      ></textarea>
+     </label>
+    </section>
+
+    <section class="record-section"
+     id="dispositionRetainFields" style="display:none">
+     <h3>Retention Terms</h3>
+
+     <label class="retention-form-field">
+      Review Date
+      <input type="date"
+       name="retain_review_date"
+       id="dispositionRetainReviewDate">
+     </label>
+
+     <label class="retention-form-field">
+      <input type="checkbox"
+       name="retain_indefinitely"
+       id="dispositionRetainIndefinitely">
+      Retain indefinitely
+     </label>
+    </section>
+
+    <section class="record-section"
+     id="dispositionExtendFields" style="display:none">
+     <h3>Retention Extension</h3>
+
+     <label class="retention-form-field">
+      Additional Months *
+      <input type="number"
+       name="extension_months"
+       id="dispositionExtensionMonths"
+       min="1" step="1">
+     </label>
+    </section>
+
+    <section class="record-section"
+     id="dispositionReconsiderFields" style="display:none">
+     <h3>Retain Reconsideration</h3>
+     <p id="dispositionReconsiderMessage">
+      The effective Retain decision will be identified
+      automatically for the selected record.
+     </p>
+    </section>
+
+    <div id="dispositionProposalMessage"
+     class="retention-form-message" role="status"></div>
+
+    <div class="retention-form-actions">
+     <button type="button"
+      id="cancelDispositionProposal">Cancel</button>
+
+     <button type="submit"
+      id="submitDispositionProposal">
+      Submit for Review
+     </button>
+    </div>
+
+   </form>
+  </div>
+ </div>
+</div>
+
+<!-- DISPOSITION DETAIL DRAWER -->
+<div class="record-modal" id="dispositionModal">
+ <div class="record-drawer">
+
+  <div class="record-drawer-head">
+   <button class="record-drawer-close"
+    id="closeDispositionDrawer"
+    type="button">×</button>
+
+   <small id="dispositionDrawerRecord">DISPOSITION</small>
+   <h2 id="dispositionDrawerTitle">Disposition Details</h2>
+   <p>Records Management — Disposition Register</p>
+  </div>
+
+  <div class="record-drawer-body">
+
+   <section class="record-section">
+    <h3>Disposition Details</h3>
+
+    <div class="record-detail-grid">
+     <div class="record-detail">
+      <label>Record</label>
+      <strong id="dispositionDrawerRecordTitle">—</strong>
+     </div>
+     <div class="record-detail">
+      <label>Decision</label>
+      <strong id="dispositionDrawerType">—</strong>
+     </div>
+     <div class="record-detail">
+      <label>Status</label>
+      <strong id="dispositionDrawerStatus">—</strong>
+     </div>
+     <div class="record-detail">
+      <label>Proposed By</label>
+      <strong id="dispositionDrawerProposedBy">—</strong>
+     </div>
+     <div class="record-detail">
+      <label>Proposed Date</label>
+      <strong id="dispositionDrawerProposedAt">—</strong>
+     </div>
+    </div>
+   </section>
+
+   <section class="record-section">
+    <h3>Proposal Reason</h3>
+    <p id="dispositionDrawerReason">—</p>
+   </section>
+
+   <section class="record-section">
+    <h3>Review and Approval</h3>
+
+    <div class="record-detail-grid">
+     <div class="record-detail">
+      <label>Approved By</label>
+      <strong id="dispositionDrawerApprovedBy">—</strong>
+     </div>
+     <div class="record-detail">
+      <label>Approval Date</label>
+      <strong id="dispositionDrawerApprovedAt">—</strong>
+     </div>
+    </div>
+
+    <div class="record-detail" style="margin-top:15px">
+     <label>Review Notes</label>
+     <p id="dispositionDrawerReviewNotes">—</p>
+    </div>
+   </section>
+
+   <section class="record-section">
+    <h3>Retention Decision</h3>
+
+    <div class="record-detail-grid">
+     <div class="record-detail">
+      <label>Extension</label>
+      <strong id="dispositionDrawerExtension">—</strong>
+     </div>
+     <div class="record-detail">
+      <label>New Disposal Due</label>
+      <strong id="dispositionDrawerNewDue">—</strong>
+     </div>
+     <div class="record-detail">
+      <label>Retain Review Date</label>
+      <strong id="dispositionDrawerRetainReview">—</strong>
+     </div>
+     <div class="record-detail">
+      <label>Retain Indefinitely</label>
+      <strong id="dispositionDrawerIndefinite">—</strong>
+     </div>
+     <div class="record-detail">
+      <label>Reconsiders Disposition</label>
+      <strong id="dispositionDrawerReconsiders">—</strong>
+     </div>
+    </div>
+   </section>
+
+   <section class="record-section">
+    <h3>Completion</h3>
+
+    <div class="record-detail-grid">
+     <div class="record-detail">
+      <label>Completed By</label>
+      <strong id="dispositionDrawerCompletedBy">—</strong>
+     </div>
+     <div class="record-detail">
+      <label>Completed Date</label>
+      <strong id="dispositionDrawerCompletedAt">—</strong>
+     </div>
+    </div>
+   </section>
+
+   <div class="retention-form-actions"
+        id="dispositionDrawerActions"
+        style="display:none">
+
+    <button id="approveDispositionBtn" type="button">
+     Approve
+    </button>
+
+    <button id="rejectDispositionBtn" type="button">
+     Reject
+    </button>
+
+    <button id="completeDispositionBtn" type="button">
+     Complete Disposition
+    </button>
+
    </div>
 
   </div>
@@ -3477,6 +3783,746 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    }
   });
 
+
+ // ============================================================
+ // ENTERPRISE DISPOSITION REGISTER
+ // ============================================================
+
+ let enterpriseDispositions = [];
+ let dispositionsLoaded = false;
+ let dispositionPermissions = {
+  can_manage:false,
+  can_approve:false
+ };
+
+ function renderDispositions(){
+  const body = document.getElementById('dispositionTableBody');
+  if(!body) return;
+
+  const search = (
+   document.getElementById('dispositionSearch')?.value || ''
+  ).trim().toLowerCase();
+
+  const status =
+   document.getElementById('dispositionStatusFilter')?.value || '';
+
+  const type =
+   document.getElementById('dispositionTypeFilter')?.value || '';
+
+  const filtered = enterpriseDispositions.filter(d=>{
+   if(status && d.status !== status) return false;
+   if(type && d.disposition_type !== type) return false;
+
+   const searchable = [
+    d.record_code,
+    d.record_title,
+    d.disposition_type,
+    d.reason,
+    d.proposed_by_name,
+    d.approved_by_name
+   ].filter(Boolean).join(' ').toLowerCase();
+
+   return !search || searchable.includes(search);
+  });
+
+  if(!filtered.length){
+   body.innerHTML = `
+    <tr>
+     <td colspan="7" class="records-empty">
+      No dispositions match your filters.
+     </td>
+    </tr>
+   `;
+   return;
+  }
+
+  body.innerHTML = filtered.map(d=>`
+   <tr data-disposition-id="${Number(d.id)}">
+    <td><strong>${esc(d.record_code)}</strong></td>
+    <td>${esc(d.disposition_type)}</td>
+    <td>${esc(d.reason || '—')}</td>
+    <td>${esc(d.proposed_by_name || '—')}</td>
+    <td>${esc(formatDate(d.proposed_at))}</td>
+    <td>${esc(d.approved_by_name || '—')}</td>
+    <td>${esc(d.status)}</td>
+   </tr>
+  `).join('');
+ }
+
+
+ // ============================================================
+ // DISPOSITION DETAIL DRAWER
+ // ============================================================
+
+ function openDispositionDrawer(dispositionId){
+  const d = enterpriseDispositions.find(
+   item => String(item.id) === String(dispositionId)
+  );
+
+  if(!d) return;
+
+  const fields = {
+   dispositionDrawerRecord: d.record_code,
+   dispositionDrawerTitle: d.disposition_type + ' Disposition',
+   dispositionDrawerRecordTitle: d.record_title,
+   dispositionDrawerType: d.disposition_type,
+   dispositionDrawerStatus: d.status,
+   dispositionDrawerProposedBy: d.proposed_by_name,
+   dispositionDrawerProposedAt: formatDate(d.proposed_at),
+   dispositionDrawerReason: d.reason,
+   dispositionDrawerApprovedBy: d.approved_by_name,
+   dispositionDrawerApprovedAt: formatDate(d.approved_at),
+   dispositionDrawerReviewNotes: d.review_notes,
+   dispositionDrawerExtension:
+    d.extension_months != null
+     ? d.extension_months + ' months' : '—',
+   dispositionDrawerNewDue:
+    formatDate(d.new_disposal_due_date),
+   dispositionDrawerRetainReview:
+    formatDate(d.retain_review_date),
+   dispositionDrawerIndefinite:
+    d.disposition_type === 'Retain'
+     ? (d.retain_indefinitely ? 'Yes' : 'No') : '—',
+   dispositionDrawerReconsiders:
+    d.reconsiders_disposition_id != null
+     ? 'Disposition #' + d.reconsiders_disposition_id : '—',
+   dispositionDrawerCompletedBy: d.completed_by_name,
+   dispositionDrawerCompletedAt: formatDate(d.completed_at)
+  };
+
+  Object.entries(fields).forEach(([id,value])=>{
+   const element = document.getElementById(id);
+   if(!element) return;
+
+   element.textContent =
+    value === null || value === undefined || value === ''
+     ? '—' : String(value);
+  });
+
+  const actions =
+   document.getElementById('dispositionDrawerActions');
+
+  const approveBtn =
+   document.getElementById('approveDispositionBtn');
+
+  const rejectBtn =
+   document.getElementById('rejectDispositionBtn');
+
+  const completeBtn =
+   document.getElementById('completeDispositionBtn');
+
+  let currentUser = null;
+
+  try{
+   currentUser = JSON.parse(
+    localStorage.getItem('vero_current_user') || 'null'
+   );
+  }catch(error){
+   console.warn('Unable to read current user:',error);
+  }
+
+  const currentUserId = currentUser?.id;
+
+  const canReview =
+   dispositionPermissions.can_approve === true &&
+   d.status === 'Pending Review' &&
+   currentUserId != null &&
+   String(currentUserId) !== String(d.proposed_by_user_id);
+
+  const canComplete =
+   dispositionPermissions.can_manage === true &&
+   d.status === 'Approved' &&
+   d.disposition_type !== 'Disposal' &&
+   currentUserId != null &&
+   d.approved_by_user_id != null &&
+   String(currentUserId) !== String(d.approved_by_user_id);
+
+  if(approveBtn){
+   approveBtn.style.display = canReview ? '' : 'none';
+   approveBtn.dataset.dispositionId = String(d.id);
+  }
+
+  if(rejectBtn){
+   rejectBtn.style.display = canReview ? '' : 'none';
+   rejectBtn.dataset.dispositionId = String(d.id);
+  }
+
+  if(completeBtn){
+   completeBtn.style.display = canComplete ? '' : 'none';
+   completeBtn.dataset.dispositionId = String(d.id);
+  }
+
+  if(actions){
+   actions.style.display =
+    canReview || canComplete ? 'flex' : 'none';
+  }
+
+  document.getElementById('dispositionModal')
+   ?.classList.add('open');
+
+  document.body.style.overflow = 'hidden';
+ }
+
+ function closeDispositionDrawer(){
+  document.getElementById('dispositionModal')
+   ?.classList.remove('open');
+
+  document.body.style.overflow = '';
+ }
+
+ document.getElementById('closeDispositionDrawer')
+  ?.addEventListener('click',closeDispositionDrawer);
+
+ document.getElementById('dispositionModal')
+  ?.addEventListener('click',event=>{
+   if(event.target.id === 'dispositionModal'){
+    closeDispositionDrawer();
+   }
+  });
+
+ document.getElementById('dispositionTableBody')
+  ?.addEventListener('click',event=>{
+   const row = event.target.closest(
+    'tr[data-disposition-id]'
+   );
+
+   if(!row) return;
+
+   openDispositionDrawer(row.dataset.dispositionId);
+  });
+
+
+ // ============================================================
+ // REVIEW RECORD DISPOSITION
+ // ============================================================
+
+ async function reviewDisposition(decision, button){
+  const dispositionId = button.dataset.dispositionId;
+
+  const d = enterpriseDispositions.find(
+   item => String(item.id) === String(dispositionId)
+  );
+
+  if(!d || d.status !== 'Pending Review') return;
+
+  const action = decision === 'approve' ? 'Approve' : 'Reject';
+
+  const notes = window.prompt(
+   action + ' disposition #' + dispositionId +
+   ' for ' + d.record_code +
+   '\\n\\nEnter mandatory review notes:'
+  );
+
+  if(notes === null) return;
+
+  if(!notes.trim()){
+   window.alert('Review notes are required.');
+   return;
+  }
+
+  if(!window.confirm(
+   action + ' this ' + d.disposition_type +
+   ' disposition for ' + d.record_code + '?'
+  )) return;
+
+  button.disabled = true;
+  button.textContent = action + '...';
+
+  try{
+   const token = localStorage.getItem('vero_session_token');
+
+   if(!token){
+    throw new Error('Authentication required.');
+   }
+
+   const response = await fetch(
+    RECORDS_API + '/records/dispositions/' +
+    encodeURIComponent(dispositionId) + '/review',
+    {
+     method:'POST',
+     headers:{
+      Authorization:'Bearer ' + token,
+      'Content-Type':'application/json',
+      Accept:'application/json'
+     },
+     body:JSON.stringify({
+      decision:decision,
+      review_notes:notes.trim()
+     })
+    }
+   );
+
+   const data = await response.json();
+
+   if(!response.ok){
+    throw new Error(
+     data.message || 'Unable to review disposition.'
+    );
+   }
+
+   closeDispositionDrawer();
+
+   await loadEnterpriseDispositions();
+
+   openDispositionDrawer(dispositionId);
+
+  }catch(error){
+   console.error(error);
+   window.alert(
+    error.message || 'Unable to review disposition.'
+   );
+  }finally{
+   button.disabled = false;
+   button.textContent = action;
+  }
+ }
+
+ document.getElementById('approveDispositionBtn')
+  ?.addEventListener('click',event=>{
+   reviewDisposition('approve',event.currentTarget);
+  });
+
+ document.getElementById('rejectDispositionBtn')
+  ?.addEventListener('click',event=>{
+   reviewDisposition('reject',event.currentTarget);
+  });
+
+
+ // ============================================================
+ // COMPLETE RECORD DISPOSITION
+ // ============================================================
+
+ document.getElementById('completeDispositionBtn')
+  ?.addEventListener('click',async event=>{
+
+   const button = event.currentTarget;
+   const dispositionId = button.dataset.dispositionId;
+
+   const d = enterpriseDispositions.find(
+    item => String(item.id) === String(dispositionId)
+   );
+
+   if(!d || d.status !== 'Approved') return;
+
+   if(d.disposition_type === 'Disposal'){
+    window.alert(
+     'Physical disposal completion is not yet enabled.'
+    );
+    return;
+   }
+
+   if(!window.confirm(
+    'Complete the approved ' + d.disposition_type +
+    ' disposition for ' + d.record_code + '?'
+   )) return;
+
+   button.disabled = true;
+   button.textContent = 'Completing...';
+
+   try{
+    const token = localStorage.getItem('vero_session_token');
+
+    if(!token){
+     throw new Error('Authentication required.');
+    }
+
+    const response = await fetch(
+     RECORDS_API + '/records/dispositions/' +
+     encodeURIComponent(dispositionId) + '/complete',
+     {
+      method:'POST',
+      headers:{
+       Authorization:'Bearer ' + token,
+       Accept:'application/json'
+      }
+     }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+     throw new Error(
+      data.message || 'Unable to complete disposition.'
+     );
+    }
+
+    closeDispositionDrawer();
+
+    await loadEnterpriseDispositions();
+    await loadRecords();
+
+    openDispositionDrawer(dispositionId);
+
+   }catch(error){
+    console.error(error);
+    window.alert(
+     error.message || 'Unable to complete disposition.'
+    );
+   }finally{
+    button.disabled = false;
+    button.textContent = 'Complete Disposition';
+   }
+  });
+
+
+ // ============================================================
+ // DISPOSITION PROPOSAL FORM CONTROLS
+ // ============================================================
+
+ function getEffectiveRetain(recordId){
+  const completed = enterpriseDispositions.filter(d=>
+   String(d.record_id) === String(recordId) &&
+   d.disposition_type === 'Retain' &&
+   d.status === 'Completed'
+  );
+
+  const superseded = new Set(
+   enterpriseDispositions
+    .filter(d=>
+     String(d.record_id) === String(recordId) &&
+     d.status === 'Completed' &&
+     ['Retain','Release Retain'].includes(d.disposition_type) &&
+     d.reconsiders_disposition_id != null
+    )
+    .map(d=>String(d.reconsiders_disposition_id))
+  );
+
+  const effective = completed.filter(
+   d=>!superseded.has(String(d.id))
+  );
+
+  return effective.length === 1 ? effective[0] : null;
+ }
+
+ function updateDispositionProposalFields(){
+  const type =
+   document.getElementById('dispositionProposalType')?.value;
+
+  const recordId =
+   document.getElementById('dispositionRecordSelect')?.value;
+
+  const retain =
+   document.getElementById('dispositionRetainFields');
+
+  const extend =
+   document.getElementById('dispositionExtendFields');
+
+  const reconsider =
+   document.getElementById('dispositionReconsiderFields');
+
+  if(retain) retain.style.display =
+   type === 'Retain' ? '' : 'none';
+
+  if(extend) extend.style.display =
+   type === 'Extend' ? '' : 'none';
+
+  if(reconsider) reconsider.style.display =
+   type === 'Release Retain' ? '' : 'none';
+
+  const effective = getEffectiveRetain(recordId);
+
+  const message =
+   document.getElementById('dispositionReconsiderMessage');
+
+  if(message && type === 'Release Retain'){
+   message.textContent = effective
+    ? 'This proposal will reconsider Retain disposition #' +
+      effective.id + '.'
+    : 'No effective Retain decision exists for this record.';
+  }
+
+  const reviewDate =
+   document.getElementById('dispositionRetainReviewDate');
+
+  const months =
+   document.getElementById('dispositionExtensionMonths');
+
+  if(reviewDate){
+   reviewDate.required =
+    type === 'Retain' &&
+    !document.getElementById(
+     'dispositionRetainIndefinitely'
+    )?.checked;
+  }
+
+  if(months){
+   months.required = type === 'Extend';
+  }
+ }
+
+ function closeDispositionProposalForm(){
+  document.getElementById('dispositionFormModal')
+   ?.classList.remove('open');
+
+  document.body.style.overflow = '';
+ }
+
+ document.getElementById('proposeDispositionBtn')
+  ?.addEventListener('click',()=>{
+
+   if(dispositionPermissions.can_manage !== true) return;
+
+   const form =
+    document.getElementById('dispositionProposalForm');
+
+   form?.reset();
+
+   const select =
+    document.getElementById('dispositionRecordSelect');
+
+   if(select){
+    select.innerHTML =
+     '<option value="">Select a record</option>';
+
+    enterpriseRecords
+     .filter(r=>r.status !== 'Disposed')
+     .forEach(r=>{
+      const option = document.createElement('option');
+      option.value = String(r.id);
+      option.textContent =
+       (r.record_code || 'Record') +
+       ' — ' + (r.record_title || 'Untitled');
+      select.appendChild(option);
+     });
+   }
+
+   const message =
+    document.getElementById('dispositionProposalMessage');
+
+   if(message) message.textContent = '';
+
+   updateDispositionProposalFields();
+
+   document.getElementById('dispositionFormModal')
+    ?.classList.add('open');
+
+   document.body.style.overflow = 'hidden';
+  });
+
+ document.getElementById('closeDispositionForm')
+  ?.addEventListener('click',closeDispositionProposalForm);
+
+ document.getElementById('cancelDispositionProposal')
+  ?.addEventListener('click',closeDispositionProposalForm);
+
+ document.getElementById('dispositionFormModal')
+  ?.addEventListener('click',event=>{
+   if(event.target.id === 'dispositionFormModal'){
+    closeDispositionProposalForm();
+   }
+  });
+
+ document.getElementById('dispositionProposalType')
+  ?.addEventListener('change',updateDispositionProposalFields);
+
+ document.getElementById('dispositionRecordSelect')
+  ?.addEventListener('change',updateDispositionProposalFields);
+
+ document.getElementById('dispositionRetainIndefinitely')
+  ?.addEventListener('change',updateDispositionProposalFields);
+
+
+ // ============================================================
+ // SUBMIT DISPOSITION PROPOSAL
+ // ============================================================
+
+ document.getElementById('dispositionProposalForm')
+  ?.addEventListener('submit',async event=>{
+   event.preventDefault();
+
+   if(dispositionPermissions.can_manage !== true) return;
+
+   const form = event.currentTarget;
+   const button =
+    document.getElementById('submitDispositionProposal');
+   const message =
+    document.getElementById('dispositionProposalMessage');
+
+   const values = Object.fromEntries(
+    new FormData(form).entries()
+   );
+
+   const recordId = values.record_id;
+   const type = values.disposition_type;
+   const reason = (values.reason || '').trim();
+
+   if(!recordId || !type || !reason){
+    message.textContent =
+     'Record, decision type and reason are required.';
+    return;
+   }
+
+   const payload = {
+    disposition_type:type,
+    reason:reason
+   };
+
+   if(type === 'Retain'){
+    const indefinite =
+     document.getElementById(
+      'dispositionRetainIndefinitely'
+     )?.checked === true;
+
+    const reviewDate =
+     document.getElementById(
+      'dispositionRetainReviewDate'
+     )?.value || null;
+
+    if(indefinite === Boolean(reviewDate)){
+     message.textContent =
+      'Choose either a review date or indefinite retention.';
+     return;
+    }
+
+    payload.retain_indefinitely = indefinite;
+
+    if(reviewDate){
+     payload.retain_review_date = reviewDate;
+    }
+   }
+
+   if(type === 'Extend'){
+    const months = Number(values.extension_months);
+
+    if(!Number.isInteger(months) || months <= 0){
+     message.textContent =
+      'Enter a valid positive number of months.';
+     return;
+    }
+
+    payload.extension_months = months;
+   }
+
+   const effective = getEffectiveRetain(recordId);
+
+   if(type === 'Release Retain' && !effective){
+    message.textContent =
+     'No effective Retain decision exists for this record.';
+    return;
+   }
+
+   if(effective){
+    payload.reconsiders_disposition_id = effective.id;
+   }
+
+   button.disabled = true;
+   button.textContent = 'Submitting...';
+   message.textContent = '';
+
+   try{
+    const token = localStorage.getItem('vero_session_token');
+
+    if(!token){
+     throw new Error('Authentication required.');
+    }
+
+    const response = await fetch(
+     RECORDS_API + '/records/' +
+     encodeURIComponent(recordId) + '/dispositions',
+     {
+      method:'POST',
+      headers:{
+       Authorization:'Bearer ' + token,
+       'Content-Type':'application/json',
+       Accept:'application/json'
+      },
+      body:JSON.stringify(payload)
+     }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+     throw new Error(
+      data.message || 'Unable to submit disposition.'
+     );
+    }
+
+    closeDispositionProposalForm();
+
+    await loadEnterpriseDispositions();
+    await loadRecords();
+
+    if(data.disposition?.id){
+     openDispositionDrawer(data.disposition.id);
+    }
+
+   }catch(error){
+    console.error(error);
+    message.textContent =
+     error.message || 'Unable to submit disposition.';
+   }finally{
+    button.disabled = false;
+    button.textContent = 'Submit for Review';
+   }
+  });
+
+ async function loadEnterpriseDispositions(){
+  const body = document.getElementById('dispositionTableBody');
+
+  if(body){
+   body.innerHTML = `
+    <tr>
+     <td colspan="7" class="records-empty">
+      Loading dispositions...
+     </td>
+    </tr>
+   `;
+  }
+
+  try{
+   const data = await recordsFetch('/records/dispositions');
+
+   enterpriseDispositions = data.dispositions || [];
+   dispositionPermissions = data.permissions || {
+    can_manage:false,
+    can_approve:false
+   };
+
+   dispositionsLoaded = true;
+
+   const proposeButton =
+    document.getElementById('proposeDispositionBtn');
+
+   if(proposeButton){
+    proposeButton.style.display =
+     dispositionPermissions.can_manage === true
+      ? ''
+      : 'none';
+   }
+
+   renderDispositions();
+
+  }catch(error){
+   dispositionsLoaded = false;
+   console.error('Unable to load dispositions:',error);
+
+   if(body){
+    body.innerHTML = `
+     <tr>
+      <td colspan="7" class="records-empty">
+       Unable to load dispositions.
+       Check your access permissions.
+      </td>
+     </tr>
+    `;
+   }
+  }
+ }
+
+ ['dispositionSearch',
+  'dispositionStatusFilter',
+  'dispositionTypeFilter']
+  .forEach(id=>{
+   const element = document.getElementById(id);
+   if(!element) return;
+
+   element.addEventListener(
+    id === 'dispositionSearch' ? 'input' : 'change',
+    renderDispositions
+   );
+  });
+
  // ENTERPRISE RECORD HOLDS REGISTER
  // ============================================================
 
@@ -3796,12 +4842,24 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
      selected === 'holds' ? '' : 'none';
    }
 
+   const dispositionPanel =
+    document.getElementById('recordsDispositionPanel');
+
+   if(dispositionPanel){
+    dispositionPanel.style.display =
+     selected === 'disposition' ? '' : 'none';
+   }
+
    if(selected === 'retention' && !retentionLoaded){
     loadRetentionRules();
    }
 
    if(selected === 'holds' && !holdsLoaded){
     loadEnterpriseHolds();
+   }
+
+   if(selected === 'disposition' && !dispositionsLoaded){
+    loadEnterpriseDispositions();
    }
   });
  });
