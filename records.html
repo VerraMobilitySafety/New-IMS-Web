@@ -1823,12 +1823,10 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
       </label>
 
       <label>Security Classification *
-       <select name="security_classification" required>
-        <option value="Internal">Internal</option>
+       <select name="security_classification" id="manualSecurityClassification" required>
         <option value="Public">Public</option>
         <option value="Confidential">Confidential</option>
-        <option value="Restricted">Restricted</option>
-       </select>
+        </select>
       </label>
      </div>
     </section>
@@ -5852,6 +5850,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
    form?.reset();
    updateManualStorageFields();
+   updateManualConfidentiality();
 
    const submitButton =
     document.getElementById('submitManualRecord');
