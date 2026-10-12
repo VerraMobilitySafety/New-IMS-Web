@@ -1834,11 +1834,25 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     </section>
 
     <section class="record-section">
+     <h3>Related Compliance Requirement</h3>
+
+     <label class="retention-form-field">
+      Compliance Requirement *
+      <select name="related_requirement_id"
+       id="manualRelatedRequirement" required>
+       <option value="">Select requirement</option>
+      </select>
+     </label>
+    </section>
+
+    <section class="record-section">
      <h3>Storage Information</h3>
 
      <div class="retention-form-grid">
       <label>Storage Type *
-       <select name="storage_type" required>
+       <select name="storage_type"
+        id="manualStorageType" required>
+        <option value="Document">Upload File to Vero</option>
         <option value="External System">
          External System
         </option>
@@ -1849,10 +1863,21 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
       </label>
      </div>
 
-     <label class="retention-form-field">
+     <label class="retention-form-field"
+      id="manualFileField">
+      Upload Record *
+      <input type="file" name="file"
+       id="manualRecordFile" required>
+      <small>Maximum file size: 25 MB</small>
+     </label>
+
+     <label class="retention-form-field"
+      id="manualStorageReferenceField"
+      style="display:none">
       Storage Reference *
       <textarea name="storage_reference"
-       rows="2" maxlength="2000" required
+       id="manualStorageReference"
+       rows="2" maxlength="2000"
        placeholder="System, location, URL or reference identifier"
       ></textarea>
      </label>
@@ -5818,6 +5843,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     document.getElementById('manualRecordMessage');
 
    form?.reset();
+   updateManualStorageFields();
 
    const submitButton =
     document.getElementById('submitManualRecord');
@@ -5860,12 +5886,37 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    document.body.style.overflow = 'hidden';
 
    try{
-    const [usersData,rulesData] = await Promise.all([
-     recordsFetch('/users/active'),
-     recordsFetch('/records/retention-rules')
-    ]);
+    const [usersData,rulesData,requirementsData] =
+     await Promise.all([
+      recordsFetch('/users/active'),
+      recordsFetch('/records/retention-rules'),
+      recordsFetch('/compliance/obligations')
+     ]);
 
     if(loadId !== manualRecordLoadId) return;
+
+    const requirementSelect =
+     document.getElementById('manualRelatedRequirement');
+
+    requirementSelect.replaceChildren(
+     new Option('Select requirement','')
+    );
+
+    const uniqueRequirements = new Map();
+
+    (requirementsData.obligations || []).forEach(requirement=>{
+     if(requirement.id != null){
+      uniqueRequirements.set(requirement.id,requirement);
+     }
+    });
+
+    uniqueRequirements.forEach(requirement=>{
+     requirementSelect.add(new Option(
+      requirement.obligation_code + ' — ' +
+      requirement.obligation_title,
+      String(requirement.id)
+     ));
+    });
 
     manualRecordUsers = usersData.users || [];
 
@@ -5937,6 +5988,49 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   });
 
 
+
+ // MANUAL RECORD — STORAGE SELECTION
+ function updateManualStorageFields(){
+  const type =
+   document.getElementById('manualStorageType')?.value;
+
+  const fileField =
+   document.getElementById('manualFileField');
+
+  const fileInput =
+   document.getElementById('manualRecordFile');
+
+  const referenceField =
+   document.getElementById('manualStorageReferenceField');
+
+  const referenceInput =
+   document.getElementById('manualStorageReference');
+
+  const isUpload = type === 'Document';
+
+  if(fileField){
+   fileField.style.display = isUpload ? '' : 'none';
+  }
+
+  if(referenceField){
+   referenceField.style.display = isUpload ? 'none' : '';
+  }
+
+  if(fileInput){
+   fileInput.required = isUpload;
+   fileInput.disabled = !isUpload;
+   if(!isUpload) fileInput.value = '';
+  }
+
+  if(referenceInput){
+   referenceInput.required = !isUpload;
+   if(isUpload) referenceInput.value = '';
+  }
+ }
+
+ document.getElementById('manualStorageType')
+  ?.addEventListener('change',updateManualStorageFields);
+
  // MANUAL RECORD REGISTRATION — SUBMISSION
  let manualRecordSubmitting = false;
 
@@ -5952,9 +6046,8 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    const message =
     document.getElementById('manualRecordMessage');
 
-   const values = Object.fromEntries(
-    new FormData(form).entries()
-   );
+   const formData = new FormData(form);
+   const values = Object.fromEntries(formData.entries());
 
    if(!values.retention_rule_id){
     message.textContent =
@@ -5975,7 +6068,8 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     storage_type:values.storage_type,
     storage_reference:
      (values.storage_reference || '').trim(),
-    retention_rule_id:Number(values.retention_rule_id)
+    retention_rule_id:Number(values.retention_rule_id),
+    related_requirement_id:Number(values.related_requirement_id)
    };
 
    if(values.completion_date){
@@ -5986,7 +6080,9 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     !Number.isSafeInteger(payload.owner_user_id) ||
     payload.owner_user_id <= 0 ||
     !Number.isSafeInteger(payload.retention_rule_id) ||
-    payload.retention_rule_id <= 0
+    payload.retention_rule_id <= 0 ||
+    !Number.isSafeInteger(payload.related_requirement_id) ||
+    payload.related_requirement_id <= 0
    ){
     message.textContent =
      'Select a valid record owner and retention rule.';
@@ -6008,16 +6104,19 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
      throw new Error('Authentication required.');
     }
 
+    Object.entries(payload).forEach(([key,value])=>{
+     formData.set(key,String(value));
+    });
+
     const response = await fetch(
      RECORDS_API + '/records',
      {
       method:'POST',
       headers:{
        Authorization:'Bearer ' + token,
-       'Content-Type':'application/json',
        Accept:'application/json'
       },
-      body:JSON.stringify(payload)
+      body:formData
      }
     );
 
