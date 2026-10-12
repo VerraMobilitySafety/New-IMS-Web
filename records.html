@@ -960,6 +960,102 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  }
 }
 
+
+/* RECORD HISTORY — REFINED VERO STYLING */
+
+.record-history-count{
+ font-size:12px;
+ color:#738078;
+ margin:12px 0 20px;
+}
+
+.record-history-header{
+ display:flex;
+ align-items:baseline;
+ justify-content:space-between;
+ gap:12px;
+}
+
+.record-history-date{
+ font-size:11px;
+ color:#738078;
+ white-space:nowrap;
+}
+
+.record-history-summary{
+ background:#f4f6f5;
+ border:1px solid #e5ebe7;
+ border-radius:8px;
+ padding:12px 14px;
+ margin-top:12px;
+}
+
+.record-history-summary-row{
+ display:flex;
+ flex-direction:column;
+ gap:5px;
+}
+
+.record-history-summary-row + .record-history-summary-row{
+ margin-top:12px;
+ padding-top:12px;
+ border-top:1px solid #e1e7e3;
+}
+
+.record-history-summary-label{
+ font-size:11px;
+ font-weight:600;
+ color:#738078;
+ text-transform:capitalize;
+}
+
+.record-history-summary-values{
+ display:flex;
+ align-items:center;
+ flex-wrap:wrap;
+ gap:8px;
+ font-size:13px;
+ overflow-wrap:anywhere;
+}
+
+.record-history-summary-values strong{
+ color:#0B3D2E;
+ font-weight:700;
+}
+
+.record-history-technical{
+ margin-top:12px;
+}
+
+.record-history-technical summary{
+ cursor:pointer;
+ font-size:11px;
+ color:#68736d;
+}
+
+.record-history-technical summary:hover{
+ color:#2C8259;
+}
+
+.record-history-technical pre{
+ margin:10px 0 0;
+ padding:12px;
+ border:1px solid #e1e7e3;
+ border-radius:8px;
+ background:#fafbfa;
+ font-size:11px;
+ line-height:1.5;
+ white-space:pre-wrap;
+ overflow-wrap:anywhere;
+}
+
+@media(max-width:600px){
+ .record-history-header{
+  flex-direction:column;
+  gap:3px;
+ }
+}
+
 /* RECORD DETAIL DRAWER */
 .record-modal{
  position:fixed;
@@ -2729,84 +2825,233 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
  let recordHistoryRequest = 0;
 
+
  function renderRecordHistory(history){
   const timeline =
    document.getElementById('recordHistoryTimeline');
 
   if(!timeline) return;
 
+  timeline.replaceChildren();
+
   if(!history.length){
    timeline.textContent = 'No history events recorded.';
    return;
   }
 
+  const count = document.createElement('div');
+  count.className = 'record-history-count';
+  count.textContent =
+   history.length + ' lifecycle events • Most recent first';
+
   const list = document.createElement('div');
   list.className = 'record-history-list';
+
+  const labels = {
+   'Disposition Proposed':'Disposition Proposed',
+   'Disposition Approved':'Disposition Approved',
+   'Disposition Rejected':'Disposition Rejected',
+   'Disposition Completed':'Disposition Completed',
+   'Hold Placed':'Record Hold Placed',
+   'Hold Released':'Record Hold Released',
+   'Retention Extended':'Retention Extended',
+   'Retention Assigned':'Retention Assigned',
+   'Retention Changed':'Retention Changed',
+   'Created':'Record Created',
+   'Updated':'Record Updated',
+   'Classification Changed':'Classification Changed',
+   'Owner Changed':'Owner Changed'
+  };
+
+  const fieldLabels = {
+   disposal_due_date:'Disposal due date',
+   disposition_status:'Disposition status',
+   disposition_type:'Disposition decision',
+   retain_review_date:'Retain review date',
+   retain_indefinitely:'Retain indefinitely',
+   extension_months:'Extension period',
+   status:'Status',
+   hold_status:'Hold status',
+   retention_rule_id:'Retention rule',
+   security_classification:'Security classification'
+  };
+
+  const formatValue = (key,value)=>{
+   if(value === null || value === undefined) return '—';
+
+   if(typeof value === 'boolean'){
+    return value ? 'Yes' : 'No';
+   }
+
+   if(key.includes('date') &&
+      typeof value === 'string' &&
+      /^\\d{4}-\\d{2}-\\d{2}$/.test(value)){
+    const [year,month,day] = value.split('-');
+    return day + '/' + month + '/' + year;
+   }
+
+   if(typeof value === 'object'){
+    return JSON.stringify(value);
+   }
+
+   return String(value);
+  };
 
   history.forEach(event=>{
    const item = document.createElement('div');
    item.className = 'record-history-item';
 
+   const header = document.createElement('div');
+   header.className = 'record-history-header';
+
    const title = document.createElement('div');
    title.className = 'record-history-title';
-   title.textContent = event.event_type || 'Record Event';
+
+   const eventType = event.event_type || 'Record Event';
+
+   const decision = event.new_value?.disposition_type;
+
+   if(decision && eventType === 'Disposition Completed'){
+    title.textContent =
+     decision === 'Extend'
+      ? 'Retention Extended'
+      : decision === 'Release Retain'
+       ? 'Retain Restriction Released'
+       : decision + ' Decision Completed';
+   }else{
+    title.textContent = labels[eventType] || eventType;
+   }
+
+   const date = document.createElement('span');
+   date.className = 'record-history-date';
+
+   const timestamp = event.performed_at
+    ? new Date(event.performed_at)
+    : null;
+
+   date.textContent = timestamp &&
+    !Number.isNaN(timestamp.getTime())
+     ? timestamp.toLocaleDateString('en-AU',{
+        day:'2-digit',
+        month:'short',
+        year:'numeric'
+       })
+     : 'Unknown date';
+
+   header.append(title,date);
 
    const meta = document.createElement('div');
    meta.className = 'record-history-meta';
 
-   const eventDate = event.performed_at
-    ? new Date(event.performed_at).toLocaleString('en-AU')
-    : 'Unknown date';
+   const role =
+    eventType === 'Disposition Approved' ? 'Approved by' :
+    eventType === 'Disposition Proposed' ? 'Proposed by' :
+    eventType === 'Disposition Completed' ? 'Completed by' :
+    'Performed by';
+
+   const time = timestamp &&
+    !Number.isNaN(timestamp.getTime())
+     ? timestamp.toLocaleTimeString('en-AU',{
+        hour:'numeric',
+        minute:'2-digit'
+       })
+     : '';
 
    meta.textContent =
-    (event.performed_by_name || 'System') +
-    ' • ' + eventDate;
+    role + ' ' + (event.performed_by_name || 'System') +
+    (time ? ' • ' + time : '');
 
    const description = document.createElement('div');
    description.className = 'record-history-description';
    description.textContent =
-    event.event_description || 'No description provided.';
+    event.event_description || 'Record lifecycle event.';
 
-   item.append(title,meta,description);
+   item.append(header,meta,description);
+
+   const previous = event.previous_value || {};
+   const next = event.new_value || {};
+
+   const keys = new Set([
+    ...Object.keys(previous),
+    ...Object.keys(next)
+   ]);
+
+   const changes = [];
+
+   keys.forEach(key=>{
+    if(!(key in previous) || !(key in next)) return;
+
+    if(JSON.stringify(previous[key]) ===
+       JSON.stringify(next[key])) return;
+
+    changes.push({
+     key,
+     before:previous[key],
+     after:next[key]
+    });
+   });
+
+   if(changes.length){
+    const changeBox = document.createElement('div');
+    changeBox.className = 'record-history-summary';
+
+    changes.forEach(change=>{
+     const row = document.createElement('div');
+     row.className = 'record-history-summary-row';
+
+     const label = document.createElement('span');
+     label.className = 'record-history-summary-label';
+     label.textContent =
+      fieldLabels[change.key] ||
+      change.key.replaceAll('_',' ');
+
+     const values = document.createElement('div');
+     values.className = 'record-history-summary-values';
+
+     const before = document.createElement('span');
+     before.textContent =
+      formatValue(change.key,change.before);
+
+     const arrow = document.createElement('span');
+     arrow.textContent = ' → ';
+
+     const after = document.createElement('strong');
+     after.textContent =
+      formatValue(change.key,change.after);
+
+     values.append(before,arrow,after);
+     row.append(label,values);
+     changeBox.appendChild(row);
+    });
+
+    item.appendChild(changeBox);
+   }
 
    if(event.previous_value != null ||
       event.new_value != null){
 
     const details = document.createElement('details');
-    details.className = 'record-history-changes';
+    details.className = 'record-history-technical';
 
     const summary = document.createElement('summary');
-    summary.textContent = 'View change details';
+    summary.textContent = 'Technical audit details';
 
-    const grid = document.createElement('div');
-    grid.className = 'record-history-change-grid';
+    const pre = document.createElement('pre');
+    pre.textContent = JSON.stringify({
+     previous_value:event.previous_value,
+     new_value:event.new_value,
+     related_entity_type:event.related_entity_type,
+     related_entity_id:event.related_entity_id
+    },null,2);
 
-    [
-     ['Previous Value',event.previous_value],
-     ['New Value',event.new_value]
-    ].forEach(([label,value])=>{
-     const column = document.createElement('div');
-
-     const heading = document.createElement('strong');
-     heading.textContent = label;
-
-     const pre = document.createElement('pre');
-     pre.textContent = value == null
-      ? '—'
-      : JSON.stringify(value,null,2);
-
-     column.append(heading,pre);
-     grid.appendChild(column);
-    });
-
-    details.append(summary,grid);
+    details.append(summary,pre);
     item.appendChild(details);
    }
 
    list.appendChild(item);
   });
 
-  timeline.replaceChildren(list);
+  timeline.append(count,list);
  }
 
  async function loadRecordHistory(recordId){
