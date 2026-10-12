@@ -2827,6 +2827,82 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  </div>
 </div>
 
+
+<style>
+.record-fullscreen-viewer{
+ position:fixed;inset:0;z-index:9999;
+ background:#f1f0ee;display:none;
+ flex-direction:column;
+}
+.record-fullscreen-viewer.open{display:flex}
+.record-viewer-top{
+ min-height:64px;background:var(--charcoal);
+ color:#fff;display:flex;align-items:center;
+ gap:18px;padding:12px 20px;flex-wrap:wrap;
+}
+.record-viewer-top h2{font-size:16px;margin:0}
+.record-viewer-top small{color:#ddd}
+.record-viewer-spacer{flex:1}
+.record-viewer-btn{
+ background:#fff;color:var(--charcoal);
+ border:0;border-radius:7px;padding:9px 12px;
+ font-weight:800;cursor:pointer;
+}
+.record-viewer-body{
+ flex:1;overflow:auto;padding:30px;
+ text-align:center;
+}
+.record-viewer-body img{
+ display:block;max-width:850px;width:100%;
+ margin:0 auto 20px;background:#fff;
+ box-shadow:0 4px 20px rgba(0,0,0,.12);
+}
+.record-viewer-footer{
+ display:flex;justify-content:center;
+ align-items:center;gap:15px;padding:12px;
+ background:#fff;border-top:1px solid #ddd;
+}
+</style>
+
+<div id="recordFullscreenViewer"
+ class="record-fullscreen-viewer"
+ role="dialog" aria-modal="true"
+ aria-label="Controlled Record Viewer">
+
+ <div class="record-viewer-top">
+  <button class="record-viewer-btn"
+   id="recordViewerClose">← Close</button>
+
+  <div>
+   <h2 id="recordViewerTitle">Controlled Record</h2>
+   <small id="recordViewerMeta">Enterprise Records Management</small>
+  </div>
+
+  <div class="record-viewer-spacer"></div>
+
+  <button class="record-viewer-btn"
+   id="recordViewerRequestCopy">Request a Copy</button>
+
+  <span class="record-viewer-btn"
+   style="background:var(--green);color:#fff">
+   View only
+  </span>
+ </div>
+
+ <div class="record-viewer-body">
+  <p id="recordViewerMessage"></p>
+  <div id="recordViewerPages"></div>
+ </div>
+
+ <div class="record-viewer-footer">
+  <button class="record-viewer-btn"
+   id="recordViewerPrevious">Previous</button>
+  <span id="recordViewerPageLabel">Page 1</span>
+  <button class="record-viewer-btn"
+   id="recordViewerNext">Next</button>
+ </div>
+</div>
+
 <script>function toggleNavGroup(id){const g=document.getElementById(id);if(g)g.classList.toggle('open');}
 /* VERO GLOBAL ACCOUNT MENU */
 (()=>{
@@ -6321,16 +6397,16 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   document.getElementById('viewRecordBtn');
 
  const previewPanel =
-  document.getElementById('recordPreviewPanel');
+  document.getElementById('recordFullscreenViewer');
 
  const previewMessage =
-  document.getElementById('recordPreviewMessage');
+  document.getElementById('recordViewerMessage');
 
  const previewContent =
-  document.getElementById('recordPreviewContent');
+  document.getElementById('recordViewerPages');
 
  const previewNavigation =
-  document.getElementById('recordPreviewNavigation');
+  document.getElementById('recordFullscreenViewer');
 
  function closeControlledPreview(){
   previewRequestId++;
@@ -6342,8 +6418,8 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
   previewContent?.replaceChildren();
 
-  if(previewPanel) previewPanel.style.display = 'none';
-  if(previewNavigation) previewNavigation.style.display = 'none';
+  if(previewPanel) previewPanel.classList.remove('open');
+  if(previewNavigation)
 
   previewRecordId = null;
   previewPage = 1;
@@ -6408,10 +6484,10 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
    previewContent.replaceChildren(image);
 
-   document.getElementById('recordPreviewPageLabel')
+   document.getElementById('recordViewerPageLabel')
     .textContent = 'Page ' + previewPage;
 
-   previewNavigation.style.display = 'flex';
+
    previewMessage.textContent = 'Controlled preview';
 
   }catch(error){
@@ -6430,26 +6506,43 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   closeControlledPreview();
 
   previewRecordId = recordId;
-  previewPanel.style.display = 'block';
+
+  document.getElementById('recordViewerTitle').textContent =
+   document.getElementById('drawerRecordTitle')?.textContent
+   || 'Controlled Record';
+
+  document.getElementById('recordViewerMeta').textContent =
+   document.getElementById('drawerRecordCode')?.textContent
+   || 'Enterprise Records Management';
+
+  previewPanel.classList.add('open');
 
   loadControlledPreviewPage();
  });
 
- document.getElementById('recordPreviewPrevious')
+ document.getElementById('recordViewerPrevious')
   ?.addEventListener('click',()=>{
    if(previewPage <= 1) return;
    previewPage--;
    loadControlledPreviewPage();
   });
 
- document.getElementById('recordPreviewNext')
+ document.getElementById('recordViewerNext')
   ?.addEventListener('click',()=>{
    previewPage++;
    loadControlledPreviewPage();
   });
 
- document.getElementById('closeRecordPreview')
+ document.getElementById('recordViewerClose')
   ?.addEventListener('click',closeControlledPreview);
+
+
+ // FULL-SCREEN RECORD VIEWER CONTROLS
+ document.getElementById('recordViewerRequestCopy')
+  ?.addEventListener('click',()=>{
+   closeControlledPreview();
+   document.getElementById('requestRecordBtn')?.click();
+  });
 
  const requestBtn =
   document.getElementById('requestRecordBtn');
