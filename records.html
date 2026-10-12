@@ -6691,6 +6691,20 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    }
   });
 
+
+ // Open a specific enterprise record from another module.
+ const recordDeepLink =
+  new URLSearchParams(window.location.search)
+   .get('record_id');
+
+ if(recordDeepLink){
+  const recordId = Number(recordDeepLink);
+
+  if(Number.isSafeInteger(recordId) && recordId > 0){
+   openRecordDrawer(recordId);
+  }
+ }
+
  // Open a specific disposition from My Actions.
  const dispositionDeepLink =
   new URLSearchParams(window.location.search)
