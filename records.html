@@ -2886,8 +2886,15 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    if(key.includes('date') &&
       typeof value === 'string' &&
       /^\\d{4}-\\d{2}-\\d{2}$/.test(value)){
-    const [year,month,day] = value.split('-');
-    return day + '/' + month + '/' + year;
+    const [year,month,day] = value.split('-').map(Number);
+
+    return new Date(Date.UTC(year,month-1,day))
+     .toLocaleDateString('en-AU',{
+      day:'2-digit',
+      month:'short',
+      year:'numeric',
+      timeZone:'UTC'
+     });
    }
 
    if(typeof value === 'object'){
@@ -2979,15 +2986,22 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    const changes = [];
 
    keys.forEach(key=>{
-    if(!(key in previous) || !(key in next)) return;
+    const hasPrevious = Object.hasOwn(previous,key);
+    const hasNext = Object.hasOwn(next,key);
 
-    if(JSON.stringify(previous[key]) ===
-       JSON.stringify(next[key])) return;
+    if(
+     hasPrevious && hasNext &&
+     JSON.stringify(previous[key]) ===
+     JSON.stringify(next[key])
+    ) return;
 
     changes.push({
      key,
-     before:previous[key],
-     after:next[key]
+     before:hasPrevious ? previous[key] : null,
+     after:hasNext ? next[key] : null,
+     change_type:
+      !hasPrevious ? 'Added' :
+      !hasNext ? 'Removed' : 'Changed'
     });
    });
 
@@ -3008,44 +3022,40 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
      const values = document.createElement('div');
      values.className = 'record-history-summary-values';
 
-     const before = document.createElement('span');
-     before.textContent =
-      formatValue(change.key,change.before);
+     if(change.change_type === 'Added'){
+      const value = document.createElement('strong');
+      value.textContent =
+       formatValue(change.key,change.after);
+      values.appendChild(value);
 
-     const arrow = document.createElement('span');
-     arrow.textContent = ' → ';
+     }else if(change.change_type === 'Removed'){
+      const value = document.createElement('span');
+      value.textContent =
+       formatValue(change.key,change.before);
 
-     const after = document.createElement('strong');
-     after.textContent =
-      formatValue(change.key,change.after);
+      const removed = document.createElement('span');
+      removed.textContent = ' (Removed)';
+      values.append(value,removed);
 
-     values.append(before,arrow,after);
+     }else{
+      const before = document.createElement('span');
+      before.textContent =
+       formatValue(change.key,change.before);
+
+      const arrow = document.createElement('span');
+      arrow.textContent = ' → ';
+
+      const after = document.createElement('strong');
+      after.textContent =
+       formatValue(change.key,change.after);
+
+      values.append(before,arrow,after);
+     }
      row.append(label,values);
      changeBox.appendChild(row);
     });
 
     item.appendChild(changeBox);
-   }
-
-   if(event.previous_value != null ||
-      event.new_value != null){
-
-    const details = document.createElement('details');
-    details.className = 'record-history-technical';
-
-    const summary = document.createElement('summary');
-    summary.textContent = 'Technical audit details';
-
-    const pre = document.createElement('pre');
-    pre.textContent = JSON.stringify({
-     previous_value:event.previous_value,
-     new_value:event.new_value,
-     related_entity_type:event.related_entity_type,
-     related_entity_id:event.related_entity_id
-    },null,2);
-
-    details.append(summary,pre);
-    item.appendChild(details);
    }
 
    list.appendChild(item);
