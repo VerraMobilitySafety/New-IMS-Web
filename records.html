@@ -5886,11 +5886,12 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    document.body.style.overflow = 'hidden';
 
    try{
-    const [usersData,rulesData,requirementsData] =
+    const [usersData,rulesData,requirementsData,groupsData] =
      await Promise.all([
       recordsFetch('/users/active'),
       recordsFetch('/records/retention-rules'),
-      recordsFetch('/compliance/obligations')
+      recordsFetch('/compliance/obligations'),
+      recordsFetch('/records/confidentiality-groups')
      ]);
 
     if(loadId !== manualRecordLoadId) return;
@@ -5917,6 +5918,32 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
       String(requirement.id)
      ));
     });
+
+    const groupsContainer =
+     document.getElementById('manualConfidentialityGroups');
+
+    groupsContainer.replaceChildren();
+
+    (groupsData.groups || []).forEach(group=>{
+     const label = document.createElement('label');
+     label.style.display = 'flex';
+     label.style.alignItems = 'center';
+     label.style.gap = '10px';
+     label.style.margin = '10px 0';
+
+     const checkbox = document.createElement('input');
+     checkbox.type = 'checkbox';
+     checkbox.name = 'confidentiality_group_ids';
+     checkbox.value = String(group.id);
+
+     const text = document.createElement('span');
+     text.textContent = group.name;
+
+     label.append(checkbox,text);
+     groupsContainer.appendChild(label);
+    });
+
+    updateManualConfidentiality();
 
     manualRecordUsers = usersData.users || [];
 
@@ -5988,6 +6015,24 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   });
 
 
+
+
+ // MANUAL RECORD — CONFIDENTIALITY GROUPS
+ function updateManualConfidentiality(){
+  const classification =
+   document.getElementById('manualSecurityClassification')?.value;
+
+  const section =
+   document.getElementById('manualConfidentialitySection');
+
+  if(section){
+   section.style.display =
+    classification === 'Confidential' ? '' : 'none';
+  }
+ }
+
+ document.getElementById('manualSecurityClassification')
+  ?.addEventListener('change',updateManualConfidentiality);
 
  // MANUAL RECORD — STORAGE SELECTION
  function updateManualStorageFields(){
@@ -6087,6 +6132,32 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     message.textContent =
      'Select a valid record owner and retention rule.';
     return;
+   }
+
+   const classification =
+    payload.security_classification;
+
+   formData.delete('confidentiality_group_ids');
+
+   if(classification === 'Confidential'){
+    const selectedGroups = [
+     ...form.querySelectorAll(
+      'input[name="confidentiality_group_ids"]:checked'
+     )
+    ];
+
+    if(!selectedGroups.length){
+     message.textContent =
+      'Select at least one authorised viewing group.';
+     return;
+    }
+
+    selectedGroups.forEach(checkbox=>{
+     formData.append(
+      'confidentiality_group_ids',
+      checkbox.value
+     );
+    });
    }
 
    manualRecordSubmitting = true;
