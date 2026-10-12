@@ -2862,6 +2862,33 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  align-items:center;gap:15px;padding:12px;
  background:#fff;border-top:1px solid #ddd;
 }
+
+.record-fullscreen-viewer{
+ background:#f1f0ee;
+}
+.record-viewer-body{
+ background:#262626;
+ overflow-y:auto;
+ padding:50px 24px;
+ flex:1;
+}
+.record-viewer-body img{
+ display:block;
+ width:auto;
+ max-width:min(850px,100%);
+ height:auto;
+ margin:0 auto 18px;
+ background:white;
+ box-shadow:0 2px 12px rgba(0,0,0,.25);
+}
+.record-viewer-footer{
+ background:#3b3734;
+ color:white;
+ border:0;
+}
+.record-viewer-top{
+ background:#3b3734;
+}
 </style>
 
 <div id="recordFullscreenViewer"
@@ -2894,7 +2921,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   <div id="recordViewerPages"></div>
  </div>
 
- <div class="record-viewer-footer">
+ <div class="record-viewer-footer" style="display:none">
   <button class="record-viewer-btn"
    id="recordViewerPrevious">Previous</button>
   <span id="recordViewerPageLabel">Page 1</span>
@@ -6416,7 +6443,16 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    previewUrl = null;
   }
 
-  previewContent?.replaceChildren();
+  const urls = JSON.parse(
+   previewContent?.dataset.previewUrls || '[]'
+  );
+
+  urls.forEach(url=>URL.revokeObjectURL(url));
+
+  if(previewContent){
+   delete previewContent.dataset.previewUrls;
+   previewContent.replaceChildren();
+  }
 
   if(previewPanel) previewPanel.classList.remove('open');
   if(previewNavigation)
@@ -6425,77 +6461,75 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   previewPage = 1;
  }
 
+
  async function loadControlledPreviewPage(){
   if(!previewRecordId) return;
 
   const requestId = ++previewRequestId;
+  const recordId = previewRecordId;
 
-  previewMessage.textContent =
-   'Loading page ' + previewPage + '...';
+  previewContent.replaceChildren();
+  previewMessage.textContent = 'Loading controlled record...';
 
-  try{
-   const token =
-    localStorage.getItem('vero_session_token');
+  const token = localStorage.getItem('vero_session_token');
+  const urls = [];
 
-   const response = await fetch(
-    RECORDS_API + '/records/' +
-    encodeURIComponent(previewRecordId) +
-    '/preview?page=' + previewPage,
-    {
-     headers:{
-      Authorization:'Bearer ' + token
-     },
-     cache:'no-store'
+  // Render pages sequentially to limit memory usage.
+  for(let page = 1; page <= 200; page++){
+
+   if(requestId !== previewRequestId) break;
+
+   try{
+    const response = await fetch(
+     RECORDS_API + '/records/' +
+     encodeURIComponent(recordId) +
+     '/preview?page=' + page,
+     {
+      headers:{Authorization:'Bearer ' + token},
+      cache:'no-store'
+     }
+    );
+
+    if(requestId !== previewRequestId) break;
+
+    if(response.status === 404 && page > 1) break;
+
+    if(!response.ok){
+     const error = await response.json().catch(()=>({}));
+     throw new Error(error.message || 'Preview unavailable.');
     }
-   );
 
-   if(requestId !== previewRequestId) return;
+    const blob = await response.blob();
 
-   if(!response.ok){
-    let error = {};
+    if(requestId !== previewRequestId) break;
 
-    try{ error = await response.json(); }
-    catch(e){}
+    const url = URL.createObjectURL(blob);
+    urls.push(url);
+    previewContent.dataset.previewUrls = JSON.stringify(urls);
 
-    if(response.status === 404 && previewPage > 1){
-     previewPage--;
-     previewMessage.textContent = 'Last page reached.';
-     return;
+    const image = document.createElement('img');
+    image.src = url;
+    image.alt = 'Record page ' + page;
+    image.draggable = false;
+    image.style.userSelect = 'none';
+
+    previewContent.appendChild(image);
+
+    previewMessage.textContent = 'Controlled record — ' +
+     page + ' page(s) loaded';
+
+   }catch(error){
+    if(requestId === previewRequestId){
+     previewMessage.textContent = error.message;
     }
-
-    throw new Error(error.message || 'Preview unavailable.');
+    break;
    }
+  }
 
-   const blob = await response.blob();
-
-   if(requestId !== previewRequestId) return;
-
-   if(previewUrl) URL.revokeObjectURL(previewUrl);
-
-   previewUrl = URL.createObjectURL(blob);
-
-   const image = document.createElement('img');
-   image.src = previewUrl;
-   image.alt = 'Controlled record preview page ' + previewPage;
-   image.style.width = '100%';
-   image.style.height = 'auto';
-   image.style.userSelect = 'none';
-   image.draggable = false;
-
-   previewContent.replaceChildren(image);
-
-   document.getElementById('recordViewerPageLabel')
-    .textContent = 'Page ' + previewPage;
-
-
-   previewMessage.textContent = 'Controlled preview';
-
-  }catch(error){
-   if(requestId !== previewRequestId) return;
-   previewMessage.textContent = error.message;
+  if(requestId !== previewRequestId){
+   return;
   }
  }
-
  viewRecordBtn?.addEventListener('click',()=>{
   const recordId =
    document.getElementById('requestRecordBtn')
