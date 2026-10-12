@@ -1056,6 +1056,56 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  }
 }
 
+
+/* RECORD HISTORY — COLLAPSIBLE SECTION */
+
+#recordHistorySection,
+#recordHistorySection *{
+ font-family:inherit;
+}
+
+#recordHistoryAccordion{
+ width:100%;
+}
+
+.record-history-toggle{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:12px;
+ cursor:pointer;
+ list-style:none;
+ font-size:15px;
+ font-weight:700;
+ color:var(--charcoal);
+}
+
+.record-history-toggle::-webkit-details-marker{
+ display:none;
+}
+
+.record-history-toggle::after{
+ content:'⌄';
+ font-size:20px;
+ font-weight:400;
+ transition:transform .2s ease;
+}
+
+#recordHistoryAccordion[open] .record-history-toggle::after{
+ transform:rotate(180deg);
+}
+
+.record-history-event-count{
+ margin-left:auto;
+ font-size:12px;
+ font-weight:400;
+ color:#738078;
+}
+
+.record-history-content{
+ padding-top:15px;
+}
+
 /* RECORD DETAIL DRAWER */
 .record-modal{
  position:fixed;
@@ -2533,18 +2583,28 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
             id="recordHistorySection"
             style="display:none">
 
-    <h3>Record History</h3>
+    <details id="recordHistoryAccordion">
 
-    <p>
-     Chronological audit trail of changes,
-     approvals and lifecycle events.
-    </p>
+     <summary class="record-history-toggle">
+      <span>Record History</span>
+      <span id="recordHistoryEventCount"
+            class="record-history-event-count"></span>
+     </summary>
 
-    <div id="recordHistoryTimeline">
-     <p class="records-empty">
-      Loading record history...
-     </p>
-    </div>
+     <div class="record-history-content">
+      <p>
+       Chronological audit trail of changes,
+       approvals and lifecycle events.
+      </p>
+
+      <div id="recordHistoryTimeline">
+       <p class="records-empty">
+        Loading record history...
+       </p>
+      </div>
+     </div>
+
+    </details>
 
    </section>
 
@@ -2839,10 +2899,17 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    return;
   }
 
+  const countLabel =
+   document.getElementById('recordHistoryEventCount');
+
+  if(countLabel){
+   countLabel.textContent =
+    history.length + (history.length === 1 ? ' event' : ' events');
+  }
+
   const count = document.createElement('div');
   count.className = 'record-history-count';
-  count.textContent =
-   history.length + ' lifecycle events • Most recent first';
+  count.textContent = 'Most recent first';
 
   const list = document.createElement('div');
   list.className = 'record-history-list';
@@ -3364,6 +3431,20 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  window.closeRecordDrawer = function(){
   // Invalidate outstanding Record History requests.
   recordHistoryRequest++;
+
+  const accordion =
+   document.getElementById('recordHistoryAccordion');
+
+  if(accordion){
+   accordion.open = false;
+  }
+
+  const eventCount =
+   document.getElementById('recordHistoryEventCount');
+
+  if(eventCount){
+   eventCount.textContent = '';
+  }
 
   const historySection =
    document.getElementById('recordHistorySection');
