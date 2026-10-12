@@ -4989,6 +4989,68 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    }
   });
 
+ // Open a specific disposition from My Actions.
+ const dispositionDeepLink =
+  new URLSearchParams(window.location.search)
+   .get('disposition');
+
+ if(dispositionDeepLink){
+  const dispositionId = Number(dispositionDeepLink);
+
+  if(Number.isSafeInteger(dispositionId) && dispositionId > 0){
+   const dispositionTab = document.querySelector(
+    '.records-tab[data-tab="disposition"]'
+   );
+
+   // Show the Disposition tab without triggering
+   // a second, competing register load.
+   document.querySelectorAll('.records-tab')
+    .forEach(tab=>{
+     tab.classList.toggle('active',tab === dispositionTab);
+    });
+
+   ['recordsRegisterPanel',
+    'retentionSchedulePanel',
+    'recordsHoldsPanel',
+    'recordsDispositionPanel']
+    .forEach(id=>{
+     const panel = document.getElementById(id);
+     if(panel){
+      panel.style.display =
+       id === 'recordsDispositionPanel' ? '' : 'none';
+     }
+    });
+
+   loadEnterpriseDispositions().then(()=>{
+    if(!dispositionsLoaded){
+     console.error(
+      'Unable to load disposition for direct navigation:',
+      dispositionId
+     );
+     return;
+    }
+
+    const disposition = enterpriseDispositions.find(
+     d => Number(d.id) === dispositionId
+    );
+
+    if(disposition){
+     openDispositionDrawer(dispositionId);
+    }else{
+     console.warn(
+      'Disposition not found or access denied:',
+      dispositionId
+     );
+    }
+   }).catch(error=>{
+    console.error(
+     'Disposition direct navigation failed:',
+     error
+    );
+   });
+  }
+ }
+
  loadRecords();
 })();
 </script>

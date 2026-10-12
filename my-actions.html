@@ -1087,6 +1087,11 @@ function openActionDetail(index){
   action.source==='Records' &&
   action.action_type==='Record Request';
 
+ const isRecordDisposition=
+  action.source==='Records' &&
+  ['Disposition Review','Disposition Completion']
+   .includes(action.action_type);
+
  const requestType=action.request_type||'New Document';
 
  const requestLabels={
@@ -1322,6 +1327,27 @@ function openActionDetail(index){
             type="button"
             onclick="openRecordFromAction()">
       View Record Details →
+    </button>`;
+
+ }else if(isRecordDisposition){
+
+  document.getElementById('actionDetailGrid').innerHTML=[
+   actionField('Record',action.record_code),
+   actionField('Record title',action.record_title),
+   actionField('Decision',action.disposition_type),
+   actionField('Proposed by',action.proposed_by),
+   actionField('Proposed',formatActionDate(action.created_at)),
+   actionField('Status',action.status)
+  ].join('');
+
+  document.getElementById('actionDetailReason').textContent=
+   action.reason||action.description||'—';
+
+  document.getElementById('actionDetailAdditional').innerHTML=
+   `<button class="action-btn-more"
+            type="button"
+            onclick="openDispositionFromAction()">
+      View Disposition →
     </button>`;
 
  }else if(isCompliance){
@@ -1724,6 +1750,21 @@ function openRecordFromAction(){
 
  location.href=
   `records.html?record=${encodeURIComponent(action.record_id)}`;
+}
+
+function openDispositionFromAction(){
+ const action = currentAction;
+
+ if(
+  !action ||
+  action.source !== 'Records' ||
+  !['Disposition Review','Disposition Completion']
+   .includes(action.action_type) ||
+  !action.source_id
+ ) return;
+
+ location.href =
+  `records.html?disposition=${encodeURIComponent(action.source_id)}`;
 }
 
 function openProjectAction(){

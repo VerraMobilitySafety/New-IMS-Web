@@ -307,9 +307,20 @@ function actionDotClass(action){
  return '';
 }
 function actionTarget(action){
+ if(
+  action.source === 'Records' &&
+  ['Disposition Review','Disposition Completion']
+   .includes(action.action_type) &&
+  action.target_id != null
+ ){
+  return 'records.html?disposition=' +
+   encodeURIComponent(action.target_id);
+ }
+
  if(action.target_id!=null && action.target){
   return action.target+'?action='+encodeURIComponent(action.target_id);
  }
+
  return action.target||'#';
 }
 function renderMyActions(actions){
