@@ -2723,10 +2723,39 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     <div class="record-drawer-actions">
      <button
       class="request-record-btn"
+      id="viewRecordBtn"
+      type="button"
+      style="display:none">
+      View Record
+     </button>
+
+     <button
+      class="request-record-btn"
       id="requestRecordBtn"
       type="button"
      >
       Request Record
+     </button>
+    </div>
+
+    <div id="recordPreviewPanel"
+     class="record-request-form"
+     style="display:none">
+     <h4>Controlled Record Preview</h4>
+     <p id="recordPreviewMessage">
+      Preparing secure preview...
+     </p>
+     <div id="recordPreviewNavigation"
+      style="display:none;align-items:center;gap:12px;margin:12px 0">
+      <button type="button" id="recordPreviewPrevious">Previous</button>
+      <span id="recordPreviewPageLabel">Page 1</span>
+      <button type="button" id="recordPreviewNext">Next</button>
+     </div>
+     <div id="recordPreviewContent"></div>
+     <button type="button"
+      id="closeRecordPreview"
+      class="record-request-cancel">
+      Close Preview
      </button>
     </div>
 
@@ -3564,6 +3593,21 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
    document.getElementById('requestRecordBtn').dataset.recordId =
     r.id;
+
+   closeControlledPreview();
+
+   const viewButton =
+    document.getElementById('viewRecordBtn');
+
+   if(viewButton){
+    const isPdf =
+     (r.file_name || '').toLowerCase().endsWith('.pdf');
+
+    viewButton.style.display =
+     isPdf && r.status !== 'Disposed'
+      ? 'inline-flex'
+      : 'none';
+   }
 
    // Resolve Document Controller permission independently.
    const placeHoldButton =
@@ -6264,6 +6308,148 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    if(!row) return;
    openRecordDrawer(row.dataset.recordId);
   });
+
+
+
+ // CONTROLLED RECORD PREVIEW
+ let previewPage = 1;
+ let previewRecordId = null;
+ let previewUrl = null;
+ let previewRequestId = 0;
+
+ const viewRecordBtn =
+  document.getElementById('viewRecordBtn');
+
+ const previewPanel =
+  document.getElementById('recordPreviewPanel');
+
+ const previewMessage =
+  document.getElementById('recordPreviewMessage');
+
+ const previewContent =
+  document.getElementById('recordPreviewContent');
+
+ const previewNavigation =
+  document.getElementById('recordPreviewNavigation');
+
+ function closeControlledPreview(){
+  previewRequestId++;
+
+  if(previewUrl){
+   URL.revokeObjectURL(previewUrl);
+   previewUrl = null;
+  }
+
+  previewContent?.replaceChildren();
+
+  if(previewPanel) previewPanel.style.display = 'none';
+  if(previewNavigation) previewNavigation.style.display = 'none';
+
+  previewRecordId = null;
+  previewPage = 1;
+ }
+
+ async function loadControlledPreviewPage(){
+  if(!previewRecordId) return;
+
+  const requestId = ++previewRequestId;
+
+  previewMessage.textContent =
+   'Loading page ' + previewPage + '...';
+
+  try{
+   const token =
+    localStorage.getItem('vero_session_token');
+
+   const response = await fetch(
+    RECORDS_API + '/records/' +
+    encodeURIComponent(previewRecordId) +
+    '/preview?page=' + previewPage,
+    {
+     headers:{
+      Authorization:'Bearer ' + token
+     },
+     cache:'no-store'
+    }
+   );
+
+   if(requestId !== previewRequestId) return;
+
+   if(!response.ok){
+    let error = {};
+
+    try{ error = await response.json(); }
+    catch(e){}
+
+    if(response.status === 404 && previewPage > 1){
+     previewPage--;
+     previewMessage.textContent = 'Last page reached.';
+     return;
+    }
+
+    throw new Error(error.message || 'Preview unavailable.');
+   }
+
+   const blob = await response.blob();
+
+   if(requestId !== previewRequestId) return;
+
+   if(previewUrl) URL.revokeObjectURL(previewUrl);
+
+   previewUrl = URL.createObjectURL(blob);
+
+   const image = document.createElement('img');
+   image.src = previewUrl;
+   image.alt = 'Controlled record preview page ' + previewPage;
+   image.style.width = '100%';
+   image.style.height = 'auto';
+   image.style.userSelect = 'none';
+   image.draggable = false;
+
+   previewContent.replaceChildren(image);
+
+   document.getElementById('recordPreviewPageLabel')
+    .textContent = 'Page ' + previewPage;
+
+   previewNavigation.style.display = 'flex';
+   previewMessage.textContent = 'Controlled preview';
+
+  }catch(error){
+   if(requestId !== previewRequestId) return;
+   previewMessage.textContent = error.message;
+  }
+ }
+
+ viewRecordBtn?.addEventListener('click',()=>{
+  const recordId =
+   document.getElementById('requestRecordBtn')
+    ?.dataset.recordId;
+
+  if(!recordId) return;
+
+  closeControlledPreview();
+
+  previewRecordId = recordId;
+  previewPanel.style.display = 'block';
+
+  loadControlledPreviewPage();
+ });
+
+ document.getElementById('recordPreviewPrevious')
+  ?.addEventListener('click',()=>{
+   if(previewPage <= 1) return;
+   previewPage--;
+   loadControlledPreviewPage();
+  });
+
+ document.getElementById('recordPreviewNext')
+  ?.addEventListener('click',()=>{
+   previewPage++;
+   loadControlledPreviewPage();
+  });
+
+ document.getElementById('closeRecordPreview')
+  ?.addEventListener('click',closeControlledPreview);
 
  const requestBtn =
   document.getElementById('requestRecordBtn');
