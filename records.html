@@ -2663,12 +2663,35 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
       <label>Security Classification</label>
       <strong id="drawerClassification">—</strong>
      </div>
+     <div class="record-detail">
+      <label>Authorised Viewing Groups</label>
+      <strong id="drawerViewingGroups">—</strong>
+     </div>
 
      <div class="record-detail">
       <label>Status</label>
       <strong id="drawerStatus">—</strong>
      </div>
     </div>
+   </section>
+
+   <section class="record-section"
+    id="recordPermissionsSection"
+    style="display:none">
+
+    <h3>Viewing Permissions</h3>
+    <p>Manage groups authorised to view this Confidential record.</p>
+
+    <div id="recordPermissionsGroups"></div>
+
+    <div id="recordPermissionsMessage"
+     role="status"></div>
+
+    <button type="button"
+     id="saveRecordPermissions"
+     class="request-record-btn">
+     Save Viewing Permissions
+    </button>
    </section>
 
    <section class="record-section">
