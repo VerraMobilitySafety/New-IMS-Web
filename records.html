@@ -1471,7 +1471,8 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   <h2>Enterprise Records Register</h2>
   <p>Central register of organisational records across Vero.</p>
  </div>
- <button class="primary-action" id="addRecordBtn" type="button">
+ <button class="primary-action" id="addRecordBtn"
+ type="button" style="display:none">
   + Add Record
  </button>
 </section>
@@ -1747,6 +1748,160 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 </main></div>
 
 
+
+
+<!-- MANUAL RECORD REGISTRATION FORM -->
+<div class="record-modal" id="manualRecordModal">
+ <div class="record-drawer">
+
+  <div class="record-drawer-head">
+   <button class="record-drawer-close"
+    id="closeManualRecordForm"
+    type="button">×</button>
+
+   <small>RECORDS MANAGEMENT</small>
+   <h2>Register Enterprise Record</h2>
+   <p>Manual registration of an enterprise record.</p>
+  </div>
+
+  <div class="record-drawer-body">
+   <form id="manualRecordForm">
+
+    <section class="record-section">
+     <h3>Record Details</h3>
+
+     <div class="retention-form-grid">
+      <label>Record Title *
+       <input name="record_title"
+        maxlength="255" required>
+      </label>
+
+      <label>Record Date *
+       <input name="record_date"
+        id="manualRecordDate"
+        type="date" required>
+      </label>
+
+      <label>Record Category *
+       <select name="record_category"
+        id="manualRecordCategory" required>
+        <option value="">Select category</option>
+       </select>
+      </label>
+
+      <label>Record Type *
+       <input name="record_type"
+        id="manualRecordType"
+        maxlength="100"
+        placeholder="Enter record type"
+        required>
+      </label>
+     </div>
+
+     <label class="retention-form-field">
+      Description
+      <textarea name="description"
+       rows="3" maxlength="10000"></textarea>
+     </label>
+    </section>
+
+    <section class="record-section">
+     <h3>Ownership and Security</h3>
+
+     <div class="retention-form-grid">
+      <label>Record Owner *
+       <select name="owner_user_id"
+        id="manualRecordOwner" required>
+        <option value="">Select owner</option>
+       </select>
+      </label>
+
+      <label>Business Area *
+       <input name="owner_business_area"
+        id="manualRecordBusinessArea"
+        maxlength="255" required>
+      </label>
+
+      <label>Security Classification *
+       <select name="security_classification" required>
+        <option value="Internal">Internal</option>
+        <option value="Public">Public</option>
+        <option value="Confidential">Confidential</option>
+        <option value="Restricted">Restricted</option>
+       </select>
+      </label>
+     </div>
+    </section>
+
+    <section class="record-section">
+     <h3>Storage Information</h3>
+
+     <div class="retention-form-grid">
+      <label>Storage Type *
+       <select name="storage_type" required>
+        <option value="External System">
+         External System
+        </option>
+        <option value="External Reference">
+         External Reference
+        </option>
+       </select>
+      </label>
+     </div>
+
+     <label class="retention-form-field">
+      Storage Reference *
+      <textarea name="storage_reference"
+       rows="2" maxlength="2000" required
+       placeholder="System, location, URL or reference identifier"
+      ></textarea>
+     </label>
+    </section>
+
+    <section class="record-section">
+     <h3>Retention Classification</h3>
+
+     <div class="retention-form-grid">
+      <label>Applicable Retention Rule *
+       <select name="retention_rule_id"
+        id="manualRecordRetentionRule" required>
+        <option value="">Select retention rule</option>
+       </select>
+      </label>
+
+      <label id="manualCompletionDateField"
+       style="display:none">
+       Completion Date
+       <input name="completion_date"
+        id="manualCompletionDate"
+        type="date">
+      </label>
+     </div>
+
+     <div id="manualRetentionSummary"
+      class="record-history-summary"
+      style="display:none">
+     </div>
+    </section>
+
+    <div id="manualRecordMessage"
+     class="retention-form-message"
+     role="status"></div>
+
+    <div class="retention-form-actions">
+     <button type="button"
+      id="cancelManualRecord">Cancel</button>
+
+     <button type="submit"
+      id="submitManualRecord">
+      Register Record
+     </button>
+    </div>
+
+   </form>
+  </div>
+ </div>
+</div>
 
 <!-- RETENTION RULE FORM -->
 <div class="record-modal" id="retentionFormModal">
@@ -3489,6 +3644,32 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    window.closeRecordDrawer();
   }
  });
+
+
+ async function loadManualRecordPermissions(){
+  const button = document.getElementById('addRecordBtn');
+  if(!button) return;
+
+  button.style.display = 'none';
+
+  try{
+   const data = await recordsFetch('/records/retention-rules');
+
+   const canRegister =
+    data.permissions?.can_manage === true;
+
+   button.style.display =
+    canRegister ? 'inline-flex' : 'none';
+
+  }catch(error){
+   console.warn(
+    'Unable to verify manual registration permission:',
+    error
+   );
+
+   button.style.display = 'none';
+  }
+ }
 
  async function loadRecords(){
   const body = document.getElementById('recordsTableBody');
@@ -5458,9 +5639,446 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   });
  });
 
+ // MANUAL RECORD REGISTRATION
+ let manualRecordUsers = [];
+ let manualRecordRules = [];
+ let manualRecordLoadId = 0;
+
+
+ function updateManualRecordRetention(){
+  const form = document.getElementById('manualRecordForm');
+  if(!form) return;
+
+  const category =
+   document.getElementById('manualRecordCategory')?.value || '';
+
+  const recordType =
+   document.getElementById('manualRecordType')?.value.trim() || '';
+
+  const businessArea =
+   document.getElementById('manualRecordBusinessArea')?.value.trim() || '';
+
+  const recordDate =
+   document.getElementById('manualRecordDate')?.value || '';
+
+  const select =
+   document.getElementById('manualRecordRetentionRule');
+
+  const summary =
+   document.getElementById('manualRetentionSummary');
+
+  const completionField =
+   document.getElementById('manualCompletionDateField');
+
+  const completionInput =
+   document.getElementById('manualCompletionDate');
+
+  if(!select || !summary) return;
+
+  select.replaceChildren(
+   new Option('Select retention rule','')
+  );
+
+  summary.style.display = 'none';
+  summary.replaceChildren();
+
+  if(completionField){
+   completionField.style.display = 'none';
+  }
+
+  if(completionInput){
+   completionInput.required = false;
+  }
+
+  if(!category || !recordType || !businessArea || !recordDate){
+   return;
+  }
+
+  // Match the backend's category/type priority first.
+  const candidates = manualRecordRules.filter(rule=>
+   rule.record_category === category &&
+   (
+    rule.record_type?.trim() === recordType ||
+    !rule.record_type?.trim()
+   )
+  );
+
+  const exact = candidates.filter(
+   rule => rule.record_type?.trim() === recordType
+  );
+
+  const highestPriority = exact.length
+   ? exact
+   : candidates.filter(rule=>!rule.record_type?.trim());
+
+  // The backend requires a unique highest-priority rule
+  // before checking business area and effective date.
+  const eligible = highestPriority.length === 1 &&
+   (
+    !highestPriority[0].business_area?.trim() ||
+    highestPriority[0].business_area.trim() === businessArea
+   ) &&
+   (
+    !highestPriority[0].effective_date ||
+    recordDate >= highestPriority[0].effective_date.slice(0,10)
+   )
+    ? highestPriority
+    : [];
+
+  if(eligible.length !== 1){
+   summary.style.display = '';
+   summary.textContent = eligible.length
+    ? 'Multiple applicable retention rules exist. Resolve the ambiguity before registering.'
+    : 'No applicable Active retention rule exists for this classification.';
+   return;
+  }
+
+  const rule = eligible[0];
+
+  select.add(new Option(
+   rule.rule_code + ' — ' + rule.rule_name,
+   String(rule.id)
+  ));
+
+  select.value = String(rule.id);
+
+  summary.style.display = '';
+
+  const period = document.createElement('strong');
+  period.textContent =
+   rule.rule_code + ' — ' + rule.rule_name;
+
+  const details = document.createElement('div');
+  details.textContent =
+   'Retention: ' + rule.retention_period_months +
+   ' months • Trigger: ' + rule.retention_trigger;
+
+  summary.append(period,details);
+
+  if(rule.retention_trigger === 'Completion Date'){
+   if(completionField){
+    completionField.style.display = '';
+   }
+  }else if(rule.retention_trigger !== 'Record Date'){
+   select.value = '';
+   summary.textContent =
+    'This retention trigger is not supported for manual registration.';
+  }
+ }
+
+
+ [
+  'manualRecordCategory',
+  'manualRecordType',
+  'manualRecordBusinessArea',
+  'manualRecordDate'
+ ].forEach(id=>{
+  const element = document.getElementById(id);
+
+  element?.addEventListener(
+   'change',
+   updateManualRecordRetention
+  );
+
+  if(id === 'manualRecordType' ||
+     id === 'manualRecordBusinessArea'){
+   element?.addEventListener(
+    'input',
+    updateManualRecordRetention
+   );
+  }
+ });
+
+ function closeManualRecordForm(){
+  // Keep the drawer open while registration is in progress.
+  if(manualRecordSubmitting) return;
+
+  // Ignore outstanding registration-option requests.
+  manualRecordLoadId++;
+
+  document.getElementById('manualRecordModal')
+   ?.classList.remove('open');
+
+  document.body.style.overflow = '';
+ }
+
  document.getElementById('addRecordBtn')
-  ?.addEventListener('click',()=>{
-   alert('Add Record workflow is next.');
+  ?.addEventListener('click',async()=>{
+   if(manualRecordSubmitting) return;
+
+   const loadId = ++manualRecordLoadId;
+
+   const modal =
+    document.getElementById('manualRecordModal');
+
+   const form =
+    document.getElementById('manualRecordForm');
+
+   const message =
+    document.getElementById('manualRecordMessage');
+
+   form?.reset();
+
+   const submitButton =
+    document.getElementById('submitManualRecord');
+
+   if(submitButton){
+    submitButton.disabled = true;
+   }
+
+   const completionField =
+    document.getElementById('manualCompletionDateField');
+
+   const completionInput =
+    document.getElementById('manualCompletionDate');
+
+   if(completionField){
+    completionField.style.display = 'none';
+   }
+
+   if(completionInput){
+    completionInput.value = '';
+    completionInput.required = false;
+   }
+
+   document.getElementById('manualRecordRetentionRule')
+    ?.replaceChildren(new Option('Select retention rule',''));
+
+   const summary =
+    document.getElementById('manualRetentionSummary');
+
+   if(summary){
+    summary.style.display = 'none';
+    summary.replaceChildren();
+   }
+
+   if(message){
+    message.textContent = 'Loading registration options...';
+   }
+
+   modal?.classList.add('open');
+   document.body.style.overflow = 'hidden';
+
+   try{
+    const [usersData,rulesData] = await Promise.all([
+     recordsFetch('/users/active'),
+     recordsFetch('/records/retention-rules')
+    ]);
+
+    if(loadId !== manualRecordLoadId) return;
+
+    manualRecordUsers = usersData.users || [];
+
+    manualRecordRules = (rulesData.rules || [])
+     .filter(rule=>rule.status === 'Active');
+
+    const ownerSelect =
+     document.getElementById('manualRecordOwner');
+
+    ownerSelect.replaceChildren(
+     new Option('Select owner','')
+    );
+
+    manualRecordUsers.forEach(user=>{
+     ownerSelect.add(
+      new Option(user.name || user.email,String(user.id))
+     );
+    });
+
+    const categorySelect =
+     document.getElementById('manualRecordCategory');
+
+    categorySelect.replaceChildren(
+     new Option('Select category','')
+    );
+
+    [...new Set(
+     manualRecordRules
+      .map(rule=>rule.record_category)
+      .filter(Boolean)
+    )].sort().forEach(category=>{
+     categorySelect.add(new Option(category,category));
+    });
+
+    const dateInput =
+     document.getElementById('manualRecordDate');
+
+    const today = new Date();
+    const localDate = [
+     today.getFullYear(),
+     String(today.getMonth()+1).padStart(2,'0'),
+     String(today.getDate()).padStart(2,'0')
+    ].join('-');
+
+    dateInput.value = localDate;
+    dateInput.max = localDate;
+
+    if(message) message.textContent = '';
+
+    if(submitButton){
+     submitButton.disabled = false;
+    }
+
+   }catch(error){
+    // Ignore errors from an earlier or closed form.
+    if(loadId !== manualRecordLoadId) return;
+
+    console.error(error);
+
+    if(submitButton){
+     submitButton.disabled = true;
+    }
+
+    if(message){
+     message.textContent =
+      error.message || 'Unable to load registration options.';
+    }
+   }
+  });
+
+
+ // MANUAL RECORD REGISTRATION — SUBMISSION
+ let manualRecordSubmitting = false;
+
+ document.getElementById('manualRecordForm')
+  ?.addEventListener('submit',async event=>{
+   event.preventDefault();
+
+   if(manualRecordSubmitting) return;
+
+   const form = event.currentTarget;
+   const button =
+    document.getElementById('submitManualRecord');
+   const message =
+    document.getElementById('manualRecordMessage');
+
+   const values = Object.fromEntries(
+    new FormData(form).entries()
+   );
+
+   if(!values.retention_rule_id){
+    message.textContent =
+     'An applicable Active retention rule is required.';
+    return;
+   }
+
+   const payload = {
+    record_title:(values.record_title || '').trim(),
+    record_type:(values.record_type || '').trim(),
+    record_category:values.record_category,
+    description:(values.description || '').trim(),
+    owner_user_id:Number(values.owner_user_id),
+    owner_business_area:
+     (values.owner_business_area || '').trim(),
+    record_date:values.record_date,
+    security_classification:values.security_classification,
+    storage_type:values.storage_type,
+    storage_reference:
+     (values.storage_reference || '').trim(),
+    retention_rule_id:Number(values.retention_rule_id)
+   };
+
+   if(values.completion_date){
+    payload.completion_date = values.completion_date;
+   }
+
+   if(
+    !Number.isSafeInteger(payload.owner_user_id) ||
+    payload.owner_user_id <= 0 ||
+    !Number.isSafeInteger(payload.retention_rule_id) ||
+    payload.retention_rule_id <= 0
+   ){
+    message.textContent =
+     'Select a valid record owner and retention rule.';
+    return;
+   }
+
+   manualRecordSubmitting = true;
+   button.disabled = true;
+   button.textContent = 'Registering...';
+   message.textContent = '';
+
+   let createdRecord = null;
+
+   try{
+    const token =
+     localStorage.getItem('vero_session_token');
+
+    if(!token){
+     throw new Error('Authentication required.');
+    }
+
+    const response = await fetch(
+     RECORDS_API + '/records',
+     {
+      method:'POST',
+      headers:{
+       Authorization:'Bearer ' + token,
+       'Content-Type':'application/json',
+       Accept:'application/json'
+      },
+      body:JSON.stringify(payload)
+     }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+     throw new Error(
+      data.message || 'Unable to register record.'
+     );
+    }
+
+    createdRecord = data.record;
+
+   }catch(error){
+    console.error('Record registration failed:',error);
+    message.textContent =
+     error.message || 'Unable to register record.';
+    return;
+
+   }finally{
+    manualRecordSubmitting = false;
+    button.disabled = false;
+    button.textContent = 'Register Record';
+   }
+
+   // Registration succeeded. Do not resubmit if
+   // the register refresh or drawer opening fails.
+   closeManualRecordForm();
+
+   try{
+    await loadRecords();
+
+    if(createdRecord?.id){
+     await openRecordDrawer(createdRecord.id);
+    }
+
+   }catch(error){
+    console.error(
+     'Record created, but unable to refresh the register:',
+     error
+    );
+
+    alert(
+     'Record ' +
+     (createdRecord?.record_code || '') +
+     ' was registered successfully. Refresh the Records Register to view it.'
+    );
+   }
+  });
+
+ document.getElementById('closeManualRecordForm')
+  ?.addEventListener('click',closeManualRecordForm);
+
+ document.getElementById('cancelManualRecord')
+  ?.addEventListener('click',closeManualRecordForm);
+
+ document.getElementById('manualRecordModal')
+  ?.addEventListener('click',event=>{
+   if(event.target.id === 'manualRecordModal'){
+    closeManualRecordForm();
+   }
   });
 
  document.getElementById('recordsTableBody')
@@ -5646,6 +6264,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  }
 
  loadRecords();
+ loadManualRecordPermissions();
 })();
 </script>
 
