@@ -196,6 +196,41 @@
 <div class="admin-only-note">Administrator area • Invitations expire after 72 hours and can only be used once. Disable established users to preserve VERO history.</div>
 <section class="panel"><div class="panel-head"><div><h2>User Register</h2><span id="userCount">Loading users…</span></div><span>VERO access</span></div>
 <div style="overflow:auto"><table class="table user-table"><thead><tr><th>User</th><th>Email</th><th>Job Title</th><th>Business Unit</th><th>Country</th><th>System Access</th><th>Business Roles</th><th>Status</th><th>Last Sign-in</th><th>Actions</th></tr></thead><tbody id="userBody"><tr><td colspan="10" class="empty">Loading VERO users…</td></tr></tbody></table></div></section>
+
+<section class="section" id="confidentialityAdmin"
+ style="margin-top:24px">
+ <div class="admin-toolbar">
+  <div class="admin-title">
+   <h2>Record Confidentiality Groups</h2>
+   <p>Manage which users can view Confidential enterprise records.</p>
+  </div>
+ </div>
+
+ <div style="padding:20px">
+  <label for="confidentialityGroupSelect">
+   Confidentiality Group
+  </label>
+  <select id="confidentialityGroupSelect"
+   style="display:block;width:100%;max-width:420px;
+   padding:12px;margin:10px 0 20px">
+   <option value="">Select group</option>
+  </select>
+
+  <div id="confidentialityMemberOptions"
+   class="role-options">
+   Select a group to manage its members.
+  </div>
+
+  <div id="confidentialityAdminMessage"
+   role="status" style="margin:15px 0"></div>
+
+  <button type="button" class="btn green"
+   id="saveConfidentialityMembers">
+   Save Group Membership
+  </button>
+ </div>
+</section>
+
 <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Users • v1.5</span></footer></div>
 <div class="access-denied" id="accessDenied"><h2>Administrator access required</h2><p>This area is restricted to VERO Administrators.</p><button class="btn dark" onclick="location.href='index.html'">Return Home</button></div>
 </main></div>
@@ -263,6 +298,144 @@ function renderRoleOptions(selectedIds=[]){
 function selectedRoleIds(){return [...document.querySelectorAll('#businessRoleOptions input:checked')].map(x=>Number(x.value))}
 function statusOf(u){return u.account_status|| (u.active===false?'Disabled':'Active')}
 function statusClass(s){return String(s||'').toLowerCase()}
+
+// RECORD CONFIDENTIALITY GROUP ADMINISTRATION
+let confidentialityGroups = [];
+
+async function loadConfidentialityGroups(){
+ const response = await apiFetch(
+  '/records/confidentiality-groups'
+ );
+ const data = await response.json();
+
+ if(!response.ok){
+  throw new Error(data.message || 'Unable to load groups.');
+ }
+
+ confidentialityGroups = data.groups || [];
+
+ const select =
+  document.getElementById('confidentialityGroupSelect');
+
+ select.replaceChildren(new Option('Select group',''));
+
+ confidentialityGroups.forEach(group=>{
+  select.add(new Option(group.name,String(group.id)));
+ });
+}
+
+async function loadConfidentialityMembers(){
+ const groupId =
+  document.getElementById('confidentialityGroupSelect').value;
+
+ const container =
+  document.getElementById('confidentialityMemberOptions');
+
+ const message =
+  document.getElementById('confidentialityAdminMessage');
+
+ container.replaceChildren();
+ message.textContent = '';
+
+ if(!groupId) return;
+
+ const response = await apiFetch(
+  '/records/confidentiality-groups/' +
+  encodeURIComponent(groupId) + '/members'
+ );
+
+ const data = await response.json();
+
+ if(!response.ok){
+  throw new Error(data.message || 'Unable to load members.');
+ }
+
+ const selected = new Set(
+  (data.members || []).map(member=>Number(member.id))
+ );
+
+ loadedUsers
+  .filter(user=>user.active && user.account_status==='Active')
+  .forEach(user=>{
+   const label = document.createElement('label');
+   label.className = 'role-option';
+
+   const checkbox = document.createElement('input');
+   checkbox.type = 'checkbox';
+   checkbox.value = String(user.id);
+   checkbox.checked = selected.has(Number(user.id));
+
+   const span = document.createElement('span');
+   const strong = document.createElement('b');
+   strong.textContent =
+    [user.first_name,user.last_name].filter(Boolean).join(' ');
+
+   const small = document.createElement('small');
+   small.textContent = user.email || '';
+
+   span.append(strong,small);
+   label.append(checkbox,span);
+   container.appendChild(label);
+  });
+}
+
+async function saveConfidentialityMembers(){
+ const groupId =
+  document.getElementById('confidentialityGroupSelect').value;
+
+ const message =
+  document.getElementById('confidentialityAdminMessage');
+
+ const button =
+  document.getElementById('saveConfidentialityMembers');
+
+ if(!groupId){
+  message.textContent = 'Select a confidentiality group.';
+  return;
+ }
+
+ const userIds = [
+  ...document.querySelectorAll(
+   '#confidentialityMemberOptions input:checked'
+  )
+ ].map(input=>Number(input.value));
+
+ button.disabled = true;
+ message.textContent = 'Saving membership...';
+
+ try{
+  const response = await apiFetch(
+   '/records/confidentiality-groups/' +
+   encodeURIComponent(groupId) + '/members',
+   {
+    method:'PUT',
+    body:JSON.stringify({user_ids:userIds})
+   }
+  );
+
+  const data = await response.json();
+
+  if(!response.ok){
+   throw new Error(data.message || 'Unable to save membership.');
+  }
+
+  message.textContent = 'Group membership saved successfully.';
+
+ }catch(error){
+  message.textContent = error.message;
+ }finally{
+  button.disabled = false;
+ }
+}
+
+document.getElementById('confidentialityGroupSelect')
+ ?.addEventListener('change',()=>{
+  loadConfidentialityMembers().catch(console.error);
+ });
+
+document.getElementById('saveConfidentialityMembers')
+ ?.addEventListener('click',saveConfidentialityMembers);
+
 async function loadUsers(){
  const r=await apiFetch('/users',{cache:'no-store'});const d=await r.json().catch(()=>({}));
  if(r.status===403){document.getElementById('adminContent').style.display='none';document.getElementById('accessDenied').style.display='block';return}
@@ -495,7 +668,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAddUser()});
 document.addEventListener('DOMContentLoaded',async()=>{
  document.getElementById('userSearch')?.addEventListener('input',renderUsers);
  document.getElementById('statusFilter')?.addEventListener('change',renderUsers);
- try{if(await requireAdmin()){await loadRoles();await loadUsers()}}
+ try{if(await requireAdmin()){await loadRoles();await loadUsers();await loadConfidentialityGroups()}}
  catch(e){console.error(e);document.getElementById('userBody').innerHTML='<tr><td colspan="10" class="empty">Unable to load User Management. Check the browser console.</td></tr>'}
 });
 </script>
