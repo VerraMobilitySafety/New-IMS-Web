@@ -3763,6 +3763,14 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    document.getElementById('requestRecordBtn').dataset.recordId =
     r.id;
 
+   // Load authorised viewing groups for this record.
+   loadRecordViewingGroups(
+    r.id,
+    r.security_classification
+   ).catch(error=>{
+    console.error('Unable to load viewing permissions',error);
+   });
+
    closeControlledPreview();
 
    const viewButton =
@@ -6825,6 +6833,142 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
    }catch(error){
     message.textContent = error.message;
+    button.disabled = false;
+   }
+  });
+
+
+ // RECORD VIEWING GROUP MANAGEMENT
+ let editingRecordPermissionsId = null;
+
+ async function loadRecordViewingGroups(recordId, classification){
+  const section =
+   document.getElementById('recordPermissionsSection');
+
+  const container =
+   document.getElementById('recordPermissionsGroups');
+
+  const summary =
+   document.getElementById('drawerViewingGroups');
+
+  section.style.display = 'none';
+  container.replaceChildren();
+  summary.textContent = '—';
+  editingRecordPermissionsId = null;
+
+  if(classification !== 'Confidential') return;
+
+  const groupsResponse = await recordsFetch(
+   '/records/confidentiality-groups'
+  );
+
+  const groupsData = groupsResponse.groups || [];
+
+  let permissionsResponse;
+
+  try{
+   permissionsResponse = await recordsFetch(
+    '/records/' + encodeURIComponent(recordId) +
+    '/viewing-groups'
+   );
+  }catch(error){
+   if(error.status === 403 ||
+      /permission|forbidden|access/i.test(error.message)){
+    summary.textContent = 'Restricted';
+    return;
+   }
+   throw error;
+  }
+
+  const selected = new Set(
+   (permissionsResponse.groups || []).map(g=>Number(g.id))
+  );
+
+  summary.textContent =
+   (permissionsResponse.groups || [])
+    .map(g=>g.name).join(', ') || 'No groups assigned';
+
+  groupsData.forEach(group=>{
+   const label = document.createElement('label');
+   label.style.display = 'flex';
+   label.style.gap = '10px';
+   label.style.margin = '10px 0';
+
+   const checkbox = document.createElement('input');
+   checkbox.type = 'checkbox';
+   checkbox.value = String(group.id);
+   checkbox.checked = selected.has(Number(group.id));
+
+   const span = document.createElement('span');
+   span.textContent = group.name;
+
+   label.append(checkbox,span);
+   container.appendChild(label);
+  });
+
+  editingRecordPermissionsId = recordId;
+  section.style.display = '';
+ }
+
+ document.getElementById('saveRecordPermissions')
+  ?.addEventListener('click',async()=>{
+   if(!editingRecordPermissionsId) return;
+
+   const button =
+    document.getElementById('saveRecordPermissions');
+
+   const message =
+    document.getElementById('recordPermissionsMessage');
+
+   const groupIds = [
+    ...document.querySelectorAll(
+     '#recordPermissionsGroups input:checked'
+    )
+   ].map(input=>Number(input.value));
+
+   if(!groupIds.length){
+    message.textContent =
+     'Select at least one authorised group.';
+    return;
+   }
+
+   button.disabled = true;
+   message.textContent = 'Saving...';
+
+   try{
+    const token =
+     localStorage.getItem('vero_session_token');
+
+    const response = await fetch(
+     RECORDS_API + '/records/' +
+     encodeURIComponent(editingRecordPermissionsId) +
+     '/viewing-groups',
+     {
+      method:'PUT',
+      headers:{
+       Authorization:'Bearer ' + token,
+       'Content-Type':'application/json'
+      },
+      body:JSON.stringify({group_ids:groupIds})
+     }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+     throw new Error(data.message || 'Unable to save permissions.');
+    }
+
+    document.getElementById('drawerViewingGroups')
+     .textContent = (data.groups || [])
+      .map(g=>g.name).join(', ');
+
+    message.textContent =
+     'Viewing permissions saved successfully.';
+
+   }catch(error){
+    message.textContent = error.message;
+   }finally{
     button.disabled = false;
    }
   });
