@@ -5907,7 +5907,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     const requirementSelect =
      document.getElementById('manualRelatedRequirement');
 
-    requirementSelect.replaceChildren(
+    requirementSelect?.replaceChildren(
      new Option('Select requirement','')
     );
 
@@ -5920,7 +5920,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     });
 
     uniqueRequirements.forEach(requirement=>{
-     requirementSelect.add(new Option(
+     requirementSelect?.add(new Option(
       requirement.obligation_code + ' — ' +
       requirement.obligation_title,
       String(requirement.id)
@@ -5930,7 +5930,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     const groupsContainer =
      document.getElementById('manualConfidentialityGroups');
 
-    groupsContainer.replaceChildren();
+    groupsContainer?.replaceChildren();
 
     (groupsData.groups || []).forEach(group=>{
      const label = document.createElement('label');
@@ -5948,7 +5948,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
      text.textContent = group.name;
 
      label.append(checkbox,text);
-     groupsContainer.appendChild(label);
+     groupsContainer?.appendChild(label);
     });
 
     updateManualConfidentiality();
@@ -5961,12 +5961,12 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     const ownerSelect =
      document.getElementById('manualRecordOwner');
 
-    ownerSelect.replaceChildren(
+    ownerSelect?.replaceChildren(
      new Option('Select owner','')
     );
 
     manualRecordUsers.forEach(user=>{
-     ownerSelect.add(
+     ownerSelect?.add(
       new Option(user.name || user.email,String(user.id))
      );
     });
@@ -5974,7 +5974,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     const categorySelect =
      document.getElementById('manualRecordCategory');
 
-    categorySelect.replaceChildren(
+    categorySelect?.replaceChildren(
      new Option('Select category','')
     );
 
@@ -5983,7 +5983,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
       .map(rule=>rule.record_category)
       .filter(Boolean)
     )].sort().forEach(category=>{
-     categorySelect.add(new Option(category,category));
+     categorySelect?.add(new Option(category,category));
     });
 
     const dateInput =
