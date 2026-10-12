@@ -2601,6 +2601,28 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    </p>
   </div>
 
+  <div id="restrictedRecordView"
+   style="display:none;padding:24px">
+
+   <h3>🔒 Confidential Record</h3>
+   <p>You are not authorised to view this record.</p>
+   <p>You may request a controlled copy for a legitimate business purpose.</p>
+
+   <label for="restrictedRequestReason">Business reason</label>
+   <textarea id="restrictedRequestReason"
+    rows="4"
+    style="width:100%;margin:12px 0"
+    placeholder="Explain why you require this record..."></textarea>
+
+   <div id="restrictedRequestMessage" role="status"></div>
+
+   <button type="button"
+    class="request-record-btn"
+    id="restrictedRequestSubmit">
+    Submit Request
+   </button>
+  </div>
+
   <div class="record-drawer-body">
 
    <section class="record-section">
@@ -2793,7 +2815,8 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     </div>
    </section>
 
-   <!-- RECORD HISTORY -->
+
+<!-- RECORD HISTORY -->
    <section class="record-section"
             id="recordHistorySection"
             style="display:none">
@@ -3154,7 +3177,9 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
      </td>
 
      <td class="records-title">
-      ${esc(r.record_title)}
+      ${r.restricted
+       ? '🔒 Confidential Record'
+       : esc(r.record_title)}
      </td>
 
      <td>
@@ -3549,6 +3574,47 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   try{
    const data = await recordsFetch('/records/' + recordId);
    const r = data.record;
+
+   const restrictedView =
+    document.getElementById('restrictedRecordView');
+
+   const drawerBody =
+    document.querySelector('#recordModal .record-drawer-body');
+
+   const restrictedReason =
+    document.getElementById('restrictedRequestReason');
+   const restrictedMessage =
+    document.getElementById('restrictedRequestMessage');
+   const restrictedSubmit =
+    document.getElementById('restrictedRequestSubmit');
+
+   if(restrictedReason) restrictedReason.value = '';
+   if(restrictedMessage) restrictedMessage.textContent = '';
+   if(restrictedSubmit) restrictedSubmit.disabled = false;
+
+   if(data.restricted === true){
+
+    document.getElementById('drawerRecordCode').textContent =
+     r.record_code || 'ENTERPRISE RECORD';
+
+    document.getElementById('drawerRecordTitle').textContent =
+     'Confidential Record';
+
+    document.getElementById('drawerRecordSubtitle').textContent =
+     'Access restricted';
+
+    document.getElementById('requestRecordBtn').dataset.recordId =
+     String(r.id);
+
+    if(drawerBody) drawerBody.style.display = 'none';
+    if(restrictedView) restrictedView.style.display = 'block';
+
+    return;
+   }
+
+   if(drawerBody) drawerBody.style.display = '';
+   if(restrictedView) restrictedView.style.display = 'none';
+
    const retention = r.retention || {};
    const owner = r.owner || {};
 
@@ -6704,6 +6770,64 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    openRecordDrawer(recordId);
   }
  }
+
+
+ // RESTRICTED RECORD — CONTROLLED COPY REQUEST
+ document.getElementById('restrictedRequestSubmit')
+  ?.addEventListener('click',async()=>{
+   const button =
+    document.getElementById('restrictedRequestSubmit');
+
+   const reason =
+    document.getElementById('restrictedRequestReason')
+     ?.value.trim();
+
+   const message =
+    document.getElementById('restrictedRequestMessage');
+
+   const recordId =
+    document.getElementById('requestRecordBtn')
+     ?.dataset.recordId;
+
+   if(!reason){
+    message.textContent = 'A business reason is required.';
+    return;
+   }
+
+   button.disabled = true;
+   message.textContent = 'Submitting request...';
+
+   try{
+    const token = localStorage.getItem('vero_session_token');
+
+    const response = await fetch(
+     RECORDS_API + '/records/' +
+     encodeURIComponent(recordId) + '/requests',
+     {
+      method:'POST',
+      headers:{
+       Authorization:'Bearer ' + token,
+       'Content-Type':'application/json',
+       Accept:'application/json'
+      },
+      body:JSON.stringify({business_reason:reason})
+     }
+    );
+
+    const data = await response.json();
+
+    if(!response.ok){
+     throw new Error(data.message || 'Request failed.');
+    }
+
+    message.textContent = 'Request submitted successfully.';
+    button.disabled = true;
+
+   }catch(error){
+    message.textContent = error.message;
+    button.disabled = false;
+   }
+  });
 
  // Open a specific disposition from My Actions.
  const dispositionDeepLink =
