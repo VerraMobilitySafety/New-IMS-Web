@@ -870,6 +870,96 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 }
 
 
+
+/* ============================================================
+   RECORD HISTORY TIMELINE
+   ============================================================ */
+
+.record-history-list{
+ position:relative;
+ margin-top:20px;
+ padding-left:24px;
+ border-left:2px solid #dfe6e2;
+}
+
+.record-history-item{
+ position:relative;
+ padding:0 0 25px 20px;
+}
+
+.record-history-item::before{
+ content:'';
+ position:absolute;
+ left:-31px;
+ top:5px;
+ width:11px;
+ height:11px;
+ background:#2C8259;
+ border:3px solid #fff;
+ border-radius:50%;
+ box-shadow:0 0 0 1px #dfe6e2;
+}
+
+.record-history-title{
+ font-weight:700;
+ font-size:14px;
+ color:var(--charcoal);
+}
+
+.record-history-meta{
+ font-size:12px;
+ color:#68736d;
+ margin-top:5px;
+}
+
+.record-history-description{
+ font-size:13px;
+ line-height:1.6;
+ margin-top:9px;
+}
+
+.record-history-changes{
+ margin-top:12px;
+ border:1px solid #e1e7e3;
+ border-radius:8px;
+ overflow:hidden;
+}
+
+.record-history-changes summary{
+ cursor:pointer;
+ padding:10px 12px;
+ font-size:12px;
+ font-weight:600;
+ background:#f4f6f5;
+}
+
+.record-history-change-grid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:12px;
+ padding:12px;
+}
+
+.record-history-change-grid strong{
+ display:block;
+ font-size:12px;
+ margin-bottom:6px;
+}
+
+.record-history-change-grid pre{
+ white-space:pre-wrap;
+ overflow-wrap:anywhere;
+ font-size:11px;
+ line-height:1.5;
+ margin:0;
+}
+
+@media(max-width:600px){
+ .record-history-change-grid{
+  grid-template-columns:1fr;
+ }
+}
+
 /* RECORD DETAIL DRAWER */
 .record-modal{
  position:fixed;
@@ -2342,6 +2432,26 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     </div>
    </section>
 
+   <!-- RECORD HISTORY -->
+   <section class="record-section"
+            id="recordHistorySection"
+            style="display:none">
+
+    <h3>Record History</h3>
+
+    <p>
+     Chronological audit trail of changes,
+     approvals and lifecycle events.
+    </p>
+
+    <div id="recordHistoryTimeline">
+     <p class="records-empty">
+      Loading record history...
+     </p>
+    </div>
+
+   </section>
+
   </div>
  </div>
 </div>
@@ -2612,6 +2722,134 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  }
 
 
+
+ // ============================================================
+ // RECORD HISTORY — READ-ONLY AUDIT TIMELINE
+ // ============================================================
+
+ let recordHistoryRequest = 0;
+
+ function renderRecordHistory(history){
+  const timeline =
+   document.getElementById('recordHistoryTimeline');
+
+  if(!timeline) return;
+
+  if(!history.length){
+   timeline.textContent = 'No history events recorded.';
+   return;
+  }
+
+  const list = document.createElement('div');
+  list.className = 'record-history-list';
+
+  history.forEach(event=>{
+   const item = document.createElement('div');
+   item.className = 'record-history-item';
+
+   const title = document.createElement('div');
+   title.className = 'record-history-title';
+   title.textContent = event.event_type || 'Record Event';
+
+   const meta = document.createElement('div');
+   meta.className = 'record-history-meta';
+
+   const eventDate = event.performed_at
+    ? new Date(event.performed_at).toLocaleString('en-AU')
+    : 'Unknown date';
+
+   meta.textContent =
+    (event.performed_by_name || 'System') +
+    ' • ' + eventDate;
+
+   const description = document.createElement('div');
+   description.className = 'record-history-description';
+   description.textContent =
+    event.event_description || 'No description provided.';
+
+   item.append(title,meta,description);
+
+   if(event.previous_value != null ||
+      event.new_value != null){
+
+    const details = document.createElement('details');
+    details.className = 'record-history-changes';
+
+    const summary = document.createElement('summary');
+    summary.textContent = 'View change details';
+
+    const grid = document.createElement('div');
+    grid.className = 'record-history-change-grid';
+
+    [
+     ['Previous Value',event.previous_value],
+     ['New Value',event.new_value]
+    ].forEach(([label,value])=>{
+     const column = document.createElement('div');
+
+     const heading = document.createElement('strong');
+     heading.textContent = label;
+
+     const pre = document.createElement('pre');
+     pre.textContent = value == null
+      ? '—'
+      : JSON.stringify(value,null,2);
+
+     column.append(heading,pre);
+     grid.appendChild(column);
+    });
+
+    details.append(summary,grid);
+    item.appendChild(details);
+   }
+
+   list.appendChild(item);
+  });
+
+  timeline.replaceChildren(list);
+ }
+
+ async function loadRecordHistory(recordId){
+  const requestId = ++recordHistoryRequest;
+
+  const section =
+   document.getElementById('recordHistorySection');
+
+  const timeline =
+   document.getElementById('recordHistoryTimeline');
+
+  if(!section || !timeline) return;
+
+  section.style.display = 'none';
+  timeline.textContent = 'Loading record history...';
+
+  try{
+   const data = await recordsFetch(
+    '/records/' + encodeURIComponent(recordId) + '/history'
+   );
+
+   if(requestId !== recordHistoryRequest) return;
+
+   section.style.display = '';
+   renderRecordHistory(data.history || []);
+
+  }catch(error){
+   if(requestId !== recordHistoryRequest) return;
+
+   if(error.status === 403 ||
+      String(error.message).includes('403') ||
+      String(error.message).includes('permission')){
+    section.style.display = 'none';
+    timeline.textContent = '';
+    return;
+   }
+
+   console.error('Unable to load record history:',error);
+   section.style.display = '';
+   timeline.textContent = 'Unable to load record history.';
+  }
+ }
+
  async function openRecordDrawer(recordId){
   const modal = document.getElementById('recordModal');
   if(!modal) return;
@@ -2628,6 +2866,9 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  // Load the authorised audit history for this record.
+  loadRecordHistory(recordId);
 
   const requestBtn =
    document.getElementById('requestRecordBtn');
@@ -2866,6 +3107,23 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  }
 
  window.closeRecordDrawer = function(){
+  // Invalidate outstanding Record History requests.
+  recordHistoryRequest++;
+
+  const historySection =
+   document.getElementById('recordHistorySection');
+
+  const historyTimeline =
+   document.getElementById('recordHistoryTimeline');
+
+  if(historySection){
+   historySection.style.display = 'none';
+  }
+
+  if(historyTimeline){
+   historyTimeline.replaceChildren();
+  }
+
   const modal = document.getElementById('recordModal');
 
   if(modal){
