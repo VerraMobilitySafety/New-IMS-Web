@@ -855,7 +855,29 @@
      </div>
     </div>
 
-    <div class="action-decision-actions" id="actionDecisionActions">
+    <div id="recordReviewerAssignment"
+ style="display:none;margin:18px 0;padding:18px;
+ background:#f7f6f5;border-radius:10px">
+
+ <h3>Assign Independent Reviewer</h3>
+ <p>Select an active Document Controller who did not submit this request.</p>
+
+ <select id="recordReviewerSelect"
+  style="width:100%;padding:12px;margin:12px 0">
+  <option value="">Select reviewer</option>
+ </select>
+
+ <button type="button"
+  class="action-btn-approve"
+  id="assignRecordReviewerBtn">
+  Assign Reviewer
+ </button>
+
+ <div id="recordAssignmentMessage"
+  class="action-decision-message"></div>
+</div>
+
+<div class="action-decision-actions" id="actionDecisionActions">
     <button class="action-btn-approve" type="button" onclick="submitActionDecision('approve')">Approve</button>
     <button class="action-btn-more" type="button" onclick="prepareActionDecision('more_information')">Request More Information</button>
     <button class="action-btn-reject" type="button" onclick="prepareActionDecision('reject')">Reject</button>
@@ -1045,9 +1067,116 @@ function resetDecisionUI(){
  if(message){message.textContent='';message.className='action-decision-message';}
  document.querySelectorAll('#actionDecisionActions > button').forEach(b=>{if(b.id!=='actionDecisionConfirm'){b.style.display='';b.disabled=false;}});
 }
+
+// CONTROLLED DISTRIBUTION — INDEPENDENT REVIEWER ASSIGNMENT
+
+async function loadRecordReviewerOptions(action){
+ const select=document.getElementById('recordReviewerSelect');
+ const message=document.getElementById('recordAssignmentMessage');
+
+ select.replaceChildren(new Option('Select reviewer',''));
+ message.textContent='Loading authorised reviewers...';
+
+ try{
+  const token=localStorage.getItem('vero_session_token');
+
+  const response=await fetch(API+'/users',{
+   headers:{Authorization:'Bearer '+token}
+  });
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(data.message||'Unable to load users.');
+  }
+
+  const users=Array.isArray(data)?data:(data.users||[]);
+
+  // The server validates Document Controller membership.
+  // This list excludes the requester; the API remains authoritative.
+  users.filter(u=>
+   u.active===true &&
+   u.account_status==='Active' &&
+   Number(u.id)!==Number(action.requested_by_user_id)
+  ).forEach(u=>{
+   const name=[u.first_name,u.last_name].filter(Boolean).join(' ');
+   select.add(new Option(name+' — '+u.email,String(u.id)));
+  });
+
+  message.textContent='Only active Document Controllers can be assigned.';
+
+ }catch(error){
+  message.textContent=error.message;
+ }
+}
+
+document.getElementById('assignRecordReviewerBtn')
+ ?.addEventListener('click',async()=>{
+  const action=currentAction;
+  if(!action||action.action_type!=='Record Request Assignment')return;
+
+  const select=document.getElementById('recordReviewerSelect');
+  const message=document.getElementById('recordAssignmentMessage');
+  const button=document.getElementById('assignRecordReviewerBtn');
+  const reviewerId=Number(select.value);
+
+  if(!Number.isSafeInteger(reviewerId)||reviewerId<=0){
+   message.textContent='Select an independent reviewer.';
+   return;
+  }
+
+  button.disabled=true;
+  message.textContent='Assigning reviewer...';
+
+  try{
+   const response=await fetch(
+    API+'/record-requests/'+encodeURIComponent(action.source_id)+'/assign',
+    {
+     method:'POST',
+     headers:{
+      Authorization:'Bearer '+localStorage.getItem('vero_session_token'),
+      'Content-Type':'application/json'
+     },
+     body:JSON.stringify({reviewer_user_id:reviewerId})
+    }
+   );
+
+   const data=await response.json();
+
+   if(!response.ok){
+    throw new Error(data.message||'Unable to assign reviewer.');
+   }
+
+   message.textContent='Reviewer assigned successfully.';
+   closeActionDetail();
+   loadActions();
+
+  }catch(error){
+   message.textContent=error.message;
+  }finally{
+   button.disabled=false;
+  }
+ });
+
 function openActionDetail(index){
  const action=allActions[index]; if(!action)return;
  currentAction=action; resetDecisionUI();
+
+ const isRecordAssignment=
+  action.source==='Records' &&
+  action.action_type==='Record Request Assignment';
+
+ const assignmentPanel=
+  document.getElementById('recordReviewerAssignment');
+
+ if(assignmentPanel){
+  assignmentPanel.style.display=isRecordAssignment?'block':'none';
+ }
+
+ if(isRecordAssignment){
+  loadRecordReviewerOptions(action);
+ }
+
 
  const isDocumentRequest=
   action.source==='Documents' &&
@@ -1507,6 +1636,12 @@ function openActionDetail(index){
  }
 
  const decisionActions=document.getElementById('actionDecisionActions');
+ if(isRecordAssignment){
+  decisionActions.style.display='none';
+ }else{
+  decisionActions.style.display='';
+ }
+
 
  const isPublicationStage=
   isDocumentRequest &&
