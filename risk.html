@@ -2440,11 +2440,11 @@ table {
            required
            placeholder="Enter category name">
 
-    <label for="veroHierarchyStatusLabel">Status</label>
-    <div id="veroHierarchyStatusLabel"
-         class="vero-risk-help">
-     New categories are created as Active.
-    </div>
+    <label for="veroHierarchyStatus">Status</label>
+    <select id="veroHierarchyStatus">
+     <option value="Active">Active</option>
+     <option value="Archived">Archived</option>
+    </select>
 
     <div class="vero-hierarchy-form-actions">
      <button type="button"
@@ -2474,6 +2474,7 @@ table {
  const tier=document.getElementById('veroHierarchyTier');
  const parent=document.getElementById('veroHierarchyParent');
  const name=document.getElementById('veroHierarchyName');
+ const statusField=document.getElementById('veroHierarchyStatus');
  const save=document.getElementById('veroHierarchySave');
  const reset=document.getElementById('veroHierarchyReset');
  const heading=document.getElementById('veroHierarchyFormHeading');
@@ -2574,6 +2575,8 @@ table {
  function resetForm(){
   editingId=null;
   editingStatus='Active';
+  statusField.value='Active';
+  statusField.disabled=true;
   tier.disabled=false;
   tier.value='4';
   name.value='';
@@ -2585,6 +2588,8 @@ table {
  function editCategory(category){
   editingId=category.id;
   editingStatus=category.status;
+  statusField.value=category.status;
+  statusField.disabled=false;
   tier.value=String(category.tier);
   tier.disabled=true;
   updateParents();
@@ -2720,7 +2725,11 @@ table {
    parent_category_ids:parentIds
   };
 
-  if(!editingId) payload.tier=selectedTier;
+  if(!editingId){
+   payload.tier=selectedTier;
+  }else{
+   payload.status=statusField.value;
+  }
 
   const endpoint=editingId
    ?API+'/risk-tiers/'+editingId
