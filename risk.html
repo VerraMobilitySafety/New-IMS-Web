@@ -985,9 +985,107 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  flex:1;
 }
 </style>
+
+<style id="vero-risk-filter-layout-v2">
+
+/* Search and action buttons */
+.vero-risk-actions{
+ display:flex !important;
+ align-items:flex-end !important;
+ gap:12px !important;
+ flex-wrap:wrap;
+ margin-bottom:20px;
+}
+
+.vero-risk-actions .vero-risk-search{
+ flex:1 1 320px !important;
+ min-width:240px !important;
+ max-width:none !important;
+ margin:0 !important;
+}
+
+.vero-risk-actions .vero-risk-search input{
+ width:100% !important;
+ height:42px !important;
+ box-sizing:border-box !important;
+}
+
+.vero-risk-actions button{
+ height:42px !important;
+ white-space:nowrap;
+}
+
+/* Seven dropdown filters */
+.vero-risk-toolbar{
+ display:grid !important;
+ grid-template-columns:repeat(7,minmax(0,1fr)) !important;
+ gap:12px !important;
+ align-items:end !important;
+ width:100%;
+ margin-bottom:20px;
+}
+
+.vero-risk-toolbar .vero-risk-filter{
+ min-width:0 !important;
+ max-width:none !important;
+ width:100% !important;
+ flex:none !important;
+ margin:0 !important;
+}
+
+.vero-risk-toolbar select{
+ width:100% !important;
+ min-width:0 !important;
+ max-width:100% !important;
+ height:42px !important;
+ box-sizing:border-box !important;
+ padding:0 10px !important;
+ font-size:12px !important;
+ border-radius:8px !important;
+}
+
+.vero-risk-toolbar label,
+.vero-risk-actions label{
+ display:block;
+ min-height:16px;
+ margin-bottom:6px;
+ white-space:nowrap;
+}
+
+@media(max-width:1250px){
+ .vero-risk-toolbar{
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+ }
+}
+
+@media(max-width:700px){
+ .vero-risk-toolbar{
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+ }
+}
+
+@media(max-width:450px){
+ .vero-risk-toolbar{
+  grid-template-columns:1fr !important;
+ }
+ .vero-risk-actions .vero-risk-search{
+  flex-basis:100% !important;
+ }
+}
+
+</style>
 <div class="dashboard-content">
 
 <div class="vero-risk-actions">
+<div class="vero-risk-filter vero-risk-search">
+  <label for="veroRiskSearch">Search Risks</label>
+  <input
+   id="veroRiskSearch"
+   type="search"
+   placeholder="Search code, title, category or description..."
+   autocomplete="off"
+  >
+ </div>
  <button
   id="veroAddRiskButton"
   class="vero-risk-add-button"
@@ -1427,15 +1525,7 @@ table {
 </select>
 <div class="vero-risk-toolbar">
 
- <div class="vero-risk-filter vero-risk-search">
-  <label for="veroRiskSearch">Search Risks</label>
-  <input
-   id="veroRiskSearch"
-   type="search"
-   placeholder="Search code, title, category or description..."
-   autocomplete="off"
-  >
- </div>
+ 
 
 
 
@@ -1482,12 +1572,7 @@ table {
  </select>
 </div>
 
-</div>
-
-
-<div class="vero-risk-applicability">
-
- <div class="vero-risk-filter">
+<div class="vero-risk-filter">
   <label for="veroTier1Filter">Tier 1 — Applies To</label>
   <select id="veroTier1Filter">
    <option value="">All application types</option>
@@ -1503,8 +1588,9 @@ table {
    <option value="">Select an application type first</option>
   </select>
  </div>
-
 </div>
+
+
 <div class="vero-risk-top-grid">
 <section class="vero-risk-panel">
 
