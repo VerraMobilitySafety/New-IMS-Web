@@ -619,385 +619,231 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  <img class="chev c3" src="verra-chevron.png" alt="">
  <nav class="nav"><div id="vero-nav"></div></nav>
  <div class="side-foot">VERRA | VERO • v2.9<br>Prototype environment</div>
-</aside><main class="main"><section class="global-hero"><div class="hero-content"><div class="hero-kicker">Governance</div><h1>Enterprise Risk Management</h1><p>Enterprise risk profile, controls and treatment performance</p><div class="hero-rule"></div></div><div class="hero-tools"><input class="hero-search" placeholder="⌕   Search VERO..."><div class="vero-account" id="veroAccount"><button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false"><div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span></button><div class="vero-account-menu" id="veroAccountMenu"><div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div><a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a><button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button></div></div></div></section><div class="dashboard-content"><!-- KPI CARDS -->
-
-    <div class="kpis">
-
-        <div class="card significant">
-
-            <div class="card-title">
-                Significant Risks
-            </div>
-
-            <div class="card-number">
-                6
-            </div>
-
-            <div class="card-footer">
-                <span class="bad">↑ 1</span> this month
-            </div>
-
-        </div>
-
-
-        <div class="card high">
-
-            <div class="card-title">
-                High Risks
-            </div>
-
-            <div class="card-number">
-                11
-            </div>
-
-            <div class="card-footer">
-                <span class="good">↓ 3</span> this month
-            </div>
-
-        </div>
-
-
-        <div class="card moderate">
-
-            <div class="card-title">
-                Moderate Risks
-            </div>
-
-            <div class="card-number">
-                19
-            </div>
-
-            <div class="card-footer">
-                → No movement
-            </div>
-
-        </div>
-
-
-        <div class="card control">
-
-            <div class="card-title">
-                Control Effectiveness
-            </div>
-
-            <div class="card-number">
-                82%
-            </div>
-
-            <div class="card-footer">
-                <span class="good">↑ 4%</span> this quarter
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- MAIN PANELS -->
-
-    <div class="grid">
-
-        <div class="panel">
-
-            <div class="panel-header">
-
-                <h2>
-                    Enterprise Risk Landscape
-                </h2>
-
-                <div class="view-link">
-                    Explore landscape →
-                </div>
-
-            </div>
-
-
-            <div class="risk-row">
-
-                <div class="risk-category">
-                    Strategic
-                </div>
-
-                <div class="dots">
-                    <div class="dot red"></div>
-                    <div class="dot orange"></div>
-                    <div class="dot orange"></div>
-                </div>
-
-                <div class="risk-count">
-                    3
-                </div>
-
-            </div>
-
-
-            <div class="risk-row">
-
-                <div class="risk-category">
-                    Operational
-                </div>
-
-                <div class="dots">
-                    <div class="dot red"></div>
-                    <div class="dot red"></div>
-                    <div class="dot orange"></div>
-                    <div class="dot blue"></div>
-                    <div class="dot blue"></div>
-                </div>
-
-                <div class="risk-count">
-                    5
-                </div>
-
-            </div>
-
-
-            <div class="risk-row">
-
-                <div class="risk-category">
-                    Financial
-                </div>
-
-                <div class="dots">
-                    <div class="dot orange"></div>
-                    <div class="dot blue"></div>
-                </div>
-
-                <div class="risk-count">
-                    2
-                </div>
-
-            </div>
-
-
-            <div class="risk-row">
-
-                <div class="risk-category">
-                    People
-                </div>
-
-                <div class="dots">
-                    <div class="dot orange"></div>
-                    <div class="dot orange"></div>
-                    <div class="dot blue"></div>
-                </div>
-
-                <div class="risk-count">
-                    3
-                </div>
-
-            </div>
-
-
-            <div class="risk-row">
-
-                <div class="risk-category">
-                    Technology
-                </div>
-
-                <div class="dots">
-                    <div class="dot red"></div>
-                    <div class="dot orange"></div>
-                    <div class="dot orange"></div>
-                    <div class="dot blue"></div>
-                </div>
-
-                <div class="risk-count">
-                    4
-                </div>
-
-            </div>
-
-
-            <div class="risk-row">
-
-                <div class="risk-category">
-                    Compliance
-                </div>
-
-                <div class="dots">
-                    <div class="dot orange"></div>
-                    <div class="dot blue"></div>
-                </div>
-
-                <div class="risk-count">
-                    2
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- ATTENTION -->
-
-        <div class="panel">
-
-            <div class="panel-header">
-
-                <h2>
-                    Attention Required
-                </h2>
-
-                <div class="view-link">
-                    View all
-                </div>
-
-            </div>
-
-
-            <div class="attention-item">
-
-                <div class="attention-top">
-
-                    <div class="attention-title">
-                        Cyber Resilience
-                    </div>
-
-                    <div class="risk-badge badge-red">
-                        Significant
-                    </div>
-
-                </div>
-
-                <div class="attention-detail">
-                    Outside risk appetite for 42 days
-                </div>
-
-            </div>
-
-
-            <div class="attention-item">
-
-                <div class="attention-top">
-
-                    <div class="attention-title">
-                        Workforce Capacity
-                    </div>
-
-                    <div class="risk-badge badge-orange">
-                        High
-                    </div>
-
-                </div>
-
-                <div class="attention-detail">
-                    Risk exposure trending upward
-                </div>
-
-            </div>
-
-
-            <div class="attention-item">
-
-                <div class="attention-top">
-
-                    <div class="attention-title">
-                        Supplier Resilience
-                    </div>
-
-                    <div class="risk-badge badge-orange">
-                        High
-                    </div>
-
-                </div>
-
-                <div class="attention-detail">
-                    2 risk treatments overdue
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- LOWER METRICS -->
-
-    <div class="lower-grid">
-
-        <div class="metric-panel">
-
-            <div class="metric-label">
-                Risk Movement
-            </div>
-
-            <div class="metric-main">
-                4 ↑ &nbsp; 7 ↓
-            </div>
-
-            <div class="card-footer">
-                4 deteriorating • 7 improving
-            </div>
-
-        </div>
-
-
-        <div class="metric-panel">
-
-            <div class="metric-label">
-                Control Health
-            </div>
-
-            <div class="metric-main">
-                82%
-            </div>
-
-            <div class="progress">
-                <div class="progress-fill"></div>
-            </div>
-
-            <div class="card-footer">
-                11 weak • 3 require attention
-            </div>
-
-        </div>
-
-
-        <div class="metric-panel">
-
-            <div class="metric-label">
-                Risk Treatments
-            </div>
-
-            <div class="metric-main">
-                28 Open
-            </div>
-
-            <div class="card-footer">
-                <span class="bad">5 overdue</span> • 14 due this quarter
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- RISK INTELLIGENCE -->
-
-    <div class="ai">
-
-        <div class="ai-content">
-
-            <div class="ai-title">
-                ✦ RISK INTELLIGENCE
-            </div>
-
-            <div class="ai-text">
-                Three enterprise risks show indicators of increasing exposure.
-            </div>
-
-        </div>
-
-        <button>
-            Explore Insights →
-        </button>
-
-    </div>
-
-
-    <div class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Risks • v2.9</span></div></div></main></div><script>function toggleNavGroup(id){const g=document.getElementById(id);if(g)g.classList.toggle('open');}
+</aside><main class="main"><section class="global-hero"><div class="hero-content"><div class="hero-kicker">Governance</div><h1>Enterprise Risk Management</h1><p>Enterprise risk profile, controls and treatment performance</p><div class="hero-rule"></div></div><div class="hero-tools"><input class="hero-search" placeholder="⌕   Search VERO..."><div class="vero-account" id="veroAccount"><button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false"><div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span></button><div class="vero-account-menu" id="veroAccountMenu"><div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div><a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a><button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button></div></div></div></section>
+<div class="dashboard-content">
+
+<style>
+.vero-risk-dashboard{
+ max-width:1500px;
+ margin:auto;
+}
+.vero-risk-toolbar{
+ display:flex;
+ flex-wrap:wrap;
+ gap:14px;
+ align-items:end;
+ margin-bottom:24px;
+}
+.vero-risk-filter{
+ display:flex;
+ flex-direction:column;
+ gap:7px;
+ min-width:190px;
+}
+.vero-risk-filter label{
+ font-size:12px;
+ font-weight:700;
+ color:#6B7280;
+}
+.vero-risk-filter select{
+ padding:12px;
+ border:1px solid #E5E7EB;
+ border-radius:8px;
+ background:white;
+ font-size:13px;
+}
+.vero-risk-panel{
+ background:white;
+ border:1px solid #E5E7EB;
+ border-radius:12px;
+ padding:24px;
+ margin-bottom:24px;
+}
+.vero-risk-panel h2{
+ margin:0 0 8px;
+ font-size:20px;
+}
+.vero-risk-subtitle{
+ color:#6B7280;
+ font-size:13px;
+ margin-bottom:22px;
+}
+.vero-matrix-scroll{
+ overflow-x:auto;
+}
+.vero-matrix{
+ display:grid;
+ grid-template-columns:70px repeat(5,minmax(110px,1fr));
+ gap:3px;
+ min-width:650px;
+}
+.vero-matrix-heading{
+ background:#3D3935;
+ color:white;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ min-height:42px;
+ font-weight:700;
+}
+.vero-matrix-cell{
+ min-height:112px;
+ border:3px solid transparent;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ gap:5px;
+ cursor:pointer;
+ transition:filter .15s,border-color .15s;
+}
+.vero-matrix-cell:hover{
+ filter:brightness(.94);
+}
+.vero-matrix-cell.selected{
+ border-color:#242424;
+}
+.vero-matrix-score{
+ font-size:24px;
+ font-weight:800;
+}
+.vero-matrix-level{
+ font-size:12px;
+ font-weight:600;
+}
+.vero-matrix-count{
+ background:white;
+ color:#242424;
+ min-width:28px;
+ height:28px;
+ border-radius:20px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ padding:0 7px;
+ font-weight:800;
+ font-size:12px;
+}
+.vero-risk-table{
+ width:100%;
+ border-collapse:collapse;
+ font-size:13px;
+}
+.vero-risk-table th{
+ text-align:left;
+ padding:13px;
+ background:#F4F6F8;
+ border-bottom:1px solid #E5E7EB;
+}
+.vero-risk-table td{
+ padding:13px;
+ border-bottom:1px solid #E5E7EB;
+}
+.vero-risk-table tbody tr{
+ cursor:pointer;
+}
+.vero-risk-table tbody tr:hover{
+ background:#F7F8F7;
+}
+.vero-risk-status{
+ font-size:13px;
+ color:#6B7280;
+ margin-top:12px;
+}
+.vero-risk-clear{
+ background:white;
+ border:1px solid #E5E7EB;
+ padding:10px 14px;
+ border-radius:8px;
+ cursor:pointer;
+}
+@media(max-width:800px){
+ .vero-risk-panel{padding:15px}
+ .vero-risk-filter{width:100%}
+}
+</style>
+
+<div class="vero-risk-dashboard">
+
+<div class="vero-risk-toolbar">
+
+ <div class="vero-risk-filter">
+  <label>Risk Register</label>
+  <select id="veroRiskRegisterFilter">
+   <option value="">All authorised registers</option>
+  </select>
+ </div>
+
+ <div class="vero-risk-filter">
+  <label>Assessment</label>
+  <select id="veroRiskAssessmentFilter">
+   <option value="residual">Residual Risk</option>
+   <option value="inherent">Inherent Risk</option>
+   <option value="target" disabled>Target Risk — Coming Soon</option>
+  </select>
+ </div>
+
+ <div class="vero-risk-filter">
+  <label>Risk Category</label>
+  <select id="veroRiskCategoryFilter">
+   <option value="">All categories</option>
+  </select>
+ </div>
+
+</div>
+
+<section class="vero-risk-panel">
+
+ <h2>Risk Assessment Matrix</h2>
+ <div class="vero-risk-subtitle">
+  Verra Mobility approved 5×5 Risk Matrix
+ </div>
+
+ <div class="vero-matrix-scroll">
+  <div id="veroRiskMatrix" class="vero-matrix"></div>
+ </div>
+
+ <div class="vero-risk-status" id="veroMatrixStatus">
+  Loading risk information...
+ </div>
+
+</section>
+
+<section class="vero-risk-panel">
+
+ <div style="display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap">
+  <div>
+   <h2>Risk Register</h2>
+   <div class="vero-risk-subtitle" id="veroRiskListStatus">
+    Loading risks...
+   </div>
+  </div>
+  <button class="vero-risk-clear" id="veroClearMatrixSelection">
+   Clear Matrix Selection
+  </button>
+ </div>
+
+ <div style="overflow-x:auto">
+  <table class="vero-risk-table">
+   <thead>
+    <tr>
+     <th>Risk Code</th>
+     <th>Risk</th>
+     <th>Register</th>
+     <th>Category</th>
+     <th>Score</th>
+     <th>Status</th>
+    </tr>
+   </thead>
+   <tbody id="veroRiskTableBody"></tbody>
+  </table>
+ </div>
+
+</section>
+
+</div>
+</div>
+<div class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Risks • v2.9</span></div></div></main></div><script>function toggleNavGroup(id){const g=document.getElementById(id);if(g)g.classList.toggle('open');}
 /* VERO GLOBAL ACCOUNT MENU */
 (()=>{
  const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
@@ -1024,5 +870,262 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  signout.addEventListener('click',async()=>{const t=localStorage.getItem(TOKEN);try{if(t)await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+t}})}catch(e){}localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html');});
  load();
 })();
-</script><script src="nav.js"></script>
+</script>
+<script>
+(function(){
+ const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+
+ const matrix=document.getElementById('veroRiskMatrix');
+ const registerFilter=document.getElementById('veroRiskRegisterFilter');
+ const assessmentFilter=document.getElementById('veroRiskAssessmentFilter');
+ const categoryFilter=document.getElementById('veroRiskCategoryFilter');
+ const tableBody=document.getElementById('veroRiskTableBody');
+ const matrixStatus=document.getElementById('veroMatrixStatus');
+ const listStatus=document.getElementById('veroRiskListStatus');
+
+ const likelihoods=[25,20,15,10,5];
+ const classifications=[
+  ['Moderate','High','Significant','Significant','Significant'],
+  ['Moderate','Moderate','High','Significant','Significant'],
+  ['Low','Moderate','High','High','Significant'],
+  ['Low','Moderate','Moderate','Moderate','High'],
+  ['Low','Low','Low','Moderate','Moderate']
+ ];
+
+ const colours={
+  Low:'#A8C63D',
+  Moderate:'#21869B',
+  High:'#D1B443',
+  Significant:'#BF302D'
+ };
+
+ let registers=[];
+ let risks=[];
+ let selectedCell=null;
+
+ function assessmentValues(risk){
+  const type=assessmentFilter.value;
+  const likelihood=Number(risk[type+'_likelihood']);
+  const impact=Number(risk[type+'_impact']);
+
+  if(!Number.isInteger(likelihood) || likelihood<1 || likelihood>5 ||
+     !Number.isInteger(impact) || impact<1 || impact>5){
+   return null;
+  }
+
+  return {
+   row:5-likelihood,
+   col:impact-1,
+   score:likelihood*5*impact
+  };
+ }
+
+ function filteredRisks(){
+  return risks.filter(risk=>{
+   if(registerFilter.value &&
+      String(risk.register_id)!==registerFilter.value) return false;
+
+   if(categoryFilter.value &&
+      risk.risk_category!==categoryFilter.value) return false;
+
+   return true;
+  });
+ }
+
+ function addHeading(text){
+  const el=document.createElement('div');
+  el.className='vero-matrix-heading';
+  el.textContent=text;
+  matrix.appendChild(el);
+ }
+
+ function renderMatrix(){
+  matrix.replaceChildren();
+
+  addHeading('L / I');
+  for(let impact=1;impact<=5;impact++) addHeading(String(impact));
+
+  const visible=filteredRisks();
+
+  likelihoods.forEach((likelihood,row)=>{
+   addHeading(String(likelihood));
+
+   for(let col=0;col<5;col++){
+    const impact=col+1;
+    const classification=classifications[row][col];
+    const count=visible.filter(r=>{
+     const values=assessmentValues(r);
+     return values && values.row===row && values.col===col;
+    }).length;
+
+    const cell=document.createElement('button');
+    cell.type='button';
+    cell.className='vero-matrix-cell';
+    cell.style.background=colours[classification];
+
+    if(selectedCell &&
+       selectedCell.row===row &&
+       selectedCell.col===col){
+      cell.classList.add('selected');
+    }
+
+    const dark=classification==='Low'||classification==='High';
+    cell.style.color=dark?'#242424':'#FFFFFF';
+
+    const score=document.createElement('div');
+    score.className='vero-matrix-score';
+    score.textContent=String(likelihood*impact);
+
+    const level=document.createElement('div');
+    level.className='vero-matrix-level';
+    level.textContent=classification;
+
+    const badge=document.createElement('div');
+    badge.className='vero-matrix-count';
+    badge.textContent=String(count);
+    badge.setAttribute('aria-label',count+' risks');
+
+    cell.append(score,level,badge);
+
+    cell.addEventListener('click',()=>{
+     if(selectedCell &&
+        selectedCell.row===row &&
+        selectedCell.col===col){
+      selectedCell=null;
+     }else{
+      selectedCell={row,col};
+     }
+     render();
+    });
+
+    matrix.appendChild(cell);
+   }
+  });
+
+  matrixStatus.textContent=
+   visible.length+' risks in the current authorised view';
+ }
+
+ function renderTable(){
+  tableBody.replaceChildren();
+
+  const visible=filteredRisks().filter(risk=>{
+   if(!selectedCell) return true;
+   const values=assessmentValues(risk);
+   return values &&
+     values.row===selectedCell.row &&
+     values.col===selectedCell.col;
+  });
+
+  listStatus.textContent=visible.length+' risks displayed';
+
+  if(!visible.length){
+   const tr=document.createElement('tr');
+   const td=document.createElement('td');
+   td.colSpan=6;
+   td.textContent='No risks match the current selection.';
+   td.style.textAlign='center';
+   td.style.padding='28px';
+   tr.appendChild(td);
+   tableBody.appendChild(tr);
+   return;
+  }
+
+  visible.forEach(risk=>{
+   const tr=document.createElement('tr');
+   const values=assessmentValues(risk);
+
+   [
+    risk.risk_code,
+    risk.risk_title,
+    risk.register_name,
+    risk.risk_category||'—',
+    values?values.score:'Not assessed',
+    risk.status
+   ].forEach(value=>{
+    const td=document.createElement('td');
+    td.textContent=value??'';
+    tr.appendChild(td);
+   });
+
+   tableBody.appendChild(tr);
+  });
+ }
+
+ function render(){
+  renderMatrix();
+  renderTable();
+ }
+
+ async function load(){
+  const token=localStorage.getItem('vero_session_token');
+
+  if(!token){
+   matrixStatus.textContent='Authentication required.';
+   listStatus.textContent='Sign in to view risks.';
+   return;
+  }
+
+  try{
+   const headers={
+    Authorization:'Bearer '+token,
+    Accept:'application/json'
+   };
+
+   const [registerResponse,riskResponse]=await Promise.all([
+    fetch(API+'/risk-registers',{headers,cache:'no-store'}),
+    fetch(API+'/risks',{headers,cache:'no-store'})
+   ]);
+
+   if(!registerResponse.ok||!riskResponse.ok){
+    throw new Error('Unable to retrieve authorised risk data.');
+   }
+
+   const registerData=await registerResponse.json();
+   const riskData=await riskResponse.json();
+
+   registers=registerData.registers||[];
+   risks=riskData.risks||[];
+
+   registers.forEach(register=>{
+    const option=document.createElement('option');
+    option.value=register.id;
+    option.textContent=register.register_name;
+    registerFilter.appendChild(option);
+   });
+
+   [...new Set(risks.map(r=>r.risk_category).filter(Boolean))]
+    .sort()
+    .forEach(category=>{
+     const option=document.createElement('option');
+     option.value=category;
+     option.textContent=category;
+     categoryFilter.appendChild(option);
+    });
+
+   render();
+
+  }catch(error){
+   matrixStatus.textContent=error.message;
+   listStatus.textContent='Unable to load risks.';
+  }
+ }
+
+ [registerFilter,assessmentFilter,categoryFilter].forEach(el=>{
+  el.addEventListener('change',()=>{
+   selectedCell=null;
+   render();
+  });
+ });
+
+ document.getElementById('veroClearMatrixSelection')
+  .addEventListener('click',()=>{
+   selectedCell=null;
+   render();
+  });
+
+ load();
+})();
+</script>
+<script src="nav.js"></script>
 </body></html>
