@@ -1413,11 +1413,25 @@ table {
 </div>
 
 <div class="vero-risk-filter">
-  <label>Risk Category</label>
-  <select id="veroRiskCategoryFilter">
-   <option value="">All categories</option>
-  </select>
- </div>
+ <label for="veroTier4Filter">Tier 4</label>
+ <select id="veroTier4Filter">
+  <option value="">All Tier 4 categories</option>
+ </select>
+</div>
+
+<div class="vero-risk-filter">
+ <label for="veroTier3Filter">Tier 3</label>
+ <select id="veroTier3Filter" disabled>
+  <option value="">All Tier 3 categories</option>
+ </select>
+</div>
+
+<div class="vero-risk-filter">
+ <label for="veroTier2Filter">Tier 2</label>
+ <select id="veroTier2Filter" disabled>
+  <option value="">All Tier 2 categories</option>
+ </select>
+</div>
 
 </div>
 
@@ -1593,7 +1607,11 @@ table {
  const matrix=document.getElementById('veroRiskMatrix');
  const registerFilter=document.getElementById('veroRiskRegisterFilter');
  const assessmentFilter=document.getElementById('veroRiskAssessmentFilter');
- const categoryFilter=document.getElementById('veroRiskCategoryFilter');
+ const tier4Filter=document.getElementById('veroTier4Filter');
+ const tier3Filter=document.getElementById('veroTier3Filter');
+ const tier2Filter=document.getElementById('veroTier2Filter');
+
+ let tierCategories=[];
  const levelFilter=document.getElementById('veroRiskLevelFilter');
  const tableBody=document.getElementById('veroRiskTableBody');
  const searchInput=document.getElementById('veroRiskSearch');
@@ -1637,13 +1655,80 @@ table {
   };
  }
 
+
+ function populateTier(select,items,placeholder){
+  select.replaceChildren();
+
+  const blank=document.createElement('option');
+  blank.value='';
+  blank.textContent=placeholder;
+  select.appendChild(blank);
+
+  items.forEach(category=>{
+   const option=document.createElement('option');
+   option.value=String(category.id);
+   option.textContent=category.category_name;
+   select.appendChild(option);
+  });
+ }
+
+ function updateTier3(){
+  const parentId=Number(tier4Filter.value);
+
+  const items=tierCategories.filter(category=>
+   category.tier===3 &&
+   category.parent_category_id===parentId &&
+   category.status==='Active'
+  );
+
+  populateTier(tier3Filter,items,'All Tier 3 categories');
+  tier3Filter.disabled=!parentId;
+
+  populateTier(tier2Filter,[],'All Tier 2 categories');
+  tier2Filter.disabled=true;
+ }
+
+ function updateTier2(){
+  const parentId=Number(tier3Filter.value);
+
+  const items=tierCategories.filter(category=>
+   category.tier===2 &&
+   category.parent_category_id===parentId &&
+   category.status==='Active'
+  );
+
+  populateTier(tier2Filter,items,'All Tier 2 categories');
+  tier2Filter.disabled=!parentId;
+ }
+
+ async function loadTierCategories(headers){
+  const response=await fetch(API+'/risk-tiers',{
+   headers,
+   cache:'no-store'
+  });
+
+  if(!response.ok){
+   throw new Error('Unable to load Risk Tier categories.');
+  }
+
+  const data=await response.json();
+
+  tierCategories=(data.categories||[])
+   .filter(category=>category.status==='Active');
+
+  populateTier(
+   tier4Filter,
+   tierCategories.filter(category=>category.tier===4),
+   'All Tier 4 categories'
+  );
+ }
+
  function filteredRisks(){
   return risks.filter(risk=>{
    if(registerFilter.value &&
       String(risk.register_id)!==registerFilter.value) return false;
 
-   if(categoryFilter.value &&
-      risk.risk_category!==categoryFilter.value) return false;
+
 
    if(levelFilter.value){
     const values=assessmentValues(risk);
@@ -1881,6 +1966,8 @@ table {
    registers=registerData.registers||[];
    risks=riskData.risks||[];
 
+   await loadTierCategories(headers);
+
    registers.forEach(register=>{
     const option=document.createElement('option');
     option.value=register.id;
@@ -1888,14 +1975,7 @@ table {
     registerFilter.appendChild(option);
    });
 
-   [...new Set(risks.map(r=>r.risk_category).filter(Boolean))]
-    .sort()
-    .forEach(category=>{
-     const option=document.createElement('option');
-     option.value=category;
-     option.textContent=category;
-     categoryFilter.appendChild(option);
-    });
+
 
    render();
 
@@ -1905,11 +1985,29 @@ table {
   }
  }
 
- [registerFilter,assessmentFilter,categoryFilter,levelFilter].forEach(el=>{
+ [registerFilter,assessmentFilter,levelFilter].forEach(el=>{
   el.addEventListener('change',()=>{
    selectedCell=null;
    render();
   });
+ });
+
+
+ tier4Filter.addEventListener('change',()=>{
+  updateTier3();
+  selectedCell=null;
+  render();
+ });
+
+ tier3Filter.addEventListener('change',()=>{
+  updateTier2();
+  selectedCell=null;
+  render();
+ });
+
+ tier2Filter.addEventListener('change',()=>{
+  selectedCell=null;
+  render();
  });
 
  searchInput.addEventListener('input',()=>{
@@ -2369,7 +2467,18 @@ table {
    const data=await response.json();
    const user=data.user||data;
 
-   button.hidden=user.vero_role!=='Administrator';
+   const rolesResponse=await fetch(API+'/auth/my-roles',{
+    headers:{Authorization:'Bearer '+token,Accept:'application/json'},
+    cache:'no-store'
+   });
+
+   if(!rolesResponse.ok) return;
+
+   const rolesData=await rolesResponse.json();
+
+   button.hidden=!(rolesData.roles||[]).some(
+    role=>role.role_name==='Risk Manager'
+   );
   }catch(error){
    button.hidden=true;
   }
