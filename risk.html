@@ -1430,37 +1430,55 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 }
 
 </style>
+<style id="vero-compact-filter-bar-v3-styles">
+#veroCompactFilterBarV3{display:flex;flex-direction:column;gap:12px;margin:0 0 18px}
+#veroCompactFilterBarV3 .vero-risk-primary-row{display:grid;grid-template-columns:minmax(135px,.75fr) minmax(135px,.75fr) minmax(220px,2.3fr) auto;gap:12px;align-items:end}
+#veroCompactFilterBarV3 .vero-risk-primary-actions{display:flex;gap:10px;align-items:end}
+#veroCompactFilterBarV3 .vero-risk-primary-actions button{height:38px!important;white-space:nowrap;padding:0 13px}
+#veroCompactFilterBarV3 .vero-risk-secondary-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;align-items:end}
+#veroCompactFilterBarV3 .vero-risk-filter{display:flex;flex-direction:column;gap:5px;width:100%!important;min-width:0!important;max-width:none!important;flex:none!important;margin:0!important;position:relative}
+#veroCompactFilterBarV3 .vero-risk-filter label{font-size:11px;font-weight:600;line-height:16px;min-height:16px;margin:0;white-space:nowrap}
+#veroCompactFilterBarV3 .vero-risk-filter input,#veroCompactFilterBarV3 .vero-risk-filter select{display:block;width:100%!important;min-width:0!important;max-width:100%!important;height:38px!important;box-sizing:border-box!important;padding:0 10px!important;font-size:12px!important;border-radius:8px!important;border:1px solid #E5E1DE;background:#fff}
+#veroCompactFilterBarV3 .vero-risk-filter input:disabled,#veroCompactFilterBarV3 .vero-risk-filter select:disabled{opacity:.65}
+@media(max-width:1250px){#veroCompactFilterBarV3 .vero-risk-primary-row{grid-template-columns:repeat(2,minmax(0,1fr))}#veroCompactFilterBarV3 .vero-risk-secondary-row{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){#veroCompactFilterBarV3 .vero-risk-primary-row{grid-template-columns:1fr}#veroCompactFilterBarV3 .vero-risk-secondary-row{grid-template-columns:repeat(2,minmax(0,1fr))}#veroCompactFilterBarV3 .vero-risk-primary-actions{flex-wrap:wrap}}
+@media(max-width:450px){#veroCompactFilterBarV3 .vero-risk-secondary-row{grid-template-columns:1fr}}
+</style>
 <div class="dashboard-content">
 
-<div class="vero-risk-actions">
+<div id="veroCompactFilterBarV3" class="vero-compact-filter-bar">
+<div class="vero-risk-primary-row">
+<div class="vero-risk-filter">
+<label>Assessment</label>
+<select id="veroRiskAssessmentFilter">
+<option value="residual">Residual Risk</option>
+<option value="inherent">Inherent Risk</option>
+<option disabled="" value="target">Target Risk — Coming Soon</option>
+</select>
+</div>
+<div class="vero-risk-filter">
+<label for="veroRiskLevelFilter">Risk Level</label>
+<select id="veroRiskLevelFilter">
+<option value="">All risk levels</option>
+<option value="Significant">Significant</option>
+<option value="High">High</option>
+<option value="Moderate">Moderate</option>
+<option value="Low">Low</option>
+</select>
+</div>
 <div class="vero-risk-filter vero-risk-search">
-  <label for="veroRiskSearch">Search Risks</label>
-  <input
-   id="veroRiskSearch"
-   type="search"
-   placeholder="Search code, title, category or description..."
-   autocomplete="off"
-  >
- </div>
- <button
-  id="veroAddRiskButton"
-  class="vero-risk-add-button"
-  type="button"
- >
+<label for="veroRiskSearch">Search Risks</label>
+<input autocomplete="off" id="veroRiskSearch" placeholder="Search code, title, category or description..." type="search"/>
+</div>
+<div class="vero-risk-primary-actions">
+<button class="vero-risk-add-button" id="veroAddRiskButton" type="button">
   ＋ Add Risk
  </button>
-
- <button
-  id="veroManageRiskHierarchy"
-  class="vero-risk-hierarchy-button"
-  type="button"
-  hidden
- >
+<button class="vero-risk-hierarchy-button" hidden="" id="veroManageRiskHierarchy" type="button">
   Manage Risk Hierarchy
  </button>
 </div>
-
-
+</div>
 <style>
 .vero-risk-dashboard{
  max-width:1500px;
@@ -1884,83 +1902,47 @@ table {
 <div id="veroCompactRiskLayout">
 
 
-<section class="vero-risk-panel vero-compact-filter-panel">
- <h2>Risk Filters</h2>
- <div class="vero-grouped-filter-grid">
-<div class="vero-filter-group vero-filter-tier-group">
-<h3>Risk Tiers</h3>
+<div class="vero-risk-secondary-row">
 <div class="vero-risk-filter">
- <label for="veroTier4Filter">Tier 4</label>
- <select id="veroTier4Filter">
-  <option value="">All Tier 4 categories</option>
- </select>
+<label for="veroTier4Filter">Tier 4</label>
+<select id="veroTier4Filter">
+<option value="">All Tier 4 categories</option>
+</select>
 </div>
 <div class="vero-risk-filter">
- <label for="veroTier3Filter">Tier 3</label>
- <select id="veroTier3Filter" disabled>
-  <option value="">All Tier 3 categories</option>
- </select>
+<label for="veroTier3Filter">Tier 3</label>
+<select disabled="" id="veroTier3Filter">
+<option value="">All Tier 3 categories</option>
+</select>
 </div>
 <div class="vero-risk-filter">
- <label for="veroTier2Filter">Tier 2</label>
- <select id="veroTier2Filter" disabled>
-  <option value="">All Tier 2 categories</option>
- </select>
+<label for="veroTier2Filter">Tier 2</label>
+<select disabled="" id="veroTier2Filter">
+<option value="">All Tier 2 categories</option>
+</select>
 </div>
 <div class="vero-risk-filter">
-  <label for="veroTier1Filter">Tier 1 — Applies To</label>
-  <select id="veroTier1Filter">
-   <option value="">All application types</option>
-   <option value="Project">Project</option>
-   <option value="Contract">Contract</option>
-   <option value="VM Location">VM Location</option>
-  </select>
- </div>
-</div><div class="vero-filter-group vero-filter-application-group">
-<h3>Applicability</h3>
+<label for="veroTier1Filter">Tier 1 — Applies To</label>
+<select id="veroTier1Filter">
+<option value="">All application types</option>
+<option value="Project">Project</option>
+<option value="Contract">Contract</option>
+<option value="VM Location">VM Location</option>
+</select>
+</div>
 <div class="vero-risk-filter">
-  <label for="veroApplicationFilter">Select Record</label>
-  <select id="veroApplicationFilter" disabled>
-   <option value="">Select an application type first</option>
-  </select>
- </div>
+<label for="veroApplicationFilter">Select Record</label>
+<select disabled="" id="veroApplicationFilter">
+<option value="">Select an application type first</option>
+</select>
+</div>
 <div class="vero-risk-filter">
- <label for="veroSiteFilter">Select Site</label>
- <input
-  id="veroSiteFilter"
-  type="search"
-  placeholder="Select a record first"
-  autocomplete="off"
-  disabled
- >
- <div id="veroSiteResults"
-      class="vero-site-results"
-      role="listbox"
-      hidden></div>
-</div><div class="vero-filter-group vero-filter-view-group">
-<h3>Risk View</h3>
-<div class="vero-risk-filter">
-  <label>Assessment</label>
-  <select id="veroRiskAssessmentFilter">
-   <option value="residual">Residual Risk</option>
-   <option value="inherent">Inherent Risk</option>
-   <option value="target" disabled>Target Risk — Coming Soon</option>
-  </select>
- </div>
-<div class="vero-risk-filter">
- <label for="veroRiskLevelFilter">Risk Level</label>
- <select id="veroRiskLevelFilter">
-  <option value="">All risk levels</option>
-  <option value="Significant">Significant</option>
-  <option value="High">High</option>
-  <option value="Moderate">Moderate</option>
-  <option value="Low">Low</option>
- </select>
+<label for="veroSiteFilter">Select Site</label>
+<input autocomplete="off" disabled="" id="veroSiteFilter" placeholder="Select a record first" type="search"/>
+<div class="vero-site-results" hidden="" id="veroSiteResults" role="listbox"></div>
 </div>
 </div>
- </div>
-</section>
-
+</div>
 <div class="vero-matrix-register-grid">
 <section class="vero-risk-panel">
 
@@ -2005,7 +1987,6 @@ table {
 
 </section>
  </div>
-</div>
 <section class="vero-risk-panel vero-risk-summary" hidden>
  <h2>Attention Required</h2>
  <div class="vero-risk-subtitle">
@@ -2049,9 +2030,6 @@ table {
  </div>
 </section>
 
-</div>
-</div>
-
 <div class="vero-risk-supporting">
 
  <section class="vero-risk-panel">
@@ -2089,6 +2067,8 @@ table {
  </div>
 </section>
 
+</div>
+</div>
 <div class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Risks • v2.9</span></div></div></main></div><script>function toggleNavGroup(id){const g=document.getElementById(id);if(g)g.classList.toggle('open');}
 /* VERO GLOBAL ACCOUNT MENU */
 (()=>{
