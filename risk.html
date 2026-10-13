@@ -842,6 +842,98 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  }
 }
 </style>
+
+<style id="vero-hierarchy-manager-styles">
+.vero-risk-hierarchy-button{
+ background:#3D3935;
+ color:#fff;
+ border:0;
+ border-radius:8px;
+ padding:12px 16px;
+ font-size:13px;
+ font-weight:800;
+ cursor:pointer;
+ font-family:Montserrat,Verdana,Arial,sans-serif;
+}
+
+.vero-risk-hierarchy-button[hidden]{
+ display:none !important;
+}
+
+.vero-hierarchy-item{
+ border:1px solid #E5E1DE;
+ border-radius:8px;
+ padding:12px;
+ margin-bottom:8px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:12px;
+}
+
+.vero-hierarchy-item.archived{
+ opacity:.6;
+}
+
+.vero-hierarchy-details{
+ display:flex;
+ flex-direction:column;
+ gap:4px;
+ min-width:0;
+}
+
+.vero-hierarchy-details strong{
+ font-size:12px;
+}
+
+.vero-hierarchy-details small{
+ font-size:10px;
+ color:#857874;
+}
+
+.vero-hierarchy-edit{
+ background:#fff;
+ border:1px solid #E5E1DE;
+ border-radius:7px;
+ padding:8px 12px;
+ font-size:11px;
+ cursor:pointer;
+}
+
+.vero-hierarchy-form-actions{
+ display:flex;
+ justify-content:flex-end;
+ gap:10px;
+ margin-top:22px;
+}
+
+#veroHierarchyMessage{
+ font-size:12px;
+ margin:10px 0;
+ color:#3D3935;
+}
+
+#veroHierarchyTree{
+ margin-bottom:25px;
+}
+
+#veroHierarchyForm input,
+#veroHierarchyForm select{
+ width:100%;
+ padding:12px;
+ border:1px solid #E5E1DE;
+ border-radius:8px;
+ font-size:12px;
+}
+
+#veroHierarchyForm label{
+ display:block;
+ font-size:11px;
+ font-weight:700;
+ color:#857874;
+ margin:14px 0 6px;
+}
+</style>
 <div class="dashboard-content">
 
 <div class="vero-risk-actions">
@@ -851,6 +943,15 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   type="button"
  >
   ＋ Add Risk
+ </button>
+
+ <button
+  id="veroManageRiskHierarchy"
+  class="vero-risk-hierarchy-button"
+  type="button"
+  hidden
+ >
+  Manage Risk Hierarchy
  </button>
 </div>
 
@@ -2153,6 +2254,333 @@ table {
 
   });
 
+})();
+</script>
+
+<div id="veroHierarchyOverlay" class="vero-risk-overlay"
+     aria-hidden="true">
+ <aside class="vero-risk-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="veroHierarchyTitle">
+
+  <div class="vero-risk-drawer-head">
+   <div>
+    <small>RISK GOVERNANCE</small>
+    <h2 id="veroHierarchyTitle">Manage Risk Hierarchy</h2>
+    <p>Add and maintain Vero's four risk tiers.</p>
+   </div>
+   <button id="veroHierarchyClose"
+           type="button"
+           aria-label="Close hierarchy manager">×</button>
+  </div>
+
+  <div class="vero-risk-drawer-body">
+
+   <h3>Existing Risk Hierarchy</h3>
+   <div id="veroHierarchyMessage" role="status"></div>
+   <div id="veroHierarchyTree"></div>
+
+   <h3 id="veroHierarchyFormHeading">Add Risk Category</h3>
+
+   <form id="veroHierarchyForm">
+
+    <label for="veroHierarchyTier">Tier</label>
+    <select id="veroHierarchyTier" required>
+     <option value="4">Tier 4</option>
+     <option value="3">Tier 3</option>
+     <option value="2">Tier 2</option>
+     <option value="1">Tier 1</option>
+    </select>
+
+    <label for="veroHierarchyParent">Parent Category</label>
+    <select id="veroHierarchyParent">
+     <option value="">No parent — Tier 4</option>
+    </select>
+
+    <label for="veroHierarchyName">Category Name</label>
+    <input id="veroHierarchyName"
+           maxlength="255"
+           required
+           placeholder="Enter category name">
+
+    <label for="veroHierarchyStatusLabel">Status</label>
+    <div id="veroHierarchyStatusLabel"
+         class="vero-risk-help">
+     New categories are created as Active.
+    </div>
+
+    <div class="vero-hierarchy-form-actions">
+     <button type="button"
+             id="veroHierarchyReset"
+             class="vero-risk-cancel">Cancel Edit</button>
+     <button type="submit"
+             id="veroHierarchySave"
+             class="vero-risk-save">Add Category</button>
+    </div>
+
+   </form>
+
+  </div>
+ </aside>
+</div>
+
+<script>
+(function(){
+ const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+
+ const button=document.getElementById('veroManageRiskHierarchy');
+ const overlay=document.getElementById('veroHierarchyOverlay');
+ const close=document.getElementById('veroHierarchyClose');
+ const tree=document.getElementById('veroHierarchyTree');
+ const message=document.getElementById('veroHierarchyMessage');
+ const form=document.getElementById('veroHierarchyForm');
+ const tier=document.getElementById('veroHierarchyTier');
+ const parent=document.getElementById('veroHierarchyParent');
+ const name=document.getElementById('veroHierarchyName');
+ const save=document.getElementById('veroHierarchySave');
+ const reset=document.getElementById('veroHierarchyReset');
+ const heading=document.getElementById('veroHierarchyFormHeading');
+
+ let categories=[];
+ let editingId=null;
+ let editingStatus='Active';
+
+ function authHeaders(){
+  return {
+   Authorization:'Bearer '+localStorage.getItem('vero_session_token'),
+   Accept:'application/json',
+   'Content-Type':'application/json'
+  };
+ }
+
+ async function verifyAdmin(){
+  const token=localStorage.getItem('vero_session_token');
+  if(!token) return;
+
+  try{
+   const response=await fetch(API+'/auth/me',{
+    headers:{Authorization:'Bearer '+token},
+    cache:'no-store'
+   });
+
+   if(!response.ok) return;
+
+   const data=await response.json();
+   const user=data.user||data;
+
+   button.hidden=user.vero_role!=='Administrator';
+  }catch(error){
+   button.hidden=true;
+  }
+ }
+
+ function setMessage(text){
+  message.textContent=text;
+ }
+
+ function updateParents(){
+  const selectedTier=Number(tier.value);
+  const previous=parent.value;
+  parent.replaceChildren();
+
+  const placeholder=document.createElement('option');
+  placeholder.value='';
+  placeholder.textContent=selectedTier===4
+   ?'No parent — Tier 4'
+   :'Select parent category';
+  parent.appendChild(placeholder);
+
+  if(selectedTier===4){
+   parent.disabled=true;
+   return;
+  }
+
+  parent.disabled=false;
+
+  categories
+   .filter(c=>c.tier===selectedTier+1 && c.status==='Active')
+   .forEach(c=>{
+    const option=document.createElement('option');
+    option.value=String(c.id);
+    option.textContent=c.category_name;
+    parent.appendChild(option);
+   });
+
+  if([...parent.options].some(o=>o.value===previous)){
+   parent.value=previous;
+  }
+ }
+
+ function resetForm(){
+  editingId=null;
+  editingStatus='Active';
+  tier.disabled=false;
+  tier.value='4';
+  name.value='';
+  heading.textContent='Add Risk Category';
+  save.textContent='Add Category';
+  updateParents();
+ }
+
+ function editCategory(category){
+  editingId=category.id;
+  editingStatus=category.status;
+  tier.value=String(category.tier);
+  tier.disabled=true;
+  updateParents();
+  parent.value=category.parent_category_id==null
+   ?'':String(category.parent_category_id);
+  name.value=category.category_name;
+  heading.textContent='Edit Risk Category';
+  save.textContent='Save Changes';
+  name.focus();
+ }
+
+ function renderTree(){
+  tree.replaceChildren();
+
+  const ordered=[...categories].sort((a,b)=>
+   b.tier-a.tier || a.category_name.localeCompare(b.category_name)
+  );
+
+  ordered.forEach(category=>{
+   const item=document.createElement('div');
+   item.className='vero-hierarchy-item';
+   if(category.status==='Archived') item.classList.add('archived');
+   item.style.marginLeft=((4-category.tier)*16)+'px';
+
+   const details=document.createElement('div');
+   details.className='vero-hierarchy-details';
+
+   const title=document.createElement('strong');
+   title.textContent='Tier '+category.tier+' — '+category.category_name;
+
+   const subtitle=document.createElement('small');
+   subtitle.textContent=
+    (category.parent_category_name||'Top-level category')+
+    ' · '+category.status;
+
+   details.append(title,subtitle);
+
+   const edit=document.createElement('button');
+   edit.type='button';
+   edit.className='vero-hierarchy-edit';
+   edit.textContent='Edit';
+   edit.addEventListener('click',()=>editCategory(category));
+
+   item.append(details,edit);
+   tree.appendChild(item);
+  });
+ }
+
+ async function loadCategories(){
+  setMessage('Loading hierarchy...');
+
+  const response=await fetch(API+'/risk-tiers',{
+   headers:authHeaders(),
+   cache:'no-store'
+  });
+
+  const data=await response.json();
+
+  if(!response.ok){
+   throw new Error(data.message||'Unable to load hierarchy');
+  }
+
+  categories=data.categories||[];
+  renderTree();
+  updateParents();
+  setMessage(categories.length+' categories loaded.');
+ }
+
+ button.addEventListener('click',async()=>{
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden','false');
+  resetForm();
+
+  try{
+   await loadCategories();
+  }catch(error){
+   setMessage(error.message);
+  }
+ });
+
+ function closeDrawer(){
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden','true');
+ }
+
+ close.addEventListener('click',closeDrawer);
+
+ overlay.addEventListener('click',event=>{
+  if(event.target===overlay) closeDrawer();
+ });
+
+ document.addEventListener('keydown',event=>{
+  if(event.key==='Escape' && overlay.classList.contains('open')){
+   closeDrawer();
+  }
+ });
+
+ tier.addEventListener('change',updateParents);
+ reset.addEventListener('click',resetForm);
+
+ form.addEventListener('submit',async event=>{
+  event.preventDefault();
+
+  const selectedTier=Number(tier.value);
+  const categoryName=name.value.trim();
+
+  if(!categoryName){
+   setMessage('Category name is required.');
+   return;
+  }
+
+  if(selectedTier!==4 && !parent.value){
+   setMessage('Select a parent category.');
+   return;
+  }
+
+  const payload={
+   category_name:categoryName,
+   parent_category_id:selectedTier===4?null:Number(parent.value)
+  };
+
+  if(!editingId) payload.tier=selectedTier;
+
+  const endpoint=editingId
+   ?API+'/risk-tiers/'+editingId
+   :API+'/risk-tiers';
+
+  save.disabled=true;
+  setMessage('Saving category...');
+
+  try{
+   const response=await fetch(endpoint,{
+    method:editingId?'PUT':'POST',
+    headers:authHeaders(),
+    body:JSON.stringify(payload)
+   });
+
+   const data=await response.json();
+
+   if(!response.ok){
+    throw new Error(data.message||'Unable to save category');
+   }
+
+   resetForm();
+   await loadCategories();
+   setMessage('Category saved successfully.');
+
+  }catch(error){
+   setMessage(error.message);
+  }finally{
+   save.disabled=false;
+  }
+ });
+
+ verifyAdmin();
 })();
 </script>
 <script src="nav.js"></script>
