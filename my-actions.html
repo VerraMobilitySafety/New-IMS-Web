@@ -1094,11 +1094,17 @@ async function loadRecordReviewerOptions(action){
 
   // The server validates Document Controller membership.
   // This list excludes the requester; the API remains authoritative.
-  users.filter(u=>
+  const eligible = users.filter(u=>
    u.active===true &&
    u.account_status==='Active' &&
-   Number(u.id)!==Number(action.requested_by_user_id)
-  ).forEach(u=>{
+   Number(u.id)!==Number(action.requested_by_user_id) &&
+   Array.isArray(u.business_roles) &&
+   u.business_roles.some(r=>
+    (typeof r==='string' ? r : r.role_name)==='Document Controller'
+   )
+  );
+
+  eligible.forEach(u=>{
    const name=[u.first_name,u.last_name].filter(Boolean).join(' ');
    select.add(new Option(name+' — '+u.email,String(u.id)));
   });
