@@ -620,7 +620,175 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  <nav class="nav"><div id="vero-nav"></div></nav>
  <div class="side-foot">VERRA | VERO • v2.9<br>Prototype environment</div>
 </aside><main class="main"><section class="global-hero"><div class="hero-content"><div class="hero-kicker">Governance</div><h1>Enterprise Risk Management</h1><p>Enterprise risk profile, controls and treatment performance</p><div class="hero-rule"></div></div><div class="hero-tools"><div class="vero-account" id="veroAccount"><button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false"><div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span></button><div class="vero-account-menu" id="veroAccountMenu"><div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div><a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a><button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button></div></div></div></section>
+
+
+<style id="vero-add-risk-styles">
+.vero-risk-actions{
+ display:flex;
+ gap:12px;
+ margin:22px 0 22px;
+}
+
+.vero-risk-add-button{
+ background:#A9C23F;
+ color:#3D3935;
+ border:0;
+ border-radius:8px;
+ padding:12px 16px;
+ font-size:13px;
+ font-weight:800;
+ cursor:pointer;
+ font-family:Montserrat,Verdana,Arial,sans-serif;
+}
+
+.vero-risk-add-button:hover{
+ filter:brightness(.96);
+}
+
+.vero-risk-overlay{
+ position:fixed;
+ inset:0;
+ background:rgba(0,0,0,.42);
+ z-index:1000;
+ display:none;
+ justify-content:flex-end;
+}
+
+.vero-risk-overlay.open{
+ display:flex;
+}
+
+.vero-risk-drawer{
+ width:min(690px,95vw);
+ height:100%;
+ background:#fff;
+ box-shadow:-15px 0 35px rgba(0,0,0,.2);
+ display:flex;
+ flex-direction:column;
+}
+
+.vero-risk-drawer-head{
+ background:#3D3935;
+ color:#fff;
+ padding:23px;
+ display:flex;
+ justify-content:space-between;
+ align-items:flex-start;
+ gap:20px;
+}
+
+.vero-risk-drawer-head small{
+ color:#A9C23F;
+ font-size:11px;
+ font-weight:800;
+}
+
+.vero-risk-drawer-head h2{
+ margin:6px 0;
+ font-size:21px;
+}
+
+.vero-risk-drawer-head p{
+ margin:0;
+ color:#ddd;
+ font-size:12px;
+}
+
+#veroCloseRiskDrawer{
+ background:transparent;
+ color:#fff;
+ border:1px solid rgba(255,255,255,.22);
+ border-radius:8px;
+ width:34px;
+ height:34px;
+ font-size:24px;
+ cursor:pointer;
+}
+
+.vero-risk-drawer-body{
+ padding:24px;
+ overflow-y:auto;
+ flex:1;
+}
+
+.vero-risk-drawer-body h3{
+ font-size:14px;
+ color:#3D3935;
+ border-bottom:1px solid #E5E1DE;
+ padding-bottom:10px;
+ margin:25px 0 15px;
+}
+
+.vero-risk-drawer-body label{
+ display:block;
+ font-size:11px;
+ font-weight:700;
+ color:#857874;
+ margin:14px 0 6px;
+}
+
+.vero-risk-drawer-body input,
+.vero-risk-drawer-body select,
+.vero-risk-drawer-body textarea{
+ width:100%;
+ padding:12px;
+ border:1px solid #E5E1DE;
+ border-radius:8px;
+ font-size:12px;
+ background:#fff;
+}
+
+.vero-risk-help{
+ color:#857874;
+ font-size:12px;
+ line-height:1.6;
+}
+
+.vero-risk-drawer-footer{
+ padding:18px 24px;
+ border-top:1px solid #E5E1DE;
+ display:flex;
+ justify-content:flex-end;
+ gap:10px;
+}
+
+.vero-risk-cancel,
+.vero-risk-save{
+ padding:11px 16px;
+ border-radius:8px;
+ font-size:12px;
+ font-weight:700;
+ cursor:pointer;
+}
+
+.vero-risk-cancel{
+ background:#fff;
+ border:1px solid #E5E1DE;
+}
+
+.vero-risk-save{
+ background:#A9C23F;
+ color:#3D3935;
+ border:0;
+}
+
+.vero-risk-save:disabled{
+ opacity:.45;
+ cursor:not-allowed;
+}
+</style>
 <div class="dashboard-content">
+
+<div class="vero-risk-actions">
+ <button
+  id="veroAddRiskButton"
+  class="vero-risk-add-button"
+  type="button"
+ >
+  ＋ Add Risk
+ </button>
+</div>
+
 
 <style>
 .vero-risk-dashboard{
@@ -1590,6 +1758,140 @@ table {
   });
 
  load();
+})();
+</script>
+
+<div id="veroRiskDrawerOverlay" class="vero-risk-overlay"
+     aria-hidden="true">
+ <aside class="vero-risk-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="veroRiskDrawerTitle">
+
+  <div class="vero-risk-drawer-head">
+   <div>
+    <small>RISK MANAGEMENT</small>
+    <h2 id="veroRiskDrawerTitle">Add Risk</h2>
+    <p>Identify, assess and manage organisational risk.</p>
+   </div>
+   <button id="veroCloseRiskDrawer"
+           type="button"
+           aria-label="Close Risk drawer">×</button>
+  </div>
+
+  <div class="vero-risk-drawer-body">
+
+   <h3>Risk Identification</h3>
+
+   <label for="veroNewRiskRegister">Risk Register</label>
+   <select id="veroNewRiskRegister">
+    <option value="">Select authorised register</option>
+   </select>
+
+   <label for="veroNewRiskTitle">Risk Title</label>
+   <input id="veroNewRiskTitle"
+          placeholder="Enter risk title">
+
+   <label for="veroNewRiskDescription">Risk Description</label>
+   <textarea id="veroNewRiskDescription" rows="4"
+             placeholder="Describe the risk and potential consequences"></textarea>
+
+   <label for="veroNewRiskCategory">Risk Category</label>
+   <input id="veroNewRiskCategory"
+          placeholder="Select or enter category">
+
+   <h3>Risk Ownership</h3>
+   <p class="vero-risk-help">
+    Risk Owner selection will use Vero's existing user directory.
+   </p>
+
+   <h3>Risk Assessment</h3>
+   <p class="vero-risk-help">
+    Inherent, Residual and Target Risk assessments
+    will use the approved VM 5×5 matrix.
+   </p>
+
+   <h3>Controls</h3>
+   <p class="vero-risk-help">
+    Link existing enterprise Controls from Compliance Management.
+   </p>
+
+   <h3>Risk Treatment</h3>
+   <p class="vero-risk-help">
+    Assign treatment actions, owners and target dates.
+   </p>
+
+  </div>
+
+  <div class="vero-risk-drawer-footer">
+   <button id="veroCancelRisk"
+           class="vero-risk-cancel"
+           type="button">Cancel</button>
+   <button class="vero-risk-save"
+           type="button"
+           disabled
+           title="Risk submission will be enabled after API integration">
+    Save Risk
+   </button>
+  </div>
+
+ </aside>
+</div>
+
+<script>
+(function(){
+ const overlay=document.getElementById('veroRiskDrawerOverlay');
+ const open=document.getElementById('veroAddRiskButton');
+ const close=document.getElementById('veroCloseRiskDrawer');
+ const cancel=document.getElementById('veroCancelRisk');
+ const registerSelect=document.getElementById('veroNewRiskRegister');
+
+ function openDrawer(){
+  const dashboardRegister=document.getElementById('veroRiskRegisterFilter');
+
+  registerSelect.replaceChildren();
+
+  const placeholder=document.createElement('option');
+  placeholder.value='';
+  placeholder.textContent='Select authorised register';
+  registerSelect.appendChild(placeholder);
+
+  [...dashboardRegister.options].forEach(option=>{
+   if(!option.value) return;
+
+   const copy=document.createElement('option');
+   copy.value=option.value;
+   copy.textContent=option.textContent;
+   registerSelect.appendChild(copy);
+  });
+
+  if(dashboardRegister.value){
+   registerSelect.value=dashboardRegister.value;
+  }
+
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden','false');
+  document.getElementById('veroNewRiskTitle').focus();
+ }
+
+ function closeDrawer(){
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden','true');
+ }
+
+ open.addEventListener('click',openDrawer);
+ close.addEventListener('click',closeDrawer);
+ cancel.addEventListener('click',closeDrawer);
+
+ overlay.addEventListener('click',event=>{
+  if(event.target===overlay) closeDrawer();
+ });
+
+ document.addEventListener('keydown',event=>{
+  if(event.key==='Escape' && overlay.classList.contains('open')){
+   closeDrawer();
+  }
+ });
 })();
 </script>
 <script src="nav.js"></script>
