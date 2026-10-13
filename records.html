@@ -3931,6 +3931,69 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  });
 
 
+
+ // RECORDS MANAGEMENT — ROLE-BASED INTERFACE
+ async function applyRecordsManagementView(){
+  let canManage = false;
+
+  try{
+   const data = await recordsFetch(
+    '/records/retention-rules'
+   );
+
+   canManage =
+    data.permissions?.can_manage === true;
+
+  }catch(error){
+   console.warn(
+    'Unable to determine Records Management permissions',
+    error
+   );
+  }
+
+  // Management dashboard
+  const kpis = document.querySelector('.records-kpis');
+
+  if(kpis){
+   kpis.style.display = canManage ? 'grid' : 'none';
+  }
+
+  // Governance tabs
+  document.querySelectorAll(
+   '.records-tab'
+  ).forEach(tab=>{
+   if(tab.dataset.tab !== 'register'){
+    tab.style.display = canManage ? '' : 'none';
+   }
+  });
+
+  // Standard users always start in the register.
+  if(!canManage){
+   document.querySelectorAll('.records-tab')
+    .forEach(tab=>{
+     tab.classList.toggle(
+      'active',
+      tab.dataset.tab === 'register'
+     );
+    });
+
+   ['recordsRegisterPanel',
+    'retentionSchedulePanel',
+    'recordsDispositionPanel',
+    'recordsHoldsPanel']
+    .forEach(id=>{
+     const panel = document.getElementById(id);
+     if(panel){
+      panel.style.display =
+       id === 'recordsRegisterPanel' ? '' : 'none';
+     }
+    });
+  }
+
+  document.body.dataset.recordsManager =
+   canManage ? 'true' : 'false';
+ }
+
  async function loadManualRecordPermissions(){
   const button = document.getElementById('addRecordBtn');
   if(!button) return;
@@ -7084,6 +7147,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  }
 
  loadRecords();
+ applyRecordsManagementView();
  loadManualRecordPermissions();
 })();
 </script>
