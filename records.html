@@ -655,7 +655,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
 .records-kpis{
  display:grid;
- grid-template-columns:repeat(5,minmax(0,1fr));
+ grid-template-columns:repeat(6,minmax(0,1fr));
  gap:14px;
  margin-bottom:18px;
 }
@@ -664,7 +664,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  background:#fff;
  border:1px solid var(--line);
  border-radius:12px;
- padding:17px 18px;
+ padding:16px 13px;
  min-height:105px;
  box-shadow:0 3px 10px rgba(61,57,53,.05);
 }
@@ -1477,35 +1477,43 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 </section>
 
 <section class="records-kpis">
+
  <div class="records-kpi">
   <span>Total Records</span>
   <strong id="kpiTotalRecords">—</strong>
-  <small>Enterprise records</small>
+  <small>All records registered in Vero.</small>
  </div>
 
  <div class="records-kpi">
-  <span>Unclassified</span>
-  <strong id="kpiUnclassified">—</strong>
-  <small>Require retention classification</small>
- </div>
-
- <div class="records-kpi">
-  <span>Due for Disposal</span>
-  <strong id="kpiDueDisposal">—</strong>
-  <small>Retention period reached</small>
- </div>
-
- <div class="records-kpi">
-  <span>Active Holds</span>
-  <strong id="kpiActiveHolds">—</strong>
-  <small>Disposition suspended</small>
+  <span>Classified Records</span>
+  <strong id="kpiClassifiedRecords">—</strong>
+  <small>Records assigned a security classification.</small>
  </div>
 
  <div class="records-kpi">
   <span>Pending Disposition</span>
   <strong id="kpiPendingDisposition">—</strong>
-  <small>Awaiting governance decision</small>
+  <small>Decisions awaiting approval or completion.</small>
  </div>
+
+ <div class="records-kpi">
+  <span>Due for Disposal</span>
+  <strong id="kpiDueDisposal">—</strong>
+  <small>Records that have reached their retention expiry.</small>
+ </div>
+
+ <div class="records-kpi">
+  <span>Active Holds</span>
+  <strong id="kpiActiveHolds">—</strong>
+  <small>Records protected from disposal by an active hold.</small>
+ </div>
+
+ <div class="records-kpi">
+  <span>Record Copy Requests</span>
+  <strong id="kpiCopyRequests">—</strong>
+  <small>Requests awaiting approval and email delivery of a record.</small>
+ </div>
+
 </section>
 
 <section class="records-panel">
@@ -3096,10 +3104,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   const today = new Date();
   today.setHours(0,0,0,0);
 
-  const unclassified = records.filter(r =>
-   !r.retention ||
-   !r.retention.rule_id
-  ).length;
+
 
   const due = records.filter(r => {
    const date = r.retention?.disposal_due_date;
@@ -3119,8 +3124,14 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   document.getElementById('kpiTotalRecords').textContent =
    records.length;
 
-  document.getElementById('kpiUnclassified').textContent =
-   unclassified;
+  const classified = records.filter(r =>
+   ['Public','Confidential'].includes(
+    r.security_classification
+   )
+  ).length;
+
+  document.getElementById('kpiClassifiedRecords').textContent =
+   classified;
 
   document.getElementById('kpiDueDisposal').textContent =
    due;
@@ -3953,6 +3964,16 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    enterpriseRecords = data.records || [];
 
    updateKpis(enterpriseRecords);
+
+   // Live count of outstanding controlled copy requests.
+   const copyRequests =
+    document.getElementById('kpiCopyRequests');
+
+   if(copyRequests){
+    const count = Number(data.pending_copy_requests);
+    copyRequests.textContent =
+     Number.isFinite(count) ? count : '—';
+   }
 
    populateFilter(
     'categoryFilter',
