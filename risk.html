@@ -1350,6 +1350,86 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 }
 
 </style>
+
+<style id="vero-grouped-risk-filter-styles">
+
+.vero-compact-filter-panel{
+ padding:16px 20px !important;
+ margin-bottom:16px !important;
+}
+
+.vero-compact-filter-panel > h2{
+ font-size:18px !important;
+ margin:0 0 14px !important;
+}
+
+.vero-grouped-filter-grid{
+ display:grid;
+ grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr);
+ gap:24px;
+ align-items:start;
+}
+
+.vero-filter-group{
+ display:flex;
+ flex-direction:column;
+ gap:8px;
+ min-width:0;
+}
+
+.vero-filter-group h3{
+ font-size:12px;
+ font-weight:700;
+ color:#3D3935;
+ margin:0 0 5px;
+}
+
+.vero-filter-group .vero-risk-filter{
+ width:100% !important;
+ min-width:0 !important;
+ max-width:none !important;
+ margin:0 !important;
+ position:relative;
+}
+
+.vero-filter-group label{
+ display:block;
+ font-size:11px;
+ font-weight:600;
+ margin-bottom:4px;
+}
+
+.vero-filter-group select,
+.vero-filter-group input{
+ width:100% !important;
+ min-width:0 !important;
+ height:36px !important;
+ box-sizing:border-box !important;
+ padding:0 10px !important;
+ font-size:12px !important;
+ border-radius:7px !important;
+}
+
+@media(max-width:900px){
+ .vero-grouped-filter-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+ }
+ .vero-filter-tier-group{
+  grid-row:span 2;
+ }
+}
+
+@media(max-width:600px){
+ .vero-grouped-filter-grid{
+  grid-template-columns:1fr;
+ }
+ .vero-filter-tier-group{
+  grid-row:auto;
+ }
+}
+
+</style>
 <div class="dashboard-content">
 
 <div class="vero-risk-actions">
@@ -1803,27 +1883,12 @@ table {
 
 <div id="veroCompactRiskLayout">
 
+
 <section class="vero-risk-panel vero-compact-filter-panel">
  <h2>Risk Filters</h2>
- <div class="vero-compact-filter-grid">
-<div class="vero-risk-filter">
-  <label>Assessment</label>
-  <select id="veroRiskAssessmentFilter">
-   <option value="residual">Residual Risk</option>
-   <option value="inherent">Inherent Risk</option>
-   <option value="target" disabled>Target Risk — Coming Soon</option>
-  </select>
- </div>
-<div class="vero-risk-filter">
- <label for="veroRiskLevelFilter">Risk Level</label>
- <select id="veroRiskLevelFilter">
-  <option value="">All risk levels</option>
-  <option value="Significant">Significant</option>
-  <option value="High">High</option>
-  <option value="Moderate">Moderate</option>
-  <option value="Low">Low</option>
- </select>
-</div>
+ <div class="vero-grouped-filter-grid">
+<div class="vero-filter-group vero-filter-tier-group">
+<h3>Risk Tiers</h3>
 <div class="vero-risk-filter">
  <label for="veroTier4Filter">Tier 4</label>
  <select id="veroTier4Filter">
@@ -1851,6 +1916,8 @@ table {
    <option value="VM Location">VM Location</option>
   </select>
  </div>
+</div><div class="vero-filter-group vero-filter-application-group">
+<h3>Applicability</h3>
 <div class="vero-risk-filter">
   <label for="veroApplicationFilter">Select Record</label>
   <select id="veroApplicationFilter" disabled>
@@ -1870,10 +1937,31 @@ table {
       class="vero-site-results"
       role="listbox"
       hidden></div>
+</div><div class="vero-filter-group vero-filter-view-group">
+<h3>Risk View</h3>
+<div class="vero-risk-filter">
+  <label>Assessment</label>
+  <select id="veroRiskAssessmentFilter">
+   <option value="residual">Residual Risk</option>
+   <option value="inherent">Inherent Risk</option>
+   <option value="target" disabled>Target Risk — Coming Soon</option>
+  </select>
+ </div>
+<div class="vero-risk-filter">
+ <label for="veroRiskLevelFilter">Risk Level</label>
+ <select id="veroRiskLevelFilter">
+  <option value="">All risk levels</option>
+  <option value="Significant">Significant</option>
+  <option value="High">High</option>
+  <option value="Moderate">Moderate</option>
+  <option value="Low">Low</option>
+ </select>
+</div>
+</div>
  </div>
 </section>
 
- <div class="vero-matrix-register-grid">
+<div class="vero-matrix-register-grid">
 <section class="vero-risk-panel">
 
  <h2>Risk Assessment Matrix</h2>
