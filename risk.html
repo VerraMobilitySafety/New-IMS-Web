@@ -1107,6 +1107,98 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  display:none !important;
 }
 </style>
+
+<style id="vero-shared-matrix-styles">
+
+.vero-shared-matrix-layout{
+ display:grid;
+ grid-template-columns:minmax(0,1.2fr) minmax(340px,1fr);
+ gap:22px;
+ align-items:start;
+ margin-bottom:24px;
+}
+
+.vero-shared-matrix-layout > .vero-risk-panel{
+ margin:0 !important;
+ height:100%;
+}
+
+.vero-shared-filters{
+ border:1px solid #E5E7EB;
+ border-radius:12px;
+ padding:20px;
+ background:#FFFFFF;
+}
+
+.vero-shared-filters h3{
+ font-size:12px;
+ font-weight:800;
+ margin:0 0 12px;
+ color:#3D3935;
+}
+
+.vero-filter-view{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:12px;
+ margin-bottom:20px;
+}
+
+.vero-filter-tiers{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:12px;
+ margin-bottom:20px;
+}
+
+.vero-filter-application{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:12px;
+}
+
+.vero-shared-filters .vero-risk-filter{
+ min-width:0 !important;
+ width:100%;
+ margin:0;
+}
+
+.vero-shared-filters label{
+ display:block;
+ font-size:11px;
+ font-weight:600;
+ margin-bottom:6px;
+}
+
+.vero-shared-filters select,
+.vero-shared-filters input{
+ width:100%;
+ height:42px;
+ box-sizing:border-box;
+ border-radius:8px;
+ padding:0 10px;
+ font-size:12px;
+}
+
+.vero-risk-summary[hidden]{
+ display:none !important;
+}
+
+@media(max-width:1100px){
+ .vero-shared-matrix-layout{
+  grid-template-columns:1fr;
+ }
+}
+
+@media(max-width:600px){
+ .vero-filter-view,
+ .vero-filter-tiers,
+ .vero-filter-application{
+  grid-template-columns:1fr;
+ }
+}
+
+</style>
 <div class="dashboard-content">
 
 <div class="vero-risk-actions">
@@ -1556,91 +1648,8 @@ table {
 <select id="veroRiskRegisterFilter" hidden>
  <option value="">All authorised registers</option>
 </select>
-<div class="vero-risk-toolbar">
 
- 
-
-
-
-
- <div class="vero-risk-filter">
-  <label>Assessment</label>
-  <select id="veroRiskAssessmentFilter">
-   <option value="residual">Residual Risk</option>
-   <option value="inherent">Inherent Risk</option>
-   <option value="target" disabled>Target Risk — Coming Soon</option>
-  </select>
- </div>
-
- 
-<div class="vero-risk-filter">
- <label for="veroRiskLevelFilter">Risk Level</label>
- <select id="veroRiskLevelFilter">
-  <option value="">All risk levels</option>
-  <option value="Significant">Significant</option>
-  <option value="High">High</option>
-  <option value="Moderate">Moderate</option>
-  <option value="Low">Low</option>
- </select>
-</div>
-
-<div class="vero-risk-filter">
- <label for="veroTier4Filter">Tier 4</label>
- <select id="veroTier4Filter">
-  <option value="">All Tier 4 categories</option>
- </select>
-</div>
-
-<div class="vero-risk-filter">
- <label for="veroTier3Filter">Tier 3</label>
- <select id="veroTier3Filter" disabled>
-  <option value="">All Tier 3 categories</option>
- </select>
-</div>
-
-<div class="vero-risk-filter">
- <label for="veroTier2Filter">Tier 2</label>
- <select id="veroTier2Filter" disabled>
-  <option value="">All Tier 2 categories</option>
- </select>
-</div>
-
-<div class="vero-risk-filter">
-  <label for="veroTier1Filter">Tier 1 — Applies To</label>
-  <select id="veroTier1Filter">
-   <option value="">All application types</option>
-   <option value="Project">Project</option>
-   <option value="Contract">Contract</option>
-   <option value="VM Location">VM Location</option>
-  </select>
- </div>
-
- <div class="vero-risk-filter">
-  <label for="veroApplicationFilter">Select Record</label>
-  <select id="veroApplicationFilter" disabled>
-   <option value="">Select an application type first</option>
-  </select>
- </div>
-
-<div class="vero-risk-filter">
- <label for="veroSiteFilter">Select Site</label>
- <input
-  id="veroSiteFilter"
-  type="search"
-  placeholder="Select a record first"
-  autocomplete="off"
-  disabled
- >
- <div id="veroSiteResults"
-      class="vero-site-results"
-      role="listbox"
-      hidden></div>
-</div>
-
-</div>
-
-
-<div class="vero-risk-top-grid">
+<div id="veroSharedMatrixLayout" class="vero-shared-matrix-layout">
 <section class="vero-risk-panel">
 
  <h2>Risk Assessment Matrix</h2>
@@ -1657,9 +1666,88 @@ table {
  </div>
 
 </section>
+<div class="vero-shared-filters">
 
+ <h3>Risk View</h3>
+ <div class="vero-filter-view">
+<div class="vero-risk-filter">
+  <label>Assessment</label>
+  <select id="veroRiskAssessmentFilter">
+   <option value="residual">Residual Risk</option>
+   <option value="inherent">Inherent Risk</option>
+   <option value="target" disabled>Target Risk — Coming Soon</option>
+  </select>
+ </div>
+<div class="vero-risk-filter">
+ <label for="veroRiskLevelFilter">Risk Level</label>
+ <select id="veroRiskLevelFilter">
+  <option value="">All risk levels</option>
+  <option value="Significant">Significant</option>
+  <option value="High">High</option>
+  <option value="Moderate">Moderate</option>
+  <option value="Low">Low</option>
+ </select>
+</div>
+ </div>
 
-<section class="vero-risk-panel vero-risk-summary">
+ <h3>Risk Tiers</h3>
+ <div class="vero-filter-tiers">
+<div class="vero-risk-filter">
+ <label for="veroTier4Filter">Tier 4</label>
+ <select id="veroTier4Filter">
+  <option value="">All Tier 4 categories</option>
+ </select>
+</div>
+<div class="vero-risk-filter">
+ <label for="veroTier3Filter">Tier 3</label>
+ <select id="veroTier3Filter" disabled>
+  <option value="">All Tier 3 categories</option>
+ </select>
+</div>
+<div class="vero-risk-filter">
+ <label for="veroTier2Filter">Tier 2</label>
+ <select id="veroTier2Filter" disabled>
+  <option value="">All Tier 2 categories</option>
+ </select>
+</div>
+<div class="vero-risk-filter">
+  <label for="veroTier1Filter">Tier 1 — Applies To</label>
+  <select id="veroTier1Filter">
+   <option value="">All application types</option>
+   <option value="Project">Project</option>
+   <option value="Contract">Contract</option>
+   <option value="VM Location">VM Location</option>
+  </select>
+ </div>
+ </div>
+
+ <h3>Applicability</h3>
+ <div class="vero-filter-application">
+<div class="vero-risk-filter">
+  <label for="veroApplicationFilter">Select Record</label>
+  <select id="veroApplicationFilter" disabled>
+   <option value="">Select an application type first</option>
+  </select>
+ </div>
+<div class="vero-risk-filter">
+ <label for="veroSiteFilter">Select Site</label>
+ <input
+  id="veroSiteFilter"
+  type="search"
+  placeholder="Select a record first"
+  autocomplete="off"
+  disabled
+ >
+ <div id="veroSiteResults"
+      class="vero-site-results"
+      role="listbox"
+      hidden></div>
+ </div>
+
+</div>
+
+</div>
+<section class="vero-risk-panel vero-risk-summary" hidden>
  <h2>Attention Required</h2>
  <div class="vero-risk-subtitle">
   Items requiring management action
@@ -1701,10 +1789,6 @@ table {
   Movement reporting will use historical risk assessments.
  </div>
 </section>
-
-
-</div>
-
 <section class="vero-risk-panel">
 
  <div style="display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap">
