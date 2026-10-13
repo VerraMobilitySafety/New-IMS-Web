@@ -1621,6 +1621,16 @@ body[data-records-manager="false"] #sourceFilter{
 }
 </style>
 
+
+<style>
+/* Hide management UI until permissions are confirmed */
+body:not([data-records-manager="true"]) .records-kpis,
+body:not([data-records-manager="true"]) .records-manager-filter,
+body:not([data-records-manager="true"]) .records-tab:not([data-tab="register"]){
+ display:none!important;
+}
+</style>
+
 </head><body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
