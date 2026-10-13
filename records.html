@@ -6769,9 +6769,14 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     requestBtn.textContent = '✓ Request Submitted';
     requestBtn.classList.add('submitted');
 
-    setTimeout(()=>{
-     window.closeRecordDrawer();
-    },700);
+    // Close the record drawer immediately after submission.
+    window.closeRecordDrawer();
+
+    // Confirm successful submission.
+    window.alert(
+     'Controlled Copy request submitted successfully. ' +
+     'Your request has been sent for review.'
+    );
 
    }catch(error){
     console.error(error);
