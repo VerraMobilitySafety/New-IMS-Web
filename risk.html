@@ -1018,7 +1018,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 /* Seven dropdown filters */
 .vero-risk-toolbar{
  display:grid !important;
- grid-template-columns:repeat(7,minmax(0,1fr)) !important;
+ grid-template-columns:repeat(8,minmax(0,1fr)) !important;
  gap:12px !important;
  align-items:end !important;
  width:100%;
@@ -1073,6 +1073,39 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  }
 }
 
+</style>
+
+<style id="vero-site-filter-styles">
+.vero-risk-toolbar .vero-risk-filter{
+ position:relative;
+}
+
+.vero-risk-toolbar input[type="search"]{
+ width:100% !important;
+ height:42px !important;
+ box-sizing:border-box !important;
+ padding:0 10px !important;
+ font-size:12px !important;
+ border-radius:8px !important;
+}
+
+.vero-site-results{
+ position:absolute;
+ top:100%;
+ left:0;
+ right:0;
+ z-index:30;
+ background:#FFFFFF;
+ border:1px solid #E5E1DE;
+ border-radius:8px;
+ box-shadow:0 8px 24px rgba(0,0,0,.12);
+ max-height:240px;
+ overflow-y:auto;
+}
+
+.vero-site-results[hidden]{
+ display:none !important;
+}
 </style>
 <div class="dashboard-content">
 
@@ -1588,6 +1621,22 @@ table {
    <option value="">Select an application type first</option>
   </select>
  </div>
+
+<div class="vero-risk-filter">
+ <label for="veroSiteFilter">Select Site</label>
+ <input
+  id="veroSiteFilter"
+  type="search"
+  placeholder="Select a record first"
+  autocomplete="off"
+  disabled
+ >
+ <div id="veroSiteResults"
+      class="vero-site-results"
+      role="listbox"
+      hidden></div>
+</div>
+
 </div>
 
 
@@ -2948,6 +2997,42 @@ table {
    reset('Unable to load projects');
   }
  });
+})();
+</script>
+
+<script>
+(function(){
+ const type=document.getElementById('veroTier1Filter');
+ const record=document.getElementById('veroApplicationFilter');
+ const site=document.getElementById('veroSiteFilter');
+ const results=document.getElementById('veroSiteResults');
+
+ function resetSite(){
+  site.value='';
+  site.disabled=true;
+  site.placeholder='Select a record first';
+  results.replaceChildren();
+  results.hidden=true;
+ }
+
+ function updateSiteAvailability(){
+  resetSite();
+
+  if(!type.value || !record.value){
+   return;
+  }
+
+  if(type.value==='Project' || type.value==='Contract'){
+   site.placeholder='Site lookup coming soon';
+  }else{
+   site.placeholder='Not applicable';
+  }
+ }
+
+ type.addEventListener('change',resetSite);
+ record.addEventListener('change',updateSiteAvailability);
+
+ resetSite();
 })();
 </script>
 <script src="nav.js"></script>
