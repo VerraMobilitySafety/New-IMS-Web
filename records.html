@@ -1568,6 +1568,59 @@ body[data-records-manager="false"] #sourceFilter{
 }
 
 </style>
+
+<style>
+/* Standard-user Records Register layout */
+@media(min-width:601px){
+
+ body[data-records-manager="false"] #recordsRegisterPanel{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;
+  column-gap:12px;
+  padding:16px 20px;
+  align-items:start;
+ }
+
+ body[data-records-manager="false"] .records-search-toolbar{
+  display:contents;
+ }
+
+ body[data-records-manager="false"] .records-search-main{
+  grid-column:1 / -1;
+  grid-row:1;
+  margin:0 0 12px;
+ }
+
+ body[data-records-manager="false"] .records-filters{
+  display:contents;
+ }
+
+ body[data-records-manager="false"] #categoryFilter{
+  grid-column:1;
+  grid-row:2;
+ }
+
+ body[data-records-manager="false"] #sourceFilter{
+  grid-column:2;
+  grid-row:2;
+ }
+
+ body[data-records-manager="false"] .records-clear-btn{
+  grid-column:3;
+  grid-row:2;
+  margin:0;
+  align-self:stretch;
+ }
+
+ body[data-records-manager="false"] .records-table-wrap{
+  grid-column:1 / -1;
+  grid-row:3;
+  margin-top:16px;
+ }
+
+}
+</style>
+
 </head><body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
