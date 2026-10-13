@@ -2182,59 +2182,61 @@ table {
   });
  }
 
- function updateTier3(){
-  const parentId=Number(tier4Filter.value);
-
-  const items=tierCategories.filter(category=>
-   category.tier===3 &&
-   category.parent_category_id===parentId &&
-   category.status==='Active'
-  );
-
-  populateTier(tier3Filter,items,'All Tier 3 categories');
-  tier3Filter.disabled=!parentId;
-
-  populateTier(tier2Filter,[],'All Tier 2 categories');
-  tier2Filter.disabled=true;
- }
-
- function updateTier2(){
-  const parentId=Number(tier3Filter.value);
-
-  const items=tierCategories.filter(category=>
-   category.tier===2 &&
-   category.parent_category_id===parentId &&
-   category.status==='Active'
-  );
-
-  populateTier(tier2Filter,items,'All Tier 2 categories');
-  tier2Filter.disabled=!parentId;
- }
-
- async function loadTierCategories(headers){
-  const response=await fetch(API+'/risk-tiers',{
-   headers,
-   cache:'no-store'
-  });
-
-  if(!response.ok){
-   throw new Error('Unable to load Risk Tier categories.');
+  // Category hierarchy supports multiple parents. Tier 1 is applicability,
+  // not a parent in the strategic classification tree.
+  function parentIds(category){
+   if(Array.isArray(category.parent_category_ids))
+    return category.parent_category_ids.map(Number);
+   return category.parent_category_id == null
+    ? [] : [Number(category.parent_category_id)];
   }
 
-  const data=await response.json();
+  function updateTier3(){
+   const parentId=Number(tier4Filter.value);
+   const items=tierCategories.filter(category=>
+    category.tier===3 && parentIds(category).includes(parentId)
+   );
+   populateTier(tier3Filter,items,'All Tier 3 categories');
+   tier3Filter.disabled=!parentId;
+   populateTier(tier2Filter,[],'All Tier 2 categories');
+   tier2Filter.disabled=true;
+  }
 
-  tierCategories=(data.categories||[])
-   .filter(category=>category.status==='Active');
+  function updateTier2(){
+   const parentId=Number(tier3Filter.value);
+   const items=tierCategories.filter(category=>
+    category.tier===2 && parentIds(category).includes(parentId)
+   );
+   populateTier(tier2Filter,items,'All Tier 2 categories');
+   tier2Filter.disabled=!parentId;
+  }
 
-  populateTier(
-   tier4Filter,
-   tierCategories.filter(category=>category.tier===4),
-   'All Tier 4 categories'
-  );
- }
+  async function loadTierCategories(headers){
+   const response=await fetch(API+'/risk-tiers',{
+    headers,cache:'no-store'
+   });
+   if(!response.ok)
+    throw new Error('Unable to load Risk Tier categories.');
+   const data=await response.json();
+   tierCategories=(data.categories||[])
+    .filter(category=>category.status==='Active');
+   populateTier(tier4Filter,
+    tierCategories.filter(category=>category.tier===4),
+    'All Tier 4 categories');
+   updateTier3();
+  }
+
+  function hasClassification(risk,tier,id){
+   const ids=risk['tier_'+tier+'_ids'];
+   return Array.isArray(ids) && ids.some(value=>Number(value)===Number(id));
+  }
 
  function filteredRisks(){
   return risks.filter(risk=>{
+    // Filter only against IDs returned by the authorised Risk API.
+    if(tier4Filter.value && !hasClassification(risk,4,tier4Filter.value)) return false;
+    if(tier3Filter.value && !hasClassification(risk,3,tier3Filter.value)) return false;
+    if(tier2Filter.value && !hasClassification(risk,2,tier2Filter.value)) return false;
 
 
 
