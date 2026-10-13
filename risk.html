@@ -1371,6 +1371,9 @@ table {
 <div class="vero-risk-dashboard">
 
 
+<select id="veroRiskRegisterFilter" hidden>
+ <option value="">All authorised registers</option>
+</select>
 <div class="vero-risk-toolbar">
 
  <div class="vero-risk-filter vero-risk-search">
@@ -1384,12 +1387,7 @@ table {
  </div>
 
 
- <div class="vero-risk-filter">
-  <label>Risk Register</label>
-  <select id="veroRiskRegisterFilter">
-   <option value="">All authorised registers</option>
-  </select>
- </div>
+
 
  <div class="vero-risk-filter">
   <label>Assessment</label>
@@ -1725,8 +1723,7 @@ table {
 
  function filteredRisks(){
   return risks.filter(risk=>{
-   if(registerFilter.value &&
-      String(risk.register_id)!==registerFilter.value) return false;
+
 
 
 
@@ -1985,7 +1982,7 @@ table {
   }
  }
 
- [registerFilter,assessmentFilter,levelFilter].forEach(el=>{
+ [assessmentFilter,levelFilter].forEach(el=>{
   el.addEventListener('change',()=>{
    selectedCell=null;
    render();
