@@ -1631,6 +1631,61 @@ body:not([data-records-manager="true"]) .records-tab:not([data-tab="register"]){
 }
 </style>
 
+
+<style>
+/* ============================================================
+   STANDARD USER — RECORD DETAILS
+   ============================================================ */
+
+/* Hide governance-only information */
+body[data-records-manager="false"]
+#recordModal .record-detail:has(#drawerViewingGroups),
+
+body[data-records-manager="false"]
+#recordModal .record-detail:has(#drawerRetentionRule),
+
+body[data-records-manager="false"]
+#recordModal .record-detail:has(#drawerRetentionTrigger),
+
+body[data-records-manager="false"]
+#recordModal .record-detail:has(#drawerTriggerDate),
+
+body[data-records-manager="false"]
+#recordModal .record-detail:has(#drawerHoldStatus),
+
+body[data-records-manager="false"]
+#recordHoldSection,
+
+body[data-records-manager="false"]
+#recordPermissionsSection,
+
+body[data-records-manager="false"]
+#recordHistorySection{
+ display:none!important;
+}
+
+/* Standard-user retention section */
+body[data-records-manager="false"]
+#recordModal .record-detail:has(#drawerRetentionPeriod),
+
+body[data-records-manager="false"]
+#recordModal .record-detail:has(#drawerDisposalDate){
+ min-height:70px;
+}
+
+/* Prevent governance controls flashing before permissions load */
+body:not([data-records-manager="true"])
+#recordHoldSection,
+
+body:not([data-records-manager="true"])
+#recordPermissionsSection,
+
+body:not([data-records-manager="true"])
+#recordHistorySection{
+ display:none!important;
+}
+</style>
+
 </head><body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
@@ -2995,7 +3050,7 @@ body:not([data-records-manager="true"]) .records-tab:not([data-tab="register"]){
       id="requestRecordBtn"
       type="button"
      >
-      Request Record
+      Request a Copy
      </button>
     </div>
 
