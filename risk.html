@@ -934,6 +934,43 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  margin:14px 0 6px;
 }
 </style>
+
+<style id="vero-multi-parent-styles">
+.vero-hierarchy-parent-list{
+ display:flex;
+ flex-direction:column;
+ gap:8px;
+ padding:12px;
+ border:1px solid #E5E1DE;
+ border-radius:8px;
+ max-height:220px;
+ overflow-y:auto;
+ font-size:12px;
+}
+
+.vero-hierarchy-parent-option{
+ display:flex !important;
+ align-items:center;
+ gap:10px;
+ margin:0 !important;
+ padding:7px;
+ cursor:pointer;
+ color:#3D3935 !important;
+ text-transform:none !important;
+}
+
+.vero-hierarchy-parent-option input{
+ width:16px !important;
+ height:16px;
+ margin:0;
+ accent-color:#A9C23F;
+ flex-shrink:0;
+}
+
+.vero-hierarchy-parent-option span{
+ font-size:12px;
+}
+</style>
 <div class="dashboard-content">
 
 <div class="vero-risk-actions">
@@ -2388,10 +2425,14 @@ table {
      <option value="1">Tier 1</option>
     </select>
 
-    <label for="veroHierarchyParent">Parent Category</label>
-    <select id="veroHierarchyParent">
-     <option value="">No parent — Tier 4</option>
-    </select>
+    <label id="veroHierarchyParentLabel">
+     Parent Categories
+    </label>
+    <div id="veroHierarchyParent"
+         class="vero-hierarchy-parent-list"
+         role="group"
+         aria-labelledby="veroHierarchyParentLabel">
+    </div>
 
     <label for="veroHierarchyName">Category Name</label>
     <input id="veroHierarchyName"
@@ -2485,37 +2526,49 @@ table {
   message.textContent=text;
  }
 
- function updateParents(){
+
+ function selectedParents(){
+  return [...parent.querySelectorAll(
+   'input[type="checkbox"]:checked'
+  )].map(input=>Number(input.value));
+ }
+
+ function updateParents(selected=[]){
   const selectedTier=Number(tier.value);
-  const previous=parent.value;
+  const chosen=new Set(selected.map(Number));
+
   parent.replaceChildren();
 
-  const placeholder=document.createElement('option');
-  placeholder.value='';
-  placeholder.textContent=selectedTier===4
-   ?'No parent — Tier 4'
-   :'Select parent category';
-  parent.appendChild(placeholder);
-
   if(selectedTier===4){
-   parent.disabled=true;
+   parent.textContent='Tier 4 categories have no parents.';
    return;
   }
 
-  parent.disabled=false;
+  const available=categories.filter(c=>
+   c.tier===selectedTier+1 &&
+   c.status==='Active'
+  );
 
-  categories
-   .filter(c=>c.tier===selectedTier+1 && c.status==='Active')
-   .forEach(c=>{
-    const option=document.createElement('option');
-    option.value=String(c.id);
-    option.textContent=c.category_name;
-    parent.appendChild(option);
-   });
-
-  if([...parent.options].some(o=>o.value===previous)){
-   parent.value=previous;
+  if(!available.length){
+   parent.textContent='No active parent categories available.';
+   return;
   }
+
+  available.forEach(category=>{
+   const label=document.createElement('label');
+   label.className='vero-hierarchy-parent-option';
+
+   const checkbox=document.createElement('input');
+   checkbox.type='checkbox';
+   checkbox.value=String(category.id);
+   checkbox.checked=chosen.has(Number(category.id));
+
+   const text=document.createElement('span');
+   text.textContent=category.category_name;
+
+   label.append(checkbox,text);
+   parent.appendChild(label);
+  });
  }
 
  function resetForm(){
@@ -2535,8 +2588,11 @@ table {
   tier.value=String(category.tier);
   tier.disabled=true;
   updateParents();
-  parent.value=category.parent_category_id==null
-   ?'':String(category.parent_category_id);
+  updateParents(
+   category.parent_category_ids ||
+   (category.parent_category_id==null
+    ?[]:[category.parent_category_id])
+  );
   name.value=category.category_name;
   heading.textContent='Edit Risk Category';
   save.textContent='Save Changes';
@@ -2563,8 +2619,17 @@ table {
    title.textContent='Tier '+category.tier+' — '+category.category_name;
 
    const subtitle=document.createElement('small');
+   const ids=category.parent_category_ids||
+    (category.parent_category_id==null
+     ?[]:[category.parent_category_id]);
+
+   const parentNames=ids.map(id=>{
+    const found=categories.find(c=>Number(c.id)===Number(id));
+    return found?found.category_name:'Unknown parent';
+   });
+
    subtitle.textContent=
-    (category.parent_category_name||'Top-level category')+
+    (parentNames.join(', ')||'Top-level category')+
     ' · '+category.status;
 
    details.append(title,subtitle);
@@ -2629,7 +2694,7 @@ table {
   }
  });
 
- tier.addEventListener('change',updateParents);
+ tier.addEventListener('change',()=>updateParents());
  reset.addEventListener('click',resetForm);
 
  form.addEventListener('submit',async event=>{
@@ -2643,14 +2708,16 @@ table {
    return;
   }
 
-  if(selectedTier!==4 && !parent.value){
-   setMessage('Select a parent category.');
+  const parentIds=selectedTier===4?[]:selectedParents();
+
+  if(selectedTier!==4 && !parentIds.length){
+   setMessage('Select at least one parent category.');
    return;
   }
 
   const payload={
    category_name:categoryName,
-   parent_category_id:selectedTier===4?null:Number(parent.value)
+   parent_category_ids:parentIds
   };
 
   if(!editingId) payload.tier=selectedTier;
