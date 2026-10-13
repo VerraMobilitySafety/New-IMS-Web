@@ -1199,6 +1199,77 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 }
 
 </style>
+
+<style id="vero-final-panel-alignment">
+
+/* Equal-height shared panels */
+.vero-shared-matrix-layout{
+ display:grid !important;
+ grid-template-columns:minmax(0,1.2fr) minmax(340px,1fr);
+ align-items:stretch !important;
+ gap:18px !important;
+}
+
+.vero-shared-matrix-layout > .vero-risk-panel,
+.vero-shared-matrix-layout > .vero-shared-filters{
+ height:100% !important;
+ min-width:0;
+ box-sizing:border-box;
+}
+
+/* Matching primary headings */
+.vero-shared-matrix-layout .vero-risk-panel h2,
+.vero-shared-filters > h3:first-child{
+ font-family:Montserrat,Verdana,Arial,sans-serif !important;
+ font-size:18px !important;
+ font-weight:700 !important;
+ letter-spacing:-0.3px !important;
+ line-height:1.4 !important;
+ margin:0 0 20px !important;
+ color:#3D3935 !important;
+}
+
+/* Secondary filter headings */
+.vero-shared-filters h3:not(:first-child){
+ font-size:12px !important;
+ font-weight:700 !important;
+ margin:18px 0 12px !important;
+}
+
+/* Vertical tier progression */
+.vero-filter-tiers{
+ display:grid !important;
+ grid-template-columns:minmax(0,1fr) !important;
+ gap:10px !important;
+}
+
+/* Keep the other filter groups side by side */
+.vero-filter-view,
+.vero-filter-application{
+ grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+}
+
+/* Full-width Risk Register */
+.vero-risk-dashboard > .vero-risk-panel{
+ width:100% !important;
+ max-width:none !important;
+ grid-column:1 / -1 !important;
+}
+
+@media(max-width:1100px){
+ .vero-shared-matrix-layout{
+  grid-template-columns:minmax(0,1fr) !important;
+ }
+}
+
+@media(max-width:600px){
+ .vero-filter-view,
+ .vero-filter-application{
+  grid-template-columns:minmax(0,1fr) !important;
+ }
+}
+
+</style>
 <div class="dashboard-content">
 
 <div class="vero-risk-actions">
@@ -1653,9 +1724,7 @@ table {
 <section class="vero-risk-panel">
 
  <h2>Risk Assessment Matrix</h2>
- <div class="vero-risk-subtitle">
-  Verra Mobility approved 5×5 Risk Matrix
- </div>
+
 
  <div class="vero-matrix-scroll">
   <div id="veroRiskMatrix" class="vero-matrix"></div>
