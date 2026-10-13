@@ -1519,6 +1519,18 @@ body[data-records-manager="false"] #recordsRegisterPanel > .records-filters{
  .records-search-toolbar{flex-direction:column;align-items:stretch}
  .records-filters{grid-template-columns:1fr}
 }
+
+/* Hide management controls until permissions are resolved */
+body:not([data-records-manager="true"]) .records-manager-filter{
+ display:none!important;
+}
+
+/* Standard-user filters remain visible */
+body[data-records-manager="false"] #categoryFilter,
+body[data-records-manager="false"] #sourceFilter{
+ display:block!important;
+}
+
 /* Standard-user filter layout */
 
 @media(min-width:601px){
