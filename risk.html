@@ -1270,6 +1270,86 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 }
 
 </style>
+
+<style id="vero-compact-matrix-register-styles">
+
+.vero-compact-filter-panel{
+ margin-bottom:18px !important;
+}
+
+.vero-compact-filter-grid{
+ display:grid;
+ grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:14px;
+}
+
+.vero-compact-filter-grid .vero-risk-filter{
+ min-width:0 !important;
+ width:100%;
+ margin:0;
+ position:relative;
+}
+
+.vero-compact-filter-grid select,
+.vero-compact-filter-grid input{
+ width:100%;
+ height:42px;
+ box-sizing:border-box;
+ padding:0 10px;
+ font-size:12px;
+ border-radius:8px;
+}
+
+.vero-matrix-register-grid{
+ display:grid;
+ grid-template-columns:minmax(0,45fr) minmax(0,55fr);
+ gap:18px;
+ align-items:stretch;
+ margin-bottom:24px;
+}
+
+.vero-matrix-register-grid > .vero-risk-panel{
+ min-width:0;
+ margin:0 !important;
+}
+
+.vero-matrix-register-grid .vero-risk-table{
+ width:100%;
+}
+
+.vero-matrix-register-grid .vero-risk-table th,
+.vero-matrix-register-grid .vero-risk-table td{
+ padding:12px 9px;
+}
+
+.vero-matrix-register-grid .vero-risk-panel h2{
+ font-size:18px !important;
+ font-weight:700 !important;
+}
+
+.vero-risk-summary[hidden]{
+ display:none !important;
+}
+
+@media(max-width:1100px){
+ .vero-matrix-register-grid{
+  grid-template-columns:1fr;
+ }
+}
+
+@media(max-width:800px){
+ .vero-compact-filter-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+ }
+}
+
+@media(max-width:450px){
+ .vero-compact-filter-grid{
+  grid-template-columns:1fr;
+ }
+}
+
+</style>
 <div class="dashboard-content">
 
 <div class="vero-risk-actions">
@@ -1720,25 +1800,12 @@ table {
  <option value="">All authorised registers</option>
 </select>
 
-<div id="veroSharedMatrixLayout" class="vero-shared-matrix-layout">
-<section class="vero-risk-panel">
 
- <h2>Risk Assessment Matrix</h2>
+<div id="veroCompactRiskLayout">
 
-
- <div class="vero-matrix-scroll">
-  <div id="veroRiskMatrix" class="vero-matrix"></div>
- </div>
-
- <div class="vero-risk-status" id="veroMatrixStatus">
-  Loading risk information...
- </div>
-
-</section>
-<div class="vero-shared-filters">
-
- <h3>Risk View</h3>
- <div class="vero-filter-view">
+<section class="vero-risk-panel vero-compact-filter-panel">
+ <h2>Risk Filters</h2>
+ <div class="vero-compact-filter-grid">
 <div class="vero-risk-filter">
   <label>Assessment</label>
   <select id="veroRiskAssessmentFilter">
@@ -1757,10 +1824,6 @@ table {
   <option value="Low">Low</option>
  </select>
 </div>
- </div>
-
- <h3>Risk Tiers</h3>
- <div class="vero-filter-tiers">
 <div class="vero-risk-filter">
  <label for="veroTier4Filter">Tier 4</label>
  <select id="veroTier4Filter">
@@ -1788,10 +1851,6 @@ table {
    <option value="VM Location">VM Location</option>
   </select>
  </div>
- </div>
-
- <h3>Applicability</h3>
- <div class="vero-filter-application">
 <div class="vero-risk-filter">
   <label for="veroApplicationFilter">Select Record</label>
   <select id="veroApplicationFilter" disabled>
@@ -1812,9 +1871,52 @@ table {
       role="listbox"
       hidden></div>
  </div>
+</section>
 
-</div>
+ <div class="vero-matrix-register-grid">
+<section class="vero-risk-panel">
 
+ <h2>Risk Assessment Matrix</h2>
+
+
+ <div class="vero-matrix-scroll">
+  <div id="veroRiskMatrix" class="vero-matrix"></div>
+ </div>
+
+ <div class="vero-risk-status" id="veroMatrixStatus">
+  Loading risk information...
+ </div>
+
+</section><section class="vero-risk-panel">
+
+ <div style="display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap">
+  <div>
+   <h2>Risk Register</h2>
+   <div class="vero-risk-subtitle" id="veroRiskListStatus">
+    Loading risks...
+   </div>
+  </div>
+  <button class="vero-risk-clear" id="veroClearMatrixSelection">
+   Clear Matrix Selection
+  </button>
+ </div>
+
+ <div style="overflow-x:auto">
+  <table class="vero-risk-table">
+   <thead>
+    <tr>
+     <th>Risk Code</th>
+     <th>Risk</th>
+     <th>Rating</th>
+     <th>Status</th>
+    </tr>
+   </thead>
+   <tbody id="veroRiskTableBody"></tbody>
+  </table>
+ </div>
+
+</section>
+ </div>
 </div>
 <section class="vero-risk-panel vero-risk-summary" hidden>
  <h2>Attention Required</h2>
@@ -1857,37 +1959,6 @@ table {
  <div class="vero-risk-status">
   Movement reporting will use historical risk assessments.
  </div>
-</section>
-<section class="vero-risk-panel">
-
- <div style="display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap">
-  <div>
-   <h2>Risk Register</h2>
-   <div class="vero-risk-subtitle" id="veroRiskListStatus">
-    Loading risks...
-   </div>
-  </div>
-  <button class="vero-risk-clear" id="veroClearMatrixSelection">
-   Clear Matrix Selection
-  </button>
- </div>
-
- <div style="overflow-x:auto">
-  <table class="vero-risk-table">
-   <thead>
-    <tr>
-     <th>Risk Code</th>
-     <th>Risk</th>
-     <th>Register</th>
-     <th>Category</th>
-     <th>Score</th>
-     <th>Status</th>
-    </tr>
-   </thead>
-   <tbody id="veroRiskTableBody"></tbody>
-  </table>
- </div>
-
 </section>
 
 </div>
@@ -2203,7 +2274,7 @@ table {
   if(!visible.length){
    const tr=document.createElement('tr');
    const td=document.createElement('td');
-   td.colSpan=6;
+   td.colSpan=4;
    td.textContent='No risks match the current selection.';
    td.style.textAlign='center';
    td.style.padding='28px';
@@ -2219,9 +2290,9 @@ table {
    [
     risk.risk_code,
     risk.risk_title,
-    risk.register_name,
-    risk.risk_category||'—',
-    values?values.score:'Not assessed',
+    values
+     ?classifications[values.row][values.col]
+     :'Not assessed',
     risk.status
    ].forEach(value=>{
     const td=document.createElement('td');
