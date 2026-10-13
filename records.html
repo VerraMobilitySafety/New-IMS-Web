@@ -1457,7 +1457,64 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  }
 }
 
-</style></head><body><div class="app"><aside class="sidebar">
+</style>
+<style>
+.records-search-toolbar{
+ display:flex;
+ gap:12px;
+ align-items:center;
+ margin-bottom:12px;
+}
+.records-search-main{
+ position:relative;
+ flex:1;
+}
+.records-search-main input{
+ width:100%;
+ padding:14px 16px 14px 42px;
+ border:1px solid var(--line);
+ border-radius:9px;
+ font-size:13px;
+ background:#fff;
+}
+.records-search-icon{
+ position:absolute;
+ left:15px;
+ top:50%;
+ transform:translateY(-50%);
+ color:var(--grey);
+ font-size:23px;
+ pointer-events:none;
+}
+.records-clear-btn{
+ padding:13px 18px;
+ border:1px solid var(--line);
+ background:#fff;
+ border-radius:9px;
+ cursor:pointer;
+ font-weight:700;
+ white-space:nowrap;
+}
+.records-clear-btn:hover{
+ background:#f4f6f5;
+}
+.records-filters{
+ display:grid;
+ grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:10px;
+}
+body[data-records-manager="false"] .records-manager-filter{
+ display:none!important;
+}
+@media(max-width:900px){
+ .records-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+ .records-search-toolbar{flex-direction:column;align-items:stretch}
+ .records-filters{grid-template-columns:1fr}
+}
+</style>
+</head><body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
  <img class="chev c2" src="verra-chevron.png" alt="">
@@ -1535,13 +1592,22 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
  <div id="recordsRegisterPanel">
 
- <div class="records-filters">
-  <input
-   id="recordSearch"
-   type="search"
-   placeholder="Search records..."
-  >
+ <div class="records-search-toolbar">
+  <div class="records-search-main">
+   <span class="records-search-icon">⌕</span>
+   <input
+    id="recordSearch"
+    type="search"
+    placeholder="Search record number, title, owner or keyword..."
+   >
+  </div>
+  <button type="button" id="clearRecordFilters"
+   class="records-clear-btn">
+   Clear Filters
+  </button>
+ </div>
 
+ <div class="records-filters">
   <select id="categoryFilter">
    <option value="">All Categories</option>
   </select>
@@ -1550,8 +1616,34 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    <option value="">All Sources</option>
   </select>
 
-  <select id="statusFilter">
+  <select id="statusFilter" class="records-manager-filter">
    <option value="">All Statuses</option>
+  </select>
+
+  <select id="classificationFilter" class="records-manager-filter">
+   <option value="">All Classifications</option>
+   <option value="Public">Public</option>
+   <option value="Confidential">Confidential</option>
+  </select>
+
+  <select id="ownerFilter" class="records-manager-filter">
+   <option value="">All Owners</option>
+  </select>
+
+  <select id="businessAreaFilter" class="records-manager-filter">
+   <option value="">All Business Areas</option>
+  </select>
+
+  <select id="retentionFilter" class="records-manager-filter">
+   <option value="">All Retention Statuses</option>
+   <option value="due">Due for Disposal</option>
+   <option value="notdue">Not Yet Due</option>
+  </select>
+
+  <select id="holdFilter" class="records-manager-filter">
+   <option value="">All Hold Statuses</option>
+   <option value="active">Active Hold</option>
+   <option value="none">No Active Hold</option>
   </select>
  </div>
 
@@ -3143,6 +3235,24 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    pendingDisposition;
  }
 
+
+ function populateAdvancedRecordFilters(){
+  populateFilter(
+   'ownerFilter',
+   enterpriseRecords.map(r =>
+    [r.owner?.first_name,r.owner?.last_name]
+     .filter(Boolean).join(' ')
+   ),
+   'All Owners'
+  );
+
+  populateFilter(
+   'businessAreaFilter',
+   enterpriseRecords.map(r=>r.owner?.business_area),
+   'All Business Areas'
+  );
+ }
+
  function filteredRecords(){
   const q = (
    document.getElementById('recordSearch')?.value || ''
@@ -3156,6 +3266,17 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
   const status =
    document.getElementById('statusFilter')?.value || '';
+
+  const classification =
+   document.getElementById('classificationFilter')?.value || '';
+  const owner =
+   document.getElementById('ownerFilter')?.value || '';
+  const businessArea =
+   document.getElementById('businessAreaFilter')?.value || '';
+  const retention =
+   document.getElementById('retentionFilter')?.value || '';
+  const hold =
+   document.getElementById('holdFilter')?.value || '';
 
   return enterpriseRecords.filter(r => {
    const haystack = [
@@ -3176,6 +3297,30 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    if(category && r.record_category !== category) return false;
    if(source && r.source_module !== source) return false;
    if(status && r.status !== status) return false;
+   if(classification &&
+      r.security_classification !== classification) return false;
+
+   const recordOwner =
+    [r.owner?.first_name,r.owner?.last_name]
+     .filter(Boolean).join(' ');
+
+   if(owner && recordOwner !== owner) return false;
+   if(businessArea &&
+      r.owner?.business_area !== businessArea) return false;
+
+   const dueDate = r.retention?.disposal_due_date;
+   const isDue = Boolean(
+    dueDate &&
+    dueDate <= new Date().toISOString().slice(0,10) &&
+    r.status !== 'Disposed'
+   );
+
+   if(retention === 'due' && !isDue) return false;
+   if(retention === 'notdue' && isDue) return false;
+
+   if(hold === 'active' && !r.has_active_hold) return false;
+   if(hold === 'none' && r.has_active_hold) return false;
+
 
    return true;
   });
@@ -4056,6 +4201,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     'All Statuses'
    );
 
+   populateAdvancedRecordFilters();
    renderRecords();
 
   }catch(error){
@@ -7145,6 +7291,31 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    });
   }
  }
+
+ document.getElementById('clearRecordFilters')
+  ?.addEventListener('click',()=>{
+   [
+    'recordSearch',
+    'categoryFilter',
+    'sourceFilter',
+    'statusFilter',
+    'classificationFilter',
+    'ownerFilter',
+    'businessAreaFilter',
+    'retentionFilter',
+    'holdFilter'
+   ].forEach(id=>{
+    const element=document.getElementById(id);
+    if(element) element.value='';
+   });
+   renderRecords();
+  });
+
+ ['classificationFilter','ownerFilter','businessAreaFilter',
+  'retentionFilter','holdFilter'].forEach(id=>{
+   document.getElementById(id)
+    ?.addEventListener('change',renderRecords);
+  });
 
  loadRecords();
  applyRecordsManagementView();
