@@ -619,7 +619,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  <img class="chev c3" src="verra-chevron.png" alt="">
  <nav class="nav"><div id="vero-nav"></div></nav>
  <div class="side-foot">VERRA | VERO • v2.9<br>Prototype environment</div>
-</aside><main class="main"><section class="global-hero"><div class="hero-content"><div class="hero-kicker">Governance</div><h1>Enterprise Risk Management</h1><p>Enterprise risk profile, controls and treatment performance</p><div class="hero-rule"></div></div><div class="hero-tools"><input class="hero-search" placeholder="⌕   Search VERO..."><div class="vero-account" id="veroAccount"><button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false"><div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span></button><div class="vero-account-menu" id="veroAccountMenu"><div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div><a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a><button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button></div></div></div></section>
+</aside><main class="main"><section class="global-hero"><div class="hero-content"><div class="hero-kicker">Governance</div><h1>Enterprise Risk Management</h1><p>Enterprise risk profile, controls and treatment performance</p><div class="hero-rule"></div></div><div class="hero-tools"><div class="vero-account" id="veroAccount"><button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false"><div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span></button><div class="vero-account-menu" id="veroAccountMenu"><div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div><a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a><button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button></div></div></div></section>
 <div class="dashboard-content">
 
 <style>
@@ -937,6 +937,101 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  .vero-risk-supporting{
   grid-template-columns:1fr;
  }
+}
+</style>
+
+<style id="vero-risk-typography">
+/* Consistent VERO typography */
+
+body,
+button,
+input,
+select,
+textarea,
+table {
+ font-family:Montserrat,Verdana,Arial,sans-serif !important;
+}
+
+.vero-risk-dashboard,
+.vero-risk-dashboard * {
+ font-family:Montserrat,Verdana,Arial,sans-serif;
+}
+
+.vero-risk-panel h2 {
+ font-size:18px;
+ font-weight:700;
+ letter-spacing:-0.3px;
+}
+
+.vero-risk-subtitle,
+.vero-risk-status {
+ font-size:12px;
+ font-weight:400;
+ line-height:1.5;
+}
+
+.vero-risk-filter label {
+ font-size:11px;
+ font-weight:600;
+}
+
+.vero-risk-filter input,
+.vero-risk-filter select {
+ font-size:12px;
+ font-weight:500;
+}
+
+.vero-risk-table th {
+ font-size:11px;
+ font-weight:700;
+}
+
+.vero-risk-table td {
+ font-size:12px;
+ font-weight:400;
+}
+
+.vero-summary-row {
+ font-size:12px;
+ font-weight:500;
+}
+
+.vero-summary-row strong {
+ font-size:15px;
+ font-weight:700;
+}
+
+.vero-matrix-score {
+ font-size:17px;
+ font-weight:800;
+}
+
+.vero-matrix-level {
+ font-size:9px;
+ font-weight:600;
+}
+
+.vero-matrix-count {
+ font-size:10px;
+ font-weight:700;
+}
+
+.vero-movement-card strong {
+ font-size:23px;
+ font-weight:700;
+}
+
+.vero-movement-card span {
+ font-size:11px;
+ font-weight:500;
+}
+
+/* Keep account menu aligned after removing hero search */
+.hero-tools {
+ display:flex;
+ align-items:center;
+ justify-content:flex-end;
+ gap:12px;
 }
 </style>
 <div class="vero-risk-dashboard">
