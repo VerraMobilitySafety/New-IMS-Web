@@ -883,6 +883,62 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  }
 }
 </style>
+
+<style>
+.vero-movement-grid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:12px;
+}
+
+.vero-movement-card{
+ background:#F7F8F7;
+ border:1px solid #E5E7EB;
+ border-radius:9px;
+ padding:17px;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ gap:7px;
+}
+
+.vero-movement-card strong{
+ font-size:25px;
+ color:#3D3935;
+}
+
+.vero-movement-card span{
+ font-size:12px;
+ color:#6B7280;
+}
+
+.vero-movement-icon{
+ font-size:23px;
+ font-weight:800;
+ color:#857874;
+}
+
+.vero-risk-supporting{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:20px;
+ margin-bottom:24px;
+}
+
+.vero-risk-supporting .vero-risk-panel{
+ margin-bottom:0;
+}
+
+.vero-risk-intelligence{
+ border-left:4px solid #A9C23F;
+}
+
+@media(max-width:950px){
+ .vero-risk-supporting{
+  grid-template-columns:1fr;
+ }
+}
+</style>
 <div class="vero-risk-dashboard">
 
 
@@ -915,7 +971,19 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   </select>
  </div>
 
- <div class="vero-risk-filter">
+ 
+<div class="vero-risk-filter">
+ <label for="veroRiskLevelFilter">Risk Level</label>
+ <select id="veroRiskLevelFilter">
+  <option value="">All risk levels</option>
+  <option value="Significant">Significant</option>
+  <option value="High">High</option>
+  <option value="Moderate">Moderate</option>
+  <option value="Low">Low</option>
+ </select>
+</div>
+
+<div class="vero-risk-filter">
   <label>Risk Category</label>
   <select id="veroRiskCategoryFilter">
    <option value="">All categories</option>
@@ -942,30 +1010,50 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
 </section>
 
+
 <section class="vero-risk-panel vero-risk-summary">
- <h2>Risk Summary</h2>
+ <h2>Attention Required</h2>
  <div class="vero-risk-subtitle">
-  Current authorised risk exposure
+  Items requiring management action
  </div>
 
- <div id="veroRiskSummary" class="vero-summary-list">
+ <div class="vero-summary-list">
   <div class="vero-summary-row">
-   <span>Significant</span><strong id="veroCountSignificant">0</strong>
+   <span>Overdue Risk Reviews</span>
+   <strong id="veroOverdueReviews">0</strong>
   </div>
   <div class="vero-summary-row">
-   <span>High</span><strong id="veroCountHigh">0</strong>
+   <span>Overdue Risk Treatments</span>
+   <strong id="veroOverdueTreatments">Not yet available</strong>
   </div>
   <div class="vero-summary-row">
-   <span>Moderate</span><strong id="veroCountModerate">0</strong>
-  </div>
-  <div class="vero-summary-row">
-   <span>Low</span><strong id="veroCountLow">0</strong>
-  </div>
-  <div class="vero-summary-row vero-summary-total">
-   <span>Total assessed</span><strong id="veroCountTotal">0</strong>
+   <span>Risks Awaiting Approval</span>
+   <strong id="veroAwaitingApproval">Not yet available</strong>
   </div>
  </div>
+
+ <h2 style="margin-top:25px">Risk Movement</h2>
+ <div class="vero-risk-subtitle">
+  Changes in assessed risk exposure
+ </div>
+
+ <div class="vero-movement-grid">
+  <div class="vero-movement-card">
+   <div class="vero-movement-icon">↑</div>
+   <strong id="veroDeteriorating">—</strong>
+   <span>Deteriorating</span>
+  </div>
+  <div class="vero-movement-card">
+   <div class="vero-movement-icon">↓</div>
+   <strong id="veroImproving">—</strong>
+   <span>Improving</span>
+  </div>
+ </div>
+ <div class="vero-risk-status">
+  Movement reporting will use historical risk assessments.
+ </div>
 </section>
+
 
 </div>
 
@@ -1003,6 +1091,44 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
 </div>
 </div>
+
+<div class="vero-risk-supporting">
+
+ <section class="vero-risk-panel">
+  <h2>Enterprise Risk Landscape</h2>
+  <div class="vero-risk-subtitle">
+   Risk distribution across authorised categories
+  </div>
+  <div id="veroRiskLandscape">
+   No risks recorded yet.
+  </div>
+ </section>
+
+ <section class="vero-risk-panel">
+  <h2>Control Health and Treatments</h2>
+  <div class="vero-risk-subtitle">
+   Control effectiveness and treatment performance
+  </div>
+  <div class="vero-risk-status">
+   Control and treatment reporting will be enabled
+   when the supporting API endpoints are available.
+  </div>
+ </section>
+
+</div>
+
+<section class="vero-risk-panel vero-risk-intelligence">
+ <h2>✦ Risk Intelligence</h2>
+ <div class="vero-risk-subtitle">
+  Connected insights across Vero
+ </div>
+ <div class="vero-risk-status">
+  Future insights will identify emerging exposure,
+  common control weaknesses and relationships
+  between risks, incidents, audits and treatments.
+ </div>
+</section>
+
 <div class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Risks • v2.9</span></div></div></main></div><script>function toggleNavGroup(id){const g=document.getElementById(id);if(g)g.classList.toggle('open');}
 /* VERO GLOBAL ACCOUNT MENU */
 (()=>{
@@ -1039,6 +1165,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  const registerFilter=document.getElementById('veroRiskRegisterFilter');
  const assessmentFilter=document.getElementById('veroRiskAssessmentFilter');
  const categoryFilter=document.getElementById('veroRiskCategoryFilter');
+ const levelFilter=document.getElementById('veroRiskLevelFilter');
  const tableBody=document.getElementById('veroRiskTableBody');
  const searchInput=document.getElementById('veroRiskSearch');
  const matrixStatus=document.getElementById('veroMatrixStatus');
@@ -1088,6 +1215,14 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
    if(categoryFilter.value &&
       risk.risk_category!==categoryFilter.value) return false;
+
+   if(levelFilter.value){
+    const values=assessmentValues(risk);
+    if(!values) return false;
+    if(classifications[values.row][values.col]!==levelFilter.value){
+     return false;
+    }
+   }
 
    const query=searchInput.value.trim().toLowerCase();
 
@@ -1228,34 +1363,63 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  }
 
 
- function renderSummary(){
-  const totals={
-   Significant:0,
-   High:0,
-   Moderate:0,
-   Low:0
-  };
+
+
+ function renderLandscape(){
+  const container=document.getElementById('veroRiskLandscape');
+  container.replaceChildren();
+
+  const categories={};
 
   filteredRisks().forEach(risk=>{
-   const values=assessmentValues(risk);
-   if(!values) return;
-
-   const level=classifications[values.row][values.col];
-   totals[level]++;
+   const category=risk.risk_category||'Uncategorised';
+   categories[category]=(categories[category]||0)+1;
   });
 
-  document.getElementById('veroCountSignificant').textContent=totals.Significant;
-  document.getElementById('veroCountHigh').textContent=totals.High;
-  document.getElementById('veroCountModerate').textContent=totals.Moderate;
-  document.getElementById('veroCountLow').textContent=totals.Low;
-  document.getElementById('veroCountTotal').textContent=
-   Object.values(totals).reduce((a,b)=>a+b,0);
+  const entries=Object.entries(categories)
+   .sort((a,b)=>b[1]-a[1]);
+
+  if(!entries.length){
+   container.textContent='No risks recorded in the current view.';
+   return;
+  }
+
+  entries.forEach(([name,count])=>{
+   const row=document.createElement('div');
+   row.className='vero-summary-row';
+
+   const label=document.createElement('span');
+   label.textContent=name;
+
+   const value=document.createElement('strong');
+   value.textContent=count;
+
+   row.append(label,value);
+   container.appendChild(row);
+  });
+ }
+
+ function renderSummary(){
+  const today=new Date();
+  today.setHours(0,0,0,0);
+
+  const overdueReviews=filteredRisks().filter(risk=>{
+   if(!risk.next_review_date) return false;
+   if(['Closed','Archived'].includes(risk.status)) return false;
+
+   const date=new Date(risk.next_review_date+'T00:00:00');
+   return date<today;
+  }).length;
+
+  document.getElementById('veroOverdueReviews').textContent=
+   overdueReviews;
  }
 
  function render(){
   renderMatrix();
   renderTable();
   renderSummary();
+  renderLandscape();
  }
 
  async function load(){
@@ -1312,7 +1476,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   }
  }
 
- [registerFilter,assessmentFilter,categoryFilter].forEach(el=>{
+ [registerFilter,assessmentFilter,categoryFilter,levelFilter].forEach(el=>{
   el.addEventListener('change',()=>{
    selectedCell=null;
    render();
