@@ -763,9 +763,141 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 }
 </style>
 
+
+<style>
+/* VERO Risk Management — compact dashboard */
+.vero-risk-dashboard{
+ max-width:none !important;
+ width:100%;
+ margin:0 !important;
+}
+
+.vero-risk-toolbar{
+ justify-content:flex-start;
+ align-items:flex-end;
+}
+
+.vero-risk-filter{
+ min-width:150px;
+}
+
+.vero-risk-search{
+ min-width:280px;
+ flex:1 1 280px;
+ max-width:420px;
+}
+
+.vero-risk-search input{
+ width:100%;
+ padding:12px;
+ border:1px solid #E5E7EB;
+ border-radius:8px;
+ background:#fff;
+ font-size:13px;
+}
+
+.vero-risk-top-grid{
+ display:grid;
+ grid-template-columns:minmax(0,720px) minmax(240px,1fr);
+ gap:20px;
+ align-items:start;
+ margin-bottom:24px;
+}
+
+.vero-risk-top-grid .vero-risk-panel{
+ margin-bottom:0;
+}
+
+.vero-matrix{
+ grid-template-columns:48px repeat(5,minmax(0,1fr)) !important;
+ min-width:0 !important;
+ gap:2px;
+}
+
+.vero-matrix-heading{
+ min-height:30px;
+ font-size:12px;
+}
+
+.vero-matrix-cell{
+ min-height:65px !important;
+ gap:2px;
+ padding:3px;
+ border-width:2px;
+}
+
+.vero-matrix-score{
+ font-size:17px;
+ line-height:1.1;
+}
+
+.vero-matrix-level{
+ font-size:10px;
+ line-height:1.1;
+}
+
+.vero-matrix-count{
+ min-width:20px;
+ height:20px;
+ font-size:10px;
+ padding:0 5px;
+}
+
+.vero-summary-list{
+ display:flex;
+ flex-direction:column;
+ gap:10px;
+}
+
+.vero-summary-row{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ padding:13px 15px;
+ background:#F7F8F7;
+ border-radius:8px;
+ font-size:13px;
+}
+
+.vero-summary-row strong{
+ font-size:18px;
+}
+
+.vero-summary-total{
+ border-top:2px solid #E5E7EB;
+ font-weight:700;
+}
+
+@media(max-width:1100px){
+ .vero-risk-top-grid{
+  grid-template-columns:1fr;
+ }
+}
+
+@media(max-width:700px){
+ .vero-matrix-scroll{
+  overflow-x:auto;
+ }
+ .vero-matrix{
+  min-width:480px !important;
+ }
+}
+</style>
 <div class="vero-risk-dashboard">
 
+
 <div class="vero-risk-toolbar">
+
+ <div class="vero-risk-filter vero-risk-search">
+  <label for="veroRiskSearch">Search Risks</label>
+  <input
+   id="veroRiskSearch"
+   type="search"
+   placeholder="Search code, title, category or description..."
+   autocomplete="off"
+  >
+ </div>
+
 
  <div class="vero-risk-filter">
   <label>Risk Register</label>
@@ -792,6 +924,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
 </div>
 
+<div class="vero-risk-top-grid">
 <section class="vero-risk-panel">
 
  <h2>Risk Assessment Matrix</h2>
@@ -808,6 +941,33 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  </div>
 
 </section>
+
+<section class="vero-risk-panel vero-risk-summary">
+ <h2>Risk Summary</h2>
+ <div class="vero-risk-subtitle">
+  Current authorised risk exposure
+ </div>
+
+ <div id="veroRiskSummary" class="vero-summary-list">
+  <div class="vero-summary-row">
+   <span>Significant</span><strong id="veroCountSignificant">0</strong>
+  </div>
+  <div class="vero-summary-row">
+   <span>High</span><strong id="veroCountHigh">0</strong>
+  </div>
+  <div class="vero-summary-row">
+   <span>Moderate</span><strong id="veroCountModerate">0</strong>
+  </div>
+  <div class="vero-summary-row">
+   <span>Low</span><strong id="veroCountLow">0</strong>
+  </div>
+  <div class="vero-summary-row vero-summary-total">
+   <span>Total assessed</span><strong id="veroCountTotal">0</strong>
+  </div>
+ </div>
+</section>
+
+</div>
 
 <section class="vero-risk-panel">
 
@@ -880,6 +1040,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  const assessmentFilter=document.getElementById('veroRiskAssessmentFilter');
  const categoryFilter=document.getElementById('veroRiskCategoryFilter');
  const tableBody=document.getElementById('veroRiskTableBody');
+ const searchInput=document.getElementById('veroRiskSearch');
  const matrixStatus=document.getElementById('veroMatrixStatus');
  const listStatus=document.getElementById('veroRiskListStatus');
 
@@ -927,6 +1088,20 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 
    if(categoryFilter.value &&
       risk.risk_category!==categoryFilter.value) return false;
+
+   const query=searchInput.value.trim().toLowerCase();
+
+   if(query){
+    const searchable=[
+     risk.risk_code,
+     risk.risk_title,
+     risk.risk_description,
+     risk.risk_category,
+     risk.register_name
+    ].filter(Boolean).join(' ').toLowerCase();
+
+    if(!searchable.includes(query)) return false;
+   }
 
    return true;
   });
@@ -1052,9 +1227,35 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
   });
  }
 
+
+ function renderSummary(){
+  const totals={
+   Significant:0,
+   High:0,
+   Moderate:0,
+   Low:0
+  };
+
+  filteredRisks().forEach(risk=>{
+   const values=assessmentValues(risk);
+   if(!values) return;
+
+   const level=classifications[values.row][values.col];
+   totals[level]++;
+  });
+
+  document.getElementById('veroCountSignificant').textContent=totals.Significant;
+  document.getElementById('veroCountHigh').textContent=totals.High;
+  document.getElementById('veroCountModerate').textContent=totals.Moderate;
+  document.getElementById('veroCountLow').textContent=totals.Low;
+  document.getElementById('veroCountTotal').textContent=
+   Object.values(totals).reduce((a,b)=>a+b,0);
+ }
+
  function render(){
   renderMatrix();
   renderTable();
+  renderSummary();
  }
 
  async function load(){
@@ -1116,6 +1317,11 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
    selectedCell=null;
    render();
   });
+ });
+
+ searchInput.addEventListener('input',()=>{
+  selectedCell=null;
+  render();
  });
 
  document.getElementById('veroClearMatrixSelection')
