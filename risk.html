@@ -971,6 +971,20 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  font-size:12px;
 }
 </style>
+
+<style id="vero-tier1-styles">
+.vero-risk-applicability{
+ display:flex;
+ gap:14px;
+ flex-wrap:wrap;
+ align-items:flex-end;
+ margin:0 0 20px;
+}
+.vero-risk-applicability .vero-risk-filter{
+ min-width:220px;
+ flex:1;
+}
+</style>
 <div class="dashboard-content">
 
 <div class="vero-risk-actions">
@@ -1470,6 +1484,27 @@ table {
 
 </div>
 
+
+<div class="vero-risk-applicability">
+
+ <div class="vero-risk-filter">
+  <label for="veroTier1Filter">Tier 1 — Applies To</label>
+  <select id="veroTier1Filter">
+   <option value="">All application types</option>
+   <option value="Project">Project</option>
+   <option value="Contract">Contract</option>
+   <option value="VM Location">VM Location</option>
+  </select>
+ </div>
+
+ <div class="vero-risk-filter">
+  <label for="veroApplicationFilter">Select Record</label>
+  <select id="veroApplicationFilter" disabled>
+   <option value="">Select an application type first</option>
+  </select>
+ </div>
+
+</div>
 <div class="vero-risk-top-grid">
 <section class="vero-risk-panel">
 
@@ -2763,6 +2798,70 @@ table {
  });
 
  verifyAdmin();
+})();
+</script>
+
+<script>
+(function(){
+ const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+ const type=document.getElementById('veroTier1Filter');
+ const record=document.getElementById('veroApplicationFilter');
+
+ function reset(message){
+  record.replaceChildren();
+  const option=document.createElement('option');
+  option.value='';
+  option.textContent=message;
+  record.appendChild(option);
+  record.disabled=true;
+ }
+
+ type.addEventListener('change',async()=>{
+  const selected=type.value;
+
+  if(!selected){
+   reset('Select an application type first');
+   return;
+  }
+
+  if(selected!=='Project'){
+   reset('Module connection coming soon');
+   return;
+  }
+
+  reset('Loading projects...');
+
+  try{
+   const token=localStorage.getItem('vero_session_token');
+
+   const response=await fetch(API+'/projects',{
+    headers:{
+     Authorization:'Bearer '+token,
+     Accept:'application/json'
+    },
+    cache:'no-store'
+   });
+
+   if(!response.ok) throw new Error('Unable to load projects');
+
+   const data=await response.json();
+   const projects=Array.isArray(data)?data:(data.projects||[]);
+
+   reset('All projects');
+
+   projects.forEach(project=>{
+    const option=document.createElement('option');
+    option.value=String(project.id);
+    option.textContent=project.project_name;
+    record.appendChild(option);
+   });
+
+   record.disabled=false;
+
+  }catch(error){
+   reset('Unable to load projects');
+  }
+ });
 })();
 </script>
 <script src="nav.js"></script>
