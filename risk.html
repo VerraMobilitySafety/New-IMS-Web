@@ -777,6 +777,71 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  cursor:not-allowed;
 }
 </style>
+
+<style id="vero-assessment-styles">
+
+.vero-assessment-section{
+ margin:18px 0 25px;
+}
+
+.vero-assessment-section h4{
+ font-size:13px;
+ font-weight:800;
+ color:#3D3935;
+ margin:0 0 5px;
+}
+
+.vero-assessment-section .vero-risk-help{
+ margin:0 0 12px;
+}
+
+.vero-assessment-row{
+ display:grid;
+ grid-template-columns:1fr 1fr 85px 115px;
+ gap:10px;
+ align-items:end;
+}
+
+.vero-assessment-field{
+ min-width:0;
+}
+
+.vero-assessment-field label{
+ margin:0 0 6px;
+ font-size:10px;
+ font-weight:700;
+}
+
+.vero-assessment-field select{
+ width:100%;
+ height:42px;
+ padding:8px;
+ font-size:12px;
+}
+
+.assessment-score,
+.assessment-level{
+ height:42px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ border-radius:8px;
+ font-size:12px;
+ font-weight:800;
+ background:#F4F6F5;
+ border:1px solid #E5E1DE;
+}
+
+.assessment-level{
+ font-size:10px;
+}
+
+@media(max-width:520px){
+ .vero-assessment-row{
+  grid-template-columns:1fr 1fr;
+ }
+}
+</style>
 <div class="dashboard-content">
 
 <div class="vero-risk-actions">
@@ -1805,11 +1870,149 @@ table {
     Risk Owner selection will use Vero's existing user directory.
    </p>
 
+
    <h3>Risk Assessment</h3>
+
    <p class="vero-risk-help">
-    Inherent, Residual and Target Risk assessments
-    will use the approved VM 5×5 matrix.
+    Assess each risk using the approved Verra Mobility
+    Risk Assessment Matrix.
    </p>
+
+   <div class="vero-assessment-section">
+
+    <h4>Inherent Risk</h4>
+    <p class="vero-risk-help">
+     Risk exposure before controls are applied.
+    </p>
+
+    <div class="vero-assessment-row" data-assessment="inherent">
+     <div class="vero-assessment-field">
+      <label>Impact</label>
+      <select class="assessment-impact">
+       <option value="">Select</option>
+       <option value="1">1</option>
+       <option value="2">2</option>
+       <option value="3">3</option>
+       <option value="4">4</option>
+       <option value="5">5</option>
+      </select>
+     </div>
+
+     <div class="vero-assessment-field">
+      <label>Likelihood</label>
+      <select class="assessment-likelihood">
+       <option value="">Select</option>
+       <option value="5">5</option>
+       <option value="10">10</option>
+       <option value="15">15</option>
+       <option value="20">20</option>
+       <option value="25">25</option>
+      </select>
+     </div>
+
+     <div class="vero-assessment-field">
+      <label>Score</label>
+      <div class="assessment-score">—</div>
+     </div>
+
+     <div class="vero-assessment-field">
+      <label>Risk Level</label>
+      <div class="assessment-level">—</div>
+     </div>
+    </div>
+
+   </div>
+
+   <div class="vero-assessment-section">
+
+    <h4>Residual Risk</h4>
+    <p class="vero-risk-help">
+     Risk exposure with existing controls in place.
+    </p>
+
+    <div class="vero-assessment-row" data-assessment="residual">
+     <div class="vero-assessment-field">
+      <label>Impact</label>
+      <select class="assessment-impact">
+       <option value="">Select</option>
+       <option value="1">1</option>
+       <option value="2">2</option>
+       <option value="3">3</option>
+       <option value="4">4</option>
+       <option value="5">5</option>
+      </select>
+     </div>
+
+     <div class="vero-assessment-field">
+      <label>Likelihood</label>
+      <select class="assessment-likelihood">
+       <option value="">Select</option>
+       <option value="5">5</option>
+       <option value="10">10</option>
+       <option value="15">15</option>
+       <option value="20">20</option>
+       <option value="25">25</option>
+      </select>
+     </div>
+
+     <div class="vero-assessment-field">
+      <label>Score</label>
+      <div class="assessment-score">—</div>
+     </div>
+
+     <div class="vero-assessment-field">
+      <label>Risk Level</label>
+      <div class="assessment-level">—</div>
+     </div>
+    </div>
+
+   </div>
+
+   <div class="vero-assessment-section">
+
+    <h4>Target Risk</h4>
+    <p class="vero-risk-help">
+     Intended risk exposure following additional controls.
+    </p>
+
+    <div class="vero-assessment-row" data-assessment="target">
+     <div class="vero-assessment-field">
+      <label>Impact</label>
+      <select class="assessment-impact">
+       <option value="">Select</option>
+       <option value="1">1</option>
+       <option value="2">2</option>
+       <option value="3">3</option>
+       <option value="4">4</option>
+       <option value="5">5</option>
+      </select>
+     </div>
+
+     <div class="vero-assessment-field">
+      <label>Likelihood</label>
+      <select class="assessment-likelihood">
+       <option value="">Select</option>
+       <option value="5">5</option>
+       <option value="10">10</option>
+       <option value="15">15</option>
+       <option value="20">20</option>
+       <option value="25">25</option>
+      </select>
+     </div>
+
+     <div class="vero-assessment-field">
+      <label>Score</label>
+      <div class="assessment-score">—</div>
+     </div>
+
+     <div class="vero-assessment-field">
+      <label>Risk Level</label>
+      <div class="assessment-level">—</div>
+     </div>
+    </div>
+
+   </div>
+
 
    <h3>Controls</h3>
    <p class="vero-risk-help">
@@ -1892,6 +2095,64 @@ table {
    closeDrawer();
   }
  });
+})();
+</script>
+
+<script>
+(function(){
+
+ const matrix=[
+  ['Moderate','High','Significant','Significant','Significant'],
+  ['Moderate','Moderate','High','Significant','Significant'],
+  ['Low','Moderate','High','High','Significant'],
+  ['Low','Moderate','Moderate','Moderate','High'],
+  ['Low','Low','Low','Moderate','Moderate']
+ ];
+
+ const colours={
+  Low:'#A8C63D',
+  Moderate:'#21869B',
+  High:'#D1B443',
+  Significant:'#BF302D'
+ };
+
+ document.querySelectorAll('.vero-assessment-row')
+  .forEach(row=>{
+
+   const impact=row.querySelector('.assessment-impact');
+   const likelihood=row.querySelector('.assessment-likelihood');
+   const score=row.querySelector('.assessment-score');
+   const level=row.querySelector('.assessment-level');
+
+   function calculate(){
+
+    if(!impact.value || !likelihood.value){
+     score.textContent='—';
+     level.textContent='—';
+     level.style.background='#F4F6F5';
+     level.style.color='#3D3935';
+     return;
+    }
+
+    const i=Number(impact.value);
+    const l=Number(likelihood.value);
+
+    const rowIndex=[25,20,15,10,5].indexOf(l);
+    const classification=matrix[rowIndex][i-1];
+
+    score.textContent=String(i*l);
+    level.textContent=classification;
+    level.style.background=colours[classification];
+    level.style.color=
+     classification==='Low'||classification==='High'
+      ?'#242424':'#FFFFFF';
+   }
+
+   impact.addEventListener('change',calculate);
+   likelihood.addEventListener('change',calculate);
+
+  });
+
 })();
 </script>
 <script src="nav.js"></script>
