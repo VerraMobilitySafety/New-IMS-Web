@@ -73,6 +73,9 @@
     path === 'project-management.html' ||
     path === 'project-workspace.html';
 
+  const maintenanceActive =
+    path === 'maintenance-management.html';
+
   const incidentActive =
     path === 'incident-management.html';
 
@@ -114,7 +117,8 @@
         <span>Projects</span>
       </a>
 
-      <a class="placeholder" href="#" onclick="return false">
+      <a class="${maintenanceActive ? 'active' : ''}"
+         href="maintenance-management.html">
         <span class="ico">⚙</span>
         <span>Maintenance</span>
       </a>
