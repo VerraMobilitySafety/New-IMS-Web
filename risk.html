@@ -3642,7 +3642,9 @@ table {
      const data=await response.json();if(!response.ok)throw Error(data.message||'Unable to retrieve Master Risks');
      if(version!==request||overlay.hidden)return;
      const risks=(data.risks||[]).filter(risk=>(risk.tier_1_ids||[]).some(id=>Number(id)===Number(r.id)));
-     c.replaceChildren(make('h3','Linked Master Risks'));
+     c.replaceChildren(make('h3','Linked Master Risks ('+risks.length+')'));
+     const info=make('p','Master Risk definitions are governed by Risk Office. Select a record to inspect its definition, review status and approvals.');c.appendChild(info);
+     risks.sort((a,b)=>String(a.risk_title||'').localeCompare(String(b.risk_title||'')));
      if(!risks.length)c.appendChild(make('p','No Master Risks are linked to this Tier 1 classification.'));
      for(const risk of risks){
       const line=make('div','');line.className='vero-risk-classification-row';
