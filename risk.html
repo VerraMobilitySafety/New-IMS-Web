@@ -3540,47 +3540,90 @@ table {
 }
 </style>
 <script>
-document.addEventListener('vero-risk-open-classification',event=>{
- const r=event.detail.category;
+(()=>{
+ const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
  const overlay=document.getElementById('veroRiskDetailsOverlay');
  const content=document.getElementById('veroRiskDetailsContent');
- const title=document.getElementById('veroRiskDetailsTitle');
- const code=document.getElementById('veroRiskDetailsCode');
  const tabs=overlay.querySelector('.vero-risk-details-tabs');
  const actions=overlay.querySelector('.vero-risk-office-actions');
- title.textContent=r.name;
- code.textContent='Tier '+r.tier+' · Classification';
- tabs.hidden=true;
- if(actions)actions.hidden=true;
- content.replaceChildren();
- const section=document.createElement('section');section.className='vero-risk-details-card';
- const heading=document.createElement('h3');heading.textContent='Classification and aggregated exposure';
- section.appendChild(heading);
- const entries=[['Classification',r.name],['Tier',r.tier],
-  ['Underlying Master Risks',r.master_risks],['Applicable records',r.applicable_contexts],
-  ['Approved assessments',r.contributing_assessments],
-  ['Average residual score',r.average_residual_score??'Not assessed'],
-  ['Maximum residual score',r.maximum_residual_score??'Not assessed'],
-  ['Awaiting assessment',r.awaiting_assessment]];
- for(const [label,value] of entries){
-  const p=document.createElement('p');
-  const strong=document.createElement('strong');strong.textContent=label+': ';
-  p.append(strong,document.createTextNode(String(value??'—')));section.appendChild(p);
- }
- content.appendChild(section);
- overlay.hidden=false;document.body.style.overflow='hidden';
- document.getElementById('veroRiskDetailsClose').focus();
-});
-document.addEventListener('vero-risk-open-details',()=>{
- const overlay=document.getElementById('veroRiskDetailsOverlay');
- overlay.querySelector('.vero-risk-details-tabs').hidden=false;
- const actions=overlay.querySelector('.vero-risk-office-actions');
- if(actions)actions.hidden=false;
-});
+ const title=document.getElementById('veroRiskDetailsTitle');
+ const subtitle=document.getElementById('veroRiskDetailsCode');
+ let request=0;
+ const make=(tag,value)=>{const n=document.createElement(tag);n.textContent=String(value??'');return n;};
+ const card=heading=>{const c=make('section','');c.className='vero-risk-details-card';c.appendChild(make('h3',heading));content.appendChild(c);return c;};
+ const field=(parent,label,value)=>{const p=make('p','');const strong=make('strong',label+': ');p.append(strong,document.createTextNode(String(value??'Not assessed')));parent.appendChild(p);};
+ document.addEventListener('vero-risk-open-classification',event=>{
+  const r=event.detail.category,version=++request;
+  title.textContent=r.name;subtitle.textContent='Tier '+r.tier+' · Classification';
+  tabs.hidden=true;if(actions)actions.hidden=true;
+  content.replaceChildren();
+  const nav=make('div','');nav.className='vero-risk-classification-tabs';
+  const pages=['Overview','Child Classifications','Terminal Risks','Operational Exposure'];
+  async function show(page){
+   content.replaceChildren(nav);
+   [...nav.children].forEach(btn=>btn.setAttribute('aria-current',String(btn.textContent===page)));
+   if(page==='Overview'){
+    const c=card('Classification overview');
+    field(c,'Classification',r.name);field(c,'Tier',r.tier);
+    field(c,'Underlying Master Risks',r.master_risks);
+    field(c,'Applicable records',r.applicable_contexts);
+    field(c,'Approved assessments',r.contributing_assessments);
+    field(c,'Average residual score',r.average_residual_score);
+    field(c,'Maximum residual score',r.maximum_residual_score);
+    field(c,'Awaiting assessment',r.awaiting_assessment);
+    return;
+   }
+   if(page==='Operational Exposure'){
+    const c=card('Operational exposure');
+    field(c,'Applicable records',r.applicable_contexts);
+    field(c,'Approved assessments',r.contributing_assessments);
+    field(c,'Average residual score',r.average_residual_score);
+    field(c,'Maximum residual score',r.maximum_residual_score);
+    field(c,'Awaiting assessment',r.awaiting_assessment);
+    c.appendChild(make('p','Detailed operational contributors will be available after individual applicability records are connected to this view.'));
+    return;
+   }
+   const c=card(page);
+   c.appendChild(make('p','Loading classifications...'));
+   try{
+    const response=await fetch(API+'/risk/hierarchical-register?parent_id='+encodeURIComponent(r.id),{
+     headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},cache:'no-store'
+    });
+    const data=await response.json();
+    if(!response.ok)throw Error(data.message||'Unable to retrieve classifications');
+    if(version!==request||overlay.hidden)return;
+    const rows=(data.rows||[]).filter(item=>page==='Child Classifications'?item.kind==='category':item.kind==='terminal_risk');
+    c.replaceChildren(make('h3',page));
+    if(!rows.length)c.appendChild(make('p','No records at this level.'));
+    for(const item of rows){
+     const line=make('div','');line.style.cssText='padding:12px 0;border-bottom:1px solid #e1e5e2';
+     line.appendChild(make('strong',item.name));
+     if(item.kind==='category')field(line,'Master Risks',item.master_risks);
+     else field(line,'Risk code',item.code);
+     c.appendChild(line);
+    }
+   }catch(error){if(version===request)c.replaceChildren(make('h3',page),make('p',error.message));}
+  }
+  for(const page of pages){
+   const btn=make('button',page);btn.type='button';btn.addEventListener('click',()=>show(page));nav.appendChild(btn);
+  }
+  overlay.hidden=false;document.body.style.overflow='hidden';
+  show('Overview');
+  document.getElementById('veroRiskDetailsClose').focus();
+ });
+ document.addEventListener('vero-risk-open-details',()=>{
+  request++;tabs.hidden=false;if(actions)actions.hidden=false;
+ });
+})();
 </script>
 <style id="vero-risk-heading-count-styles">
 .vero-matrix-register-grid .vero-risk-heading-with-count{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 16px}
 .vero-matrix-register-grid .vero-risk-heading-count{display:inline-block;font-size:14px;font-weight:700;color:#607068;line-height:1.3;font-variant-numeric:tabular-nums}
+</style>
+<style id="vero-risk-classification-tab-styles">
+#veroRiskDetailsOverlay .vero-risk-classification-tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+#veroRiskDetailsOverlay .vero-risk-classification-tabs button{border:1px solid #dce3de;background:#fff;border-radius:7px;padding:9px 12px;font-size:12px;cursor:pointer}
+#veroRiskDetailsOverlay .vero-risk-classification-tabs button[aria-current=true]{background:#0b3d2e;color:#fff;border-color:#0b3d2e}
 </style>
 <script src="risk-hierarchy.js"></script>
 <script src="risk-operational.js"></script>
