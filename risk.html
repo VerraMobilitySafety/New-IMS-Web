@@ -3633,32 +3633,45 @@ table {
    content.replaceChildren(nav);
    const panel=card('Change parent classifications');
    const form=make('form','');
-   const selectLabel=make('label','Select one or more parent classifications');
-   const select=document.createElement('select');select.multiple=true;select.size=7;
-   selectLabel.appendChild(select);
+   const selectLabel=make('div','Select parent classifications');
+   selectLabel.className='vero-parent-picker';
+   const parentChoices=make('div','');parentChoices.className='vero-parent-choices';
+   const selectedParents=new Set();
+   selectLabel.appendChild(parentChoices);
    const reasonLabel=make('label','Reason for changing parents');
    const reason=document.createElement('textarea');reason.required=true;reason.maxLength=2000;
    reasonLabel.appendChild(reason);
    const message=make('p','Loading eligible parents…');message.setAttribute('role','status');
    const save=make('button','Save parent relationships');save.type='submit';save.disabled=true;
    const cancel=make('button','Cancel');cancel.type='button';cancel.addEventListener('click',()=>show('Overview'));
-   form.append(selectLabel,reasonLabel,save,cancel,message);panel.appendChild(form);
+   const actionsRow=make('div','');actionsRow.className='vero-parent-actions';
+   actionsRow.append(save,cancel);
+   form.append(selectLabel,reasonLabel,actionsRow,message);panel.appendChild(form);
    try{
     const response=await fetch(API+'/risk-tiers',{headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},cache:'no-store'});
     const data=await response.json();if(!response.ok)throw Error(data.message||'Unable to load classifications');
     if(version!==request||overlay.hidden)return;
     const current=(data.categories||[]).find(c=>Number(c.id)===Number(r.id));
     if(!current)throw Error('Classification not found');
-    const selected=new Set((current.parent_category_ids||[]).map(Number));
-    for(const parent of (data.categories||[]).filter(c=>c.status==='Active'&&Number(c.tier)===Number(r.tier)+1)){
-     const option=make('option',parent.category_name);option.value=String(parent.id);
-     option.selected=selected.has(Number(parent.id));select.appendChild(option);
+    (current.parent_category_ids||[]).forEach(id=>selectedParents.add(Number(id)));
+    const eligible=(data.categories||[]).filter(c=>c.status==='Active'&&Number(c.tier)===Number(r.tier)+1);
+    for(const parent of eligible){
+     const choice=make('label','');choice.className='vero-parent-choice';
+     const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=String(parent.id);
+     checkbox.checked=selectedParents.has(Number(parent.id));
+     checkbox.addEventListener('change',()=>{
+      if(checkbox.checked)selectedParents.add(Number(parent.id));
+      else selectedParents.delete(Number(parent.id));
+     });
+     const text=make('span',parent.category_name);
+     choice.append(checkbox,text);parentChoices.appendChild(choice);
     }
+    if(!eligible.length)parentChoices.appendChild(make('p','No active parent classifications are available at the next tier.'));
     save.disabled=false;message.textContent='Select the appropriate parent categories.';
    }catch(error){message.textContent=error.message;}
    form.addEventListener('submit',async event=>{
     event.preventDefault();
-    const ids=[...select.selectedOptions].map(option=>Number(option.value));
+    const ids=[...selectedParents];
     if(!ids.length){message.textContent='Select at least one parent.';return;}
     if(!reason.value.trim()){message.textContent='A justification is required.';return;}
     save.disabled=true;
