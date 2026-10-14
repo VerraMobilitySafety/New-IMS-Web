@@ -2321,6 +2321,8 @@ table {
  function filteredRisks(){
   if(riskDataState!=='ready')return [];
   return risks.filter(risk=>{
+    // Archived Master Risks remain in history but are excluded from active reporting.
+    if(String(risk.status||'').toLowerCase()==='archived')return false;
     if(contextTypeFilter.value){
      if(!contextAssignmentsReady)return false;
      const kind={'Project':'Project','Contract':'Maintenance Contract',
