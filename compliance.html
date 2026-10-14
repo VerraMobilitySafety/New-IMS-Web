@@ -2569,6 +2569,16 @@ button,input,select,textarea{font-family:inherit}
      </div>
 
      <div class="field full">
+      <label>Risk Classification (required)</label>
+      <small>Select the relevant classification from VERO's shared Risk Classification System.</small>
+     </div>
+     <div class="field"><label>Tier 4</label><select id="singleRiskTier4" onchange="changeSubmissionRiskTier(4)"><option value="">Select Tier 4...</option></select></div>
+     <div class="field"><label>Tier 3</label><select id="singleRiskTier3" onchange="changeSubmissionRiskTier(3)"><option value="">Select Tier 3...</option></select></div>
+     <div class="field"><label>Tier 2</label><select id="singleRiskTier2" onchange="changeSubmissionRiskTier(2)"><option value="">Select Tier 2...</option></select></div>
+     <div class="field"><label>Tier 1</label><select id="singleRiskTier1"><option value="">Select Tier 1...</option></select></div>
+     <div class="field full"><small id="singleRiskClassificationMessage"></small></div>
+
+     <div class="field full">
       <label>Requirement Description</label>
 
       <textarea
