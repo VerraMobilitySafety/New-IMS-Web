@@ -3407,7 +3407,7 @@ table {
    node.append(label,badge);
    const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';
    edit.className='vero-hierarchy-edit';
-   edit.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();editCategory(category);});
+   edit.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();editCategory(category);form.scrollIntoView({behavior:'smooth',block:'start'});setMessage('Editing '+category.category_name+'. Choose Archived, then Save Changes.');});
    summary.append(node,edit);details.appendChild(summary);
    if(ancestry.has(id))return details;
    const next=new Set(ancestry);next.add(id);
