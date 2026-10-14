@@ -165,7 +165,7 @@
         <span>Risk Management</span>
       </a>
 
-      <a class="placeholder" href="#" onclick="return false">
+      <a class="${isActive('insurance.html') ? 'active' : ''}" href="insurance.html">
         <span class="ico">◇</span>
         <span>Insurance Management</span>
       </a>
