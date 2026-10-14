@@ -1173,6 +1173,12 @@ button,input,select,textarea{font-family:inherit}
     </div>
     <div id="complianceLinkedRisks" class="compliance-linked-risks">No risks linked.</div>
     <div id="complianceRiskLinker" hidden>
+     <div class="manage-activity-form">
+      <div class="field"><label>Tier 4</label><select id="complianceRiskTier4" onchange="filterComplianceRiskClassifications(4)"><option value="">All Tier 4 categories</option></select></div>
+      <div class="field"><label>Tier 3</label><select id="complianceRiskTier3" onchange="filterComplianceRiskClassifications(3)"><option value="">All Tier 3 categories</option></select></div>
+      <div class="field"><label>Tier 2</label><select id="complianceRiskTier2" onchange="filterComplianceRiskClassifications(2)"><option value="">All Tier 2 categories</option></select></div>
+      <div class="field"><label>Tier 1</label><select id="complianceRiskTier1" onchange="filterComplianceRiskClassifications(1)"><option value="">All Tier 1 categories</option></select></div>
+     </div>
      <div class="field full"><label>Approved Master Risk</label><select id="complianceRiskSelect"><option value="">Select approved risk...</option></select></div>
      <div id="complianceRiskLinkMessage" role="status"></div>
      <button type="button" class="btn green" onclick="saveComplianceRiskLink()">Link Selected Risk</button>
@@ -8059,16 +8065,62 @@ async function loadComplianceLinkedRisks(id,canManage){
    : '<div class="compliance-empty-state">No approved master risks linked.</div>';
  }catch(error){target.textContent=error.message;}
 }
+let complianceApprovedRisks=[];
+let complianceClassificationPaths=[];
+function filterComplianceRiskClassifications(changedTier){
+ const tiers=[4,3,2,1];
+ const values={};
+ tiers.forEach(t=>{values[t]=document.getElementById('complianceRiskTier'+t).value;});
+ tiers.forEach(t=>{
+  if(t>=changedTier)return;
+  values[t]='';
+ });
+ tiers.forEach(t=>{
+  const el=document.getElementById('complianceRiskTier'+t);
+  if(t>changedTier)return;
+  const eligible=complianceClassificationPaths.filter(path=>
+   tiers.filter(parent=>parent>t).every(parent=>!values[parent]||path.path_ids.some((id,i)=>id===Number(values[parent])&&complianceClassificationPathTier(path,i)===parent))
+  );
+  const choices=new Map();
+  eligible.forEach(path=>{
+   path.path_ids.forEach((id,i)=>{
+    if(complianceClassificationPathTier(path,i)===t)choices.set(id,path.path.split(' → ')[i]);
+   });
+  });
+  el.innerHTML='<option value="">All Tier '+t+' categories</option>'+
+   [...choices.entries()].sort((a,b)=>a[1].localeCompare(b[1])).map(([id,name])=>
+    '<option value="'+id+'">'+escapeComplianceText(name)+'</option>').join('');
+  el.value=values[t]||'';
+ });
+ const matchingPaths=complianceClassificationPaths.filter(path=>
+  tiers.every(t=>!values[t]||path.path_ids.some((id,i)=>id===Number(values[t])&&complianceClassificationPathTier(path,i)===t))
+ );
+ const categoryIds=new Set(matchingPaths.map(path=>Number(path.category_id)));
+ const filtered=complianceApprovedRisks.filter(r=>
+  !tiers.some(t=>values[t])||r.classifications.some(c=>categoryIds.has(Number(c.category_id)))
+ );
+ document.getElementById('complianceRiskSelect').innerHTML=
+  '<option value="">Select approved risk ('+filtered.length+')...</option>'+
+  filtered.map(r=>'<option value="'+Number(r.id)+'">'+escapeComplianceText(r.risk_code)+' — '+escapeComplianceText(r.risk_title)+'</option>').join('');
+}
+function complianceClassificationPathTier(path,index){
+ return Number(path.tier)+path.path_ids.length-1-index;
+}
 async function openComplianceRiskLinker(){
  if(!complianceRiskCanManage)return;
  document.getElementById('complianceRiskLinker').hidden=false;
- const select=document.getElementById('complianceRiskSelect');
- select.innerHTML='<option value="">Loading approved risks...</option>';
+ document.getElementById('complianceRiskSelect').innerHTML='<option value="">Loading approved risks...</option>';
+ const message=document.getElementById('complianceRiskLinkMessage');
+ message.textContent='';
  try{
-  const data=await complianceRiskRequest('/compliance/risks/approved');
-  select.innerHTML='<option value="">Select approved risk...</option>'+(data.risks||[]).map(r=>
-   '<option value="'+Number(r.id)+'">'+escapeComplianceText(r.risk_code)+' — '+escapeComplianceText(r.risk_title)+'</option>').join('');
- }catch(error){select.innerHTML='<option value="">'+escapeComplianceText(error.message)+'</option>';}
+  const [risks,catalogue]=await Promise.all([
+   complianceRiskRequest('/compliance/risks/approved'),
+   complianceRiskRequest('/risk/classification-catalogue')
+  ]);
+  complianceApprovedRisks=risks.risks||[];
+  complianceClassificationPaths=(catalogue.categories||[]).filter(path=>path.is_terminal);
+  filterComplianceRiskClassifications(4);
+ }catch(error){message.textContent=error.message;}
 }
 async function saveComplianceRiskLink(){
  if(!complianceRiskCanManage)return;
@@ -8093,4 +8145,11 @@ async function unlinkComplianceRisk(riskId){
   await loadComplianceLinkedRisks(id,true);
  }catch(error){alert(error.message);}
 }
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const id=new URLSearchParams(location.search).get('obligation_id');
+ if(id&&/^\d+$/.test(id))openLiveObligation(Number(id));
+});
 </script>
