@@ -8214,3 +8214,21 @@ document.addEventListener('DOMContentLoaded',()=>{
  if(id&&/^\d+$/.test(id))openLiveObligation(Number(id));
 });
 </script>
+
+<script>
+async function loadComplianceRiskAssessmentHistory(id){
+ const target=document.getElementById('complianceRiskAssessmentHistory');
+ target.textContent='Loading risk assessments...';
+ try{
+  const data=await complianceRiskRequest('/compliance/obligations/'+id+'/risk-assessments');
+  if(Number(currentLiveObligationId)!==Number(id))return;
+  const rows=data.assessments||[];
+  target.innerHTML=rows.length?rows.map(a=>
+   '<div class="compliance-linked-risk"><div><strong>'+escapeComplianceText(a.assessment_date)+' — '+escapeComplianceText(a.assessment_status)+'</strong>'+
+   '<small>Inherent '+a.inherent_score+'/25 · Residual '+a.residual_score+'/25 · Controls: '+escapeComplianceText(a.control_effectiveness)+'</small>'+
+   '<small>'+escapeComplianceText(a.risk_code||'No master risk linked')+'</small>'+
+   '<p>'+escapeComplianceText(a.justification)+'</p></div></div>').join('')
+   :'<div class="compliance-empty-state">No risk assessments recorded.</div>';
+ }catch(error){target.textContent=error.message;}
+}
+</script>
