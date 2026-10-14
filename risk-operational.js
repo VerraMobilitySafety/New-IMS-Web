@@ -103,6 +103,50 @@
   const list=section('Operational assessments');
   const assignments=(data.assignments||[]).filter(a=>a.status==='Applicable');
   if(!assignments.length){list.appendChild(node('p','No applicable operational records. Risk Office must establish applicability first.'));return;}
+  // Draft assessment form is deliberately gated until context-owner checks are enforced by the API.
+  const assessmentEditorEnabled=false;
+  if(assessmentEditorEnabled){
+   const editor=section('Create operational risk assessment');
+   const form=node('form');form.style.display='grid';form.style.gap='10px';
+   const targetLabel=node('label','Applicable operational record');
+   const target=node('select');target.required=true;
+   for(const a of assignments){
+    const opt=node('option',a.context_type+' · Record '+a.context_id);
+    opt.value=String(a.id);target.appendChild(opt);
+   }
+   targetLabel.appendChild(target);form.appendChild(targetLabel);
+   const ratings={};
+   for(const key of ['inherent_likelihood','inherent_impact','residual_likelihood','residual_impact']){
+    const label=node('label',key.replaceAll('_',' '));
+    const select=node('select');select.required=true;
+    for(let n=1;n<=5;n++){const option=node('option',n);option.value=String(n);select.appendChild(option);}
+    ratings[key]=select;label.appendChild(select);form.appendChild(label);
+   }
+   const controlsLabel=node('label','Existing controls');
+   const controls=node('textarea');controls.rows=3;controls.maxLength=10000;controlsLabel.appendChild(controls);
+   const treatmentsLabel=node('label','Additional treatments');
+   const treatments=node('textarea');treatments.rows=3;treatments.maxLength=10000;treatmentsLabel.appendChild(treatments);
+   const button=node('button','Save draft assessment');button.type='submit';
+   const message=node('p');message.setAttribute('role','status');
+   form.append(controlsLabel,treatmentsLabel,button,message);
+   form.addEventListener('submit',async event=>{
+    event.preventDefault();button.disabled=true;message.textContent='Saving draft...';
+    try{
+     const payload=Object.fromEntries(Object.entries(ratings).map(([k,v])=>[k,Number(v.value)]));
+     payload.controls_summary=controls.value.trim();
+     payload.treatments_summary=treatments.value.trim();
+     await json(API+'/risk/applicability/'+encodeURIComponent(target.value)+'/assessments',{
+      method:'POST',body:JSON.stringify(payload)
+     });
+     if(seq===sequence&&!overlay.hidden)await showAssessments(risk,seq);
+    }catch(error){message.textContent=error.message;}
+    finally{button.disabled=false;}
+   });
+   editor.appendChild(form);
+  }else{
+   const notice=section('Assessment creation');
+   notice.appendChild(node('p','Assessment entry will be enabled after operational ownership and approval permissions are validated.'));
+  }
   for(const a of assignments){
    const item=node('div');item.style.padding='12px 0';item.style.borderBottom='1px solid #e1e5e2';
    item.appendChild(node('strong',a.context_type+' · Record '+a.context_id));
