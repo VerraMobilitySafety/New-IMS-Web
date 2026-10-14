@@ -4245,7 +4245,7 @@ async function openComplianceRequestFromAction(requestId){
     classification.id='controllerProposedRiskClassifications';
     sections[0].appendChild(classification);
    }
-   classification.textContent='Risk Classification: '+(item.risk_classifications||[]).map(r=>r.category_name).join(', ')||'Not selected';
+   classification.textContent='Risk Classification: '+((item.risk_classifications||[]).map(r=>r.category_name).join(', ')||'Not selected');
 
   }
 
