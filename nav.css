@@ -1,5 +1,5 @@
 /* VERO shared sidebar design. Loaded after page CSS; nav.js owns structure and behaviour. */
-:root{--vero-sidebar-width:260px}
+:root{--vero-sidebar-width:300px}
 .sidebar{width:var(--vero-sidebar-width)!important;position:fixed!important;inset:0 auto 0 0!important;background:#252321!important;color:#fff!important;padding:22px 24px!important;overflow:hidden!important;z-index:10;box-sizing:border-box}
 .sidebar .brand{height:82px!important;min-height:82px;position:relative!important;display:block!important;margin:0 0 12px!important;flex-shrink:0!important}
 .sidebar .brand img{position:absolute!important;width:96px!important;max-height:56px!important;object-fit:contain!important;right:calc(50% + 16px)!important;left:auto!important;top:28px!important;transform:translateY(-50%)!important}

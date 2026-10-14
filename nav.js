@@ -5,7 +5,7 @@
   if (!nav) return;
 
   /* SIDEBAR CONFIGURATION */
-  const SIDEBAR_WIDTH = '260px';
+  const SIDEBAR_WIDTH = '300px';
 
   document.documentElement.style.setProperty(
     '--vero-sidebar-width',
