@@ -6465,6 +6465,39 @@ function readComplianceRiskPosition(status){
  };
 }
 
+async function prepareComplianceRiskAssessment(){
+ const ids=['reviewRiskInherentLikelihood','reviewRiskInherentImpact','reviewRiskResidualLikelihood','reviewRiskResidualImpact'];
+ ids.forEach(id=>{
+  const el=document.getElementById(id);
+  el.innerHTML='<option value="">Select 1–5...</option>'+[1,2,3,4,5].map(n=>'<option value="'+n+'">'+n+'</option>').join('');
+  el.onchange=updateComplianceRiskScores;
+ });
+ document.getElementById('reviewAssessmentStatus').onchange=()=>{
+  const enabled=document.getElementById('reviewAssessmentStatus').value!=='Not Applicable';
+  ids.concat(['reviewRiskControlEffectiveness','reviewRiskOwner','reviewRiskLinkedMaster','reviewRiskJustification']).forEach(id=>
+   document.getElementById(id).disabled=!enabled);
+ };
+ document.getElementById('reviewRiskControlEffectiveness').value='';
+ document.getElementById('reviewRiskJustification').value='';
+ updateComplianceRiskScores();
+ try{
+  const [users,risks]=await Promise.all([
+   complianceRiskRequest('/users/active'),
+   complianceRiskRequest('/compliance/obligations/'+currentLiveObligationId+'/risks')
+  ]);
+  document.getElementById('reviewRiskOwner').innerHTML='<option value="">Select owner...</option>'+
+   (users.users||[]).map(u=>'<option value="'+Number(u.id)+'">'+escapeComplianceText(u.name)+'</option>').join('');
+  document.getElementById('reviewRiskLinkedMaster').innerHTML='<option value="">No linked master risk</option>'+
+   (risks.risks||[]).map(r=>'<option value="'+Number(r.id)+'">'+escapeComplianceText(r.risk_code)+' — '+escapeComplianceText(r.risk_title)+'</option>').join('');
+ }catch(error){document.getElementById('reviewAssessmentMessage').textContent=error.message;}
+}
+function updateComplianceRiskScores(){
+ const v=id=>Number(document.getElementById(id).value);
+ const a=v('reviewRiskInherentLikelihood')*v('reviewRiskInherentImpact');
+ const b=v('reviewRiskResidualLikelihood')*v('reviewRiskResidualImpact');
+ document.getElementById('reviewRiskScores').textContent='Inherent: '+(a||'—')+' / 25 · Residual: '+(b||'—')+' / 25';
+}
+
 async function submitComplianceAssessment(){
 
  const status=
