@@ -3519,6 +3519,7 @@ table {
 
   const selectedTier=Number(tier.value);
   const categoryName=name.value.trim();
+  setMessage('Validating classification change…');
 
   if(!categoryName){
    setMessage('Category name is required.');
@@ -3534,7 +3535,7 @@ table {
   }
 
   const justification=window.prompt('Risk Office justification for this classification change:');
-  if(justification===null)return;
+  if(justification===null){setMessage('Change cancelled.');return;}
   if(!justification.trim()||justification.length>2000){setMessage('A justification of up to 2000 characters is required.');return;}
   const payload={
    category_name:categoryName,
