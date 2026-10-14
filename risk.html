@@ -2553,6 +2553,7 @@ table {
 
    await loadTierCategories(headers);
 
+   registerFilter.querySelectorAll('option:not(:first-child)').forEach(option=>option.remove());
    registers.forEach(register=>{
     const option=document.createElement('option');
     option.value=register.id;
@@ -2569,6 +2570,8 @@ table {
    listStatus.textContent='Unable to load risks.';
   }
  }
+
+ document.addEventListener('vero-risk-register-refresh',()=>{load();});
 
  [assessmentFilter,levelFilter].forEach(el=>{
   el.addEventListener('change',()=>{
