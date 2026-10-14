@@ -3546,6 +3546,45 @@ table {
  #veroRiskDetailsOverlay .vero-risk-details-card form{grid-template-columns:1fr}
 }
 </style>
+<script>
+document.addEventListener('vero-risk-open-classification',event=>{
+ const r=event.detail.category;
+ const overlay=document.getElementById('veroRiskDetailsOverlay');
+ const content=document.getElementById('veroRiskDetailsContent');
+ const title=document.getElementById('veroRiskDetailsTitle');
+ const code=document.getElementById('veroRiskDetailsCode');
+ const tabs=overlay.querySelector('.vero-risk-details-tabs');
+ const actions=overlay.querySelector('.vero-risk-office-actions');
+ title.textContent=r.name;
+ code.textContent='Tier '+r.tier+' · Classification';
+ tabs.hidden=true;
+ if(actions)actions.hidden=true;
+ content.replaceChildren();
+ const section=document.createElement('section');section.className='vero-risk-details-card';
+ const heading=document.createElement('h3');heading.textContent='Classification and aggregated exposure';
+ section.appendChild(heading);
+ const entries=[['Classification',r.name],['Tier',r.tier],
+  ['Underlying Master Risks',r.master_risks],['Applicable records',r.applicable_contexts],
+  ['Approved assessments',r.contributing_assessments],
+  ['Average residual score',r.average_residual_score??'Not assessed'],
+  ['Maximum residual score',r.maximum_residual_score??'Not assessed'],
+  ['Awaiting assessment',r.awaiting_assessment]];
+ for(const [label,value] of entries){
+  const p=document.createElement('p');
+  const strong=document.createElement('strong');strong.textContent=label+': ';
+  p.append(strong,document.createTextNode(String(value??'—')));section.appendChild(p);
+ }
+ content.appendChild(section);
+ overlay.hidden=false;document.body.style.overflow='hidden';
+ document.getElementById('veroRiskDetailsClose').focus();
+});
+document.addEventListener('vero-risk-open-details',()=>{
+ const overlay=document.getElementById('veroRiskDetailsOverlay');
+ overlay.querySelector('.vero-risk-details-tabs').hidden=false;
+ const actions=overlay.querySelector('.vero-risk-office-actions');
+ if(actions)actions.hidden=false;
+});
+</script>
 <script src="risk-hierarchy.js"></script>
 <script src="risk-operational.js"></script>
 <script src="risk-office.js"></script>
