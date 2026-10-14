@@ -3971,6 +3971,7 @@ async function openLiveObligation(id){
   const apps=data.applicability||[];
   const controls=data.controls||[];
   currentLiveControls=controls;
+  loadRequirementRiskClassifications(currentLiveObligationId);
   loadComplianceRiskAssessmentHistory(currentLiveObligationId);
   loadComplianceLinkedRisks(currentLiveObligationId,!!data.permissions?.is_controller);
 
