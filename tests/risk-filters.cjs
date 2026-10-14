@@ -253,3 +253,14 @@ test('Tier 3 and Tier 2 preserve category rows until a detailed risk filter is s
  assert.match(app.table(),/Category 10/);assert.match(app.table(),/Category 12/);assert.doesNotMatch(app.table(),/Alpha/);
  app.change('veroTier1Filter',10);await settle();assert.match(app.table(),/Alpha/);assert.doesNotMatch(app.table(),/Category 12/);
 });
+
+
+test('register refresh preserves valid Tier 4 to Tier 1, context, search and matrix filters',async()=>{
+ const app=setup();await settle();
+ app.change('veroTier4Filter',40);app.change('veroTier3Filter',30);app.change('veroTier2Filter',20);app.change('veroTier1Filter',10);
+ app.change('veroContextTypeFilter','Project');await settle();app.change('veroApplicationFilter',101);await settle();
+ app.el('veroRiskRegisterFilter').value='1';app.el('veroRiskSearch').value='Alpha';app.el('veroRiskSearch').dispatchEvent(new CustomEvent('input'));
+ app.document.dispatchEvent(new CustomEvent('vero-risk-register-refresh',{detail:{riskId:7,created:true}}));await settle();
+ for(const [id,value] of Object.entries({veroTier4Filter:'40',veroTier3Filter:'30',veroTier2Filter:'20',veroTier1Filter:'10',veroContextTypeFilter:'Project',veroApplicationFilter:'101',veroRiskRegisterFilter:'1',veroRiskSearch:'Alpha'}))assert.equal(app.el(id).value,value,id);
+ assert.match(app.table(),/Alpha/);assert.doesNotMatch(app.table(),/Beta|Gamma/);assert.equal(app.el('veroMatrixStatus').textContent,'1');
+});

@@ -40,4 +40,5 @@ jobs:
           JS
 
       - name: Run offline Risk filter regressions
-        run: node --test tests/risk-filters.cjs
+        run: node --test tests/risk-*.cjs
+
