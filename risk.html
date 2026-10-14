@@ -3513,6 +3513,18 @@ table {
 
  tier.addEventListener('change',()=>updateParents());
  reset.addEventListener('click',resetForm);
+ // Surface native validation failures instead of silently swallowing submit.
+ form.addEventListener('invalid',event=>{
+  const label=event.target?.labels?.[0]?.textContent?.trim()||event.target?.id||'Required field';
+  setMessage('Cannot save: '+label+' needs attention.');
+ },true);
+ save.addEventListener('click',()=>{
+  if(!form.checkValidity()){
+   const invalid=form.querySelector(':invalid');
+   const label=invalid?.labels?.[0]?.textContent?.trim()||invalid?.id||'a required field';
+   setMessage('Cannot save: check '+label+'.');
+  }
+ });
 
  form.addEventListener('submit',async event=>{
   event.preventDefault();
