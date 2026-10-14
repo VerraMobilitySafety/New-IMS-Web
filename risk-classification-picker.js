@@ -17,7 +17,7 @@ window.VeroRiskClassificationPicker=(()=>{
    const matches=rows.filter(x=>x.path.toLowerCase().includes(q));
    select.replaceChildren();
    const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Select a classification';select.appendChild(placeholder);
-   for(const item of matches){const opt=document.createElement('option');opt.value=String(item.category_id);opt.textContent=item.path;select.appendChild(opt)}
+   for(const item of matches){const opt=document.createElement('option');opt.value=String(item.category_id);opt.textContent=item.path+' (Tier '+item.tier+')';select.appendChild(opt)}
    select.value=current==null?'':String(current);
    if(!matches.some(x=>String(x.category_id)===String(current)))select.value='';
    info.textContent=matches.length+' matching classification paths';
@@ -26,7 +26,7 @@ window.VeroRiskClassificationPicker=(()=>{
   select.addEventListener('change',()=>{
    current=select.value||null;
    const item=rows.find(x=>String(x.category_id)===String(current));
-   selected.textContent=item?'Selected: '+item.path:'';
+   selected.textContent=item?'Selected: '+item.path+' · Tier '+item.tier:'';
    if(typeof options.onSelect==='function')options.onSelect(item||null);
   });
   async function refresh(){
