@@ -34,7 +34,7 @@
    status.textContent=decision==='Approved'?'Approved. Register updating...':'Changes requested. Register updating...';
    document.dispatchEvent(new CustomEvent('vero-risk-register-refresh',{detail:{riskId:selected.id,decision}}));
    syncActions();
-   document.querySelector('[data-risk-tab="overview"]')?.click();
+   document.getElementById('veroRiskDetailsClose')?.click();
   }catch(error){status.textContent=error.message;}
   finally{approve.disabled=false;changes.disabled=false;}
  }
