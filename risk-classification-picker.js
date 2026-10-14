@@ -27,6 +27,7 @@ window.VeroRiskClassificationPicker=(()=>{
    const active=rows.find(x=>String(x.category_id)===String(current));
    selected.textContent=active?'Selected: '+active.path+' · Tier '+active.tier:'';
    info.textContent=unique.size+' matching classifications';
+   select.disabled=unique.size===0;
   }
   search.addEventListener('input',render);
   select.addEventListener('change',()=>{
@@ -37,13 +38,14 @@ window.VeroRiskClassificationPicker=(()=>{
   });
   async function refresh(){
    const seq=++requestId;
+   select.disabled=true;
    info.textContent='Loading classifications…';
    try{
     const response=await fetch(API+'/risk/classification-catalogue',{headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},cache:'no-store'});
     const data=await response.json();if(!response.ok)throw Error(data.message||'Catalogue unavailable');
     if(disposed||seq!==requestId)return;
     rows=Array.isArray(data.categories)?data.categories:[];render();
-   }catch(error){if(disposed||seq!==requestId)return;info.textContent='Unable to load classifications: '+error.message;select.replaceChildren();}
+   }catch(error){if(disposed||seq!==requestId)return;rows=[];select.disabled=true;selected.textContent='';info.textContent='Unable to load classifications: '+error.message;select.replaceChildren();}
   }
   refresh();
   return {refresh,getValue:()=>current,setValue(value){current=value??null;render();},destroy(){disposed=true;requestId++;wrap.remove();}};
