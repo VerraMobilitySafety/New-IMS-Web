@@ -3904,11 +3904,12 @@ table {
 })();
 </script>
 <style id="vero-parent-picker-styles">
-#veroRiskDetailsOverlay .vero-parent-picker{display:grid;gap:12px;font-size:13px;font-weight:700;color:#3d3935}
-#veroRiskDetailsOverlay .vero-parent-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px;max-height:260px;overflow:auto;padding:12px;border:1px solid #dfe5e1;border-radius:9px;background:#f8faf8}
-#veroRiskDetailsOverlay .vero-parent-choice{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #dfe5e1;border-radius:8px;background:#fff;cursor:pointer;font-weight:500}
-#veroRiskDetailsOverlay .vero-parent-choice:has(input:checked){border-color:#2c8259;background:#eef6f0}
-#veroRiskDetailsOverlay .vero-parent-choice input{width:17px;height:17px;accent-color:#0b3d2e;flex:none}
+#veroRiskDetailsOverlay .vero-parent-picker{display:flex;flex-direction:column;gap:12px;width:100%;min-width:0;font-size:13px;font-weight:700;color:#3d3935}
+#veroRiskDetailsOverlay .vero-parent-choices{display:flex;flex-direction:column;gap:8px;width:100%;max-height:300px;overflow-y:auto;overflow-x:hidden;padding:12px;box-sizing:border-box;border:1px solid #dfe5e1;border-radius:9px;background:#f8faf8}
+#veroRiskDetailsOverlay label.vero-parent-choice{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:12px!important;min-height:48px;width:100%!important;max-width:100%;margin:0!important;padding:12px 14px!important;box-sizing:border-box;border:1px solid #dfe5e1;border-radius:8px;background:#fff;cursor:pointer;font-size:13px!important;font-weight:500!important;letter-spacing:normal!important;text-transform:none!important;color:#242526!important;white-space:normal!important}
+#veroRiskDetailsOverlay label.vero-parent-choice:has(input:checked){border-color:#2c8259;background:#eef6f0}
+#veroRiskDetailsOverlay label.vero-parent-choice input[type=checkbox]{display:block!important;position:static!important;appearance:auto!important;flex:0 0 18px!important;width:18px!important;min-width:18px!important;max-width:18px!important;height:18px!important;min-height:18px!important;margin:0!important;padding:0!important;accent-color:#0b3d2e}
+#veroRiskDetailsOverlay .vero-parent-choice span{display:block;flex:1 1 auto;min-width:0;overflow-wrap:anywhere;line-height:1.45;text-align:left}
 #veroRiskDetailsOverlay .vero-parent-actions{display:flex;justify-content:flex-start;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px}
 #veroRiskDetailsOverlay .vero-parent-actions button{width:auto;min-width:135px}
 #veroRiskDetailsOverlay .vero-parent-picker+label{display:grid;gap:8px;margin-top:18px;font-size:13px;font-weight:700}
