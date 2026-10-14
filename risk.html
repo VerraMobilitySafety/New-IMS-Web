@@ -2146,6 +2146,21 @@ table {
  let registers=[];
  let risks=[];
  let selectedCell=null;
+ let contextAssignments=[];
+ let contextAssignmentsReady=false;
+ const contextTypeFilter=document.getElementById('veroTier1Filter');
+ const contextNameFilter=document.getElementById('veroApplicationFilter');
+ const contextSiteFilter=document.getElementById('veroSiteFilter');
+ document.addEventListener('vero-risk-context-assignments',event=>{
+  contextAssignments=event.detail.assignments||[];
+  contextAssignmentsReady=event.detail.ready===true;
+  selectedCell=null;
+  render();
+ });
+ [contextTypeFilter,contextNameFilter,contextSiteFilter].forEach(el=>
+  el.addEventListener('change',()=>{selectedCell=null;render();})
+ );
+
 
  function assessmentValues(risk){
   const type=assessmentFilter.value;
@@ -2242,6 +2257,19 @@ table {
 
  function filteredRisks(){
   return risks.filter(risk=>{
+    if(contextTypeFilter.value){
+     if(!contextAssignmentsReady)return false;
+     const field={'Project':'project_id','Contract':'contract_id',
+                  'VM Location':'vm_location_id'}[contextTypeFilter.value];
+     if(!field)return false;
+     const matches=contextAssignments.some(a=>
+      Number(a.risk_id)===Number(risk.id) &&
+      a[field]!=null &&
+      (!contextNameFilter.value || String(a[field])===contextNameFilter.value) &&
+      (!contextSiteFilter.value || String(a.site_id)===contextSiteFilter.value)
+     );
+     if(!matches)return false;
+    }
     // Filter only against IDs returned by the authorised Risk API.
     if(tier4Filter.value && !hasClassification(risk,4,tier4Filter.value)) return false;
     if(tier3Filter.value && !hasClassification(risk,3,tier3Filter.value)) return false;
@@ -3303,6 +3331,23 @@ table {
    });
    if(!response.ok)throw Error('Unable to load Operational Context ('+response.status+')');
    contexts=await response.json();
+   try{
+    const applicability=await fetch(API+'/risk/context-assignments',{
+     headers:{Authorization:'Bearer '+token,Accept:'application/json'},
+     cache:'no-store'
+    });
+    if(!applicability.ok)throw Error('Risk applicability unavailable');
+    const payload=await applicability.json();
+    document.dispatchEvent(new CustomEvent('vero-risk-context-assignments',{
+     detail:{ready:true,assignments:payload.assignments||[]}
+    }));
+   }catch(error){
+    note.textContent='Context options are available. Risk applicability filtering is not ready.';
+    document.dispatchEvent(new CustomEvent('vero-risk-context-assignments',{
+     detail:{ready:false,assignments:[]}
+    }));
+   }
+
    const types=(contexts.context_types||['Project','Contract','VM Location'])
     .map(t=>typeof t==='string'?{id:t,name:t}:{id:t.id??t.value??t.name,name:t.name??t.label??t.value});
    fill(type,types,'All context types');
