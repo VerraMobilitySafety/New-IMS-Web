@@ -3580,7 +3580,31 @@ table {
     field(c,'Average residual score',r.average_residual_score);
     field(c,'Maximum residual score',r.maximum_residual_score);
     field(c,'Awaiting assessment',r.awaiting_assessment);
-    c.appendChild(make('p','Detailed operational contributors will be available after individual applicability records are connected to this view.'));
+    const details=card('Contributing operational assessments');
+    details.appendChild(make('p','Loading operational records...'));
+    try{
+     const response=await fetch(API+'/risk/classifications/'+encodeURIComponent(r.id)+'/exposures',{
+      headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},cache:'no-store'
+     });
+     const data=await response.json();
+     if(!response.ok)throw Error(data.message||'Operational exposure unavailable');
+     if(version!==request||overlay.hidden)return;
+     details.replaceChildren(make('h3','Contributing operational assessments'));
+     if(!data.exposures?.length){
+      details.appendChild(make('p','No operational assessments or applicability records are linked to this classification yet.'));
+     }
+     for(const exposure of data.exposures||[]){
+      const line=make('div','');line.className='vero-risk-classification-row';
+      line.appendChild(make('strong',exposure.context_name||exposure.context_type+' '+exposure.context_id));
+      field(line,'Context',exposure.context_type);
+      field(line,'Master Risk',exposure.risk_title);
+      field(line,'Residual score',exposure.residual_score??'Not assessed');
+      field(line,'Assessment',exposure.assessment_id?'Approved':'Awaiting assessment');
+      details.appendChild(line);
+     }
+    }catch(error){
+     if(version===request)details.replaceChildren(make('h3','Contributing operational assessments'),make('p',error.message));
+    }
     return;
    }
    const c=card(page);
