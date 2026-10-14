@@ -3570,7 +3570,7 @@ table {
   tabs.hidden=true;if(actions)actions.hidden=true;
   content.replaceChildren();
   const nav=make('div','');nav.className='vero-risk-classification-tabs';
-  const pages=['Overview','Child Classifications','Terminal Risks','Operational Exposure'];
+  const pages=['Overview','Child Classifications','Terminal Risks','Operational Exposure','History'];
   if(Number(r.tier)===1){
    const notice=make('button','Master Risks · View linked records');notice.type='button';notice.className='vero-risk-classification-create';
    notice.addEventListener('click',()=>show('Terminal Risks'));
@@ -3620,6 +3620,37 @@ table {
     field(c,'Average residual score',r.average_residual_score);
     field(c,'Maximum residual score',r.maximum_residual_score);
     field(c,'Awaiting assessment',r.awaiting_assessment);
+    return;
+   }
+   if(page==='History'){
+    const historyCard=card('Classification change history');
+    historyCard.appendChild(make('p','Loading recorded Risk Office changes…'));
+    try{
+     const response=await fetch(API+'/risk-tiers/'+encodeURIComponent(r.id)+'/history',{
+      headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},
+      cache:'no-store'
+     });
+     const data=await response.json();
+     if(!response.ok)throw Error(data.message||'Unable to retrieve classification history');
+     if(version!==request||overlay.hidden)return;
+     historyCard.replaceChildren(make('h3','Classification change history'));
+     const entries=data.history||[];
+     if(!entries.length)historyCard.appendChild(make('p','No audited changes recorded yet. Earlier changes are not backfilled.'));
+     for(const entry of entries){
+      const line=make('div','');line.className='vero-risk-classification-row';
+      line.appendChild(make('strong',entry.action||'Change'));
+      field(line,'When',entry.changed_at?new Date(entry.changed_at).toLocaleString():'Not recorded');
+      field(line,'Changed by',entry.changed_by||'Unknown');
+      field(line,'Reason',entry.reason||'Not recorded');
+      if(entry.previous_name!==entry.new_name)field(line,'Name',(entry.previous_name||'—')+' → '+(entry.new_name||'—'));
+      if(entry.previous_status!==entry.new_status)field(line,'Status',(entry.previous_status||'—')+' → '+(entry.new_status||'—'));
+      if(JSON.stringify(entry.previous_parent_ids)!==JSON.stringify(entry.new_parent_ids))
+       field(line,'Parent IDs',(entry.previous_parent_ids||[]).join(', ')+' → '+(entry.new_parent_ids||[]).join(', '));
+      historyCard.appendChild(line);
+     }
+    }catch(error){
+     if(version===request&&!overlay.hidden)historyCard.replaceChildren(make('h3','Classification change history'),make('p',error.message));
+    }
     return;
    }
    if(page==='Operational Exposure'){
