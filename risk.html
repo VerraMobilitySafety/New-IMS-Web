@@ -3643,6 +3643,23 @@ table {
    }
    const c=card(page);
    c.appendChild(make('p','Loading classifications...'));
+   if(page==='Terminal Risks'&&Number(r.tier)===1){
+    try{
+     const response=await fetch(API+'/risks',{headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},cache:'no-store'});
+     const data=await response.json();if(!response.ok)throw Error(data.message||'Unable to retrieve Master Risks');
+     if(version!==request||overlay.hidden)return;
+     const risks=(data.risks||[]).filter(risk=>(risk.tier_1_ids||[]).some(id=>Number(id)===Number(r.id)));
+     c.replaceChildren(make('h3','Linked Master Risks'));
+     if(!risks.length)c.appendChild(make('p','No Master Risks are linked to this Tier 1 classification.'));
+     for(const risk of risks){
+      const line=make('div','');line.className='vero-risk-classification-row';
+      const open=make('button',risk.risk_title||risk.risk_code);open.type='button';open.className='vero-risk-classification-open';
+      open.addEventListener('click',()=>document.dispatchEvent(new CustomEvent('vero-risk-open-details',{detail:{risk}})));
+      line.appendChild(open);field(line,'Risk code',risk.risk_code);field(line,'Status',risk.status);field(line,'Risk owner',risk.risk_owner||'Unassigned');field(line,'Next review',risk.next_review_date||'Not scheduled');c.appendChild(line);
+     }
+    }catch(error){if(version===request&&!overlay.hidden)c.replaceChildren(make('h3','Linked Master Risks'),make('p',error.message));}
+    return;
+   }
    try{
     const response=await fetch(API+'/risk/hierarchical-register?parent_id='+encodeURIComponent(r.id),{
      headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},cache:'no-store'
