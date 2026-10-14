@@ -3559,6 +3559,11 @@ table {
   content.replaceChildren();
   const nav=make('div','');nav.className='vero-risk-classification-tabs';
   const pages=['Overview','Child Classifications','Terminal Risks','Operational Exposure'];
+  if(Number(r.tier)===1){
+   const notice=make('button','Master Risks · View linked records');notice.type='button';notice.className='vero-risk-classification-create';
+   notice.addEventListener('click',()=>show('Terminal Risks'));
+   nav.appendChild(notice);
+  }
   if(Number(r.tier)>1){
    const create=make('button','+ Add Tier '+(Number(r.tier)-1)+' classification');
    create.type='button';create.className='vero-risk-classification-create';create.hidden=true;
