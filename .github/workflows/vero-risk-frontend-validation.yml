@@ -1,0 +1,33 @@
+name: VERO Risk frontend validation
+on:
+  pull_request:
+    paths:
+      - 'risk.html'
+      - '.github/workflows/vero-risk-frontend-validation.yml'
+  push:
+    branches:
+      - 'vero/risk-operational-context-filters-20261014'
+jobs:
+  syntax-and-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check inline JavaScript syntax and required controls
+        run: |
+          node <<'JS'
+          const fs=require('fs'),vm=require('vm');
+          const html=fs.readFileSync('risk.html','utf8');
+          const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(x=>x[1]).filter(x=>x.trim());
+          scripts.forEach((code,i)=>new vm.Script(code,{filename:'inline-'+i+'.js'}));
+          const ids=['veroTier4Filter','veroTier3Filter','veroTier2Filter','veroRiskTier1CategoryFilter','veroTier1Filter','veroApplicationFilter','veroSiteFilter'];
+          for(const id of ids){
+            const count=[...html.matchAll(new RegExp('\\bid=["\\x27]'+id+'["\\x27]','g'))].length;
+            if(count!==1)throw Error(id+' count='+count);
+          }
+          if(!html.includes('/risk/context-assignments'))throw Error('Missing authorised assignments API');
+          if(!html.includes('/risk/operational-contexts'))throw Error('Missing operational context API');
+          console.log('Passed '+scripts.length+' inline scripts and seven filter IDs');
+          JS
