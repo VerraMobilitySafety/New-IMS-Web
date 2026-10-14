@@ -3567,9 +3567,11 @@ table {
     throw new Error(data.message||'Unable to save category');
    }
 
+   const archived=payload.status==='Archived';
    resetForm();
    await loadCategories();
-   setMessage('Category saved successfully.');
+   document.dispatchEvent(new CustomEvent('vero-risk-hierarchy-render'));
+   setMessage(archived?'Classification archived and removed from the active tree.':'Category saved successfully.');
 
   }catch(error){
    setMessage(error.message);
