@@ -18,6 +18,7 @@
  }
  async function decide(decision){
   if(!authorised||selected?.status!=='Draft')return;
+  const current=selected,seq=version;
   const reason=window.prompt(decision==='Approved'?'Approval rationale (required):':'Reason for requesting changes (required):');
   if(reason===null)return;
   if(!reason.trim()){status.textContent='A reason is required.';return;}
@@ -25,17 +26,18 @@
   if(decision==='Approved'&&!window.confirm('Approve this Master Risk definition?'))return;
   approve.disabled=true;changes.disabled=true;status.textContent='Recording decision...';
   try{
-   const response=await fetch(API+'/risks/'+encodeURIComponent(selected.id)+'/office-decision',{
+   const response=await fetch(API+'/risks/'+encodeURIComponent(current.id)+'/office-decision',{
     method:'POST',headers:headers(),body:JSON.stringify({decision,reason:reason.trim()})
    });
    const data=await response.json();
    if(!response.ok)throw Error(data.message||'Unable to record decision');
-   selected.status=data.risk_status||selected.status;
+   current.status=data.risk_status||current.status;
+   document.dispatchEvent(new CustomEvent('vero-risk-register-refresh',{detail:{riskId:current.id,decision}}));
+   if(seq!==version||overlay.hidden)return;
    status.textContent=decision==='Approved'?'Approved. Register updating...':'Changes requested. Register updating...';
-   document.dispatchEvent(new CustomEvent('vero-risk-register-refresh',{detail:{riskId:selected.id,decision}}));
    syncActions();
    document.getElementById('veroRiskDetailsClose')?.click();
-  }catch(error){status.textContent=error.message;}
+  }catch(error){if(seq===version&&!overlay.hidden)status.textContent=error.message;}
   finally{approve.disabled=false;changes.disabled=false;}
  }
  approve.addEventListener('click',()=>decide('Approved'));
@@ -51,6 +53,7 @@
  };
  function showEdit(){
   if(!selected||!authorised||selected.status!=='Draft')return;
+  const current=selected,seq=version;
   const form=document.createElement('form');form.className='vero-risk-office-form';
   const h=document.createElement('h3');h.textContent='Edit Draft Master Risk';form.appendChild(h);
   const name=field(form,'Risk Title','risk_title',selected.risk_title);
@@ -63,17 +66,19 @@
   form.onsubmit=async event=>{
    event.preventDefault();save.disabled=true;status.textContent='Saving...';
    try{
-    const response=await fetch(API+'/risks/'+encodeURIComponent(selected.id)+'/definition',{
+    const response=await fetch(API+'/risks/'+encodeURIComponent(current.id)+'/definition',{
      method:'PUT',headers:headers(),body:JSON.stringify({
       risk_title:name.value.trim(),risk_description:description.value.trim(),reason:reason.value.trim()
      })
     });
     const data=await response.json();
     if(!response.ok)throw Error(data.message||'Unable to save');
-    selected.risk_title=name.value.trim();selected.risk_description=description.value.trim();
+    current.risk_title=name.value.trim();current.risk_description=description.value.trim();
+    document.dispatchEvent(new CustomEvent('vero-risk-register-refresh',{detail:{riskId:current.id,definitionUpdated:true}}));
+    if(seq!==version||overlay.hidden)return;
     title.textContent=selected.risk_title;status.textContent='Saved. Refresh register for updated results.';
     document.querySelector('[data-risk-tab="overview"]')?.click();
-   }catch(error){status.textContent=error.message;}finally{save.disabled=false;}
+   }catch(error){if(seq===version&&!overlay.hidden)status.textContent=error.message;}finally{save.disabled=false;}
   };
  }
  async function showHistory(){
@@ -108,9 +113,13 @@
    syncActions();
   }catch(error){console.warn('Risk Office role lookup unavailable',error);}
  });
+ for(const event of ['vero-risk-open-classification','vero-risk-create-master','vero-risk-details-close']){
+  document.addEventListener(event,()=>{version++;selected=null;authorised=false;syncActions();status.textContent='';});
+ }
  edit.addEventListener('click',showEdit);
  tabs.addEventListener('click',event=>{
   const tab=event.target.closest('[data-risk-tab]');
   if(tab?.dataset.riskTab==='history'){version++;showHistory();}
  });
 })();
+
