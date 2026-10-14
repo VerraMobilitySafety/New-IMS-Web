@@ -625,6 +625,24 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
     gap: 18px !important;
 }
 </style>
+<style id="vero-risk-two-dimensions-v1">
+.vero-risk-filter-groups{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;margin-top:14px;margin-bottom:24px;align-items:stretch}
+.vero-filter-group-panel{background:#fff;border:1px solid #e5e1de;border-radius:12px;padding:18px 20px;min-width:0}
+.vero-filter-group-panel h3{font-size:14px;margin:0 0 17px;font-weight:800;color:#3d3935}
+.vero-filter-group-panel h3 span{display:block;font-size:11px;color:#857874;font-weight:500;margin-top:4px}
+.vero-filter-fields{display:grid;gap:10px;align-items:end}
+.vero-four-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+.vero-three-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+.vero-three-fields>.vero-risk-filter:last-child{grid-column:1/-1}
+.vero-filter-group-panel .vero-risk-filter{min-width:0!important;max-width:none!important;width:100%!important;display:flex;flex-direction:column;gap:6px;margin:0!important;position:relative}
+.vero-filter-group-panel .vero-risk-filter label{font-size:11px;font-weight:650;color:#625e5b;margin:0}
+.vero-filter-group-panel .vero-risk-filter select,.vero-filter-group-panel .vero-risk-filter input{height:38px!important;min-width:0;width:100%!important;border:1px solid #e5e1de;border-radius:8px;padding:0 10px;font:500 12px Montserrat,Verdana,Arial,sans-serif;background:#fff}
+.vero-filter-group-panel .vero-risk-filter small{font-weight:400}
+.vero-context-note{font-size:10px;color:#857874;line-height:1.5;margin:12px 0 0}
+@media(max-width:1200px){.vero-risk-filter-groups{grid-template-columns:1fr}.vero-four-fields{grid-template-columns:repeat(4,minmax(0,1fr))}.vero-three-fields{grid-template-columns:repeat(3,minmax(0,1fr))}.vero-three-fields>.vero-risk-filter:last-child{grid-column:auto}}
+@media(max-width:780px){.vero-four-fields,.vero-three-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.vero-three-fields>.vero-risk-filter:last-child{grid-column:1/-1}}
+@media(max-width:480px){.vero-four-fields,.vero-three-fields{grid-template-columns:1fr}}
+</style>
 </head><body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
@@ -1915,45 +1933,25 @@ table {
 <div id="veroCompactRiskLayout">
 
 
-<div class="vero-risk-secondary-row">
-<div class="vero-risk-filter">
-<label for="veroTier4Filter">Tier 4</label>
-<select id="veroTier4Filter">
-<option value="">All Tier 4 categories</option>
-</select>
-</div>
-<div class="vero-risk-filter">
-<label for="veroTier3Filter">Tier 3</label>
-<select disabled="" id="veroTier3Filter">
-<option value="">All Tier 3 categories</option>
-</select>
-</div>
-<div class="vero-risk-filter">
-<label for="veroTier2Filter">Tier 2</label>
-<select disabled="" id="veroTier2Filter">
-<option value="">All Tier 2 categories</option>
-</select>
-</div>
-<div class="vero-risk-filter">
-<label for="veroTier1Filter">Tier 1 — Applies To</label>
-<select id="veroTier1Filter">
-<option value="">All application types</option>
-<option value="Project">Project</option>
-<option value="Contract">Contract</option>
-<option value="VM Location">VM Location</option>
-</select>
-</div>
-<div class="vero-risk-filter">
-<label for="veroApplicationFilter">Select Record</label>
-<select disabled="" id="veroApplicationFilter">
-<option value="">Select an application type first</option>
-</select>
-</div>
-<div class="vero-risk-filter">
-<label for="veroSiteFilter">Select Site</label>
-<input autocomplete="off" disabled="" id="veroSiteFilter" placeholder="Select a record first" type="search"/>
-<div class="vero-site-results" hidden="" id="veroSiteResults" role="listbox"></div>
-</div>
+<div class="vero-risk-filter-groups">
+ <section class="vero-filter-group-panel" aria-labelledby="veroClassificationHeading">
+  <h3 id="veroClassificationHeading">Risk Classification <span>What is the risk?</span></h3>
+  <div class="vero-filter-fields vero-four-fields">
+   <div class="vero-risk-filter"><label for="veroTier4Filter">Tier 4 · Category</label><select id="veroTier4Filter"><option value="">All categories</option></select></div>
+   <div class="vero-risk-filter"><label for="veroTier3Filter">Tier 3 · Discipline</label><select id="veroTier3Filter" disabled><option value="">All disciplines</option></select></div>
+   <div class="vero-risk-filter"><label for="veroTier2Filter">Tier 2 · Hazard / Type</label><select id="veroTier2Filter" disabled><option value="">All types</option></select></div>
+   <div class="vero-risk-filter"><label for="veroRiskTier1CategoryFilter">Tier 1 · Exposure</label><select id="veroRiskTier1CategoryFilter" disabled><option value="">All exposures</option></select></div>
+  </div>
+ </section>
+ <section class="vero-filter-group-panel" aria-labelledby="veroContextHeading">
+  <h3 id="veroContextHeading">Operational Context <span>Where or within what does it apply?</span></h3>
+  <div class="vero-filter-fields vero-three-fields">
+   <div class="vero-risk-filter"><label for="veroTier1Filter">Context Type</label><select id="veroTier1Filter"><option value="">All context types</option><option value="Project">Project</option><option value="Contract">Contract</option><option value="VM Location">VM Location</option></select></div>
+   <div class="vero-risk-filter"><label for="veroApplicationFilter">Context Name</label><select id="veroApplicationFilter" disabled><option value="">Select context type first</option></select></div>
+   <div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area <small>(optional)</small></label><input id="veroSiteFilter" autocomplete="off" disabled placeholder="Select a context first" type="search"><div class="vero-site-results" id="veroSiteResults" hidden role="listbox"></div></div>
+  </div>
+  <p class="vero-context-note">Project names load from Vero. Contract, VM Location and site connections are pending; these selections do not yet filter the risk register.</p>
+ </section>
 </div>
 </div>
 <div class="vero-matrix-register-grid" style="margin-top:24px !important;">
@@ -2120,6 +2118,7 @@ table {
  const tier4Filter=document.getElementById('veroTier4Filter');
  const tier3Filter=document.getElementById('veroTier3Filter');
  const tier2Filter=document.getElementById('veroTier2Filter');
+  const tier1CategoryFilter=document.getElementById('veroRiskTier1CategoryFilter');
 
  let tierCategories=[];
  const levelFilter=document.getElementById('veroRiskLevelFilter');
@@ -2200,6 +2199,8 @@ table {
    tier3Filter.disabled=!parentId;
    populateTier(tier2Filter,[],'All Tier 2 categories');
    tier2Filter.disabled=true;
+    populateTier(tier1CategoryFilter,[],'All exposures');
+    tier1CategoryFilter.disabled=true;
   }
 
   function updateTier2(){
@@ -2209,6 +2210,14 @@ table {
    );
    populateTier(tier2Filter,items,'All Tier 2 categories');
    tier2Filter.disabled=!parentId;
+    updateTier1Category();
+  }
+
+  function updateTier1Category(){
+    const parentId=Number(tier2Filter.value);
+    const items=tierCategories.filter(category=>category.tier===1 && parentIds(category).includes(parentId));
+    populateTier(tier1CategoryFilter,items,'All exposures');
+    tier1CategoryFilter.disabled=!parentId;
   }
 
   async function loadTierCategories(headers){
@@ -2237,6 +2246,7 @@ table {
     if(tier4Filter.value && !hasClassification(risk,4,tier4Filter.value)) return false;
     if(tier3Filter.value && !hasClassification(risk,3,tier3Filter.value)) return false;
     if(tier2Filter.value && !hasClassification(risk,2,tier2Filter.value)) return false;
+    if(tier1CategoryFilter.value && !hasClassification(risk,1,tier1CategoryFilter.value)) return false;
 
 
 
@@ -2521,7 +2531,12 @@ table {
   render();
  });
 
- searchInput.addEventListener('input',()=>{
+ tier1CategoryFilter.addEventListener('change',()=>{
+   selectedCell=null;
+   render();
+  });
+
+  searchInput.addEventListener('input',()=>{
   selectedCell=null;
   render();
  });
