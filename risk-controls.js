@@ -53,6 +53,7 @@
     row.appendChild(node('strong',(c.control_code||'')+' · '+(c.control_title||'')));
     row.appendChild(node('p',[c.relationship_type,c.effectiveness,c.control_status].filter(Boolean).join(' · ')));
     if(c.rationale)row.appendChild(node('p','Link justification: '+c.rationale));
+    if(canManage){const button=node('button','Remove link');button.type='button';button.addEventListener('click',()=>saveLink(c,'Remove'));row.appendChild(button);}
     linkedSection.appendChild(row);
    }
    card.appendChild(linkedSection);
@@ -68,6 +69,7 @@
      section.appendChild(node('strong',(c.control_code||'')+' · '+(c.control_title||'')));
      const meta=node('p',[c.control_type,c.status,c.owner_name&&'Owner: '+c.owner_name,c.control_frequency&&'Frequency: '+c.control_frequency].filter(Boolean).join(' · '));section.appendChild(meta);
      if(c.description)section.appendChild(node('p',c.description));
+     if(canManage&&!linked.some(x=>Number(x.control_id)===Number(c.id))){const button=node('button','Link control');button.type='button';button.addEventListener('click',()=>saveLink(c,'Link'));section.appendChild(button);}
      list.appendChild(section);
     }
     if(!found.length)list.appendChild(node('p','No matching enterprise controls.'));
