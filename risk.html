@@ -3286,9 +3286,9 @@ table {
  function onRecord(){
   clearSites();
   if(!record.value||!relationKeys[type.value])return;
-  const [linkKey,parentKey]=relationKeys[type.value];
+  const [linkKey]=relationKeys[type.value];
   const linkedIds=new Set((contexts?.[linkKey]||[])
-   .filter(link=>String(link[parentKey])===record.value)
+   .filter(link=>String(link.context_id)===record.value)
    .map(link=>String(link.site_id)));
   fill(site,(contexts?.sites||[]).filter(item=>linkedIds.has(String(item.id))),'All sites / operational areas');
  }
