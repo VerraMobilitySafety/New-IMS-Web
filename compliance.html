@@ -8243,3 +8243,35 @@ async function loadComplianceRiskAssessmentHistory(id){
  }catch(error){target.textContent=error.message;}
 }
 </script>
+
+<script>
+let submissionRiskPaths=[];
+async function loadSubmissionRiskClassifications(){
+ const message=document.getElementById('singleRiskClassificationMessage');
+ message.textContent='Loading risk classifications...';
+ try{
+  const data=await complianceRiskRequest('/compliance/risk-classifications');
+  submissionRiskPaths=data.classifications||[];
+  changeSubmissionRiskTier(5);
+  message.textContent=submissionRiskPaths.length?'':'No active classification paths available.';
+ }catch(error){message.textContent=error.message;}
+}
+function changeSubmissionRiskTier(changedTier){
+ const tiers=[4,3,2,1];
+ const selected={};
+ tiers.forEach(t=>selected[t]=document.getElementById('singleRiskTier'+t).value);
+ tiers.forEach(t=>{if(t<changedTier)selected[t]='';});
+ tiers.forEach(t=>{
+  const element=document.getElementById('singleRiskTier'+t);
+  const eligible=submissionRiskPaths.filter(path=>
+   tiers.filter(parent=>parent>t).every(parent=>
+    !selected[parent]||String(path.path_ids[4-parent])===selected[parent]));
+  const values=new Map(eligible.map(path=>
+   [String(path.path_ids[4-t]),path.path_names[4-t]]));
+  element.innerHTML='<option value="">Select Tier '+t+'...</option>'+
+   [...values].sort((a,b)=>a[1].localeCompare(b[1])).map(([id,name])=>
+    '<option value="'+id+'">'+escapeComplianceText(name)+'</option>').join('');
+  element.value=selected[t]||'';
+ });
+}
+</script>
