@@ -102,6 +102,13 @@
    contexts=await read('/risk/operational-contexts');
    const types=(contexts.context_types||[]).filter(value=>Object.hasOwn(keys,value));
    fill(type,types.map(value=>({id:value,name:value})),'All context types');
+   const requestedProject=new URLSearchParams(location.search).get('project_id');
+   if(requestedProject&&types.includes('Project')&&(contexts.projects||[]).some(p=>String(p.id)===requestedProject)){
+    type.value='Project';
+    fill(name,contexts.projects,'All contexts');
+    name.value=requestedProject;
+    changed();
+   }
    fill(name,[],'Select context type first');clearSite();optionsError=false;emit();
   }catch(error){
    fill(type,[],'Context options unavailable');fill(name,[],'Select context type first');
