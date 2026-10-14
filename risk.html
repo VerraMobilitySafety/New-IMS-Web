@@ -2772,9 +2772,35 @@ table {
   }else if(active==='controls'){
    content.textContent='Loading linked enterprise controls...';
    document.dispatchEvent(new CustomEvent('vero-risk-controls-tab',{detail:{risk}}));
+  }else if(active==='related'){
+   content.textContent='Loading linked Compliance Requirements...';
+   const selectedRiskId=risk.id;
+   const api='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+   const token=localStorage.getItem('vero_session_token');
+   fetch(api+'/risks/'+encodeURIComponent(selectedRiskId)+'/compliance-obligations',{
+    headers:{'Accept':'application/json',...(token?{'Authorization':'Bearer '+token}:{})}
+   }).then(async response=>{
+    const data=await response.json();
+    if(!response.ok)throw Error(data.message||'Unable to load requirements');
+    if(active!=='related'||!risk||risk.id!==selectedRiskId)return;
+    content.replaceChildren();
+    const items=data.obligations||[];
+    if(!items.length){content.appendChild(card('Linked Compliance Requirements',[['Status','No requirements linked']]));return;}
+    items.forEach(item=>{
+     const section=card(item.obligation_code+' — '+item.obligation_title,[['Status',item.status]]);
+     const link=document.createElement('a');
+     link.href='compliance.html?obligation_id='+encodeURIComponent(item.id);
+     link.textContent='Open Compliance Requirement →';
+     link.style.display='inline-block';
+     link.style.marginTop='12px';
+     section.appendChild(link);
+     content.appendChild(section);
+    });
+   }).catch(error=>{
+    if(active==='related'&&risk&&risk.id===selectedRiskId)content.textContent=error.message;
+   });
   }else{
-   const names={history:'History',related:'Related Records'};
-   content.appendChild(card(names[active],[['Availability','Not yet connected to an authorised data source']]));
+   content.appendChild(card('History',[['Availability','Not yet connected to an authorised data source']]));
   }
  }
  function close(){
