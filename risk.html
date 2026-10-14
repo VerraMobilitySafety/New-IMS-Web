@@ -1960,6 +1960,19 @@ table {
 .vero-risk-filter-panels .vero-risk-filter select{width:100%;min-width:0;height:38px;border:1px solid #e1e5e2;border-radius:8px;padding:0 10px;background:#fff}
 @media(max-width:950px){.vero-risk-filter-panels{grid-template-columns:1fr}}
 @media(max-width:500px){.vero-risk-filter-panels .vero-risk-secondary-row{grid-template-columns:1fr}}
+/* Final Risk Management panel alignment */
+@media(min-width:951px){
+ .vero-risk-filter-panels{grid-template-columns:minmax(0,45fr) minmax(0,55fr)!important}
+ .vero-risk-filter-panels>.vero-risk-filter-panel:first-child .vero-risk-secondary-row{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ .vero-risk-filter-panels>.vero-risk-filter-panel:last-child .vero-risk-secondary-row{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+.vero-risk-filter-panels .vero-risk-filter{min-width:0!important;max-width:none!important;width:100%!important}
+.vero-risk-filter-panels .vero-risk-filter select{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+.vero-matrix-register-grid{align-items:stretch!important}
+.vero-matrix-register-grid>.vero-risk-panel{min-height:570px!important;height:570px!important;box-sizing:border-box!important;overflow:hidden}
+.vero-matrix-register-grid>.vero-risk-panel:last-child{display:flex;flex-direction:column;min-height:0}
+.vero-matrix-register-grid .vero-risk-register-scroll{flex:1;min-height:0;max-height:none!important;overflow-y:auto;overflow-x:auto}
+@media(max-width:950px){.vero-matrix-register-grid>.vero-risk-panel{height:auto!important;min-height:460px!important}.vero-matrix-register-grid .vero-risk-register-scroll{max-height:460px!important}}
 </style>
 <div class="vero-risk-dashboard">
 
