@@ -1962,27 +1962,14 @@ table {
 <div id="veroCompactRiskLayout">
 
 
-<div class="vero-risk-filter-groups">
-<section class="vero-filter-group-panel" aria-labelledby="veroContextHeading">
-  <h3 id="veroContextHeading">Operational Context <span>Where or within what does it apply?</span></h3>
-  <div class="vero-filter-fields vero-three-fields">
-   <div class="vero-risk-filter"><label for="veroTier1Filter">Context Type</label><select id="veroTier1Filter"><option value="">All context types</option></select></div>
-   <div class="vero-risk-filter"><label for="veroApplicationFilter">Context Name</label><select id="veroApplicationFilter" disabled><option value="">Select context type first</option></select></div>
-   <div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area <small>(optional)</small></label><select id="veroSiteFilter" disabled><option value="">Select a context first</option></select></div>
-  </div>
-  <p class="vero-context-note" aria-live="polite"></p>
- </section>
-
- <section class="vero-filter-group-panel" aria-labelledby="veroClassificationHeading">
-  <h3 id="veroClassificationHeading">Risk Classification <span>What is the risk?</span></h3>
-  <div class="vero-filter-fields vero-four-fields">
-   <div class="vero-risk-filter"><label for="veroTier4Filter">Tier 4 · Category</label><select id="veroTier4Filter"><option value="">All categories</option></select></div>
-   <div class="vero-risk-filter"><label for="veroTier3Filter">Tier 3 · Discipline</label><select id="veroTier3Filter" disabled><option value="">All disciplines</option></select></div>
-   <div class="vero-risk-filter"><label for="veroTier2Filter">Tier 2 · Hazard / Type</label><select id="veroTier2Filter" disabled><option value="">All types</option></select></div>
-   <div class="vero-risk-filter"><label for="veroRiskTier1CategoryFilter">Tier 1 · Exposure</label><select id="veroRiskTier1CategoryFilter" disabled><option value="">All exposures</option></select></div>
-  </div>
- </section>
-</div>
+<div class="vero-risk-secondary-row">
+<div class="vero-risk-filter"><label for="veroTier4Filter">Tier 4</label><select id="veroTier4Filter"><option value="">All Tier 4 categories</option></select></div>
+<div class="vero-risk-filter"><label for="veroTier3Filter">Tier 3</label><select id="veroTier3Filter"><option value="">All Tier 3 categories</option></select></div>
+<div class="vero-risk-filter"><label for="veroTier2Filter">Tier 2</label><select id="veroTier2Filter"><option value="">All Tier 2 categories</option></select></div>
+<div class="vero-risk-filter"><label for="veroTier1Filter">Tier 1</label><select id="veroTier1Filter"><option value="">All Tier 1 categories</option></select></div>
+<div class="vero-risk-filter"><label for="veroContextTypeFilter">Context Type</label><select id="veroContextTypeFilter"><option value="">All context types</option></select></div>
+<div class="vero-risk-filter"><label for="veroApplicationFilter">Context Name</label><select id="veroApplicationFilter"><option value="">All contexts</option></select></div>
+<div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area</label><select id="veroSiteFilter"><option value="">All sites / areas</option></select></div>
 </div>
 <div class="vero-matrix-register-grid" style="margin-top:14px !important;">
 <section class="vero-risk-panel">
@@ -3431,75 +3418,47 @@ table {
 <script>
 (function(){
  const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
- const type=document.getElementById('veroTier1Filter');
- const record=document.getElementById('veroApplicationFilter');
+ const type=document.getElementById('veroContextTypeFilter');
+ const name=document.getElementById('veroApplicationFilter');
  const site=document.getElementById('veroSiteFilter');
- const note=document.querySelector('.vero-context-note');
- let contexts=null;
- const typeKeys={'Project':'projects','Contract':'contracts','VM Location':'vm_locations'};
- const relationKeys={'Project':['project_sites','project_id'],'Contract':['contract_sites','contract_id'],'VM Location':['vm_location_sites','vm_location_id']};
+ let data={};
+
  function fill(select,rows,placeholder){
   select.replaceChildren(new Option(placeholder,''));
-  for(const row of rows){
-   const id=row.id??row.value;
-   const label=row.name??row.label??row.project_name??row.contract_name??row.location_name??row.site_name??String(id);
-   if(id!=null)select.add(new Option(label,String(id)));
-  }
-  select.disabled=rows.length===0;
+  rows.forEach(r=>select.add(new Option(r.name||r.site_name||r.location_name||r.contract_name,String(r.id))));
+  select.disabled=!rows.length;
  }
- function clearSites(placeholder='All sites / operational areas'){fill(site,[],placeholder);}
- function onType(){
-  const key=typeKeys[type.value];
-  fill(record,key?(contexts?.[key]||[]):[],'All contexts');
-  clearSites();
+
+ function updateSites(){
+  const selected=Number(name.value);
+  const kind=type.value;
+  const links=kind==='Project'?data.project_sites:
+              kind==='Contract'?data.contract_sites:data.vm_location_sites;
+  const parentKey=kind==='Project'?'project_id':
+                  kind==='Contract'?'contract_id':'vm_location_id';
+  const ids=new Set((links||[]).filter(r=>Number(r[parentKey])===selected).map(r=>Number(r.site_id)));
+  fill(site,(data.sites||[]).filter(r=>ids.has(Number(r.id))),'All sites / areas');
  }
- function onRecord(){
-  clearSites();
-  if(!record.value||!relationKeys[type.value])return;
-  const [linkKey]=relationKeys[type.value];
-  const linkedIds=new Set((contexts?.[linkKey]||[])
-   .filter(link=>String(link.context_id)===record.value)
-   .map(link=>String(link.site_id)));
-  fill(site,(contexts?.sites||[]).filter(item=>linkedIds.has(String(item.id))),'All sites / operational areas');
- }
- type.addEventListener('change',onType);
- record.addEventListener('change',onRecord);
- (async()=>{
+
+ type.addEventListener('change',()=>{
+  const key={'Project':'projects','Contract':'contracts','VM Location':'vm_locations'}[type.value];
+  fill(name,key?(data[key]||[]):[],'All contexts');
+  fill(site,[],'All sites / areas');
+ });
+ name.addEventListener('change',updateSites);
+
+ async function load(){
   try{
    const token=localStorage.getItem('vero_session_token');
-   if(!token)throw Error('Sign in to load Operational Context');
    const response=await fetch(API+'/risk/operational-contexts',{
-    headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store'
+    headers:{Authorization:'Bearer '+token},cache:'no-store'
    });
-   if(!response.ok)throw Error('Unable to load Operational Context ('+response.status+')');
-   contexts=await response.json();
-   try{
-    const applicability=await fetch(API+'/risk/context-assignments',{
-     headers:{Authorization:'Bearer '+token,Accept:'application/json'},
-     cache:'no-store'
-    });
-    if(!applicability.ok)throw Error('Risk applicability unavailable');
-    const payload=await applicability.json();
-    document.dispatchEvent(new CustomEvent('vero-risk-context-assignments',{
-     detail:{ready:true,assignments:payload.assignments||[]}
-    }));
-   }catch(error){
-    note.textContent='Context options are available. Risk applicability filtering is not ready.';
-    document.dispatchEvent(new CustomEvent('vero-risk-context-assignments',{
-     detail:{ready:false,assignments:[]}
-    }));
-   }
-
-   const types=(contexts.context_types||['Project','Contract','VM Location'])
-    .map(t=>typeof t==='string'?{id:t,name:t}:{id:t.id??t.value??t.name,name:t.name??t.label??t.value});
-   fill(type,types,'All context types');
-   onType();
-  }catch(error){
-   type.disabled=true;
-   note.textContent=error.message;
-   console.error('VERO Operational Context:',error);
-  }
- })();
+   if(!response.ok)throw Error('Operational Context API unavailable');
+   data=await response.json();
+   fill(type,(data.context_types||[]).map(t=>typeof t==='string'?{id:t,name:t}:t),'All context types');
+  }catch(error){console.error(error);}
+ }
+ load();
 })();
 </script>
 <style>
