@@ -24,6 +24,9 @@
    if(!linkedResponse.ok)throw Error(linkedData.message||'Unable to retrieve linked controls');
    if(ticket!==version||overlay.hidden)return;
    const linked=linkedData.controls||[];
+   const roleResult=await fetch(API+'/auth/my-roles',{headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token')}});
+   const roleData=roleResult.ok?await roleResult.json():{roles:[]};
+   const canManage=(roleData.roles||[]).some(r=>r.role_name==='Risk Manager');
    status.textContent=linked.length+' linked controls · '+controls.length+' enterprise controls available';
    const linkedSection=node('section');linkedSection.appendChild(node('h3','Controls linked to this Master Risk'));
    if(!linked.length)linkedSection.appendChild(node('p','No enterprise controls linked to this Master Risk yet.'));
