@@ -3659,13 +3659,6 @@ table {
    const input=document.createElement('input');
    input.type='text';input.value=r.name;input.maxLength=255;input.required=true;
    label.appendChild(input);
-   const statusLabel=make('label','Classification status');
-   const statusSelect=document.createElement('select');
-   for(const value of ['Active','Archived']){
-    const option=make('option',value);option.value=value;statusSelect.appendChild(option);
-   }
-   statusSelect.value='Active';
-   statusLabel.appendChild(statusSelect);
    const reasonLabel=make('label','Reason for change');
    const reason=document.createElement('textarea');
    reason.required=true;reason.maxLength=2000;
