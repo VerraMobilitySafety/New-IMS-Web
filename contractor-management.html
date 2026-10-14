@@ -1,0 +1,229 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VERO — Contractor Management</title><link rel="icon" href="favicon.png"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet"><style>
+:root{--green:#A9C23F;--charcoal:#3D3935;--line:#E5E1DE;--grey:#857874}*{box-sizing:border-box}body{margin:0;background:#F7F8F7;color:#292725;font-family:Montserrat,Arial,sans-serif}.sidebar{width:260px;position:fixed;inset:0 auto 0 0;background:#252321;color:white;padding:22px 24px}.brand{display:flex;align-items:center;gap:15px;height:82px}.brand img{width:90px}.brand strong{color:var(--green);border-left:1px solid #888;padding-left:15px;letter-spacing:2px}.nav-section{margin-bottom:16px}.nav-label{font-size:9px;text-transform:uppercase;color:#aaa;letter-spacing:1.5px;margin:0 0 6px 14px}.nav a{display:flex;gap:10px;padding:9px 12px;color:white;text-decoration:none;font-size:12px;border-left:3px solid transparent;border-radius:7px}.nav a:hover,.nav a.active{background:#393633;border-left-color:var(--green)}.nav a.placeholder{opacity:.7}.ico{width:20px;text-align:center}.side-foot{position:absolute;bottom:20px;color:#aaa;font-size:10px}.main{margin-left:300px;padding:0 28px 40px}.hero{background:var(--charcoal);color:white;margin:0 -35px 24px;padding:42px}.hero small{color:var(--green);text-transform:uppercase;letter-spacing:2px;font-weight:800}.hero h1{font-size:34px;margin:12px 0}.hero p{font-size:13px;color:#ddd}.rule{background:var(--green);height:4px;width:70px;margin-top:20px}.actions,.tabs{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:20px}button{font:700 12px Montserrat,Arial,sans-serif;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:white;padding:12px 15px}.primary{background:var(--green);border-color:var(--green)}.tabs button{background:#eae7e4}.tabs button.active{background:var(--charcoal);color:white}.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:22px}.kpi,.panel{background:white;border:1px solid var(--line);border-radius:12px;box-shadow:0 3px 10px #00000008}.kpi{padding:20px;border-top:4px solid var(--green)}.kpi b{display:block;font-size:28px;overflow-wrap:anywhere}.kpi span{font-size:11px;color:var(--grey)}.panel{overflow:hidden}.panel-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:15px}.panel h2{font-size:18px;margin:0}.panel-body{padding:24px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.tile{border:1px solid var(--line);border-radius:9px;padding:18px}.tile h3{font-size:13px}.tile p,.note{font-size:12px;color:#706a66;line-height:1.7}.empty{text-align:center;padding:35px;border:1px dashed #ccc;border-radius:9px}.search,input,select{border:1px solid var(--line);border-radius:7px;padding:10px;font:12px Montserrat,Arial,sans-serif}.modal{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.modal.open{display:flex}.dialog{background:white;padding:25px;border-radius:12px;width:min(650px,100%);max-height:90vh;overflow:auto}.fields{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field label{display:block;font-size:11px;font-weight:700;margin-bottom:6px}.field input,.field select{width:100%}.dialog-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}table{border-collapse:collapse;width:100%}td,th{text-align:left;border-bottom:1px solid var(--line);padding:12px;font-size:11px}th{background:#f8f7f6;color:var(--grey)}@media(max-width:1050px){.kpis{grid-template-columns:1fr 1fr}}@media(max-width:750px){.sidebar{display:none!important}.main{margin:0!important;width:100%!important;padding:0 18px 30px}.hero{margin:0 -18px 20px;padding:30px}.grid,.fields{grid-template-columns:1fr}}@media(max-width:500px){.kpis{grid-template-columns:1fr}}
+
+/* Shared VERO sidebar presentation */
+.sidebar{overflow:hidden}.brand{height:82px;position:relative;display:block;margin-bottom:28px;flex-shrink:0}.brand img{position:absolute;width:96px;max-height:56px;object-fit:contain;right:calc(50% + 16px);top:28px;transform:translateY(-50%)}.vero-lockup{position:absolute;left:50%;top:0;height:56px}.vero-divider{position:absolute;left:0;top:28px;width:1px;height:34px;background:rgba(255,255,255,.42);transform:translate(-.5px,-50%)}.vero-name{position:absolute;left:16px;top:28px;transform:translateY(-50%);color:var(--green);font-weight:800;letter-spacing:1.8px;font-size:18px;white-space:nowrap}.chev{position:absolute;z-index:0;opacity:.13;pointer-events:none}.chev.c1{width:110px;right:-32px;top:150px}.chev.c2{width:70px;left:14px;top:48%}.chev.c3{width:145px;right:-42px;bottom:65px}.brand,.nav,.side-foot{z-index:1}.nav{position:relative;display:block}.nav-section{margin:0 0 16px}.nav a{align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-left-width:3px;font-size:12px}.nav a.placeholder:hover{background:rgba(255,255,255,.04);border-left-color:transparent}.nav-group-toggle{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:7px;border-left:3px solid transparent;color:#f7f7f6;font-size:12px;cursor:pointer}.nav-group-toggle:hover,.nav-group.open>.nav-group-toggle{background:rgba(255,255,255,.08);border-left-color:var(--green)}.nav-caret{margin-left:auto;font-size:10px}.nav-sub{display:none;margin:2px 0 5px 34px}.nav-group.open .nav-sub{display:block}.nav-sub a{padding:7px 10px;font-size:11px}.side-foot{position:relative;bottom:auto;font-size:11px;line-height:1.7;padding-top:12px}
+.global-hero{position:relative;height:245px;margin:0 -28px 24px;overflow:hidden;background-image:linear-gradient(90deg,rgba(9,49,63,.64),rgba(9,49,63,.12)),url("verra-governance-header.png");background-size:cover;background-position:center}.hero-content{position:absolute;left:48px;top:50%;transform:translateY(-50%);color:#fff;z-index:2}.hero-kicker{font-size:10px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase;margin-bottom:10px}.hero-content h1{font-size:32px;margin:0 0 8px;font-weight:800}.hero-content p{font-size:14px;margin:0;color:rgba(255,255,255,.94)}.hero-rule{width:64px;height:4px;background:var(--green);margin-top:18px}@media(max-width:750px){.global-hero{margin:0 -18px 20px}.hero-content{left:25px;right:20px}.hero-content h1{font-size:27px}}
+.hero-tools{
+ position:absolute;
+ right:28px;
+ top:22px;
+ z-index:3;
+}
+
+.avatar{
+ width:36px;
+ height:36px;
+ border-radius:50%;
+ display:grid;
+ place-items:center;
+ background:#302e2b;
+ color:#fff;
+ border:2px solid rgba(255,255,255,.8);
+ font-size:11px;
+ font-weight:800;
+}
+
+.vero-account{
+ position:relative;
+ z-index:50;
+}
+
+.vero-account-trigger{
+ display:flex;
+ align-items:center;
+ gap:9px;
+ border:0;
+ background:transparent;
+ padding:0;
+ cursor:pointer;
+}
+
+.vero-account-name{
+ font-size:11px;
+ font-weight:800;
+ color:#fff;
+}
+
+.vero-account-caret{
+ font-size:9px;
+ color:#fff;
+}
+
+.vero-account-menu{
+ position:absolute;
+ right:0;
+ top:48px;
+ width:250px;
+ background:#fff;
+ border:1px solid var(--line);
+ border-radius:11px;
+ box-shadow:0 16px 38px rgba(30,28,26,.18);
+ overflow:hidden;
+ display:none;
+}
+
+.vero-account.open .vero-account-menu{
+ display:block;
+}
+
+.vero-account-profile{
+ padding:15px 16px;
+ border-bottom:1px solid var(--line);
+}
+
+.vero-account-profile b{
+ display:block;
+ font-size:12px;
+}
+
+.vero-account-profile small{
+ font-size:9px;
+ color:var(--grey);
+}
+
+.vero-account-item{
+ width:100%;
+ display:flex;
+ gap:9px;
+ border:0;
+ background:#fff;
+ padding:12px 16px;
+ font-weight:700;
+ font-size:10px;
+ color:var(--charcoal);
+ text-decoration:none;
+ cursor:pointer;
+}
+
+.vero-account-item.admin{
+ display:none;
+}
+
+.vero-account-item.signout{
+ border-top:1px solid var(--line);
+ color:#8f2929;
+}
+
+
+</style><link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="header.css">
+</head><body><aside class="sidebar"><div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div><img class="chev c1" src="verra-chevron.png" alt=""><img class="chev c2" src="verra-chevron.png" alt=""><img class="chev c3" src="verra-chevron.png" alt=""><nav class="nav"><div id="vero-nav"></div></nav><div class="side-foot">VERO • Prototype environment</div></aside><main class="main"><section class="global-hero"><div class="hero-content"><div class="hero-kicker">Operations</div><h1>Contractor Management</h1><p>Qualify, approve and monitor contractors and their workers throughout the engagement lifecycle.</p><div class="hero-rule"></div></div><div class="hero-tools">
+  <div class="vero-account" id="veroAccount">
+
+   <button
+    class="vero-account-trigger"
+    id="veroAccountTrigger"
+    type="button"
+   >
+    <div class="avatar" id="veroAccountAvatar">—</div>
+    <span class="vero-account-name" id="veroAccountName">
+     Signed in user
+    </span>
+    <span class="vero-account-caret">▼</span>
+   </button>
+
+   <div class="vero-account-menu">
+
+    <div class="vero-account-profile">
+     <b id="veroAccountFullName">Signed in user</b>
+     <small id="veroAccountEmail"></small>
+    </div>
+
+    <a
+     class="vero-account-item admin"
+     id="veroUserManagement"
+     href="users.html"
+    >
+     ♙ User Management
+    </a>
+
+    <button
+     class="vero-account-item signout"
+     id="veroAccountSignOut"
+     type="button"
+    >
+     ↪ Sign out
+    </button>
+
+   </div>
+  </div>
+ </div>
+</section>
+<div class="actions"><button class="primary" onclick="openForm('contractors')">＋ Register Contractor</button><button onclick="openForm('workers')">＋ Add Worker</button><button onclick="openForm('requirements')">＋ Add Requirement</button></div>
+<div class="kpis"><div class="kpi"><b id="active">0</b><span>Approved Contractors</span></div><div class="kpi"><b id="premium">0</b><span>Current Contractor Workers</span></div><div class="kpi"><b id="upcoming">0</b><span>Requirements Expiring ≤ 30 Days</span></div><div class="kpi"><b id="open">0</b><span>Contractors Requiring Attention</span></div></div>
+<div class="tabs" id="tabs"></div><section class="panel"><div class="panel-head"><h2 id="heading">Contractor Register</h2><input id="search" class="search" placeholder="Search register" aria-label="Search register"></div><div class="panel-body" id="content"></div></section>
+<p class="note" id="syncState">Connected to the VERO Contractor Management register.</p></main>
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="dialog"><h2 id="formTitle"></h2><form id="form"><div class="fields" id="fields"></div><div class="dialog-actions"><button type="button" onclick="closeForm()">Cancel</button><button class="primary" type="submit">Save to VERO</button></div></form></div></div><script src="nav.js"></script><script>
+const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api',TOKEN='vero_session_token';
+let data={contractors:[],workers:[],requirements:[],monitoring:[]},tab='Contractors',formType='';
+const $=id=>document.getElementById(id),safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cfg={
+ contractors:[['company_name','Company Name'],['abn','ABN / Company Number'],['service_type','Service / Trade'],['country','Country'],['contract_owner','Contract Owner'],['risk_level','Risk Level'],['status','Status']],
+ workers:[['contractor_id','Contractor ID','number'],['first_name','First Name'],['last_name','Last Name'],['email','Email'],['role_title','Role / Trade'],['induction_status','Induction Status'],['status','Status']],
+ requirements:[['contractor_id','Contractor ID','number'],['requirement_type','Requirement Type'],['reference','Policy / Licence / Certificate No.'],['expiry_date','Expiry Date','date'],['compliance_status','Compliance Status'],['notes','Notes']]
+};
+const tabs=['Contractors','Workers','Requirements','Monitoring'];
+$('tabs').innerHTML=tabs.map(t=>'<button type="button" data-tab="'+t+'">'+t+'</button>').join('');
+$('tabs').onclick=e=>{if(e.target.dataset.tab){tab=e.target.dataset.tab;render()}};
+$('search').oninput=render;
+function auth(){return{Authorization:'Bearer '+localStorage.getItem(TOKEN),'Content-Type':'application/json'}}
+async function load(){
+ try{
+  const r=await fetch(API+'/contractors',{headers:auth(),cache:'no-store'});
+  if(r.status===401)return location.replace('login.html?return=contractor-management.html');
+  if(!r.ok)throw new Error('API '+r.status);
+  const d=await r.json();data=d.data||d;$('syncState').textContent='Live VERO register';render();
+ }catch(e){$('syncState').textContent='Contractor API deployment pending';render()}
+}
+function openForm(type){formType=type;$('formTitle').textContent=type==='contractors'?'Register Contractor':type==='workers'?'Add Contractor Worker':'Add Contractor Requirement';$('fields').innerHTML=cfg[type].map(([id,label,kind])=>'<div class="field"><label>'+safe(label)+'</label><input name="'+id+'" type="'+(kind||'text')+'" '+(['company_name','first_name','last_name','requirement_type'].includes(id)?'required':'')+'></div>').join('');$('modal').classList.add('open')}
+function closeForm(){$('modal').classList.remove('open');$('form').reset()}
+$('modal').onclick=e=>{if(e.target===$('modal'))closeForm()};
+$('form').onsubmit=async e=>{e.preventDefault();const payload=Object.fromEntries(new FormData(e.target).entries());try{const r=await fetch(API+'/contractors/'+formType,{method:'POST',headers:auth(),body:JSON.stringify(payload)});const d=await r.json();if(!r.ok)throw new Error(d.message||'Unable to save');closeForm();await load()}catch(x){alert(x.message)}};
+function rows(type,fields){
+ const q=$('search').value.toLowerCase(),list=(data[type]||[]).filter(x=>Object.values(x).some(v=>String(v??'').toLowerCase().includes(q)));
+ return list.length?'<div style="overflow-x:auto"><table><thead><tr>'+fields.map(f=>'<th>'+f[1]+'</th>').join('')+'</tr></thead><tbody>'+list.map(r=>'<tr>'+fields.map(f=>'<td>'+safe(r[f[0]]??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>':'<div class="empty"><strong>No records found</strong><p class="note">Use the actions above to add the first record.</p></div>'
+}
+function render(){
+ const now=new Date(),soon=new Date(Date.now()+30*864e5);
+ $('active').textContent=data.contractors.filter(x=>x.status==='Approved').length;
+ $('premium').textContent=data.workers.filter(x=>x.status==='Current').length;
+ $('upcoming').textContent=data.requirements.filter(x=>x.expiry_date&&new Date(x.expiry_date)>=now&&new Date(x.expiry_date)<=soon).length;
+ $('open').textContent=data.contractors.filter(c=>c.status!=='Approved'||data.requirements.some(r=>Number(r.contractor_id)===Number(c.id)&&['Expired','Missing'].includes(r.compliance_status))).length;
+ document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+ $('heading').textContent={Contractors:'Contractor Register',Workers:'Contractor Workers',Requirements:'Qualification and Compliance Requirements',Monitoring:'Monitoring and Assurance'}[tab];
+ if(tab==='Contractors')$('content').innerHTML=rows('contractors',[['contractor_code','Code'],['company_name','Contractor'],['service_type','Service / Trade'],['risk_level','Risk'],['contract_owner','Contract Owner'],['status','Status']]);
+ else if(tab==='Workers')$('content').innerHTML=rows('workers',[['first_name','First Name'],['last_name','Last Name'],['role_title','Role / Trade'],['induction_status','Induction'],['status','Status']]);
+ else if(tab==='Requirements')$('content').innerHTML=rows('requirements',[['contractor_id','Contractor ID'],['requirement_type','Requirement'],['reference','Reference'],['expiry_date','Expiry'],['compliance_status','Status']]);
+ else $('content').innerHTML=rows('monitoring',[['contractor_id','Contractor ID'],['monitoring_type','Activity'],['activity_date','Date'],['outcome','Outcome'],['notes','Notes']]);
+}
+load();render();
+</script><script>
+/* VERO GLOBAL ACCOUNT MENU */
+(()=>{
+ const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+ const TOKEN='vero_session_token', USER='vero_current_user';
+ const account=document.getElementById('veroAccount'); if(!account)return;
+ const trigger=document.getElementById('veroAccountTrigger');
+ const avatar=document.getElementById('veroAccountAvatar');
+ const name=document.getElementById('veroAccountName');
+ const full=document.getElementById('veroAccountFullName');
+ const email=document.getElementById('veroAccountEmail');
+ const admin=document.getElementById('veroUserManagement');
+ const signout=document.getElementById('veroAccountSignOut');
+ const initials=u=>(((u?.first_name||'').charAt(0)+(u?.last_name||'').charAt(0)).toUpperCase()||'U');
+ const fullName=u=>[u?.first_name,u?.last_name].filter(Boolean).join(' ').trim()||u?.email||'Signed in user';
+ function render(u){avatar.textContent=initials(u);name.textContent=fullName(u);full.textContent=fullName(u);email.textContent=u?.email||'';admin.style.display=u?.vero_role==='Administrator'?'flex':'none';}
+ async function load(){
+  const t=localStorage.getItem(TOKEN); if(!t){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));return;}
+  try{const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t,Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('auth');const d=await r.json();const u=d.user||d;localStorage.setItem(USER,JSON.stringify(u));render(u);}
+  catch(e){localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));}
+ }
+ trigger.addEventListener('click',e=>{e.stopPropagation();const open=account.classList.toggle('open');trigger.setAttribute('aria-expanded',String(open));});
+ document.addEventListener('click',e=>{if(!account.contains(e.target)){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
+ signout.addEventListener('click',async()=>{const t=localStorage.getItem(TOKEN);try{if(t)await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+t}})}catch(e){}localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html');});
+ load();
+})();
+
+</script></body></html>
