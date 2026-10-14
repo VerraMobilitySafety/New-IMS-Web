@@ -3561,7 +3561,8 @@ table {
   const pages=['Overview','Child Classifications','Terminal Risks','Operational Exposure'];
   if(Number(r.tier)>1){
    const create=make('button','+ Add Tier '+(Number(r.tier)-1)+' classification');
-   create.type='button';create.className='vero-risk-classification-create';
+   create.type='button';create.className='vero-risk-classification-create';create.hidden=true;
+   fetch(API+'/auth/my-roles',{headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},cache:'no-store'}).then(response=>{if(!response.ok)throw Error('Role lookup unavailable');return response.json()}).then(data=>{if(version===request&&!overlay.hidden)create.hidden=!(data.roles||[]).some(role=>role.role_name==='Risk Manager')}).catch(()=>{create.hidden=true});
    create.addEventListener('click',async()=>{
     content.replaceChildren(nav);
     const panel=card('Add child classification');
@@ -3579,7 +3580,6 @@ table {
      try{
       const response=await fetch(API+'/risk-tiers',{method:'POST',headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json','Content-Type':'application/json'},body:JSON.stringify({tier:Number(r.tier)-1,category_name:name.value.trim(),parent_category_ids:[Number(r.id)]})});
       const result=await response.json();if(!response.ok)throw Error(result.message||'Unable to create classification');
-      feedback.textContent='Classification created successfully.';
       document.dispatchEvent(new CustomEvent('vero-risk-hierarchy-render'));
       await show('Child Classifications');
      }catch(error){feedback.textContent=error.message;submit.disabled=false;}
@@ -3588,6 +3588,7 @@ table {
    nav.appendChild(create);
   }
   async function show(page){
+   if(version!==request||overlay.hidden)return;
    content.replaceChildren(nav);
    [...nav.children].forEach(btn=>btn.setAttribute('aria-current',String(btn.textContent===page)));
    if(page==='Overview'){
