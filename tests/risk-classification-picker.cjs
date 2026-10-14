@@ -4,7 +4,9 @@ const {test}=require('node:test');
 const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const code=fs.readFileSync(path.join(__dirname,'..','risk-classification-picker.js'),'utf8');
 class Element{
- constructor(tag='div'){this.tagName=tag;this.children=[];this.listeners={};this.value='';this.disabled=false;this.textContent='';}
+ constructor(tag='div'){this.tagName=tag;this.children=[];this.listeners={};this.value='';this.disabled=false;this.textContent='';this._value='';}
+ set value(v){this._value=String(v);}
+ get value(){return this._value;}
  append(...items){this.children.push(...items);}
  appendChild(item){this.children.push(item);return item;}
  replaceChildren(...items){this.children=[...items];}
