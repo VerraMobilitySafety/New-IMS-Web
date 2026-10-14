@@ -20,6 +20,8 @@ class Target{
 }
 class Element extends Target{
  constructor(tag='div'){super();this.tagName=tag.toUpperCase();this.children=[];this.style={};this.attributes={};this.disabled=false;this.hidden=false;this._text='';this._value=undefined;this.className='';this.classList={add:(name)=>{this.className+=' '+name;},contains:(name)=>this.className.split(' ').includes(name)};}
+ get childNodes(){return this.children;}
+ cloneNode(deep=false){const copy=new Element(this.tagName);copy._text=this._text;copy._value=this._value;copy.className=this.className;copy.hidden=this.hidden;copy.disabled=this.disabled;copy.attributes={...this.attributes};if(deep)for(const child of this.children)copy.appendChild(child.cloneNode(true));return copy;}
  get value(){return this._value??(this.tagName==='SELECT'?(this.children[0]?.value||''):'');}
  set value(value){value=String(value);this._value=this.tagName==='SELECT'&&!this.children.some(x=>x.value===value)?'':value;}
  set textContent(value){this._text=String(value??'');this.children=[];}
