@@ -365,9 +365,9 @@
 
  <section id="actions" class="ws-view"><div class="empty-state"><b>No live project actions yet.</b><br><br>Workflow actions assigned to this project will appear here.</div></section>
 
- <section id="risks" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Risks</h2><span id="projectRiskCount">Loading…</span></div><div id="projectRiskList" class="empty-state">Loading authorised project risk applicability…</div></div></section>
+ <section id="risks" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Risks</h2><div><button type="button" class="btn outline" onclick="openProjectRiskWorkflow()">Manage Risks</button> <span id="projectRiskCount">Loading…</span></div></div><div id="projectRiskList" class="empty-state">Loading authorised project risk applicability…</div></div></section>
 
- <section id="compliance" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Compliance</h2><span id="projectComplianceCount">Loading…</span></div><div id="projectComplianceList" class="empty-state">Loading applicable obligations…</div></div></section>
+ <section id="compliance" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Compliance</h2><div><button type="button" class="btn green" onclick="createProjectCompliance()">Add Requirement</button> <span id="projectComplianceCount">Loading…</span></div></div><div id="projectComplianceList" class="empty-state">Loading applicable obligations…</div></div></section>
 
  <section id="documents" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Documents</h2><span id="projectDocumentCount">Loading…</span></div><div id="projectDocumentsList" class="project-docs"><div class="empty-state"><b>Loading project documents…</b></div></div></div></section>
  <section id="assurance" class="ws-view"><div class="empty-state"><b>Project Assurance</b><br><br>Audits, inspections, project gates and assurance activities linked to this project will appear here.</div></section>
@@ -485,6 +485,17 @@ function closeDeleteProjectModal(){document.getElementById('deleteProjectModal')
 function validateDeleteProjectCode(){const expected=String(currentProject?.project_code||currentProject?.id||''),actual=document.getElementById('deleteProjectCodeInput')?.value||'',btn=document.getElementById('confirmDeleteProjectButton');if(btn)btn.disabled=actual!==expected}
 async function deleteCurrentProject(){if(signedInUser?.vero_role!=='Administrator'||!currentProject?.id)return;const expected=String(currentProject.project_code||currentProject.id),actual=document.getElementById('deleteProjectCodeInput')?.value||'';if(actual!==expected)return;const btn=document.getElementById('confirmDeleteProjectButton'),er=document.getElementById('deleteProjectError');if(btn){btn.disabled=true;btn.textContent='Deleting…'}if(er)er.style.display='none';try{const res=await apiFetch(`${PROJECTS_API}/${currentProject.id}`,{method:'DELETE'}),d=await res.json().catch(()=>({}));if(!res.ok)throw new Error(d.message||('Delete API returned '+res.status));location.href='project-management.html?deleted=1'}catch(e){console.error(e);if(er){er.textContent='Unable to delete project. '+e.message;er.style.display='block'}if(btn){btn.textContent='Delete Project Permanently';validateDeleteProjectCode()}}}
 
+function createProjectCompliance(){
+ if(!currentProject?.id)return;
+ const params=new URLSearchParams({new:'single',project_id:String(currentProject.id)});
+ location.href='compliance.html?'+params.toString();
+}
+function openProjectRiskWorkflow(){
+ if(!currentProject?.id)return;
+ // Risk creation is not yet API-enabled. Open the existing governed Risk module
+ // with project context rather than creating a misleading local record.
+ location.href='risk.html?'+new URLSearchParams({project_id:String(currentProject.id)}).toString();
+}
 /* Read-only, project-scoped Risk and Compliance views. */
 const projectLinkedCache={id:null,risks:false,compliance:false};
 function projectListMessage(id,message){const el=document.getElementById(id);if(el)el.textContent=message}
