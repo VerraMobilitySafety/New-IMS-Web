@@ -47,11 +47,7 @@
     for(const value of values)tr.appendChild(make('td',value));
     const open=()=>{
      if(category){
-      const filter=filters[4-row.tier];
-      if(filter){
-       filter.value=String(row.id);
-       filter.dispatchEvent(new Event('change',{bubbles:true}));
-      }
+      document.dispatchEvent(new CustomEvent('vero-risk-open-classification',{detail:{category:row}}));
      }else{
       const master=window.__veroRiskById?.(row.id);
       if(master)document.dispatchEvent(new CustomEvent('vero-risk-open-details',{detail:{risk:master}}));
