@@ -7,9 +7,39 @@
  const tabs=overlay.querySelector('.vero-risk-details-tabs');
  const actions=document.createElement('div');
  actions.className='vero-risk-office-actions';
- actions.innerHTML='<button type="button" id="veroRiskOfficeEdit" hidden>Edit Draft Risk</button><span id="veroRiskOfficeStatus" role="status"></span>';
+ actions.innerHTML='<button type="button" id="veroRiskOfficeEdit" hidden>Edit Draft Risk</button><button type="button" id="veroRiskOfficeApprove" hidden>Approve</button><button type="button" id="veroRiskOfficeChanges" hidden>Request Changes</button><span id="veroRiskOfficeStatus" role="status"></span>';
  tabs.before(actions);
  const edit=actions.querySelector('button'),status=actions.querySelector('span');
+ const approve=actions.querySelector('#veroRiskOfficeApprove');
+ const changes=actions.querySelector('#veroRiskOfficeChanges');
+ function syncActions(){
+  const show=authorised&&selected?.status==='Draft';
+  edit.hidden=!show;approve.hidden=!show;changes.hidden=!show;
+ }
+ async function decide(decision){
+  if(!authorised||selected?.status!=='Draft')return;
+  const reason=window.prompt(decision==='Approved'?'Approval rationale (required):':'Reason for requesting changes (required):');
+  if(reason===null)return;
+  if(!reason.trim()){status.textContent='A reason is required.';return;}
+  if(reason.length>2000){status.textContent='Reason must be 2000 characters or fewer.';return;}
+  if(decision==='Approved'&&!window.confirm('Approve this Master Risk definition?'))return;
+  approve.disabled=true;changes.disabled=true;status.textContent='Recording decision...';
+  try{
+   const response=await fetch(API+'/risks/'+encodeURIComponent(selected.id)+'/office-decision',{
+    method:'POST',headers:headers(),body:JSON.stringify({decision,reason:reason.trim()})
+   });
+   const data=await response.json();
+   if(!response.ok)throw Error(data.message||'Unable to record decision');
+   selected.status=data.risk_status||selected.status;
+   status.textContent=decision==='Approved'?'Approved. Refresh the register to see updated status.':'Changes requested and recorded.';
+   syncActions();
+   document.querySelector('[data-risk-tab="overview"]')?.click();
+  }catch(error){status.textContent=error.message;}
+  finally{approve.disabled=false;changes.disabled=false;}
+ }
+ approve.addEventListener('click',()=>decide('Approved'));
+ changes.addEventListener('click',()=>decide('Changes Requested'));
+
  let selected=null,authorised=false,version=0;
  const headers=()=>({Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json','Content-Type':'application/json'});
  const field=(form,label,name,value,tag='input')=>{
@@ -66,7 +96,7 @@
   }catch(error){if(seq===version)content.textContent=error.message;}
  }
  document.addEventListener('vero-risk-open-details',async event=>{
-  selected=event.detail.risk;authorised=false;edit.hidden=true;status.textContent='';version++;
+  selected=event.detail.risk;authorised=false;syncActions();status.textContent='';version++;
   const seq=version;
   try{
    const response=await fetch(API+'/auth/my-roles',{headers:headers()});
@@ -74,7 +104,7 @@
    const data=await response.json();
    if(seq!==version)return;
    authorised=(data.roles||[]).some(r=>r.role_name==='Risk Manager');
-   edit.hidden=!(authorised&&selected.status==='Draft');
+   syncActions();
   }catch(error){console.warn('Risk Office role lookup unavailable',error);}
  });
  edit.addEventListener('click',showEdit);
