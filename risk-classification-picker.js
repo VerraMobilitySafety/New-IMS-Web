@@ -15,6 +15,8 @@ window.VeroRiskClassificationPicker=(()=>{
   function render(){
    const q=search.value.trim().toLowerCase();
    const matches=rows.filter(x=>x.path.toLowerCase().includes(q));
+   // Multiple paths can lead to one classification when it has multiple parents.
+   // Keep the selected category ID stable even if the displayed path changes.
    select.replaceChildren();
    const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Select a classification';select.appendChild(placeholder);
    for(const item of matches){const opt=document.createElement('option');opt.value=String(item.category_id);opt.textContent=item.path+' (Tier '+item.tier+')';select.appendChild(opt)}
