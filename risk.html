@@ -3619,6 +3619,38 @@ table {
    .then(data=>{if(version===request&&!overlay.hidden)
     editClassification.hidden=!(data.roles||[]).some(role=>role.role_name==='Risk Manager');})
    .catch(()=>{editClassification.hidden=true;});
+  const archiveClassification=make('button','Archive Classification');
+  archiveClassification.type='button';
+  archiveClassification.className='vero-risk-classification-create';
+  archiveClassification.hidden=true;
+  nav.appendChild(archiveClassification);
+  fetch(API+'/auth/my-roles',{
+   headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},
+   cache:'no-store'
+  }).then(response=>response.ok?response.json():{roles:[]})
+   .then(data=>{if(version===request&&!overlay.hidden)
+    archiveClassification.hidden=!(data.roles||[]).some(role=>role.role_name==='Risk Manager');})
+   .catch(()=>{archiveClassification.hidden=true;});
+  archiveClassification.addEventListener('click',async()=>{
+   if(!window.confirm('Archive this classification? Active children and linked risk definitions must be reassigned first.'))return;
+   const reason=window.prompt('Risk Office reason for archiving:');
+   if(reason===null)return;
+   if(!reason.trim()||reason.length>2000){window.alert('A justification up to 2000 characters is required.');return;}
+   archiveClassification.disabled=true;
+   try{
+    const response=await fetch(API+'/risk-tiers/'+encodeURIComponent(r.id),{
+     method:'PUT',headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),
+      Accept:'application/json','Content-Type':'application/json'},
+     body:JSON.stringify({status:'Archived',reason:reason.trim()})
+    });
+    const data=await response.json();
+    if(!response.ok)throw Error(data.message||'Unable to archive classification');
+    document.dispatchEvent(new CustomEvent('vero-risk-hierarchy-render'));
+    archiveClassification.textContent='Archived';
+    await show('History');
+   }catch(error){window.alert(error.message);}
+   finally{archiveClassification.disabled=false;}
+  });
   editClassification.addEventListener('click',()=>{
    content.replaceChildren(nav);
    const panel=card('Edit classification');
