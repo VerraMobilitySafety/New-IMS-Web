@@ -119,7 +119,7 @@
         <span>Maintenance</span>
       </a>
 
-      <a class="placeholder" href="#" onclick="return false">
+      <a class="${isActive('contractor-management.html') ? 'active' : ''}" href="contractor-management.html">
         <span class="ico">♙</span>
         <span>Contractor Management</span>
       </a>
