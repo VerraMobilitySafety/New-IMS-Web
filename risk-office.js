@@ -7,14 +7,16 @@
  const tabs=overlay.querySelector('.vero-risk-details-tabs');
  const actions=document.createElement('div');
  actions.className='vero-risk-office-actions';
- actions.innerHTML='<button type="button" id="veroRiskOfficeEdit" hidden>Edit Draft Risk</button><button type="button" id="veroRiskOfficeApprove" hidden>Approve</button><button type="button" id="veroRiskOfficeChanges" hidden>Request Changes</button><span id="veroRiskOfficeStatus" role="status"></span>';
+ actions.innerHTML='<button type="button" id="veroRiskOfficeEdit" hidden>Edit Draft Risk</button><button type="button" id="veroRiskOfficeApprove" hidden>Approve</button><button type="button" id="veroRiskOfficeChanges" hidden>Request Changes</button><button type="button" id="veroRiskOfficeArchive" hidden>Archive Master Risk</button><span id="veroRiskOfficeStatus" role="status"></span>';
  tabs.before(actions);
  const edit=actions.querySelector('button'),status=actions.querySelector('span');
  const approve=actions.querySelector('#veroRiskOfficeApprove');
  const changes=actions.querySelector('#veroRiskOfficeChanges');
+ const archive=actions.querySelector('#veroRiskOfficeArchive');
  function syncActions(){
   const show=authorised&&selected?.status==='Draft';
   edit.hidden=!show;approve.hidden=!show;changes.hidden=!show;
+  archive.hidden=!(authorised&&selected&&['Draft','Open','Closed'].includes(selected.status));
  }
  async function decide(decision){
   if(!authorised||selected?.status!=='Draft')return;
@@ -40,6 +42,30 @@
   }catch(error){if(seq===version&&!overlay.hidden)status.textContent=error.message;}
   finally{approve.disabled=false;changes.disabled=false;}
  }
+ archive.addEventListener('click',async()=>{
+  if(!authorised||!selected||!['Draft','Open','Closed'].includes(selected.status))return;
+  const current=selected,seq=version;
+  const reason=window.prompt('Reason for archiving this Master Risk:');
+  if(reason===null)return;
+  if(!reason.trim()||reason.length>2000){status.textContent='A justification of up to 2000 characters is required.';return;}
+  if(!window.confirm('Archive this Master Risk? Its history will be retained.'))return;
+  archive.disabled=true;status.textContent='Archiving Master Risk…';
+  try{
+   const response=await fetch(API+'/risks/'+encodeURIComponent(current.id)+'/archive',{
+    method:'POST',headers:headers(),body:JSON.stringify({reason:reason.trim()})
+   });
+   const data=await response.json();
+   if(!response.ok)throw Error(data.message||'Unable to archive Master Risk');
+   current.status='Archived';
+   document.dispatchEvent(new CustomEvent('vero-risk-register-refresh',{detail:{riskId:current.id,archived:true}}));
+   if(seq!==version||overlay.hidden)return;
+   status.textContent='Master Risk archived.';
+   syncActions();
+   document.getElementById('veroRiskDetailsClose')?.click();
+  }catch(error){
+   if(seq===version&&!overlay.hidden){status.textContent=error.message;window.alert('Master Risk not archived: '+error.message);}
+  }finally{archive.disabled=false;}
+ });
  approve.addEventListener('click',()=>decide('Approved'));
  changes.addEventListener('click',()=>decide('Changes Requested'));
 
