@@ -3607,6 +3607,52 @@ table {
    });
    nav.appendChild(create);
   }
+  const editClassification=make('button','Edit Classification');
+  editClassification.type='button';
+  editClassification.className='vero-risk-classification-create';
+  editClassification.hidden=true;
+  nav.appendChild(editClassification);
+  fetch(API+'/auth/my-roles',{
+   headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},
+   cache:'no-store'
+  }).then(response=>response.ok?response.json():{roles:[]})
+   .then(data=>{if(version===request&&!overlay.hidden)
+    editClassification.hidden=!(data.roles||[]).some(role=>role.role_name==='Risk Manager');})
+   .catch(()=>{editClassification.hidden=true;});
+  editClassification.addEventListener('click',()=>{
+   content.replaceChildren(nav);
+   const panel=card('Edit classification');
+   const form=make('form','');
+   const label=make('label','Classification name');
+   const input=document.createElement('input');
+   input.type='text';input.value=r.name;input.maxLength=255;input.required=true;
+   label.appendChild(input);
+   const reasonLabel=make('label','Reason for change');
+   const reason=document.createElement('textarea');
+   reason.required=true;reason.maxLength=2000;
+   reasonLabel.appendChild(reason);
+   const feedback=make('p','');feedback.setAttribute('role','status');
+   const save=make('button','Save changes');save.type='submit';
+   const cancel=make('button','Cancel');cancel.type='button';
+   cancel.addEventListener('click',()=>show('Overview'));
+   form.append(label,reasonLabel,save,cancel,feedback);
+   panel.appendChild(form);input.focus();
+   form.addEventListener('submit',async event=>{
+    event.preventDefault();save.disabled=true;feedback.textContent='Saving classification…';
+    try{
+     const response=await fetch(API+'/risk-tiers/'+encodeURIComponent(r.id),{
+      method:'PUT',headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),
+       Accept:'application/json','Content-Type':'application/json'},
+      body:JSON.stringify({category_name:input.value.trim(),reason:reason.value.trim()})
+     });
+     const data=await response.json();
+     if(!response.ok)throw Error(data.message||'Unable to update classification');
+     r.name=input.value.trim();title.textContent=r.name;
+     document.dispatchEvent(new CustomEvent('vero-risk-hierarchy-render'));
+     await show('History');
+    }catch(error){feedback.textContent=error.message;save.disabled=false;}
+   });
+  });
   async function show(page){
    if(version!==request||overlay.hidden)return;
    content.replaceChildren(nav);
