@@ -3619,6 +3619,60 @@ table {
    .then(data=>{if(version===request&&!overlay.hidden)
     editClassification.hidden=!(data.roles||[]).some(role=>role.role_name==='Risk Manager');})
    .catch(()=>{editClassification.hidden=true;});
+  const moveClassification=make('button','Change Parents');
+  moveClassification.type='button';
+  moveClassification.className='vero-risk-classification-create';
+  moveClassification.hidden=true;
+  nav.appendChild(moveClassification);
+  fetch(API+'/auth/my-roles',{headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token')}})
+   .then(response=>response.ok?response.json():{roles:[]})
+   .then(data=>{if(version===request&&!overlay.hidden)
+    moveClassification.hidden=Number(r.tier)===4||!(data.roles||[]).some(role=>role.role_name==='Risk Manager');})
+   .catch(()=>{moveClassification.hidden=true;});
+  moveClassification.addEventListener('click',async()=>{
+   content.replaceChildren(nav);
+   const panel=card('Change parent classifications');
+   const form=make('form','');
+   const selectLabel=make('label','Select one or more parent classifications');
+   const select=document.createElement('select');select.multiple=true;select.size=7;
+   selectLabel.appendChild(select);
+   const reasonLabel=make('label','Reason for changing parents');
+   const reason=document.createElement('textarea');reason.required=true;reason.maxLength=2000;
+   reasonLabel.appendChild(reason);
+   const message=make('p','Loading eligible parents…');message.setAttribute('role','status');
+   const save=make('button','Save parent relationships');save.type='submit';save.disabled=true;
+   const cancel=make('button','Cancel');cancel.type='button';cancel.addEventListener('click',()=>show('Overview'));
+   form.append(selectLabel,reasonLabel,save,cancel,message);panel.appendChild(form);
+   try{
+    const response=await fetch(API+'/risk-tiers',{headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},cache:'no-store'});
+    const data=await response.json();if(!response.ok)throw Error(data.message||'Unable to load classifications');
+    if(version!==request||overlay.hidden)return;
+    const current=(data.categories||[]).find(c=>Number(c.id)===Number(r.id));
+    if(!current)throw Error('Classification not found');
+    const selected=new Set((current.parent_category_ids||[]).map(Number));
+    for(const parent of (data.categories||[]).filter(c=>c.status==='Active'&&Number(c.tier)===Number(r.tier)+1)){
+     const option=make('option',parent.category_name);option.value=String(parent.id);
+     option.selected=selected.has(Number(parent.id));select.appendChild(option);
+    }
+    save.disabled=false;message.textContent='Select the appropriate parent categories.';
+   }catch(error){message.textContent=error.message;}
+   form.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const ids=[...select.selectedOptions].map(option=>Number(option.value));
+    if(!ids.length){message.textContent='Select at least one parent.';return;}
+    if(!reason.value.trim()){message.textContent='A justification is required.';return;}
+    save.disabled=true;
+    try{
+     const response=await fetch(API+'/risk-tiers/'+encodeURIComponent(r.id),{
+      method:'PUT',headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),'Content-Type':'application/json',Accept:'application/json'},
+      body:JSON.stringify({parent_category_ids:ids,reason:reason.value.trim()})
+     });
+     const data=await response.json();if(!response.ok)throw Error(data.message||'Unable to update parents');
+     document.dispatchEvent(new CustomEvent('vero-risk-hierarchy-render'));
+     await show('History');
+    }catch(error){message.textContent=error.message;save.disabled=false;}
+   });
+  });
   const archiveClassification=make('button','Archive Classification');
   archiveClassification.type='button';
   archiveClassification.className='vero-risk-classification-create';
