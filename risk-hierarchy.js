@@ -60,7 +60,7 @@
    }
    if(!rows.length){const tr=make('tr','');const td=make('td','No classifications or terminal risks at this level.');td.colSpan=8;tr.appendChild(td);fragment.appendChild(tr);}
    body.replaceChildren(fragment);
-   status.textContent=rows.length+' hierarchy rows displayed';
+   status.textContent=String(rows.length);
   }catch(error){
    if(ticket===serial)console.warn('Hierarchical register unavailable; keeping existing register',error);
   }
