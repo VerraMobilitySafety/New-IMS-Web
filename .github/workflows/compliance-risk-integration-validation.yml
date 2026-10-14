@@ -1,0 +1,35 @@
+name: Compliance Risk integration validation
+on:
+  pull_request:
+    paths:
+      - 'compliance.html'
+      - 'risk.html'
+      - '.github/workflows/compliance-risk-integration-validation.yml'
+jobs:
+  syntax-and-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate inline JavaScript and linked UI
+        run: |
+          node <<'JS'
+          const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+          for(const path of ['compliance.html','risk.html']){
+            const html=fs.readFileSync(path,'utf8');
+            const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)];
+            scripts.forEach((m,i)=>{if(m[1].trim())new vm.Script(m[1],{filename:path+':'+i});});
+          }
+          const compliance=fs.readFileSync('compliance.html','utf8');
+          const risk=fs.readFileSync('risk.html','utf8');
+          for(const id of ['complianceLinkedRisks','complianceRiskTier4','complianceRiskTier3','complianceRiskTier2','complianceRiskTier1','complianceRiskSelect']){
+            assert.ok(compliance.includes('id="'+id+'"'),id);
+          }
+          assert.ok(compliance.includes('/compliance/risks/approved'));
+          assert.ok(compliance.includes('/risk/classification-catalogue'));
+          assert.ok(compliance.includes('/compliance/obligations/'));
+          assert.ok(risk.includes('/compliance-obligations'));
+          console.log('Compliance Risk integration UI syntax and wiring passed');
+          JS
