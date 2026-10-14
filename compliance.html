@@ -6499,7 +6499,8 @@ async function submitComplianceAssessment(){
      assessment_status:status,
      rationale:rationale,
      gaps_identified:gaps||null,
-     next_assessment_date:nextDate||null
+     next_assessment_date:nextDate||null,
+     risk_position:readComplianceRiskPosition(status)
     })
    }
   );
