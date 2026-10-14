@@ -152,7 +152,7 @@
 </section>
 <div class="actions"><button class="primary" onclick="openForm('contractors')">＋ Register Contractor</button><button onclick="openForm('workers')">＋ Add Worker</button><button onclick="openForm('requirements')">＋ Add Requirement</button></div>
 <div class="kpis"><div class="kpi"><b id="active">0</b><span>Approved Contractors</span></div><div class="kpi"><b id="premium">0</b><span>Current Contractor Workers</span></div><div class="kpi"><b id="upcoming">0</b><span>Requirements Expiring ≤ 30 Days</span></div><div class="kpi"><b id="open">0</b><span>Contractors Requiring Attention</span></div></div>
-<div class="tabs" id="tabs"></div><section class="panel"><div class="panel-head"><h2 id="heading">Contractor Register</h2><input id="search" class="search" placeholder="Search register" aria-label="Search register"></div><div class="panel-body" id="content"></div></section>
+<div class="tabs" id="tabs"></div><section class="panel"><div class="panel-head"><h2 id="heading">Contractor Register</h2><input id="search" class="search" placeholder="Search contractor companies or people" aria-label="Search register"></div><div class="panel-body" id="content"></div></section>
 <p class="note" id="syncState">Connected to the VERO Contractor Management register.</p></main>
 <div class="modal" id="modal" role="dialog" aria-modal="true"><div class="dialog"><h2 id="formTitle"></h2><form id="form"><div class="fields" id="fields"></div><div class="dialog-actions"><button type="button" onclick="closeForm()">Cancel</button><button class="primary" type="submit">Save to VERO</button></div></form></div></div><script src="nav.js"></script><script>
 const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api',TOKEN='vero_session_token';
@@ -181,7 +181,7 @@ function closeForm(){$('modal').classList.remove('open');$('form').reset()}
 $('modal').onclick=e=>{if(e.target===$('modal'))closeForm()};
 $('form').onsubmit=async e=>{e.preventDefault();const payload=Object.fromEntries(new FormData(e.target).entries());try{const r=await fetch(API+'/contractors/'+formType,{method:'POST',headers:auth(),body:JSON.stringify(payload)});const d=await r.json();if(!r.ok)throw new Error(d.message||'Unable to save');closeForm();await load()}catch(x){alert(x.message)}};
 function rows(type,fields){
- const q=$('search').value.toLowerCase(),list=(data[type]||[]).filter(x=>Object.values(x).some(v=>String(v??'').toLowerCase().includes(q)));
+ const q=$('search').value.trim().toLowerCase(),list=(data[type]||[]).filter(x=>{if(!q)return true;if(type==='contractors')return String(x.company_name||'').toLowerCase().includes(q);if(type==='workers')return [x.first_name,x.last_name].filter(Boolean).join(' ').toLowerCase().includes(q);return true;});
  return list.length?'<div style="overflow-x:auto"><table><thead><tr>'+fields.map(f=>'<th>'+f[1]+'</th>').join('')+'</tr></thead><tbody>'+list.map(r=>'<tr>'+fields.map(f=>'<td>'+safe(r[f[0]]??'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>':'<div class="empty"><strong>No records found</strong><p class="note">Use the actions above to add the first record.</p></div>'
 }
 function render(){
@@ -192,7 +192,7 @@ function render(){
  $('open').textContent=data.contractors.filter(c=>c.status!=='Approved'||data.requirements.some(r=>Number(r.contractor_id)===Number(c.id)&&['Expired','Missing'].includes(r.compliance_status))).length;
  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
  $('heading').textContent={Contractors:'Contractor Register',Workers:'Contractor Workers',Requirements:'Qualification and Compliance Requirements',Monitoring:'Monitoring and Assurance'}[tab];
- if(tab==='Contractors')$('content').innerHTML=rows('contractors',[['contractor_code','Code'],['company_name','Contractor'],['service_type','Service / Trade'],['risk_level','Risk'],['contract_owner','Contract Owner'],['status','Status']]);
+ $('search').style.display=['Contractors','Workers'].includes(tab)?'block':'none';if(tab==='Contractors')$('content').innerHTML=rows('contractors',[['contractor_code','Code'],['company_name','Contractor'],['service_type','Service / Trade'],['risk_level','Risk'],['contract_owner','Contract Owner'],['status','Status']]);
  else if(tab==='Workers')$('content').innerHTML=rows('workers',[['first_name','First Name'],['last_name','Last Name'],['role_title','Role / Trade'],['induction_status','Induction'],['status','Status']]);
  else if(tab==='Requirements')$('content').innerHTML=rows('requirements',[['contractor_id','Contractor ID'],['requirement_type','Requirement'],['reference','Reference'],['expiry_date','Expiry'],['compliance_status','Status']]);
  else $('content').innerHTML=rows('monitoring',[['contractor_id','Contractor ID'],['monitoring_type','Activity'],['activity_date','Date'],['outcome','Outcome'],['notes','Notes']]);
