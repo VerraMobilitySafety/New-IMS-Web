@@ -4239,6 +4239,14 @@ async function openComplianceRequestFromAction(requestId){
 
    if(strong)strong.textContent=item.proposed_title||'—';
    if(para)para.textContent=item.proposed_description||'No description provided.';
+   let classification=sections[0].querySelector('#controllerProposedRiskClassifications');
+   if(!classification){
+    classification=document.createElement('p');
+    classification.id='controllerProposedRiskClassifications';
+    sections[0].appendChild(classification);
+   }
+   classification.textContent='Risk Classification: '+(item.risk_classifications||[]).map(r=>r.category_name).join(', ')||'Not selected';
+
   }
 
   if(sections[1]){
