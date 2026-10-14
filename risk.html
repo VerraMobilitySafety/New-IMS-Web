@@ -1942,6 +1942,14 @@ table {
  background: #f1f3f5;
 }
 .vero-context-note:empty{display:none}
+/* Align filter-panel divider with the matrix/register divider. */
+@media(min-width:1201px){
+ .vero-risk-filter-groups{
+  grid-template-columns:minmax(0,45fr) minmax(0,55fr);
+  gap:18px;
+ }
+}
+
 </style>
 <div class="vero-risk-dashboard">
 
