@@ -1996,25 +1996,18 @@ table {
 <div class="vero-matrix-register-grid" style="margin-top:14px !important;">
 <section class="vero-risk-panel">
 
- <h2>Risk Assessment Matrix</h2>
-
+ <h2 class="vero-risk-heading-with-count">Risk Assessment Matrix <span class="vero-risk-heading-count" id="veroMatrixStatus" aria-live="polite">—</span></h2>
 
  <div class="vero-matrix-scroll">
   <div id="veroRiskMatrix" class="vero-matrix"></div>
  </div>
 
- <div class="vero-risk-status" id="veroMatrixStatus">
-  Loading risk information...
- </div>
 
 </section><section class="vero-risk-panel">
 
  <div style="display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap">
   <div>
-   <h2>Risk Register</h2>
-   <div class="vero-risk-subtitle" id="veroRiskListStatus">
-    Loading risks...
-   </div>
+   <h2 class="vero-risk-heading-with-count">Risk Register <span class="vero-risk-heading-count" id="veroRiskListStatus" aria-live="polite">—</span></h2>
   </div>
   <button class="vero-risk-clear" id="veroClearMatrixSelection">
    Clear Matrix Selection
@@ -2420,7 +2413,7 @@ table {
   });
 
   matrixStatus.textContent=
-   visible.length+' risks in the current authorised view';
+   String(visible.length);
  }
 
  function renderTable(){
@@ -2434,7 +2427,7 @@ table {
      values.col===selectedCell.col;
   });
 
-  listStatus.textContent=visible.length+' risks displayed';
+  listStatus.textContent=String(visible.length);
 
   if(!visible.length){
    const tr=document.createElement('tr');
@@ -3585,6 +3578,10 @@ document.addEventListener('vero-risk-open-details',()=>{
  if(actions)actions.hidden=false;
 });
 </script>
+<style id="vero-risk-heading-count-styles">
+.vero-matrix-register-grid .vero-risk-heading-with-count{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 16px}
+.vero-matrix-register-grid .vero-risk-heading-count{display:inline-block;font-size:14px;font-weight:700;color:#607068;line-height:1.3;font-variant-numeric:tabular-nums}
+</style>
 <script src="risk-hierarchy.js"></script>
 <script src="risk-operational.js"></script>
 <script src="risk-office.js"></script>
