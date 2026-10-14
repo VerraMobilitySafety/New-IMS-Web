@@ -365,9 +365,9 @@
 
  <section id="actions" class="ws-view"><div class="empty-state"><b>No live project actions yet.</b><br><br>Workflow actions assigned to this project will appear here.</div></section>
 
- <section id="risks" class="ws-view"><div class="empty-state"><b>No live project risks connected yet.</b><br><br>Risks linked to this project will appear here.</div></section>
+ <section id="risks" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Risks</h2><span id="projectRiskCount">Loading…</span></div><div id="projectRiskList" class="empty-state">Loading authorised project risk applicability…</div></div></section>
 
- <section id="compliance" class="ws-view"><div class="empty-state"><b>No live compliance requirements connected yet.</b><br><br>Contractual and project compliance requirements will appear here.</div></section>
+ <section id="compliance" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Compliance</h2><span id="projectComplianceCount">Loading…</span></div><div id="projectComplianceList" class="empty-state">Loading applicable obligations…</div></div></section>
 
  <section id="documents" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Documents</h2><span id="projectDocumentCount">Loading…</span></div><div id="projectDocumentsList" class="project-docs"><div class="empty-state"><b>Loading project documents…</b></div></div></div></section>
  <section id="assurance" class="ws-view"><div class="empty-state"><b>Project Assurance</b><br><br>Audits, inspections, project gates and assurance activities linked to this project will appear here.</div></section>
@@ -484,7 +484,70 @@ function openDeleteProjectModal(){if(signedInUser?.vero_role!=='Administrator'||
 function closeDeleteProjectModal(){document.getElementById('deleteProjectModal')?.classList.remove('show')}
 function validateDeleteProjectCode(){const expected=String(currentProject?.project_code||currentProject?.id||''),actual=document.getElementById('deleteProjectCodeInput')?.value||'',btn=document.getElementById('confirmDeleteProjectButton');if(btn)btn.disabled=actual!==expected}
 async function deleteCurrentProject(){if(signedInUser?.vero_role!=='Administrator'||!currentProject?.id)return;const expected=String(currentProject.project_code||currentProject.id),actual=document.getElementById('deleteProjectCodeInput')?.value||'';if(actual!==expected)return;const btn=document.getElementById('confirmDeleteProjectButton'),er=document.getElementById('deleteProjectError');if(btn){btn.disabled=true;btn.textContent='Deleting…'}if(er)er.style.display='none';try{const res=await apiFetch(`${PROJECTS_API}/${currentProject.id}`,{method:'DELETE'}),d=await res.json().catch(()=>({}));if(!res.ok)throw new Error(d.message||('Delete API returned '+res.status));location.href='project-management.html?deleted=1'}catch(e){console.error(e);if(er){er.textContent='Unable to delete project. '+e.message;er.style.display='block'}if(btn){btn.textContent='Delete Project Permanently';validateDeleteProjectCode()}}}
-async function loadProject(){const id=new URLSearchParams(location.search).get('id')||new URLSearchParams(location.search).get('project'),err=document.getElementById('loadError');if(!id){err.style.display='block';err.textContent='No project ID was supplied in the URL.';return}try{const res=await apiFetch(PROJECTS_API,{cache:'no-store'});if(!res.ok)throw new Error('Projects API returned '+res.status);const data=await res.json(),rows=Array.isArray(data)?data:(data.projects||[]),p=rows.find(x=>String(x.id)===String(id));if(!p)throw new Error('Project '+id+' was not found in the VERO Projects Register.');renderProject(p);await loadProjectDocuments(p.id);const [rr,mr]=await Promise.all([apiFetch(PROJECT_REQUEST_API(p.id),{cache:'no-store'}),apiFetch(PROJECT_MILESTONES_API(p.id),{cache:'no-store'})]);if(mr.ok)currentMilestones=(await mr.json()).milestones||[];if(rr.status===404){renderNoRequest();renderMilestoneOverview();return}if(!rr.ok)throw new Error('New Project Request API returned '+rr.status);renderRequest((await rr.json()).request);}catch(e){err.style.display='block';err.textContent='Unable to load this project from VERO. '+e.message}}
+
+/* Read-only, project-scoped Risk and Compliance views. */
+const projectLinkedCache={id:null,risks:false,compliance:false};
+function projectListMessage(id,message){const el=document.getElementById(id);if(el)el.textContent=message}
+function projectTable(container,headers,items,columns){
+ const host=document.getElementById(container);if(!host)return;
+ const table=document.createElement('table');table.className='table';
+ const head=table.createTHead().insertRow();
+ headers.forEach(h=>{const th=document.createElement('th');th.textContent=h;head.appendChild(th)});
+ const body=table.createTBody();
+ items.forEach(item=>{const tr=body.insertRow();columns.forEach(fn=>{const td=tr.insertCell();td.textContent=String(fn(item)??'—')})});
+ host.replaceChildren(table);host.classList.remove('empty-state');
+}
+async function loadProjectCompliance(id){
+ const host='projectComplianceList',count='projectComplianceCount';
+ try{
+  const res=await apiFetch(API_BASE+'/compliance/obligations',{cache:'no-store'});
+  if(!res.ok)throw Error('Compliance API returned '+res.status);
+  const data=await res.json();if(!Array.isArray(data.obligations))throw Error('Invalid compliance response');
+  // Only explicit Project applicability can be proven from this response.
+  // Broader jurisdiction/organisation applicability requires a dedicated backend resolver.
+  const items=data.obligations.filter(o=>{
+   const a=o.applicability||{};
+   return a.type==='Project' && String(a.project_id??a.projectId??a.context_id??'')===String(id);
+  });
+  document.getElementById(count).textContent=items.length+' directly applicable obligation(s)';
+  if(!items.length){projectListMessage(host,'No directly linked project obligations. Broader applicability is not yet resolved here.');return}
+  projectTable(host,['Reference','Obligation','Source','Assessment'],items,[
+   o=>o.obligation_code,o=>o.obligation_title,o=>o.source_name,o=>o.current_assessment?.status||'Not Assessed'
+  ]);
+ }catch(e){console.error('Project compliance',e);document.getElementById(count).textContent='Unavailable';projectListMessage(host,'Unable to load project compliance: '+e.message)}
+}
+async function loadProjectRisks(id){
+ const host='projectRiskList',count='projectRiskCount';
+ try{
+  const res=await apiFetch(API_BASE+'/risks',{cache:'no-store'});
+  if(!res.ok)throw Error('Risk API returned '+res.status);
+  const data=await res.json();if(!Array.isArray(data.risks))throw Error('Invalid risk response');
+  const risks=data.risks,linked=[];let next=0;
+  // Reuse the same authorised applicability API and bounded concurrency as risk-context.js.
+  // Fail closed: never present a partial result as the full project risk list.
+  await Promise.all(Array.from({length:Math.min(6,risks.length)},async()=>{
+   while(next<risks.length){
+    const risk=risks[next++];
+    const rr=await apiFetch(API_BASE+'/risks/'+encodeURIComponent(risk.id)+'/applicability',{cache:'no-store'});
+    if(!rr.ok)throw Error('Risk applicability returned '+rr.status);
+    const d=await rr.json();if(!Array.isArray(d.assignments))throw Error('Invalid risk applicability response');
+    if(d.assignments.some(a=>a.status==='Applicable'&&a.context_type==='Project'&&String(a.context_id)===String(id)))linked.push(risk);
+   }
+  }));
+  document.getElementById(count).textContent=linked.length+' linked risk(s)';
+  if(!linked.length){projectListMessage(host,'No risks explicitly applicable to this project.');return}
+  linked.sort((a,b)=>String(a.risk_code||'').localeCompare(String(b.risk_code||'')));
+  projectTable(host,['Reference','Risk','Status','Next Review'],linked,[
+   r=>r.risk_code,r=>r.risk_title,r=>r.status,r=>fmtDate(r.next_review_date)
+  ]);
+ }catch(e){console.error('Project risks',e);document.getElementById(count).textContent='Unavailable';projectListMessage(host,'Unable to load complete project risks: '+e.message)}
+}
+async function loadProjectGovernance(id){
+ if(projectLinkedCache.id!==id){projectLinkedCache.id=id;projectLinkedCache.risks=false;projectLinkedCache.compliance=false}
+ await Promise.all([loadProjectRisks(id),loadProjectCompliance(id)]);
+}
+
+async function loadProject(){const id=new URLSearchParams(location.search).get('id')||new URLSearchParams(location.search).get('project'),err=document.getElementById('loadError');if(!id){err.style.display='block';err.textContent='No project ID was supplied in the URL.';return}try{const res=await apiFetch(PROJECTS_API,{cache:'no-store'});if(!res.ok)throw new Error('Projects API returned '+res.status);const data=await res.json(),rows=Array.isArray(data)?data:(data.projects||[]),p=rows.find(x=>String(x.id)===String(id));if(!p)throw new Error('Project '+id+' was not found in the VERO Projects Register.');renderProject(p);void loadProjectGovernance(p.id);await loadProjectDocuments(p.id);const [rr,mr]=await Promise.all([apiFetch(PROJECT_REQUEST_API(p.id),{cache:'no-store'}),apiFetch(PROJECT_MILESTONES_API(p.id),{cache:'no-store'})]);if(mr.ok)currentMilestones=(await mr.json()).milestones||[];if(rr.status===404){renderNoRequest();renderMilestoneOverview();return}if(!rr.ok)throw new Error('New Project Request API returned '+rr.status);renderRequest((await rr.json()).request);}catch(e){err.style.display='block';err.textContent='Unable to load this project from VERO. '+e.message}}
 function field(l,v){return `<div class="detail"><label>${esc(l)}</label><strong>${esc(text(v))}</strong></div>`}
 function openRequest(){editRequest();document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';}
 function val(name,def=''){const v=currentRequest?.[name];return v===null||v===undefined?def:v}
