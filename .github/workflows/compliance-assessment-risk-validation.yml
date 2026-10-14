@@ -24,5 +24,10 @@ jobs:
             assert.ok(html.includes('id="'+id+'"'),id);
           }
           assert.ok(html.includes('risk_position:readComplianceRiskPosition(status)'));
+          for(const id of ['singleRiskTier4','singleRiskTier3','singleRiskTier2','singleRiskTier1']){
+            assert.ok(html.includes('id="'+id+'"'),id);
+          }
+          assert.ok(html.includes('risk_classification_ids:[riskCategoryId]'));
+          assert.ok(html.includes('loadSubmissionRiskClassifications'));
           console.log('Compliance assessment UI validation passed');
           JS
