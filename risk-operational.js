@@ -254,6 +254,22 @@
      if(seq!==sequence||overlay.hidden)return;
      const currentUser=me.user||me;
      const own=Number(assessment.owner_user_id)===Number(currentUser.id);
+     if(assessment.status==='Returned'&&own&&capability?.can_create&&revisionForm){
+      const revise=node('button','Revise returned assessment');
+      revise.type='button';
+      revise.addEventListener('click',()=>{
+       revisionForm.target.value=String(a.id);
+       revisionSource=assessment.id;
+       for(const [key,control] of Object.entries(revisionForm.ratings)){
+        control.value=String(assessment[key]||1);
+       }
+       revisionForm.controls.value=assessment.controls_summary||'';
+       revisionForm.treatments.value=assessment.treatments_summary||'';
+       revisionForm.message.textContent='A new draft revision will be created. The returned assessment remains in history.';
+       revisionForm.form.scrollIntoView({block:'start',behavior:'smooth'});
+      });
+      detail.appendChild(revise);
+     }
      let decision=null;
      if(assessment.status==='Draft'&&own&&capability?.can_create)decision='Submit';
      if(assessment.status==='Submitted'&&capability?.can_approve&&!own)decision='Approve';
