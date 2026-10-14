@@ -104,9 +104,25 @@
    }
    const current=node('div');
    const form=node('form');form.style.display='grid';form.style.gap='10px';
-   const userLabel=node('label','User ID (from Vero User Management)');
-   const userId=node('input');userId.type='number';userId.min='1';userId.required=true;
+   const userLabel=node('label','Assigned employee');
+   const userId=node('select');userId.required=true;
    userLabel.appendChild(userId);
+   async function loadUsers(){
+    userId.replaceChildren();
+    const blank=node('option','Select an eligible employee');blank.value='';userId.appendChild(blank);
+    if(!chooser.value)return;
+    const [type,id]=chooser.value.split('|');
+    try{
+     const result=await json(API+'/risk/eligible-assessors?context_type='+encodeURIComponent(type)+'&context_id='+encodeURIComponent(id));
+     if(seq!==sequence||overlay.hidden)return;
+     for(const person of result.users||[]){
+      const opt=node('option',(person.name||person.email)+' · '+person.email);
+      opt.value=String(person.id);
+      opt.dataset.roles=(person.roles||[]).join(',');
+      userId.appendChild(opt);
+     }
+    }catch(error){feedback.textContent=error.message;}
+   }
    const permissionLabel=node('label','Permission');
    const permission=node('select');
    for(const p of ['Assessor','Approver']){const opt=node('option',p);opt.value=p;permission.appendChild(opt);}
@@ -134,7 +150,7 @@
      }
     }catch(error){current.textContent=error.message;}
    }
-   chooser.addEventListener('change',reload);
+   chooser.addEventListener('change',()=>{reload();loadUsers();});
    form.append(userLabel,permissionLabel,actionLabel,reasonLabel,save,feedback);
    form.addEventListener('submit',async event=>{
     event.preventDefault();if(!chooser.value)return;
@@ -150,7 +166,7 @@
     }catch(error){feedback.textContent=error.message;}
     finally{save.disabled=false;}
    });
-   if(available.length){access.append(chooser,current,form);reload();}
+   if(available.length){access.append(chooser,current,form);reload();loadUsers();}
    else access.appendChild(node('p','Assign this risk to an operational record before managing its permissions.'));
   }
   const note=section('Risk Office governance');
