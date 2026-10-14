@@ -26,6 +26,18 @@
   const token=localStorage.getItem('vero_session_token');
   if(!token)return;
   const params=new URLSearchParams({parent_id:String(selectedParent()),...Object.fromEntries(Object.entries(context()).map(([k,v])=>[k,String(v)]))});
+  // The legacy register is the fallback, not a temporary display.
+  // Keep its current rows for recovery, but show a stable loading state.
+  const fallback=[...body.childNodes].map(node=>node.cloneNode(true));
+  const fallbackStatus=status.textContent;
+  const loading=make('tr','');
+  const cell=make('td','Loading risk classifications…');
+  cell.colSpan=8;
+  cell.style.textAlign='center';
+  cell.style.padding='28px';
+  loading.appendChild(cell);
+  body.replaceChildren(loading);
+  status.textContent='Loading…';
   try{
    const response=await fetch(API+'/risk/hierarchical-register?'+params,{
     headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store'
@@ -64,7 +76,11 @@
    body.replaceChildren(fragment);
    status.textContent=String(rows.length);
   }catch(error){
-   if(ticket===serial)console.warn('Hierarchical register unavailable; keeping existing register',error);
+   if(ticket===serial){
+    body.replaceChildren(...fallback);
+    status.textContent=fallbackStatus;
+    console.warn('Hierarchical register unavailable; restoring existing register',error);
+   }
   }
  }
  document.addEventListener('vero-risk-hierarchy-render',draw);
