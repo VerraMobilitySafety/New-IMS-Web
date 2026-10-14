@@ -163,14 +163,22 @@
   const list=section('Operational assessments');
   const assignments=(data.assignments||[]).filter(a=>a.status==='Applicable');
   if(!assignments.length){list.appendChild(node('p','No applicable operational records. Risk Office must establish applicability first.'));return;}
-  // Draft assessment form is deliberately gated until context-owner checks are enforced by the API.
-  const assessmentEditorEnabled=false;
+  // The API is the authority: display editing only for explicitly assigned operational assessors.
+  const capabilities=await Promise.all(assignments.map(async a=>{
+   try{
+    const response=await json(API+'/risk/applicability/'+encodeURIComponent(a.id)+'/capabilities');
+    return {assignment:a,can_create:response.can_create===true};
+   }catch(error){return {assignment:a,can_create:false};}
+  }));
+  if(seq!==sequence||overlay.hidden)return;
+  const editable=capabilities.filter(c=>c.can_create).map(c=>c.assignment);
+  const assessmentEditorEnabled=editable.length>0;
   if(assessmentEditorEnabled){
    const editor=section('Create operational risk assessment');
    const form=node('form');form.style.display='grid';form.style.gap='10px';
    const targetLabel=node('label','Applicable operational record');
    const target=node('select');target.required=true;
-   for(const a of assignments){
+   for(const a of editable){
     const opt=node('option',a.context_type+' · Record '+a.context_id);
     opt.value=String(a.id);target.appendChild(opt);
    }
@@ -205,7 +213,7 @@
    editor.appendChild(form);
   }else{
    const notice=section('Assessment creation');
-   notice.appendChild(node('p','Assessment entry will be enabled after operational ownership and approval permissions are validated.'));
+   notice.appendChild(node('p','You are not assigned as an operational Risk Assessor for any applicable record.'));
   }
   for(const a of assignments){
    const item=node('div');item.style.padding='12px 0';item.style.borderBottom='1px solid #e1e5e2';
