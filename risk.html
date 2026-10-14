@@ -2569,6 +2569,7 @@ table {
 
    registers=registerData.registers||[];
    risks=riskData.risks||[];
+   window.__veroRiskById=id=>risks.find(r=>Number(r.id)===Number(id));
 
    // Aggregation is supplementary: failures must never prevent the Risk Register loading.
    try{
