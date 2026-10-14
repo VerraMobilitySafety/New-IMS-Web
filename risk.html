@@ -3559,6 +3559,34 @@ table {
   content.replaceChildren();
   const nav=make('div','');nav.className='vero-risk-classification-tabs';
   const pages=['Overview','Child Classifications','Terminal Risks','Operational Exposure'];
+  if(Number(r.tier)>1){
+   const create=make('button','+ Add Tier '+(Number(r.tier)-1)+' classification');
+   create.type='button';create.className='vero-risk-classification-create';
+   create.addEventListener('click',async()=>{
+    content.replaceChildren(nav);
+    const panel=card('Add child classification');
+    field(panel,'Parent classification',r.name+' · Tier '+r.tier);
+    const form=make('form','');
+    const label=make('label','New Tier '+(Number(r.tier)-1)+' classification name');
+    const name=document.createElement('input');name.type='text';name.maxLength=255;name.required=true;
+    label.appendChild(name);
+    const feedback=make('p','');feedback.setAttribute('role','status');
+    const submit=make('button','Create classification');submit.type='submit';
+    const cancel=make('button','Cancel');cancel.type='button';cancel.addEventListener('click',()=>show('Child Classifications'));
+    form.append(label,submit,cancel,feedback);panel.appendChild(form);name.focus();
+    form.addEventListener('submit',async e=>{
+     e.preventDefault();submit.disabled=true;feedback.textContent='Creating classification…';
+     try{
+      const response=await fetch(API+'/risk-tiers',{method:'POST',headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json','Content-Type':'application/json'},body:JSON.stringify({tier:Number(r.tier)-1,category_name:name.value.trim(),parent_category_ids:[Number(r.id)]})});
+      const result=await response.json();if(!response.ok)throw Error(result.message||'Unable to create classification');
+      feedback.textContent='Classification created successfully.';
+      document.dispatchEvent(new CustomEvent('vero-risk-hierarchy-render'));
+      await show('Child Classifications');
+     }catch(error){feedback.textContent=error.message;submit.disabled=false;}
+    });
+   });
+   nav.appendChild(create);
+  }
   async function show(page){
    content.replaceChildren(nav);
    [...nav.children].forEach(btn=>btn.setAttribute('aria-current',String(btn.textContent===page)));
