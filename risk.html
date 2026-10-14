@@ -3291,6 +3291,8 @@ table {
 
  function setMessage(text){
   message.textContent=text;
+  message.setAttribute('aria-live','assertive');
+  message.scrollIntoView({block:'nearest'});
  }
 
 
@@ -3579,7 +3581,10 @@ table {
    const data=await response.json();
 
    if(!response.ok){
-    throw new Error(data.message||'Unable to save category');
+    const detail=data.message||'Unable to save category';
+    setMessage(detail);
+    window.alert('Classification not saved: '+detail);
+    return;
    }
 
    const archived=payload.status==='Archived';
@@ -3590,6 +3595,7 @@ table {
 
   }catch(error){
    setMessage(error.message);
+   window.alert('Classification could not be saved: '+error.message);
   }finally{
    save.disabled=false;
   }
