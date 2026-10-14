@@ -66,6 +66,7 @@ test('excludes archived and invalid classifications from new selections',async()
   {category_id:1,path:'Traffic',tier:1,status:'Active'},
   {category_id:2,path:'Retired',tier:2,status:'Archived'},
   {category_id:3,path:'Disabled',tier:2,status:'Inactive'},
+  {category_id:5,path:'Pending',tier:2,status:'Draft'},
   {category_id:4,path:'Invalid tier',tier:5,status:'Active'},
   {path:'Missing ID',tier:1,status:'Active'}
  ]}));await tick();
