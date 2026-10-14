@@ -3370,48 +3370,94 @@ table {
 
  function renderTree(){
   tree.replaceChildren();
-
-  const ordered=[...categories].sort((a,b)=>
-   b.tier-a.tier || a.category_name.localeCompare(b.category_name)
-  );
-
-  ordered.forEach(category=>{
-   const item=document.createElement('div');
-   item.className='vero-hierarchy-item';
-   if(category.status==='Archived') item.classList.add('archived');
-   item.style.marginLeft=((4-category.tier)*16)+'px';
-
-   const details=document.createElement('div');
-   details.className='vero-hierarchy-details';
-
-   const title=document.createElement('strong');
-   title.textContent='Tier '+category.tier+' — '+category.category_name;
-
-   const subtitle=document.createElement('small');
-   const ids=category.parent_category_ids||
-    (category.parent_category_id==null
-     ?[]:[category.parent_category_id]);
-
-   const parentNames=ids.map(id=>{
-    const found=categories.find(c=>Number(c.id)===Number(id));
-    return found?found.category_name:'Unknown parent';
-   });
-
-   subtitle.textContent=
-    (parentNames.join(', ')||'Top-level category')+
-    ' · '+category.status;
-
-   details.append(title,subtitle);
-
-   const edit=document.createElement('button');
-   edit.type='button';
+  const active=categories.filter(c=>c.status==='Active');
+  const byId=new Map(active.map(c=>[Number(c.id),c]));
+  const children=new Map();
+  for(const category of active){
+   const parents=category.parent_category_ids||(category.parent_category_id==null?[]:[category.parent_category_id]);
+   for(const parentId of parents){
+    const key=Number(parentId);
+    if(!children.has(key))children.set(key,[]);
+    children.get(key).push(category);
+   }
+  }
+  const sort=(a,b)=>a.category_name.localeCompare(b.category_name);
+  const roots=active.filter(c=>Number(c.tier)===4).sort(sort);
+  const explorer=document.createElement('div');
+  explorer.className='vero-family-explorer';
+  const toolbar=document.createElement('div');toolbar.className='vero-family-toolbar';
+  const search=document.createElement('input');search.type='search';search.placeholder='Find a classification in the family tree';
+  search.setAttribute('aria-label','Find classification');
+  const count=document.createElement('span');count.textContent=active.length+' active classifications';
+  toolbar.append(search,count);explorer.appendChild(toolbar);
+  const canvas=document.createElement('div');canvas.className='vero-family-canvas';
+  explorer.appendChild(canvas);
+  function branch(category,ancestry=new Set()){
+   const id=Number(category.id);
+   const details=document.createElement('details');details.className='vero-family-branch';
+   details.dataset.categoryId=String(id);
+   if(category.tier===4)details.open=true;
+   const summary=document.createElement('summary');
+   const node=document.createElement('span');node.className='vero-family-node';
+   const label=document.createElement('span');label.className='vero-family-name';
+   label.textContent=category.category_name;
+   const badge=document.createElement('small');badge.textContent='Tier '+category.tier;
+   node.append(label,badge);
+   const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';
    edit.className='vero-hierarchy-edit';
-   edit.textContent='Edit';
-   edit.addEventListener('click',()=>editCategory(category));
-
-   item.append(details,edit);
-   tree.appendChild(item);
-  });
+   edit.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();editCategory(category);});
+   summary.append(node,edit);details.appendChild(summary);
+   if(ancestry.has(id))return details;
+   const next=new Set(ancestry);next.add(id);
+   const descendants=(children.get(id)||[]).sort(sort);
+   if(descendants.length){
+    const group=document.createElement('div');group.className='vero-family-children';
+    for(const child of descendants)group.appendChild(branch(child,next));
+    details.appendChild(group);
+   }
+   return details;
+  }
+  function draw(query=''){
+   canvas.replaceChildren();
+   const q=query.trim().toLocaleLowerCase();
+   const matching=new Set();
+   if(q){
+    for(const category of active){
+     if(!category.category_name.toLocaleLowerCase().includes(q))continue;
+     const pending=[Number(category.id)];
+     while(pending.length){
+      const id=pending.pop();
+      if(matching.has(id))continue;
+      matching.add(id);
+      const item=byId.get(id);
+      for(const p of item?.parent_category_ids||[])pending.push(Number(p));
+     }
+    }
+   }
+   function filtered(category,visited=new Set()){
+    const id=Number(category.id);
+    if(q&&!matching.has(id))return null;
+    const item=branch(category,visited);
+    if(q){
+     item.open=true;
+     const group=item.querySelector('.vero-family-children');
+     if(group)for(const child of [...group.children])if(!matching.has(Number(child.dataset.categoryId)))child.remove();
+    }
+    return item;
+   }
+   for(const root of roots){
+    const item=filtered(root);
+    if(item)canvas.appendChild(item);
+   }
+   if(!canvas.children.length){
+    const empty=document.createElement('p');
+    empty.textContent=q?'No matching classifications.':'No active Tier 4 classifications.';
+    canvas.appendChild(empty);
+   }
+  }
+  search.addEventListener('input',()=>draw(search.value));
+  draw();
+  tree.appendChild(explorer);
  }
 
  async function loadCategories(){
@@ -3974,6 +4020,7 @@ table {
 #veroRiskDetailsOverlay .vero-risk-classification-tabs button{border:1px solid #dce3de;background:#fff;border-radius:7px;padding:9px 12px;font-size:12px;cursor:pointer}
 #veroRiskDetailsOverlay .vero-risk-classification-tabs button[aria-current=true]{background:#0b3d2e;color:#fff;border-color:#0b3d2e}
 </style>
+<style id="vero-family-tree-styles">#veroHierarchyTree .vero-family-explorer{font-size:13px}#veroHierarchyTree .vero-family-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}#veroHierarchyTree .vero-family-toolbar input{flex:1;min-width:180px;padding:11px;border:1px solid #dce3de;border-radius:8px}#veroHierarchyTree .vero-family-toolbar span{color:#68766e;font-size:12px}#veroHierarchyTree .vero-family-canvas{max-height:55vh;overflow:auto;padding:14px;background:#f7faf8;border:1px solid #e0e7e1;border-radius:10px}#veroHierarchyTree .vero-family-branch{position:relative;margin:8px 0}#veroHierarchyTree .vero-family-branch>summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:revert}#veroHierarchyTree .vero-family-node{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0;flex:1;background:#fff;border:1px solid #dce5de;border-left:3px solid #2c8259;border-radius:8px;padding:11px 12px}#veroHierarchyTree .vero-family-name{font-weight:650;overflow-wrap:anywhere}#veroHierarchyTree .vero-family-node small{white-space:nowrap;color:#587565}#veroHierarchyTree .vero-family-children{margin-left:20px;padding-left:18px;border-left:2px solid #a8cbb5}#veroHierarchyTree .vero-family-children>.vero-family-branch:before{content:"";position:absolute;top:23px;left:-18px;width:16px;border-top:2px solid #a8cbb5}#veroHierarchyTree .vero-family-branch summary:focus-visible{outline:2px solid #2c8259;outline-offset:3px}</style>
 <script src="risk-exposure.js"></script>
 <script src="risk-classification-picker.js"></script>
 <script src="risk-hierarchy.js"></script>
