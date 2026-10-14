@@ -4,9 +4,152 @@
 /* Shared VERO sidebar presentation */
 .sidebar{overflow:hidden}.brand{height:82px;position:relative;display:block;margin-bottom:28px;flex-shrink:0}.brand img{position:absolute;width:96px;max-height:56px;object-fit:contain;right:calc(50% + 16px);top:28px;transform:translateY(-50%)}.vero-lockup{position:absolute;left:50%;top:0;height:56px}.vero-divider{position:absolute;left:0;top:28px;width:1px;height:34px;background:rgba(255,255,255,.42);transform:translate(-.5px,-50%)}.vero-name{position:absolute;left:16px;top:28px;transform:translateY(-50%);color:var(--green);font-weight:800;letter-spacing:1.8px;font-size:18px;white-space:nowrap}.chev{position:absolute;z-index:0;opacity:.13;pointer-events:none}.chev.c1{width:110px;right:-32px;top:150px}.chev.c2{width:70px;left:14px;top:48%}.chev.c3{width:145px;right:-42px;bottom:65px}.brand,.nav,.side-foot{z-index:1}.nav{position:relative;display:block}.nav-section{margin:0 0 16px}.nav a{align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-left-width:3px;font-size:12px}.nav a.placeholder:hover{background:rgba(255,255,255,.04);border-left-color:transparent}.nav-group-toggle{display:flex;align-items:center;gap:11px;padding:9px 12px;margin:2px 0;border-radius:7px;border-left:3px solid transparent;color:#f7f7f6;font-size:12px;cursor:pointer}.nav-group-toggle:hover,.nav-group.open>.nav-group-toggle{background:rgba(255,255,255,.08);border-left-color:var(--green)}.nav-caret{margin-left:auto;font-size:10px}.nav-sub{display:none;margin:2px 0 5px 34px}.nav-group.open .nav-sub{display:block}.nav-sub a{padding:7px 10px;font-size:11px}.side-foot{position:relative;bottom:auto;font-size:11px;line-height:1.7;padding-top:12px}
 .global-hero{position:relative;height:245px;margin:0 -28px 24px;overflow:hidden;background-image:linear-gradient(90deg,rgba(9,49,63,.64),rgba(9,49,63,.12)),url("verra-governance-header.png");background-size:cover;background-position:center}.hero-content{position:absolute;left:48px;top:50%;transform:translateY(-50%);color:#fff;z-index:2}.hero-kicker{font-size:10px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase;margin-bottom:10px}.hero-content h1{font-size:32px;margin:0 0 8px;font-weight:800}.hero-content p{font-size:14px;margin:0;color:rgba(255,255,255,.94)}.hero-rule{width:64px;height:4px;background:var(--green);margin-top:18px}@media(max-width:750px){.global-hero{margin:0 -18px 20px}.hero-content{left:25px;right:20px}.hero-content h1{font-size:27px}}
+.hero-tools{
+ position:absolute;
+ right:28px;
+ top:22px;
+ z-index:3;
+}
+
+.avatar{
+ width:36px;
+ height:36px;
+ border-radius:50%;
+ display:grid;
+ place-items:center;
+ background:#302e2b;
+ color:#fff;
+ border:2px solid rgba(255,255,255,.8);
+ font-size:11px;
+ font-weight:800;
+}
+
+.vero-account{
+ position:relative;
+ z-index:50;
+}
+
+.vero-account-trigger{
+ display:flex;
+ align-items:center;
+ gap:9px;
+ border:0;
+ background:transparent;
+ padding:0;
+ cursor:pointer;
+}
+
+.vero-account-name{
+ font-size:11px;
+ font-weight:800;
+ color:#fff;
+}
+
+.vero-account-caret{
+ font-size:9px;
+ color:#fff;
+}
+
+.vero-account-menu{
+ position:absolute;
+ right:0;
+ top:48px;
+ width:250px;
+ background:#fff;
+ border:1px solid var(--line);
+ border-radius:11px;
+ box-shadow:0 16px 38px rgba(30,28,26,.18);
+ overflow:hidden;
+ display:none;
+}
+
+.vero-account.open .vero-account-menu{
+ display:block;
+}
+
+.vero-account-profile{
+ padding:15px 16px;
+ border-bottom:1px solid var(--line);
+}
+
+.vero-account-profile b{
+ display:block;
+ font-size:12px;
+}
+
+.vero-account-profile small{
+ font-size:9px;
+ color:var(--grey);
+}
+
+.vero-account-item{
+ width:100%;
+ display:flex;
+ gap:9px;
+ border:0;
+ background:#fff;
+ padding:12px 16px;
+ font-weight:700;
+ font-size:10px;
+ color:var(--charcoal);
+ text-decoration:none;
+ cursor:pointer;
+}
+
+.vero-account-item.admin{
+ display:none;
+}
+
+.vero-account-item.signout{
+ border-top:1px solid var(--line);
+ color:#8f2929;
+}
+
+
 </style><link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="header.css">
-</head><body><aside class="sidebar"><div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div><img class="chev c1" src="verra-chevron.png" alt=""><img class="chev c2" src="verra-chevron.png" alt=""><img class="chev c3" src="verra-chevron.png" alt=""><nav class="nav"><div id="vero-nav"></div></nav><div class="side-foot">VERO • Prototype environment</div></aside><main class="main"><section class="global-hero"><div class="hero-content"><div class="hero-kicker">Governance</div><h1>Insurance Management</h1><p>Manage insurance policies, coverage, renewals, claims and financial performance.</p><div class="hero-rule"></div></div></section><div class="actions"><button class="primary" onclick="openForm('policies')">＋ Register Policy</button><button onclick="openForm('claims')">＋ Register Claim</button><button onclick="openForm('renewals')">＋ Plan Renewal</button></div><div class="kpis"><div class="kpi"><b id="active">0</b><span>Active Policies</span></div><div class="kpi"><b id="premium">—</b><span>Annual Premiums</span></div><div class="kpi"><b id="upcoming">0</b><span>Renewals Within 90 Days</span></div><div class="kpi"><b id="open">0</b><span>Open Claims</span></div></div><div class="tabs" id="tabs"></div><section class="panel"><div class="panel-head"><h2 id="heading">Insurance Overview</h2><input id="search" class="search" placeholder="Search records" aria-label="Search records"></div><div class="panel-body" id="content"></div></section><p class="note">Prototype only — entries are held in memory and will disappear on refresh. No Azure API or database changes have been made.</p></main><div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="formTitle"><div class="dialog"><h2 id="formTitle"></h2><form id="form"><div class="fields" id="fields"></div><div class="dialog-actions"><button type="button" onclick="closeForm()">Cancel</button><button class="primary" type="submit">Add to Prototype</button></div></form></div></div><script src="nav.js"></script><script>
+</head><body><aside class="sidebar"><div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div><img class="chev c1" src="verra-chevron.png" alt=""><img class="chev c2" src="verra-chevron.png" alt=""><img class="chev c3" src="verra-chevron.png" alt=""><nav class="nav"><div id="vero-nav"></div></nav><div class="side-foot">VERO • Prototype environment</div></aside><main class="main"><section class="global-hero"><div class="hero-content"><div class="hero-kicker">Governance</div><h1>Insurance Management</h1><p>Manage insurance policies, coverage, renewals, claims and financial performance.</p><div class="hero-rule"></div></div><div class="hero-tools">
+  <div class="vero-account" id="veroAccount">
+
+   <button
+    class="vero-account-trigger"
+    id="veroAccountTrigger"
+    type="button"
+   >
+    <div class="avatar" id="veroAccountAvatar">—</div>
+    <span class="vero-account-name" id="veroAccountName">
+     Signed in user
+    </span>
+    <span class="vero-account-caret">▼</span>
+   </button>
+
+   <div class="vero-account-menu">
+
+    <div class="vero-account-profile">
+     <b id="veroAccountFullName">Signed in user</b>
+     <small id="veroAccountEmail"></small>
+    </div>
+
+    <a
+     class="vero-account-item admin"
+     id="veroUserManagement"
+     href="users.html"
+    >
+     ♙ User Management
+    </a>
+
+    <button
+     class="vero-account-item signout"
+     id="veroAccountSignOut"
+     type="button"
+    >
+     ↪ Sign out
+    </button>
+
+   </div>
+  </div>
+ </div>
+</section><div class="actions"><button class="primary" onclick="openForm('policies')">＋ Register Policy</button><button onclick="openForm('claims')">＋ Register Claim</button><button onclick="openForm('renewals')">＋ Plan Renewal</button></div><div class="kpis"><div class="kpi"><b id="active">0</b><span>Active Policies</span></div><div class="kpi"><b id="premium">—</b><span>Annual Premiums</span></div><div class="kpi"><b id="upcoming">0</b><span>Renewals Within 90 Days</span></div><div class="kpi"><b id="open">0</b><span>Open Claims</span></div></div><div class="tabs" id="tabs"></div><section class="panel"><div class="panel-head"><h2 id="heading">Insurance Overview</h2><input id="search" class="search" placeholder="Search records" aria-label="Search records"></div><div class="panel-body" id="content"></div></section><p class="note">Prototype only — entries are held in memory and will disappear on refresh. No Azure API or database changes have been made.</p></main><div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="formTitle"><div class="dialog"><h2 id="formTitle"></h2><form id="form"><div class="fields" id="fields"></div><div class="dialog-actions"><button type="button" onclick="closeForm()">Cancel</button><button class="primary" type="submit">Add to Prototype</button></div></form></div></div><script src="nav.js"></script><script>
 const data={policies:[],renewals:[],claims:[]};let tab='Overview',formType='';const $=id=>document.getElementById(id),safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const config={policies:[['name','Policy Name'],['number','Policy Number'],['class','Insurance Class'],['insurer','Insurer'],['broker','Broker'],['entity','Insured Entity'],['country','Jurisdiction'],['inception','Inception Date','date'],['expiry','Expiry Date','date'],['limit','Coverage Limit','number'],['excess','Deductible / Excess','number'],['premium','Annual Premium','number'],['currency','Currency'],['status','Status']],claims:[['reference','Claim Reference'],['policy','Policy Number'],['description','Description'],['loss','Date of Loss','date'],['notified','Notification Date','date'],['reserve','Reserve','number'],['paid','Paid','number'],['currency','Currency'],['status','Status']],renewals:[['policy','Policy Number'],['due','Renewal Due','date'],['owner','Owner'],['stage','Stage'],['notes','Notes']]};
 function openForm(type){formType=type;$('formTitle').textContent='Register '+type.slice(0,-1);$('fields').innerHTML=config[type].map(([id,label,kind])=>'<div class="field"><label for="f'+id+'">'+safe(label)+'</label><input id="f'+id+'" name="'+id+'" type="'+(kind||'text')+'" '+(kind==='number'?'min="0" step="0.01"':'')+' '+(['name','number','reference','policy'].includes(id)?'required':'')+'></div>').join('');$('modal').classList.add('open');$('fields').querySelector('input')?.focus()}
 function closeForm(){$('modal').classList.remove('open');$('form').reset()}
@@ -14,4 +157,32 @@ $('modal').onclick=e=>{if(e.target===$('modal'))closeForm()};document.onkeydown=
 $('form').onsubmit=e=>{e.preventDefault();data[formType].push(Object.fromEntries(new FormData(e.target).entries()));closeForm();render()};
 const tabs=['Overview','Policies','Renewals','Claims','Documents','Analytics'];$('tabs').innerHTML=tabs.map(t=>'<button type="button" data-tab="'+t+'">'+t+'</button>').join('');$('tabs').onclick=e=>{if(e.target.dataset.tab){tab=e.target.dataset.tab;$('search').value='';render()}};$('search').oninput=render;
 function render(){const now=new Date(),end=new Date();end.setDate(now.getDate()+90);$('active').textContent=data.policies.filter(x=>x.status.toLowerCase()==='active').length;const totals={};data.policies.forEach(x=>{if(x.premium){const c=x.currency||'AUD';totals[c]=(totals[c]||0)+Number(x.premium)}});$('premium').textContent=Object.entries(totals).map(([c,v])=>c+' '+v.toLocaleString('en-AU')).join(' / ')||'—';$('upcoming').textContent=data.policies.filter(x=>x.expiry&&new Date(x.expiry)>=now&&new Date(x.expiry)<=end).length;$('open').textContent=data.claims.filter(x=>!['closed','settled','declined'].includes(x.status.toLowerCase())).length;document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));$('heading').textContent=tab==='Overview'?'Insurance Overview':tab;$('search').style.display=['Policies','Renewals','Claims'].includes(tab)?'block':'none';let html='';if(tab==='Overview')html='<div class="grid">'+[['Coverage and Risk','Map policies to entities, countries, risks and controls.'],['Renewal Pipeline','Track broker submissions, quotations, approvals and binding.'],['Claims and Recoveries','Track claim notifications, reserves, settlements and recoveries.'],['Assurance and Records','Link certificates of currency, schedules and endorsements to controlled records.']].map(x=>'<div class="tile"><h3>'+x[0]+'</h3><p>'+x[1]+'</p></div>').join('')+'</div>';else if(['Policies','Renewals','Claims'].includes(tab)){const type=tab.toLowerCase(),rows=data[type].filter(x=>Object.values(x).some(v=>String(v).toLowerCase().includes($('search').value.toLowerCase())));html=rows.length?'<div style="overflow-x:auto"><table><thead><tr>'+config[type].map(f=>'<th>'+safe(f[1])+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+config[type].map(f=>'<td>'+safe(r[f[0]]||'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>':'<div class="empty"><strong>No records found</strong><p class="note">Register a record using the buttons above.</p></div>'}else if(tab==='Documents')html='<div class="empty"><strong>Certificates and Documents</strong><p class="note">Planned integration with Vero Document and Records Management for certificates of currency, policies, endorsements and correspondence.</p></div>';else html='<div class="empty"><strong>Insurance Analytics</strong><p class="note">Planned reporting for premiums, claims costs, loss ratios, renewal performance and geographic exposure. No sample financial data is presented as actuals.</p></div>';$('content').innerHTML=html}render();
+</script><script>
+/* VERO GLOBAL ACCOUNT MENU */
+(()=>{
+ const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+ const TOKEN='vero_session_token', USER='vero_current_user';
+ const account=document.getElementById('veroAccount'); if(!account)return;
+ const trigger=document.getElementById('veroAccountTrigger');
+ const avatar=document.getElementById('veroAccountAvatar');
+ const name=document.getElementById('veroAccountName');
+ const full=document.getElementById('veroAccountFullName');
+ const email=document.getElementById('veroAccountEmail');
+ const admin=document.getElementById('veroUserManagement');
+ const signout=document.getElementById('veroAccountSignOut');
+ const initials=u=>(((u?.first_name||'').charAt(0)+(u?.last_name||'').charAt(0)).toUpperCase()||'U');
+ const fullName=u=>[u?.first_name,u?.last_name].filter(Boolean).join(' ').trim()||u?.email||'Signed in user';
+ function render(u){avatar.textContent=initials(u);name.textContent=fullName(u);full.textContent=fullName(u);email.textContent=u?.email||'';admin.style.display=u?.vero_role==='Administrator'?'flex':'none';}
+ async function load(){
+  const t=localStorage.getItem(TOKEN); if(!t){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));return;}
+  try{const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t,Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('auth');const d=await r.json();const u=d.user||d;localStorage.setItem(USER,JSON.stringify(u));render(u);}
+  catch(e){localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));}
+ }
+ trigger.addEventListener('click',e=>{e.stopPropagation();const open=account.classList.toggle('open');trigger.setAttribute('aria-expanded',String(open));});
+ document.addEventListener('click',e=>{if(!account.contains(e.target)){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
+ signout.addEventListener('click',async()=>{const t=localStorage.getItem(TOKEN);try{if(t)await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+t}})}catch(e){}localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html');});
+ load();
+})();
+
 </script></body></html>
