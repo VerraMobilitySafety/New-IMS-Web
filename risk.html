@@ -1951,6 +1951,16 @@ table {
 }
 
 </style>
+<style id="vero-risk-two-filter-panels">
+.vero-risk-filter-panels{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:stretch;margin-bottom:16px}
+.vero-risk-filter-panels>.vero-risk-filter-panel{margin:0!important;min-width:0;padding:18px 20px!important}
+.vero-risk-filter-panels .vero-risk-secondary-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:end}
+.vero-risk-filter-panels .vero-risk-filter{display:flex;flex-direction:column;gap:5px;min-width:0;width:100%;margin:0}
+.vero-risk-filter-panels .vero-risk-filter label{font-size:12px;font-weight:600}
+.vero-risk-filter-panels .vero-risk-filter select{width:100%;min-width:0;height:38px;border:1px solid #e1e5e2;border-radius:8px;padding:0 10px;background:#fff}
+@media(max-width:950px){.vero-risk-filter-panels{grid-template-columns:1fr}}
+@media(max-width:500px){.vero-risk-filter-panels .vero-risk-secondary-row{grid-template-columns:1fr}}
+</style>
 <div class="vero-risk-dashboard">
 
 
@@ -1961,18 +1971,15 @@ table {
 
 <div id="veroCompactRiskLayout">
 
-<section class="vero-risk-panel vero-compact-filter-panel" aria-label="Risk filters">
- <h2>Risk Filters</h2>
- <div class="vero-risk-secondary-row">
-<div class="vero-risk-filter"><label for="veroTier4Filter">Tier 4</label><select id="veroTier4Filter"><option value="">All Tier 4 categories</option></select></div>
+<div class="vero-risk-filter-panels">
+<section class="vero-risk-panel vero-compact-filter-panel vero-risk-filter-panel" aria-label="Risk Classification"><h2>Risk Classification</h2><div class="vero-risk-secondary-row"><div class="vero-risk-filter"><label for="veroTier4Filter">Tier 4</label><select id="veroTier4Filter"><option value="">All Tier 4 categories</option></select></div>
 <div class="vero-risk-filter"><label for="veroTier3Filter">Tier 3</label><select id="veroTier3Filter"><option value="">All Tier 3 categories</option></select></div>
 <div class="vero-risk-filter"><label for="veroTier2Filter">Tier 2</label><select id="veroTier2Filter"><option value="">All Tier 2 categories</option></select></div>
-<div class="vero-risk-filter"><label for="veroTier1Filter">Tier 1</label><select id="veroTier1Filter"><option value="">All Tier 1 categories</option></select></div>
-<div class="vero-risk-filter"><label for="veroContextTypeFilter">Context Type</label><select id="veroContextTypeFilter"><option value="">All context types</option></select></div>
+<div class="vero-risk-filter"><label for="veroTier1Filter">Tier 1</label><select id="veroTier1Filter"><option value="">All Tier 1 categories</option></select></div></div></section>
+<section class="vero-risk-panel vero-compact-filter-panel vero-risk-filter-panel" aria-label="Operational Context"><h2>Operational Context</h2><div class="vero-risk-secondary-row"><div class="vero-risk-filter"><label for="veroContextTypeFilter">Context Type</label><select id="veroContextTypeFilter"><option value="">All context types</option></select></div>
 <div class="vero-risk-filter"><label for="veroApplicationFilter">Context Name</label><select id="veroApplicationFilter"><option value="">All contexts</option></select></div>
-<div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area</label><select id="veroSiteFilter"><option value="">All sites / areas</option></select></div>
- </div>
-</section>
+<div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area</label><select id="veroSiteFilter"><option value="">All sites / areas</option></select></div></div></section>
+</div>
 <div class="vero-matrix-register-grid" style="margin-top:14px !important;">
 <section class="vero-risk-panel">
 
