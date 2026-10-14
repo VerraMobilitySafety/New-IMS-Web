@@ -93,6 +93,66 @@
     governance.appendChild(form);
    }
   }catch(error){governance.appendChild(node('p','Management controls unavailable: '+error.message));}
+  // Context-specific permissions: visible to Risk Office only.
+  if(governance.querySelector('form')){
+   const access=section('Operational assessor and approver assignments');
+   const chooser=node('select');
+   const available=assignments.filter(a=>a.status==='Applicable');
+   for(const a of available){
+    const opt=node('option',a.context_type+' · Record '+a.context_id);
+    opt.value=String(a.context_type+'|'+a.context_id);chooser.appendChild(opt);
+   }
+   const current=node('div');
+   const form=node('form');form.style.display='grid';form.style.gap='10px';
+   const userLabel=node('label','User ID (from Vero User Management)');
+   const userId=node('input');userId.type='number';userId.min='1';userId.required=true;
+   userLabel.appendChild(userId);
+   const permissionLabel=node('label','Permission');
+   const permission=node('select');
+   for(const p of ['Assessor','Approver']){const opt=node('option',p);opt.value=p;permission.appendChild(opt);}
+   permissionLabel.appendChild(permission);
+   const actionLabel=node('label','Action');
+   const action=node('select');
+   for(const a of ['Grant','Revoke']){const opt=node('option',a);opt.value=a;action.appendChild(opt);}
+   actionLabel.appendChild(action);
+   const reasonLabel=node('label','Justification');
+   const reason=node('textarea');reason.required=true;reason.maxLength=2000;reason.rows=3;
+   reasonLabel.appendChild(reason);
+   const save=node('button','Record permission decision');save.type='submit';
+   const feedback=node('p');feedback.setAttribute('role','status');
+   async function reload(){
+    current.textContent='Loading current assignments...';
+    if(!chooser.value){current.textContent='Assign this risk to an operational record first.';return;}
+    const [type,id]=chooser.value.split('|');
+    try{
+     const result=await json(API+'/risk/context-authorisations?context_type='+encodeURIComponent(type)+'&context_id='+encodeURIComponent(id));
+     if(seq!==sequence||overlay.hidden)return;
+     current.replaceChildren();
+     if(!result.authorisations?.length)current.appendChild(node('p','No active operational permissions.'));
+     for(const entry of result.authorisations){
+      field(current,entry.permission,entry.user_name+' · '+entry.email+' (User '+entry.user_id+')');
+     }
+    }catch(error){current.textContent=error.message;}
+   }
+   chooser.addEventListener('change',reload);
+   form.append(userLabel,permissionLabel,actionLabel,reasonLabel,save,feedback);
+   form.addEventListener('submit',async event=>{
+    event.preventDefault();if(!chooser.value)return;
+    const [type,id]=chooser.value.split('|');
+    save.disabled=true;feedback.textContent='Recording permission decision...';
+    try{
+     await json(API+'/risk/context-authorisations',{method:'POST',body:JSON.stringify({
+      context_type:type,context_id:Number(id),user_id:Number(userId.value),
+      permission:permission.value,action:action.value,reason:reason.value.trim()
+     })});
+     feedback.textContent='Permission decision recorded.';
+     await reload();
+    }catch(error){feedback.textContent=error.message;}
+    finally{save.disabled=false;}
+   });
+   if(available.length){access.append(chooser,current,form);reload();}
+   else access.appendChild(node('p','Assign this risk to an operational record before managing its permissions.'));
+  }
   const note=section('Risk Office governance');
   note.appendChild(node('p','Applicability changes require an authorised Risk Manager and a recorded rationale. Operational assessments are separately owned and approved.'));
  }
