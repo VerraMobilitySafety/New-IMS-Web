@@ -45,7 +45,7 @@ window.VeroRiskClassificationPicker=(()=>{
     const response=await fetch(API+'/risk/classification-catalogue',{headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},cache:'no-store'});
     const data=await response.json();if(!response.ok)throw Error(data.message||'Catalogue unavailable');
     if(disposed||seq!==requestId)return;
-    rows=(Array.isArray(data.categories)?data.categories:[]).filter(item=>item&&item.category_id!=null&&Number(item.tier)>=1&&Number(item.tier)<=4&&item.status!=='Archived'&&item.status!=='Inactive');render();
+    rows=(Array.isArray(data.categories)?data.categories:[]).filter(item=>item&&item.category_id!=null&&Number(item.tier)>=1&&Number(item.tier)<=4&&(!item.status||String(item.status).toLowerCase()==='active'));render();
    }catch(error){if(disposed||seq!==requestId)return;rows=[];select.disabled=true;selected.textContent='';info.textContent='Unable to load classifications: '+error.message;select.replaceChildren();}
   }
   refresh();
