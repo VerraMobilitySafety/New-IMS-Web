@@ -28,7 +28,7 @@ jobs:
             assert.ok(compliance.includes('id="'+id+'"'),id);
           }
           assert.ok(compliance.includes('/compliance/risks/approved'));
-          assert.ok(compliance.includes('/risk/classification-catalogue'));
+          assert.ok(compliance.includes('classification_paths'));
           assert.ok(compliance.includes('/compliance/obligations/'));
           assert.ok(risk.includes('/compliance-obligations'));
           console.log('Compliance Risk integration UI syntax and wiring passed');
