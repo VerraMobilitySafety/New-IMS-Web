@@ -30,6 +30,7 @@ window.VeroRiskClassificationPicker=(()=>{
    select.disabled=unique.size===0;
   }
   search.addEventListener('input',render);
+  select.disabled=true;
   select.addEventListener('change',()=>{
    current=select.value||null;
    const item=rows.find(x=>String(x.category_id)===String(current)&&x.path.toLowerCase().includes(search.value.trim().toLowerCase()))||rows.find(x=>String(x.category_id)===String(current));
@@ -48,7 +49,7 @@ window.VeroRiskClassificationPicker=(()=>{
    }catch(error){if(disposed||seq!==requestId)return;rows=[];select.disabled=true;selected.textContent='';info.textContent='Unable to load classifications: '+error.message;select.replaceChildren();}
   }
   refresh();
-  return {refresh,getValue:()=>current,setValue(value){current=value??null;render();},destroy(){disposed=true;requestId++;wrap.remove();}};
+  return {refresh,getValue:()=>current,setValue(value){current=value??null;render();},getSelected(){return rows.find(item=>String(item.category_id)===String(current))||null;},destroy(){disposed=true;requestId++;wrap.remove();}};
  }
  return {mount};
 })();
