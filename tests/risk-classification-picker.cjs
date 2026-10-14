@@ -60,3 +60,17 @@ test('supports programmatic selection',async()=>{
  assert.match(a.selected.textContent,/Fatigue/);
  assert.equal(a.events.length,0);
 });
+
+test('excludes archived and invalid classifications from new selections',async()=>{
+ const a=setup(async()=>response({categories:[
+  {category_id:1,path:'Traffic',tier:1,status:'Active'},
+  {category_id:2,path:'Retired',tier:2,status:'Archived'},
+  {category_id:3,path:'Disabled',tier:2,status:'Inactive'},
+  {category_id:4,path:'Invalid tier',tier:5,status:'Active'},
+  {path:'Missing ID',tier:1,status:'Active'}
+ ]}));await tick();
+ assert.equal(a.select.children.length,2);
+ assert.equal(a.select.children[1].value,'1');
+ a.picker.setValue(2);
+ assert.equal(a.picker.getSelected(),null);
+});
