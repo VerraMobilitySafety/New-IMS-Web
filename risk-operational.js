@@ -268,7 +268,41 @@
        }catch(error){feedback.textContent=error.message;button.disabled=false;}
       });
       detail.append(button,feedback);
+      if(decision==='Approve'){
+       const returnButton=node('button','Return for changes');
+       returnButton.type='button';returnButton.style.margin='6px 8px 6px 0';
+       returnButton.addEventListener('click',async()=>{
+        const reason=window.prompt('Reason for returning this assessment (required):');
+        if(reason===null)return;
+        if(!reason.trim()||reason.length>2000){feedback.textContent='A reason of 1–2000 characters is required.';return;}
+        returnButton.disabled=true;feedback.textContent='Returning assessment...';
+        try{
+         await json(API+'/risk/assessments/'+encodeURIComponent(assessment.id)+'/decision',{
+          method:'POST',body:JSON.stringify({decision:'Return',reason:reason.trim()})
+         });
+         if(seq===sequence&&!overlay.hidden)await showAssessments(risk,seq);
+        }catch(error){feedback.textContent=error.message;returnButton.disabled=false;}
+       });
+       detail.appendChild(returnButton);
+      }
      }
+     const historyButton=node('button','View decision history');
+     historyButton.type='button';historyButton.style.margin='6px 8px 6px 0';
+     const historyContainer=node('div');
+     historyButton.addEventListener('click',async()=>{
+      historyButton.disabled=true;historyContainer.textContent='Loading decision history...';
+      try{
+       const h=await json(API+'/risk/assessments/'+encodeURIComponent(assessment.id)+'/history');
+       if(seq!==sequence||overlay.hidden)return;
+       historyContainer.replaceChildren();
+       if(!h.history?.length)historyContainer.textContent='No decisions recorded.';
+       for(const event of h.history){
+        field(historyContainer,event.action,event.actor+' · '+(event.occurred_at||'')+(event.reason?' · '+event.reason:''));
+       }
+      }catch(error){historyContainer.textContent=error.message;}
+      finally{historyButton.disabled=false;}
+     });
+     detail.append(historyButton,historyContainer);
     }
    }catch(e){detail.textContent=e.message;}
   }
