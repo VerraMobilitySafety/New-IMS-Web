@@ -189,6 +189,8 @@
   if(seq!==sequence||overlay.hidden)return;
   const editable=capabilities.filter(c=>c.can_create).map(c=>c.assignment);
   const assessmentEditorEnabled=editable.length>0;
+  let revisionSource=null;
+  let revisionForm=null;
   if(assessmentEditorEnabled){
    const editor=section('Create operational risk assessment');
    const form=node('form');form.style.display='grid';form.style.gap='10px';
@@ -213,12 +215,15 @@
    const button=node('button','Save draft assessment');button.type='submit';
    const message=node('p');message.setAttribute('role','status');
    form.append(controlsLabel,treatmentsLabel,button,message);
+   revisionForm={form,target,ratings,controls,treatments,message};
+   target.addEventListener('change',()=>{revisionSource=null;message.textContent='';});
    form.addEventListener('submit',async event=>{
     event.preventDefault();button.disabled=true;message.textContent='Saving draft...';
     try{
      const payload=Object.fromEntries(Object.entries(ratings).map(([k,v])=>[k,Number(v.value)]));
      payload.controls_summary=controls.value.trim();
      payload.treatments_summary=treatments.value.trim();
+     if(revisionSource!==null)payload.returned_assessment_id=revisionSource;
      await json(API+'/risk/applicability/'+encodeURIComponent(target.value)+'/assessments',{
       method:'POST',body:JSON.stringify(payload)
      });
