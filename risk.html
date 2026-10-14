@@ -3458,9 +3458,13 @@ table {
    return;
   }
 
+  const justification=window.prompt('Risk Office justification for this classification change:');
+  if(justification===null)return;
+  if(!justification.trim()||justification.length>2000){setMessage('A justification of up to 2000 characters is required.');return;}
   const payload={
    category_name:categoryName,
-   parent_category_ids:parentIds
+   parent_category_ids:parentIds,
+   reason:justification.trim()
   };
 
   if(!editingId){
@@ -3591,7 +3595,10 @@ table {
     form.addEventListener('submit',async e=>{
      e.preventDefault();submit.disabled=true;feedback.textContent='Creating classification…';
      try{
-      const response=await fetch(API+'/risk-tiers',{method:'POST',headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json','Content-Type':'application/json'},body:JSON.stringify({tier:Number(r.tier)-1,category_name:name.value.trim(),parent_category_ids:[Number(r.id)]})});
+      const reason=window.prompt('Risk Office justification for this classification:');
+      if(reason===null){submit.disabled=false;feedback.textContent='Creation cancelled.';return;}
+      if(!reason.trim()||reason.length>2000)throw Error('Justification required (maximum 2000 characters)');
+      const response=await fetch(API+'/risk-tiers',{method:'POST',headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json','Content-Type':'application/json'},body:JSON.stringify({tier:Number(r.tier)-1,category_name:name.value.trim(),parent_category_ids:[Number(r.id)],reason:reason.trim()})});
       const result=await response.json();if(!response.ok)throw Error(result.message||'Unable to create classification');
       document.dispatchEvent(new CustomEvent('vero-risk-hierarchy-render'));
       await show('Child Classifications');
