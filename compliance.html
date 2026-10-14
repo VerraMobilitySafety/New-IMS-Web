@@ -1676,6 +1676,17 @@ button,input,select,textarea{font-family:inherit}
       ></textarea>
      </div>
 
+     <div class="field full"><h3>Risk Assessment — 5 × 5</h3><small>Assess inherent and residual exposure independently of compliance status.</small></div>
+     <div class="field"><label>Inherent Likelihood</label><select id="reviewRiskInherentLikelihood"></select></div>
+     <div class="field"><label>Inherent Impact</label><select id="reviewRiskInherentImpact"></select></div>
+     <div class="field"><label>Residual Likelihood</label><select id="reviewRiskResidualLikelihood"></select></div>
+     <div class="field"><label>Residual Impact</label><select id="reviewRiskResidualImpact"></select></div>
+     <div class="field"><label>Control Effectiveness</label><select id="reviewRiskControlEffectiveness"><option value="">Select...</option><option>Effective</option><option>Partially Effective</option><option>Ineffective</option><option>Not Assessed</option></select></div>
+     <div class="field"><label>Risk Owner</label><select id="reviewRiskOwner"><option value="">Select owner...</option></select></div>
+     <div class="field full"><label>Linked Master Risk (optional)</label><select id="reviewRiskLinkedMaster"><option value="">No linked master risk</option></select></div>
+     <div class="field full"><label>Risk Justification</label><textarea id="reviewRiskJustification"></textarea></div>
+     <div class="field full"><strong id="reviewRiskScores">Inherent: — · Residual: —</strong></div>
+
      <div class="field">
       <label>Next Assessment Date</label>
       <input
