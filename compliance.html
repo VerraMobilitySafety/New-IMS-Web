@@ -6450,6 +6450,21 @@ function openReviewAssessment(){
 }
 
 
+function readComplianceRiskPosition(status){
+ if(status==='Not Applicable')return null;
+ const get=id=>document.getElementById(id).value;
+ return {
+  inherent_likelihood:Number(get('reviewRiskInherentLikelihood')),
+  inherent_impact:Number(get('reviewRiskInherentImpact')),
+  residual_likelihood:Number(get('reviewRiskResidualLikelihood')),
+  residual_impact:Number(get('reviewRiskResidualImpact')),
+  control_effectiveness:get('reviewRiskControlEffectiveness'),
+  risk_owner_user_id:Number(get('reviewRiskOwner')),
+  linked_risk_id:get('reviewRiskLinkedMaster')||null,
+  justification:get('reviewRiskJustification').trim()
+ };
+}
+
 async function submitComplianceAssessment(){
 
  const status=
