@@ -3527,7 +3527,8 @@ table {
 
   const parentIds=selectedTier===4?[]:selectedParents();
 
-  if(selectedTier!==4 && !parentIds.length){
+  // Archiving retains historical parent links; do not require active parent selection.
+  if(selectedTier!==4 && !parentIds.length && (!editingId || statusField.value!=='Archived')){
    setMessage('Select at least one parent category.');
    return;
   }
@@ -3537,9 +3538,10 @@ table {
   if(!justification.trim()||justification.length>2000){setMessage('A justification of up to 2000 characters is required.');return;}
   const payload={
    category_name:categoryName,
-   parent_category_ids:parentIds,
    reason:justification.trim()
   };
+  // An archive is a status-only transition: preserve existing relationships.
+  if(!editingId || statusField.value!=='Archived')payload.parent_category_ids=parentIds;
 
   if(!editingId){
    payload.tier=selectedTier;
