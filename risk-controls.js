@@ -10,7 +10,7 @@
   const ticket=++version, risk=event.detail?.risk;
   const card=node('section');card.className='vero-risk-details-card';
   card.appendChild(node('h3','Enterprise Controls'));
-  card.appendChild(node('p','Reusable controls are maintained in the enterprise control catalogue. This view does not assume a control is linked to this Master Risk.'));
+  card.appendChild(node('p','Reusable controls are maintained in the enterprise control catalogue. Linked controls are shown separately from the full enterprise catalogue.'));
   const status=node('p','Loading enterprise controls...');status.setAttribute('role','status');card.appendChild(status);
   content.replaceChildren(card);
   try{
@@ -19,7 +19,22 @@
    if(!response.ok)throw Error(data.message||'Unable to retrieve controls');
    if(ticket!==version||overlay.hidden)return;
    const controls=data.controls||[];
-   status.textContent=controls.length+' enterprise controls available · Risk linkage not yet established';
+   const linkedResponse=await fetch(API+'/risks/'+encodeURIComponent(risk.id)+'/controls',{headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},cache:'no-store'});
+   const linkedData=await linkedResponse.json();
+   if(!linkedResponse.ok)throw Error(linkedData.message||'Unable to retrieve linked controls');
+   if(ticket!==version||overlay.hidden)return;
+   const linked=linkedData.controls||[];
+   status.textContent=linked.length+' linked controls · '+controls.length+' enterprise controls available';
+   const linkedSection=node('section');linkedSection.appendChild(node('h3','Controls linked to this Master Risk'));
+   if(!linked.length)linkedSection.appendChild(node('p','No enterprise controls linked to this Master Risk yet.'));
+   for(const c of linked){
+    const row=node('div');row.className='vero-exposure-context';
+    row.appendChild(node('strong',(c.control_code||'')+' · '+(c.control_title||'')));
+    row.appendChild(node('p',[c.relationship_type,c.effectiveness,c.control_status].filter(Boolean).join(' · ')));
+    if(c.rationale)row.appendChild(node('p','Link justification: '+c.rationale));
+    linkedSection.appendChild(row);
+   }
+   card.appendChild(linkedSection);
    if(!controls.length)return;
    const label=node('label','Find enterprise control');label.style.display='grid';label.style.gap='7px';
    const search=node('input');search.type='search';search.placeholder='Search control code, name or owner';label.appendChild(search);card.appendChild(label);
