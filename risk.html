@@ -626,7 +626,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 }
 </style>
 <style id="vero-risk-two-dimensions-v1">
-.vero-risk-filter-groups{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;margin-top:14px;margin-bottom:24px;align-items:stretch}
+.vero-risk-filter-groups{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:16px;margin-top:14px;margin-bottom:0;align-items:stretch}
 .vero-filter-group-panel{background:#fff;border:1px solid #e5e1de;border-radius:12px;padding:18px 20px;min-width:0}
 .vero-filter-group-panel h3{font-size:14px;margin:0 0 17px;font-weight:800;color:#3d3935}
 .vero-filter-group-panel h3 span{display:block;font-size:11px;color:#857874;font-weight:500;margin-top:4px}
@@ -1955,6 +1955,16 @@ table {
 
 
 <div class="vero-risk-filter-groups">
+<section class="vero-filter-group-panel" aria-labelledby="veroContextHeading">
+  <h3 id="veroContextHeading">Operational Context <span>Where or within what does it apply?</span></h3>
+  <div class="vero-filter-fields vero-three-fields">
+   <div class="vero-risk-filter"><label for="veroTier1Filter">Context Type</label><select id="veroTier1Filter"><option value="">All context types</option></select></div>
+   <div class="vero-risk-filter"><label for="veroApplicationFilter">Context Name</label><select id="veroApplicationFilter" disabled><option value="">Select context type first</option></select></div>
+   <div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area <small>(optional)</small></label><select id="veroSiteFilter" disabled><option value="">Select a context first</option></select></div></div>
+  </div>
+  <p class="vero-context-note" aria-live="polite"></p>
+ </section>
+
  <section class="vero-filter-group-panel" aria-labelledby="veroClassificationHeading">
   <h3 id="veroClassificationHeading">Risk Classification <span>What is the risk?</span></h3>
   <div class="vero-filter-fields vero-four-fields">
@@ -1964,18 +1974,9 @@ table {
    <div class="vero-risk-filter"><label for="veroRiskTier1CategoryFilter">Tier 1 · Exposure</label><select id="veroRiskTier1CategoryFilter" disabled><option value="">All exposures</option></select></div>
   </div>
  </section>
- <section class="vero-filter-group-panel" aria-labelledby="veroContextHeading">
-  <h3 id="veroContextHeading">Operational Context <span>Where or within what does it apply?</span></h3>
-  <div class="vero-filter-fields vero-three-fields">
-   <div class="vero-risk-filter"><label for="veroTier1Filter">Context Type</label><select id="veroTier1Filter"><option value="">All context types</option></select></div>
-   <div class="vero-risk-filter"><label for="veroApplicationFilter">Context Name</label><select id="veroApplicationFilter" disabled><option value="">Select context type first</option></select></div>
-   <div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area <small>(optional)</small></label><select id="veroSiteFilter" disabled><option value="">Select a context first</option></select></div></div>
-  </div>
-  <p class="vero-context-note" aria-live="polite"></p>
- </section>
 </div>
 </div>
-<div class="vero-matrix-register-grid" style="margin-top:24px !important;">
+<div class="vero-matrix-register-grid" style="margin-top:14px !important;">
 <section class="vero-risk-panel">
 
  <h2>Risk Assessment Matrix</h2>
