@@ -1991,7 +1991,7 @@ table {
 <div class="vero-risk-filter"><label for="veroTier1Filter">Tier 1</label><select id="veroTier1Filter"><option value="">All Tier 1 categories</option></select></div></div></section>
 <section class="vero-risk-panel vero-compact-filter-panel vero-risk-filter-panel" aria-label="Operational Context"><h2>Operational Context</h2><div class="vero-risk-secondary-row"><div class="vero-risk-filter"><label for="veroContextTypeFilter">Context Type</label><select id="veroContextTypeFilter"><option value="">All context types</option></select></div>
 <div class="vero-risk-filter"><label for="veroApplicationFilter">Context Name</label><select id="veroApplicationFilter"><option value="">All contexts</option></select></div>
-<div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area</label><select id="veroSiteFilter"><option value="">All sites / areas</option></select></div></div></section>
+<div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area</label><select id="veroSiteFilter" disabled aria-describedby="veroContextStatus"><option value="">Site-level filtering unavailable</option></select></div></div><p id="veroContextStatus" role="status">Site-level risk applicability is not available. Context filters cover the whole selected context.</p><button id="veroContextRetry" class="vero-risk-clear" type="button" hidden>Retry context data</button></section>
 </div>
 <div class="vero-matrix-register-grid" style="margin-top:14px !important;">
 <section class="vero-risk-panel">
@@ -2182,21 +2182,40 @@ table {
  let registers=[];
  let risks=[];
  let riskAggregation=new Map();
+ let riskDataState='loading',loadSerial=0;
+ function publishRiskData(state){
+  riskDataState=state;
+  const masterRegisters=new Set(registers.filter(r=>r.register_code==='RISK-GLOBAL').map(r=>Number(r.id)));
+  const detail={state,risks:state==='ready'?risks.filter(r=>masterRegisters.has(Number(r.register_id))):[]};
+  // External controllers can attach after the initial API responses arrive.
+  window.__veroRiskContextData=detail;
+  const eventName={loading:'vero-risk-data-loading',ready:'vero-risk-data-loaded',error:'vero-risk-data-error'}[state];
+  document.dispatchEvent(new CustomEvent(eventName,{detail}));
+ }
+ function dataUnavailable(){
+  return riskDataState!=='ready'||Boolean(contextTypeFilter.value&&!contextAssignmentsReady);
+ }
+ function dataStatus(){
+  return riskDataState==='error'||(contextTypeFilter.value&&contextAssignmentsState==='error')?'Unavailable':'Loading…';
+ }
  let selectedCell=null;
  let contextAssignments=[];
  let contextAssignmentsReady=false;
+ let contextAssignmentsState='idle';
+ let contextSelection='';
  const contextTypeFilter=document.getElementById('veroContextTypeFilter');
  const contextNameFilter=document.getElementById('veroApplicationFilter');
  const contextSiteFilter=document.getElementById('veroSiteFilter');
  document.addEventListener('vero-risk-context-assignments',event=>{
   contextAssignments=event.detail.assignments||[];
   contextAssignmentsReady=event.detail.ready===true;
-  selectedCell=null;
+  contextAssignmentsState=event.detail.state||'idle';
+  const selection=contextTypeFilter.value+'|'+contextNameFilter.value;
+  if(selection!==contextSelection||contextTypeFilter.value)selectedCell=null;
+  contextSelection=selection;
   render();
  });
- [contextTypeFilter,contextNameFilter,contextSiteFilter].forEach(el=>
-  el.addEventListener('change',()=>{selectedCell=null;render();})
- );
+ // The context controller emits only after clearing dependent selections.
 
 
  function assessmentValues(risk){
@@ -2233,8 +2252,7 @@ table {
   });
  }
 
-  // Category hierarchy supports multiple parents. Tier 1 is applicability,
-  // not a parent in the strategic classification tree.
+  // Every classification tier supports multiple parents.
   function parentIds(category){
    if(Array.isArray(category.parent_category_ids))
     return category.parent_category_ids.map(Number);
@@ -2251,7 +2269,7 @@ table {
    tier3Filter.disabled=!parentId;
    populateTier(tier2Filter,[],'All Tier 2 categories');
    tier2Filter.disabled=true;
-    populateTier(tier1CategoryFilter,[],'All exposures');
+    populateTier(tier1CategoryFilter,[],'All Tier 1 categories');
     tier1CategoryFilter.disabled=true;
   }
 
@@ -2268,17 +2286,18 @@ table {
   function updateTier1Category(){
     const parentId=Number(tier2Filter.value);
     const items=tierCategories.filter(category=>category.tier===1 && parentIds(category).includes(parentId));
-    populateTier(tier1CategoryFilter,items,'All exposures');
+    populateTier(tier1CategoryFilter,items,'All Tier 1 categories');
     tier1CategoryFilter.disabled=!parentId;
   }
 
-  async function loadTierCategories(headers){
+  async function loadTierCategories(headers,ticket){
    const response=await fetch(API+'/risk-tiers',{
     headers,cache:'no-store'
    });
    if(!response.ok)
     throw new Error('Unable to load Risk Tier categories.');
    const data=await response.json();
+   if(ticket!==loadSerial)return;
    tierCategories=(data.categories||[])
     .filter(category=>category.status==='Active');
    populateTier(tier4Filter,
@@ -2293,17 +2312,17 @@ table {
   }
 
  function filteredRisks(){
+  if(riskDataState!=='ready')return [];
   return risks.filter(risk=>{
     if(contextTypeFilter.value){
      if(!contextAssignmentsReady)return false;
-     const field={'Project':'project_id','Contract':'contract_id',
-                  'VM Location':'vm_location_id'}[contextTypeFilter.value];
-     if(!field)return false;
+     const kind={'Project':'Project','Contract':'Maintenance Contract',
+                 'VM Location':'VM Site'}[contextTypeFilter.value];
+     if(!kind)return false;
      const matches=contextAssignments.some(a=>
       Number(a.risk_id)===Number(risk.id) &&
-      a[field]!=null &&
-      (!contextNameFilter.value || String(a[field])===contextNameFilter.value) &&
-      (!contextSiteFilter.value || String(a.site_id)===contextSiteFilter.value)
+      a.status==='Applicable' && a.context_type===kind &&
+      (!contextNameFilter.value || String(a.context_id)===contextNameFilter.value)
      );
      if(!matches)return false;
     }
@@ -2392,8 +2411,9 @@ table {
 
     const badge=document.createElement('div');
     badge.className='vero-matrix-count';
-    badge.textContent=String(count);
-    badge.setAttribute('aria-label',count+' risks');
+    badge.textContent=dataUnavailable()?'—':String(count);
+    badge.setAttribute('aria-label',dataUnavailable()?'Risk count unavailable':count+' risks');
+    cell.disabled=dataUnavailable();
 
     cell.append(score,level,badge);
 
@@ -2412,8 +2432,7 @@ table {
    }
   });
 
-  matrixStatus.textContent=
-   String(visible.length);
+  matrixStatus.textContent=dataUnavailable()?dataStatus():String(visible.length);
  }
 
  function renderTable(){
@@ -2433,7 +2452,19 @@ table {
    const tr=document.createElement('tr');
    const td=document.createElement('td');
    td.colSpan=8;
-   td.textContent='No risks match the current selection.';
+   if(riskDataState!=='ready'){
+    listStatus.textContent=dataStatus();
+    td.textContent=riskDataState==='error'
+     ?'Risk data could not be loaded. Retry using the Operational Context controls.'
+     :'Loading authorised risk data…';
+   }else if(contextTypeFilter.value&&!contextAssignmentsReady){
+    listStatus.textContent=contextAssignmentsState==='error'?'Unavailable':'Loading…';
+    td.textContent=contextAssignmentsState==='error'
+     ?'Risk applicability could not be loaded. Retry using the Operational Context controls.'
+     :'Loading authorised risk applicability…';
+   }else{
+    td.textContent='No risks match the current selection.';
+   }
    td.style.textAlign='center';
    td.style.padding='28px';
    tr.appendChild(td);
@@ -2478,6 +2509,7 @@ table {
  function renderLandscape(){
   const container=document.getElementById('veroRiskLandscape');
   container.replaceChildren();
+  if(dataUnavailable()){container.textContent=dataStatus();return;}
 
   const categories={};
 
@@ -2510,6 +2542,7 @@ table {
  }
 
  function renderSummary(){
+  if(dataUnavailable()){document.getElementById('veroOverdueReviews').textContent='—';return;}
   const today=new Date();
   today.setHours(0,0,0,0);
 
@@ -2528,21 +2561,20 @@ table {
  function render(){
   renderMatrix();
   renderTable();
-  document.dispatchEvent(new CustomEvent('vero-risk-hierarchy-render'));
+  // Detailed risk filters must not be overwritten by an asynchronous category response.
+  const showRisks=Boolean(riskDataState!=='ready'||selectedCell||searchInput.value.trim()||levelFilter.value||
+   tier1CategoryFilter.value||contextTypeFilter.value);
+  document.dispatchEvent(new CustomEvent('vero-risk-hierarchy-render',{detail:{showRisks}}));
   renderSummary();
   renderLandscape();
  }
 
  async function load(){
+  const ticket=++loadSerial;
+  publishRiskData('loading');render();
   const token=localStorage.getItem('vero_session_token');
-
-  if(!token){
-   matrixStatus.textContent='Authentication required.';
-   listStatus.textContent='Sign in to view risks.';
-   return;
-  }
-
   try{
+   if(!token)throw Error('Authentication required.');
    const headers={
     Authorization:'Bearer '+token,
     Accept:'application/json'
@@ -2559,23 +2591,27 @@ table {
 
    const registerData=await registerResponse.json();
    const riskData=await riskResponse.json();
+   if(ticket!==loadSerial)return;
 
    registers=registerData.registers||[];
    risks=riskData.risks||[];
-   window.__veroRiskById=id=>risks.find(r=>Number(r.id)===Number(id));
+   window.__veroRiskById=id=>riskDataState==='ready'?risks.find(r=>Number(r.id)===Number(id)):undefined;
 
    // Aggregation is supplementary: failures must never prevent the Risk Register loading.
    try{
     const aggregationResponse=await fetch(API+'/risk/master-aggregation',{headers,cache:'no-store'});
     if(!aggregationResponse.ok)throw Error('Aggregation unavailable');
     const aggregationData=await aggregationResponse.json();
+    if(ticket!==loadSerial)return;
     riskAggregation=new Map((aggregationData.aggregations||[]).map(a=>[Number(a.risk_id),a]));
    }catch(error){
+    if(ticket!==loadSerial)return;
     console.warn('VERO risk aggregation unavailable',error);
     riskAggregation=new Map();
    }
 
-   await loadTierCategories(headers);
+   await loadTierCategories(headers,ticket);
+   if(ticket!==loadSerial)return;
 
    registerFilter.querySelectorAll('option:not(:first-child)').forEach(option=>option.remove());
    registers.forEach(register=>{
@@ -2586,12 +2622,14 @@ table {
    });
 
 
-
+   publishRiskData('ready');
    render();
 
   }catch(error){
-   matrixStatus.textContent=error.message;
-   listStatus.textContent='Unable to load risks.';
+   if(ticket!==loadSerial)return;
+   publishRiskData('error');
+   render();
+   console.warn('VERO risk data unavailable',error);
   }
  }
 
@@ -3451,52 +3489,7 @@ table {
 })();
 </script>
 
-<script>
-(function(){
- const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
- const type=document.getElementById('veroContextTypeFilter');
- const name=document.getElementById('veroApplicationFilter');
- const site=document.getElementById('veroSiteFilter');
- let data={};
-
- function fill(select,rows,placeholder){
-  select.replaceChildren(new Option(placeholder,''));
-  rows.forEach(r=>select.add(new Option(r.name||r.site_name||r.location_name||r.contract_name,String(r.id))));
-  select.disabled=!rows.length;
- }
-
- function updateSites(){
-  const selected=Number(name.value);
-  const kind=type.value;
-  const links=kind==='Project'?data.project_sites:
-              kind==='Contract'?data.contract_sites:data.vm_location_sites;
-  const parentKey=kind==='Project'?'project_id':
-                  kind==='Contract'?'contract_id':'vm_location_id';
-  const ids=new Set((links||[]).filter(r=>Number(r[parentKey])===selected).map(r=>Number(r.site_id)));
-  fill(site,(data.sites||[]).filter(r=>ids.has(Number(r.id))),'All sites / areas');
- }
-
- type.addEventListener('change',()=>{
-  const key={'Project':'projects','Contract':'contracts','VM Location':'vm_locations'}[type.value];
-  fill(name,key?(data[key]||[]):[],'All contexts');
-  fill(site,[],'All sites / areas');
- });
- name.addEventListener('change',updateSites);
-
- async function load(){
-  try{
-   const token=localStorage.getItem('vero_session_token');
-   const response=await fetch(API+'/risk/operational-contexts',{
-    headers:{Authorization:'Bearer '+token},cache:'no-store'
-   });
-   if(!response.ok)throw Error('Operational Context API unavailable');
-   data=await response.json();
-   fill(type,(data.context_types||[]).map(t=>typeof t==='string'?{id:t,name:t}:t),'All context types');
-  }catch(error){console.error(error);}
- }
- load();
-})();
-</script>
+<script src="risk-context.js"></script>
 <style>
 .vero-risk-office-actions{display:flex;gap:12px;align-items:center;padding:10px 22px;background:white;border-bottom:1px solid #e1e5e2}
 .vero-risk-office-actions button,.vero-risk-office-form button[type=submit]{background:#3d3935;color:white;border:0;border-radius:7px;padding:10px 14px;font-weight:700;cursor:pointer}
@@ -3728,3 +3721,4 @@ table {
 <script src="risk-office.js"></script>
 <script src="nav.js"></script>
 <style id="vero-exposure-styles">.vero-operational-entry{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:12px 0 16px}.vero-operational-entry button{border:0;background:#3d3935;color:white;border-radius:8px;padding:12px 17px;font-weight:700;cursor:pointer}.vero-operational-entry span{font-size:12px;color:#857874}#veroCompactRiskLayout[hidden],#veroExposurePanel[hidden]{display:none!important}.vero-exposure-navigation{display:none!important;gap:8px;margin:16px 0}.vero-exposure-navigation button{padding:11px 17px;border:1px solid #ddd;border-radius:7px;background:#fff;color:#3d3935;font-weight:700;cursor:pointer}.vero-exposure-navigation button[aria-pressed=true]{background:#3d3935;color:white}.vero-exposure-head{display:flex;justify-content:space-between;align-items:center;gap:16px}.vero-exposure-head h2{margin:0}.vero-exposure-head p{font-size:12px;color:#777}.vero-exposure-head button{padding:10px 15px;border:0;border-radius:7px;background:#a9c23f;font-weight:700;cursor:pointer}.vero-exposure-filters{display:flex;flex-wrap:wrap;gap:15px;margin:18px 0}.vero-exposure-filters label{font-size:12px;font-weight:700;display:grid;gap:6px}.vero-exposure-filters select,.vero-exposure-filters input{padding:10px;border:1px solid #ddd;border-radius:6px;min-width:210px}.vero-exposure-table{width:100%;border-collapse:collapse}.vero-exposure-table th,.vero-exposure-table td{text-align:left;padding:13px;border-bottom:1px solid #e5e1de;font-size:12px}.vero-exposure-table th{background:#f8f7f6}.vero-exposure-table tbody tr{cursor:pointer}.vero-exposure-table tbody tr:hover{background:#f2f5eb}.vero-exposure-table tbody tr:focus-visible{outline:2px solid #2c8259}.vero-exposure-table td:first-child{font-weight:700}.vero-exposure-context{padding:12px 0;border-bottom:1px solid #e5e1de}.vero-exposure-context p{margin:6px 0;font-size:12px}.vero-exposure-context h4{margin:4px 0 10px}.vero-exposure-context button{border:0;background:#0b3d2e;color:#fff;border-radius:6px;padding:8px 12px;cursor:pointer}@media(max-width:700px){.vero-exposure-head{align-items:flex-start;flex-direction:column}.vero-exposure-table{min-width:740px}}</style></body></html>
+

@@ -84,6 +84,8 @@
         action:action.value,rationale:rationale.value.trim()
        })
       });
+      // Invalidate filter results even if the drawer closed while the decision was saving.
+      document.dispatchEvent(new CustomEvent('vero-risk-applicability-changed',{detail:{riskId:risk.id}}));
       if(seq!==sequence||overlay.hidden)return;
       message.textContent='Decision recorded. Refreshing applicability...';
       await showApplicability(risk,seq);
@@ -336,3 +338,4 @@
   }catch(error){if(seq===sequence&&!overlay.hidden)content.textContent=error.message;}
  });
 })();
+

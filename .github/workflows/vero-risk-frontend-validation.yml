@@ -3,11 +3,13 @@ on:
   pull_request:
     paths:
       - 'risk.html'
+      - 'risk-*.js'
+      - 'tests/risk-*.cjs'
       - '.github/workflows/vero-risk-frontend-validation.yml'
   push:
     branches:
-      - 'vero/risk-operational-context-filters-20261014'
-      - 'vero/risk-frontend-integration-20261014'
+      - main
+      - 'vero/risk-filter-stability-*'
 jobs:
   syntax-and-structure:
     runs-on: ubuntu-latest
@@ -23,12 +25,19 @@ jobs:
           const html=fs.readFileSync('risk.html','utf8');
           const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(x=>x[1]).filter(x=>x.trim());
           scripts.forEach((code,i)=>new vm.Script(code,{filename:'inline-'+i+'.js'}));
-          const ids=['veroTier4Filter','veroTier3Filter','veroTier2Filter','veroRiskTier1CategoryFilter','veroTier1Filter','veroApplicationFilter','veroSiteFilter'];
+          const ids=['veroTier4Filter','veroTier3Filter','veroTier2Filter','veroTier1Filter','veroContextTypeFilter','veroApplicationFilter','veroSiteFilter'];
           for(const id of ids){
             const count=[...html.matchAll(new RegExp('\\bid=["\\x27]'+id+'["\\x27]','g'))].length;
             if(count!==1)throw Error(id+' count='+count);
           }
-          if(!html.includes('/risk/context-assignments'))throw Error('Missing authorised assignments API');
-          if(!html.includes('/risk/operational-contexts'))throw Error('Missing operational context API');
+          const context=fs.readFileSync('risk-context.js','utf8');
+          if(!context.includes('/applicability'))throw Error('Missing current applicability API');
+          if(!context.includes('/risk/operational-contexts'))throw Error('Missing operational context API');
+          for(const file of fs.readdirSync('.').filter(f=>/^risk-.*\.js$/.test(f))){
+            new vm.Script(fs.readFileSync(file,'utf8'),{filename:file});
+          }
           console.log('Passed '+scripts.length+' inline scripts and seven filter IDs');
           JS
+
+      - name: Run offline Risk filter regressions
+        run: node --test tests/risk-filters.cjs
