@@ -2813,7 +2813,7 @@ table {
   if(previous&&previous.isConnected)previous.focus();
  }
  document.addEventListener('vero-risk-open-details',e=>{
-  risk=e.detail.risk;previous=document.activeElement;active='overview';
+  risk=e.detail.risk;previous=document.activeElement;active=e.detail.tab==='applicability'?'applicability':'overview';
   document.getElementById('veroRiskDetailsTitle').textContent=risk.risk_title||'Risk Details';
   document.getElementById('veroRiskDetailsCode').textContent=risk.risk_code||'';
   overlay.hidden=false;document.body.style.overflow='hidden';render();
@@ -4052,6 +4052,22 @@ table {
 <script src="risk-operational.js"></script>
 <script src="risk-office.js"></script>\n<script src="risk-controls.js"></script>
 <script src="risk-master-draft.js"></script>
+<script>
+/* Project Workspace deep links: use the existing authorised Risk details drawer. */
+(()=>{
+ const params=new URLSearchParams(location.search);
+ const riskId=Number(params.get('risk_id'));
+ if(!Number.isInteger(riskId)||riskId<=0)return;
+ let opened=false;
+ document.addEventListener('vero-risk-data-loaded',event=>{
+  if(opened)return;
+  const risk=(event.detail?.risks||[]).find(item=>Number(item.id)===riskId);
+  if(!risk)return;
+  opened=true;
+  document.dispatchEvent(new CustomEvent('vero-risk-open-details',{detail:{risk,tab:'applicability'}}));
+ });
+})();
+</script>
 <script src="nav.js"></script>
 <style id="vero-exposure-styles">.vero-operational-entry{display:none!important;align-items:center;gap:14px;flex-wrap:wrap;margin:12px 0 16px}.vero-operational-entry button{border:0;background:#3d3935;color:white;border-radius:8px;padding:12px 17px;font-weight:700;cursor:pointer}.vero-operational-entry span{font-size:12px;color:#857874}#veroCompactRiskLayout[hidden],#veroExposurePanel[hidden]{display:none!important}.vero-exposure-navigation{display:none!important;gap:8px;margin:16px 0}.vero-exposure-navigation button{padding:11px 17px;border:1px solid #ddd;border-radius:7px;background:#fff;color:#3d3935;font-weight:700;cursor:pointer}.vero-exposure-navigation button[aria-pressed=true]{background:#3d3935;color:white}.vero-exposure-head{display:flex;justify-content:space-between;align-items:center;gap:16px}.vero-exposure-head h2{margin:0}.vero-exposure-head p{font-size:12px;color:#777}.vero-exposure-head button{padding:10px 15px;border:0;border-radius:7px;background:#a9c23f;font-weight:700;cursor:pointer}.vero-exposure-filters{display:flex;flex-wrap:wrap;gap:15px;margin:18px 0}.vero-exposure-filters label{font-size:12px;font-weight:700;display:grid;gap:6px}.vero-exposure-filters select,.vero-exposure-filters input{padding:10px;border:1px solid #ddd;border-radius:6px;min-width:210px}.vero-exposure-table{width:100%;border-collapse:collapse}.vero-exposure-table th,.vero-exposure-table td{text-align:left;padding:13px;border-bottom:1px solid #e5e1de;font-size:12px}.vero-exposure-table th{background:#f8f7f6}.vero-exposure-table tbody tr{cursor:pointer}.vero-exposure-table tbody tr:hover{background:#f2f5eb}.vero-exposure-table tbody tr:focus-visible{outline:2px solid #2c8259}.vero-exposure-table td:first-child{font-weight:700}.vero-exposure-context{padding:12px 0;border-bottom:1px solid #e5e1de}.vero-exposure-context p{margin:6px 0;font-size:12px}.vero-exposure-context h4{margin:4px 0 10px}.vero-exposure-context button{border:0;background:#0b3d2e;color:#fff;border-radius:6px;padding:8px 12px;cursor:pointer}@media(max-width:700px){.vero-exposure-head{align-items:flex-start;flex-direction:column}.vero-exposure-table{min-width:740px}}</style></body></html>
 
