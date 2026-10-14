@@ -1165,6 +1165,27 @@ button,input,select,textarea{font-family:inherit}
    </div>
 
 
+   <!-- LINKED MASTER RISKS -->
+   <div class="section compliance-section">
+    <div class="compliance-section-head">
+     <div><h3>Linked Risks</h3><small>Approved master risks from the shared Risk Classification System</small></div>
+     <button type="button" class="btn outline" id="complianceLinkRiskButton" onclick="openComplianceRiskLinker()" style="display:none">Link Risk</button>
+    </div>
+    <div id="complianceLinkedRisks" class="compliance-linked-risks">No risks linked.</div>
+    <div id="complianceRiskLinker" hidden>
+     <div class="manage-activity-form">
+      <div class="field"><label>Tier 4</label><select id="complianceRiskTier4" onchange="filterComplianceRiskClassifications(4)"><option value="">All Tier 4 categories</option></select></div>
+      <div class="field"><label>Tier 3</label><select id="complianceRiskTier3" onchange="filterComplianceRiskClassifications(3)"><option value="">All Tier 3 categories</option></select></div>
+      <div class="field"><label>Tier 2</label><select id="complianceRiskTier2" onchange="filterComplianceRiskClassifications(2)"><option value="">All Tier 2 categories</option></select></div>
+      <div class="field"><label>Tier 1</label><select id="complianceRiskTier1" onchange="filterComplianceRiskClassifications(1)"><option value="">All Tier 1 categories</option></select></div>
+     </div>
+     <div class="field full"><label>Approved Master Risk</label><select id="complianceRiskSelect"><option value="">Select approved risk...</option></select></div>
+     <div id="complianceRiskLinkMessage" role="status"></div>
+     <button type="button" class="btn green" onclick="saveComplianceRiskLink()">Link Selected Risk</button>
+     <button type="button" class="btn outline" onclick="document.getElementById('complianceRiskLinker').hidden=true">Cancel</button>
+    </div>
+   </div>
+
    <!-- CONTROLS -->
 
    <div class="section compliance-section">
@@ -3917,6 +3938,7 @@ async function openLiveObligation(id){
   const apps=data.applicability||[];
   const controls=data.controls||[];
   currentLiveControls=controls;
+  loadComplianceLinkedRisks(currentLiveObligationId,!!data.permissions?.is_controller);
 
   renderControlGovernanceDocuments(controls);
   renderControlVerifications(controls);
@@ -8009,3 +8031,125 @@ function renderComplianceChangeHistory(history){
  outline-offset:2px !important;
 }
 </style>
+
+<style>
+#complianceRiskLinker[hidden]{display:none!important}
+.compliance-linked-risk{padding:12px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.compliance-linked-risk strong{display:block;font-size:11px}
+.compliance-linked-risk small{display:block;color:var(--grey);font-size:9px;margin-top:4px}
+#complianceRiskLinker{padding:15px 0}
+#complianceRiskLinker select{width:100%;padding:10px;margin:8px 0 14px}
+</style>
+<script>
+let complianceRiskCanManage=false;
+async function complianceRiskRequest(path,options={}){
+ const response=await fetch(COMPLIANCE_API+path,{
+  ...options,
+  headers:{...complianceAuthHeaders(),...(options.headers||{})}
+ });
+ const body=await response.json().catch(()=>({}));
+ if(!response.ok)throw Error(body.message||'Unable to load Risk Management data.');
+ return body;
+}
+async function loadComplianceLinkedRisks(id,canManage){
+ complianceRiskCanManage=canManage;
+ const button=document.getElementById('complianceLinkRiskButton');
+ button.style.display=canManage?'':'none';
+ const target=document.getElementById('complianceLinkedRisks');
+ target.textContent='Loading linked risks...';
+ try{
+  const data=await complianceRiskRequest('/compliance/obligations/'+id+'/risks');
+  if(Number(currentLiveObligationId)!==Number(id))return;
+  target.innerHTML=(data.risks||[]).length
+   ? data.risks.map(r=>'<div class="compliance-linked-risk"><div><strong>'+escapeComplianceText(r.risk_code)+' — '+escapeComplianceText(r.risk_title)+'</strong><small>'+escapeComplianceText(r.status)+' · Residual score: '+escapeComplianceText(r.residual_score??'Not assessed')+'</small></div>'+(canManage?'<button type="button" class="btn outline" onclick="unlinkComplianceRisk('+Number(r.id)+')">Unlink</button>':'')+'</div>').join('')
+   : '<div class="compliance-empty-state">No approved master risks linked.</div>';
+ }catch(error){target.textContent=error.message;}
+}
+let complianceApprovedRisks=[];
+let complianceClassificationPaths=[];
+function filterComplianceRiskClassifications(changedTier){
+ const tiers=[4,3,2,1];
+ const values={};
+ tiers.forEach(t=>{values[t]=document.getElementById('complianceRiskTier'+t).value;});
+ tiers.forEach(t=>{
+  if(t>=changedTier)return;
+  values[t]='';
+ });
+ tiers.forEach(t=>{
+  const el=document.getElementById('complianceRiskTier'+t);
+  if(t>changedTier)return;
+  const eligible=complianceClassificationPaths.filter(path=>
+   tiers.filter(parent=>parent>t).every(parent=>!values[parent]||path.path_ids.some((id,i)=>id===Number(values[parent])&&complianceClassificationPathTier(path,i)===parent))
+  );
+  const choices=new Map();
+  eligible.forEach(path=>{
+   path.path_ids.forEach((id,i)=>{
+    if(complianceClassificationPathTier(path,i)===t)choices.set(id,path.path.split(' → ')[i]);
+   });
+  });
+  el.innerHTML='<option value="">All Tier '+t+' categories</option>'+
+   [...choices.entries()].sort((a,b)=>a[1].localeCompare(b[1])).map(([id,name])=>
+    '<option value="'+id+'">'+escapeComplianceText(name)+'</option>').join('');
+  el.value=values[t]||'';
+ });
+ const matchingPaths=complianceClassificationPaths.filter(path=>
+  tiers.every(t=>!values[t]||path.path_ids.some((id,i)=>id===Number(values[t])&&complianceClassificationPathTier(path,i)===t))
+ );
+ const categoryIds=new Set(matchingPaths.map(path=>Number(path.category_id)));
+ const filtered=complianceApprovedRisks.filter(r=>
+  !tiers.some(t=>values[t])||r.classifications.some(c=>categoryIds.has(Number(c.category_id)))
+ );
+ document.getElementById('complianceRiskSelect').innerHTML=
+  '<option value="">Select approved risk ('+filtered.length+')...</option>'+
+  filtered.map(r=>'<option value="'+Number(r.id)+'">'+escapeComplianceText(r.risk_code)+' — '+escapeComplianceText(r.risk_title)+'</option>').join('');
+}
+function complianceClassificationPathTier(path,index){
+ return Number(path.tier)+path.path_ids.length-1-index;
+}
+async function openComplianceRiskLinker(){
+ if(!complianceRiskCanManage)return;
+ document.getElementById('complianceRiskLinker').hidden=false;
+ document.getElementById('complianceRiskSelect').innerHTML='<option value="">Loading approved risks...</option>';
+ const message=document.getElementById('complianceRiskLinkMessage');
+ message.textContent='';
+ try{
+  const [risks,catalogue]=await Promise.all([
+   complianceRiskRequest('/compliance/risks/approved'),
+   complianceRiskRequest('/risk/classification-catalogue')
+  ]);
+  complianceApprovedRisks=risks.risks||[];
+  complianceClassificationPaths=(catalogue.categories||[]).filter(path=>path.is_terminal);
+  filterComplianceRiskClassifications(4);
+ }catch(error){message.textContent=error.message;}
+}
+async function saveComplianceRiskLink(){
+ if(!complianceRiskCanManage)return;
+ const riskId=Number(document.getElementById('complianceRiskSelect').value);
+ if(!riskId)return;
+ const id=currentLiveObligationId;
+ const message=document.getElementById('complianceRiskLinkMessage');
+ try{
+  await complianceRiskRequest('/compliance/obligations/'+id+'/risks',{
+   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({risk_id:riskId})
+  });
+  message.textContent='Risk linked.';
+  document.getElementById('complianceRiskLinker').hidden=true;
+  await loadComplianceLinkedRisks(id,true);
+ }catch(error){message.textContent=error.message;}
+}
+async function unlinkComplianceRisk(riskId){
+ if(!complianceRiskCanManage||!confirm('Unlink this risk from the requirement?'))return;
+ const id=currentLiveObligationId;
+ try{
+  await complianceRiskRequest('/compliance/obligations/'+id+'/risks/'+riskId,{method:'DELETE'});
+  await loadComplianceLinkedRisks(id,true);
+ }catch(error){alert(error.message);}
+}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+ const id=new URLSearchParams(location.search).get('obligation_id');
+ if(id&&/^\d+$/.test(id))openLiveObligation(Number(id));
+});
+</script>
