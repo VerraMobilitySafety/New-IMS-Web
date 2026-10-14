@@ -9,7 +9,7 @@
  const body=document.getElementById('veroRiskTableBody');
  const status=document.getElementById('veroRiskListStatus');
  const search=document.getElementById('veroRiskSearch');
- let serial=0;
+ let serial=0,showRisks=false;
  const make=(tag,text)=>{const el=document.createElement(tag);el.textContent=String(text??'');return el;};
  function context(){
   const mapped={'Project':'Project','Contract':'Maintenance Contract','VM Location':'VM Site'}[type.value]||'';
@@ -19,8 +19,10 @@
   for(let i=filters.length-1;i>=0;i--)if(filters[i].value)return Number(filters[i].value);
   return 0;
  }
- async function draw(){
+ async function draw(event){
   const ticket=++serial;
+  if(event?.detail&&typeof event.detail.showRisks==='boolean')showRisks=event.detail.showRisks;
+  if(showRisks)return;
   const token=localStorage.getItem('vero_session_token');
   if(!token)return;
   const params=new URLSearchParams({parent_id:String(selectedParent()),...Object.fromEntries(Object.entries(context()).map(([k,v])=>[k,String(v)]))});
@@ -67,3 +69,4 @@
  }
  document.addEventListener('vero-risk-hierarchy-render',draw);
 })();
+
