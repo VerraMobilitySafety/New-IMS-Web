@@ -8113,12 +8113,9 @@ async function openComplianceRiskLinker(){
  const message=document.getElementById('complianceRiskLinkMessage');
  message.textContent='';
  try{
-  const [risks,catalogue]=await Promise.all([
-   complianceRiskRequest('/compliance/risks/approved'),
-   complianceRiskRequest('/risk/classification-catalogue')
-  ]);
+  const risks=await complianceRiskRequest('/compliance/risks/approved');
   complianceApprovedRisks=risks.risks||[];
-  complianceClassificationPaths=(catalogue.categories||[]).filter(path=>path.is_terminal);
+  complianceClassificationPaths=(risks.classification_paths||[]).filter(path=>path.is_terminal);
   filterComplianceRiskClassifications(4);
  }catch(error){message.textContent=error.message;}
 }
