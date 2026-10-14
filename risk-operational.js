@@ -29,6 +29,70 @@
    field(row,'Risk Office rationale',a.rationale);
    list.appendChild(row);
   }
+  // Only authorised Risk Managers can change the applicability boundary.
+  const governance=section('Manage applicability');
+  governance.appendChild(node('p','Risk Office only · each assignment or withdrawal requires a justification.'));
+  try{
+   const [roles,contexts]=await Promise.all([
+    json(API+'/auth/my-roles'),
+    json(API+'/risk/operational-contexts')
+   ]);
+   if(seq!==sequence||overlay.hidden)return;
+   const canManage=(roles.roles||[]).some(r=>r.role_name==='Risk Manager');
+   if(!canManage){
+    governance.appendChild(node('p','Read-only access. Contact Risk Office to change applicability.'));
+   }else{
+    const form=node('form');
+    form.style.display='grid';form.style.gap='10px';
+    const typeLabel=node('label','Operational context type');
+    const type=node('select');
+    for(const t of ['VM Site','Project','Maintenance Contract']){
+     const opt=node('option',t);opt.value=t;type.appendChild(opt);
+    }
+    typeLabel.appendChild(type);
+    const recordLabel=node('label','Operational record');
+    const record=node('select');record.required=true;recordLabel.appendChild(record);
+    const actionLabel=node('label','Decision');
+    const action=node('select');
+    for(const a of ['Assign','Withdraw']){const opt=node('option',a);opt.value=a;action.appendChild(opt);}
+    actionLabel.appendChild(action);
+    const rationaleLabel=node('label','Risk Office justification (required)');
+    const rationale=node('textarea');rationale.required=true;rationale.maxLength=2000;rationale.rows=3;
+    rationaleLabel.appendChild(rationale);
+    const message=node('p');message.setAttribute('role','status');
+    const save=node('button','Record applicability decision');save.type='submit';
+    function populate(){
+     record.replaceChildren();
+     const options=type.value==='VM Site'?contexts.vm_locations:
+       type.value==='Project'?contexts.projects:contexts.contracts;
+     const blank=node('option','Select an operational record');blank.value='';record.appendChild(blank);
+     for(const item of options||[]){
+      const opt=node('option',(item.code?item.code+' · ':'')+item.name);
+      opt.value=String(item.id);record.appendChild(opt);
+     }
+    }
+    type.addEventListener('change',populate);populate();
+    form.append(typeLabel,recordLabel,actionLabel,rationaleLabel,save,message);
+    form.addEventListener('submit',async event=>{
+     event.preventDefault();
+     if(!record.value||!rationale.value.trim())return;
+     save.disabled=true;message.textContent='Recording Risk Office decision...';
+     try{
+      await json(API+'/risks/'+encodeURIComponent(risk.id)+'/applicability',{
+       method:'POST',body:JSON.stringify({
+        context_type:type.value,context_id:Number(record.value),
+        action:action.value,rationale:rationale.value.trim()
+       })
+      });
+      if(seq!==sequence||overlay.hidden)return;
+      message.textContent='Decision recorded. Refreshing applicability...';
+      await showApplicability(risk,seq);
+     }catch(error){message.textContent=error.message;}
+     finally{save.disabled=false;}
+    });
+    governance.appendChild(form);
+   }
+  }catch(error){governance.appendChild(node('p','Management controls unavailable: '+error.message));}
   const note=section('Risk Office governance');
   note.appendChild(node('p','Applicability changes require an authorised Risk Manager and a recorded rationale. Operational assessments are separately owned and approved.'));
  }
