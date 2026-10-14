@@ -167,7 +167,7 @@
   const capabilities=await Promise.all(assignments.map(async a=>{
    try{
     const response=await json(API+'/risk/applicability/'+encodeURIComponent(a.id)+'/capabilities');
-    return {assignment:a,can_create:response.can_create===true};
+    return {assignment:a,can_create:response.can_create===true,can_approve:response.can_approve===true};
    }catch(error){return {assignment:a,can_create:false};}
   }));
   if(seq!==sequence||overlay.hidden)return;
@@ -228,6 +228,31 @@
      const score=assessment.residual_likelihood!=null&&assessment.residual_impact!=null
        ?assessment.residual_likelihood*5*assessment.residual_impact:'—';
      field(detail,'Revision '+assessment.revision,assessment.status+' · Residual score '+score);
+     const capability=capabilities.find(c=>Number(c.assignment.id)===Number(a.id));
+     const me=await json(API+'/auth/me');
+     if(seq!==sequence||overlay.hidden)return;
+     const currentUser=me.user||me;
+     const own=Number(assessment.owner_user_id)===Number(currentUser.id);
+     let decision=null;
+     if(assessment.status==='Draft'&&own&&capability?.can_create)decision='Submit';
+     if(assessment.status==='Submitted'&&capability?.can_approve&&!own)decision='Approve';
+     if(decision){
+      const button=node('button',decision==='Submit'?'Submit for approval':'Approve assessment');
+      button.type='button';
+      button.style.margin='6px 8px 6px 0';
+      const feedback=node('span');feedback.setAttribute('role','status');
+      button.addEventListener('click',async()=>{
+       if(decision==='Approve'&&!window.confirm('Approve this operational assessment?'))return;
+       button.disabled=true;feedback.textContent='Recording decision...';
+       try{
+        await json(API+'/risk/assessments/'+encodeURIComponent(assessment.id)+'/decision',{
+         method:'POST',body:JSON.stringify({decision})
+        });
+        if(seq===sequence&&!overlay.hidden)await showAssessments(risk,seq);
+       }catch(error){feedback.textContent=error.message;button.disabled=false;}
+      });
+      detail.append(button,feedback);
+     }
     }
    }catch(e){detail.textContent=e.message;}
   }
