@@ -15,19 +15,21 @@ window.VeroRiskClassificationPicker=(()=>{
   function render(){
    const q=search.value.trim().toLowerCase();
    const matches=rows.filter(x=>x.path.toLowerCase().includes(q));
+   const unique=new Map();
+   for(const item of matches)if(!unique.has(String(item.category_id)))unique.set(String(item.category_id),item);
    // Multiple paths can lead to one classification when it has multiple parents.
    // Keep the selected category ID stable even if the displayed path changes.
    select.replaceChildren();
    const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Select a classification';select.appendChild(placeholder);
-   for(const item of matches){const opt=document.createElement('option');opt.value=String(item.category_id);opt.textContent=item.path+' (Tier '+item.tier+')';select.appendChild(opt)}
+   for(const item of unique.values()){const opt=document.createElement('option');opt.value=String(item.category_id);opt.textContent=item.path+' (Tier '+item.tier+')';select.appendChild(opt)}
    select.value=current==null?'':String(current);
    if(!matches.some(x=>String(x.category_id)===String(current)))select.value='';
-   info.textContent=matches.length+' matching classification paths';
+   info.textContent=unique.size+' matching classifications';
   }
   search.addEventListener('input',render);
   select.addEventListener('change',()=>{
    current=select.value||null;
-   const item=rows.find(x=>String(x.category_id)===String(current));
+   const item=rows.find(x=>String(x.category_id)===String(current)&&x.path.toLowerCase().includes(search.value.trim().toLowerCase()))||rows.find(x=>String(x.category_id)===String(current));
    selected.textContent=item?'Selected: '+item.path+' · Tier '+item.tier:'';
    if(typeof options.onSelect==='function')options.onSelect(item||null);
   });
