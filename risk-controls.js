@@ -26,7 +26,25 @@
    const linked=linkedData.controls||[];
    const roleResult=await fetch(API+'/auth/my-roles',{headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token')}});
    const roleData=roleResult.ok?await roleResult.json():{roles:[]};
-   const canManage=(roleData.roles||[]).some(r=>r.role_name==='Risk Manager');
+   const canManage=(roleData.roles||[]).some(r=>r.role_name==='Risk Manager') &&
+    ['Open','Under Review','Treatment','Accepted'].includes(risk.status);
+   async function saveLink(item,action){
+    const reason=window.prompt('Risk Office justification (required):');
+    if(reason===null)return;
+    if(!reason.trim()||reason.length>2000){status.textContent='Enter a justification up to 2000 characters.';return;}
+    try{
+     const response=await fetch(API+'/risks/'+encodeURIComponent(risk.id)+'/controls',{
+      method:'POST',
+      headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),'Content-Type':'application/json'},
+      body:JSON.stringify({control_id:Number(item.control_id||item.id),action,
+       relationship_type:item.relationship_type||'Mitigating',
+       effectiveness:item.effectiveness||'Not Assessed',reason:reason.trim()})
+     });
+     const result=await response.json();
+     if(!response.ok)throw Error(result.message||'Control relationship failed');
+     if(ticket===version&&!overlay.hidden)document.dispatchEvent(new CustomEvent('vero-risk-controls-tab',{detail:{risk}}));
+    }catch(error){if(ticket===version&&!overlay.hidden)status.textContent=error.message;}
+   }
    status.textContent=linked.length+' linked controls · '+controls.length+' enterprise controls available';
    const linkedSection=node('section');linkedSection.appendChild(node('h3','Controls linked to this Master Risk'));
    if(!linked.length)linkedSection.appendChild(node('p','No enterprise controls linked to this Master Risk yet.'));
