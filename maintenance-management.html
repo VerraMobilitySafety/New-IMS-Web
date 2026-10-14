@@ -163,4 +163,32 @@ function openContract(c=null){selected=c;tab='Overview';document.getElementById(
 function drawTab(){document.getElementById('tabs').innerHTML=names.map(n=>'<button class="'+(tab===n?'active':'')+'" data-tab="'+n+'">'+n+'</button>').join('');document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;drawTab()});let el=document.getElementById('tabContent');if(tab!=='Overview'){let links={Compliance:'compliance.html',Risks:'risk.html',Controls:'risk.html',Records:'records.html'};el.innerHTML='<div class="message"><b>'+tab+'</b><p>This section will show records linked to this maintenance contract once the maintenance API and context relationships are connected. Central registers remain the source of truth.</p>'+(links[tab]?'<a href="'+links[tab]+'">Open central '+tab+' register →</a>':'')+'</div>';return}let c=selected||{};let fields=[['contract_name','Contract / Service Name'],['contract_code','Contract Reference'],['supplier_name','Supplier / Contractor'],['owner_name','Contract Owner'],['account_manager','Account Manager'],['location','Location / Operational Context'],['service_type','Maintenance Type'],['status','Status'],['start_date','Start Date','date'],['expiry_date','Expiry / Renewal Date','date'],['contract_value','Contract Value','number'],['review_frequency','Review Frequency'],['scope','Scope of Services','textarea'],['sla','Service Levels / KPIs','textarea'],['notes','Additional Notes','textarea']];el.innerHTML='<form id="form"><div class="fields">'+fields.map(([k,label,type])=>'<div class="field '+(type==='textarea'?'full':'')+'"><label>'+label+'</label>'+(type==='textarea'?'<textarea name="'+k+'">'+esc(val(c[k]))+'</textarea>':'<input name="'+k+'" type="'+(type||'text')+'" value="'+esc(val(c[k]))+'">')+'</div>').join('')+'</div><p class="message">Signed contracts, service reports and evidence should be registered through Records Management. Compliance and risk links will use this contract as an operational context.</p><button class="btn" type="submit">Save Contract</button><p id="saveStatus"></p></form>';document.getElementById('form').onsubmit=save}
 async function save(e){e.preventDefault();let payload=Object.fromEntries(new FormData(e.target));let msg=document.getElementById('saveStatus');try{let result=await request(selected?'/maintenance-contracts/'+selected.id:'/maintenance-contracts',{method:selected?'PUT':'POST',body:JSON.stringify(payload)});msg.textContent='Contract saved successfully.';selected=result.contract||result;await load()}catch(err){msg.textContent='Unable to save: '+err.message+'. No changes were recorded.'}}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeContract()});load();
+</script><script>
+/* VERO GLOBAL ACCOUNT MENU */
+(()=>{
+ const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+ const TOKEN='vero_session_token', USER='vero_current_user';
+ const account=document.getElementById('veroAccount'); if(!account)return;
+ const trigger=document.getElementById('veroAccountTrigger');
+ const avatar=document.getElementById('veroAccountAvatar');
+ const name=document.getElementById('veroAccountName');
+ const full=document.getElementById('veroAccountFullName');
+ const email=document.getElementById('veroAccountEmail');
+ const admin=document.getElementById('veroUserManagement');
+ const signout=document.getElementById('veroAccountSignOut');
+ const initials=u=>(((u?.first_name||'').charAt(0)+(u?.last_name||'').charAt(0)).toUpperCase()||'U');
+ const fullName=u=>[u?.first_name,u?.last_name].filter(Boolean).join(' ').trim()||u?.email||'Signed in user';
+ function render(u){avatar.textContent=initials(u);name.textContent=fullName(u);full.textContent=fullName(u);email.textContent=u?.email||'';admin.style.display=u?.vero_role==='Administrator'?'flex':'none';}
+ async function load(){
+  const t=localStorage.getItem(TOKEN); if(!t){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));return;}
+  try{const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t,Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('auth');const d=await r.json();const u=d.user||d;localStorage.setItem(USER,JSON.stringify(u));render(u);}
+  catch(e){localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));}
+ }
+ trigger.addEventListener('click',e=>{e.stopPropagation();const open=account.classList.toggle('open');trigger.setAttribute('aria-expanded',String(open));});
+ document.addEventListener('click',e=>{if(!account.contains(e.target)){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
+ signout.addEventListener('click',async()=>{const t=localStorage.getItem(TOKEN);try{if(t)await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+t}})}catch(e){}localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html');});
+ load();
+})();
+
 </script><script src="nav.js"></script></body></html>
