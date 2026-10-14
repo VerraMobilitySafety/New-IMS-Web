@@ -3596,10 +3596,26 @@ table {
     c.replaceChildren(make('h3',page));
     if(!rows.length)c.appendChild(make('p','No records at this level.'));
     for(const item of rows){
-     const line=make('div','');line.style.cssText='padding:12px 0;border-bottom:1px solid #e1e5e2';
-     line.appendChild(make('strong',item.name));
-     if(item.kind==='category')field(line,'Master Risks',item.master_risks);
-     else field(line,'Risk code',item.code);
+     const line=make('div','');line.className='vero-risk-classification-row';
+     const open=make('button',item.name);open.type='button';
+     open.className='vero-risk-classification-open';
+     open.setAttribute('aria-label','Inspect '+item.name);
+     if(item.kind==='category'){
+      field(line,'Master Risks',item.master_risks);
+      open.addEventListener('click',()=>document.dispatchEvent(
+       new CustomEvent('vero-risk-open-classification',{detail:{category:item}})));
+     }else{
+      field(line,'Risk code',item.code);
+      open.addEventListener('click',()=>{
+       const master=window.__veroRiskById?.(item.id);
+       if(master)document.dispatchEvent(new CustomEvent('vero-risk-open-details',{detail:{risk:master}}));
+       else {
+        const message=make('p','Master Risk details are unavailable. Refresh the Risk Register and try again.');
+        line.appendChild(message);
+       }
+      });
+     }
+     line.prepend(open);
      c.appendChild(line);
     }
    }catch(error){if(version===request)c.replaceChildren(make('h3',page),make('p',error.message));}
@@ -3621,6 +3637,12 @@ table {
 .vero-matrix-register-grid .vero-risk-heading-count{display:inline-block;font-size:14px;font-weight:700;color:#607068;line-height:1.3;font-variant-numeric:tabular-nums}
 </style>
 <style id="vero-risk-classification-tab-styles">
+#veroRiskDetailsOverlay .vero-risk-details-tabs[hidden],
+#veroRiskDetailsOverlay .vero-risk-office-actions[hidden]{display:none!important}
+#veroRiskDetailsOverlay .vero-risk-classification-row{padding:12px 0;border-bottom:1px solid #e1e5e2}
+#veroRiskDetailsOverlay .vero-risk-classification-open{border:0;background:transparent;padding:0;color:#0b3d2e;text-align:left;font-size:14px;font-weight:700;cursor:pointer}
+#veroRiskDetailsOverlay .vero-risk-classification-open:hover{text-decoration:underline}
+#veroRiskDetailsOverlay .vero-risk-classification-open:focus-visible{outline:2px solid #2c8259;outline-offset:3px}
 #veroRiskDetailsOverlay .vero-risk-classification-tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
 #veroRiskDetailsOverlay .vero-risk-classification-tabs button{border:1px solid #dce3de;background:#fff;border-radius:7px;padding:9px 12px;font-size:12px;cursor:pointer}
 #veroRiskDetailsOverlay .vero-risk-classification-tabs button[aria-current=true]{background:#0b3d2e;color:#fff;border-color:#0b3d2e}
