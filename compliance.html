@@ -3158,6 +3158,7 @@ async function prototypeSubmit(){
  const source=document.getElementById('singleSource').value.trim();
  const reference=document.getElementById('singleReference').value.trim();
  const additional=document.getElementById('singleAdditional').value.trim();
+ const riskCategoryId=Number(document.getElementById('singleRiskTier1').value);
 
  if(!title){
   alert('Enter a requirement title.');
