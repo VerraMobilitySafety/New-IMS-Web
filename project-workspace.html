@@ -365,7 +365,7 @@
 
  <section id="actions" class="ws-view"><div class="empty-state"><b>No live project actions yet.</b><br><br>Workflow actions assigned to this project will appear here.</div></section>
 
- <section id="risks" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Risks</h2><div><button type="button" class="btn outline" onclick="openProjectRiskWorkflow()">Manage Risks</button> <span id="projectRiskCount">Loading…</span></div></div><div id="projectRiskList" class="empty-state">Loading authorised project risk applicability…</div></div></section>
+ <section id="risks" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Risks</h2><div><button type="button" class="btn outline" onclick="openProjectRiskWorkflow()">Manage Risks</button> <button type="button" class="btn green" onclick="openProjectRiskLinker()">Link Existing Risk</button> <span id="projectRiskCount">Loading…</span></div></div><div id="projectRiskList" class="empty-state">Loading authorised project risk applicability…</div></div></section>
 
  <section id="compliance" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Compliance</h2><div><button type="button" class="btn green" onclick="createProjectCompliance()">Add Requirement</button> <span id="projectComplianceCount">Loading…</span></div></div><div id="projectComplianceList" class="empty-state">Loading applicable obligations…</div></div></section>
 
@@ -496,6 +496,65 @@ function openProjectRiskWorkflow(){
  // with project context rather than creating a misleading local record.
  location.href='risk.html?'+new URLSearchParams({project_id:String(currentProject.id)}).toString();
 }
+
+/* Link an existing Master Risk through Risk Office's authorised applicability API.
+   This does not create a second risk or bypass server-side Risk Manager checks. */
+async function openProjectRiskLinker(){
+ if(!currentProject?.id)return;
+ const projectId=String(currentProject.id);
+ let overlay=document.getElementById('projectRiskLinkOverlay');
+ if(!overlay){
+  overlay=document.createElement('div');overlay.id='projectRiskLinkOverlay';overlay.className='modal-back show';
+  overlay.innerHTML='<div class="drawer"><div class="drawer-head"><button type="button" class="close" id="projectRiskLinkClose">×</button><small>RISK OFFICE</small><h2>Link Existing Risk</h2><small>Record a governed project applicability decision.</small></div><div class="drawer-body"><label for="projectRiskLinkSelect">Master Risk</label><select id="projectRiskLinkSelect" style="display:block;width:100%;padding:11px;margin:9px 0 18px"></select><label for="projectRiskLinkReason">Justification (required)</label><textarea id="projectRiskLinkReason" maxlength="2000" style="display:block;width:100%;min-height:110px;padding:11px;margin:9px 0 16px"></textarea><div id="projectRiskLinkStatus" role="status"></div><div class="drawer-actions"><button class="btn green" type="button" id="projectRiskLinkSave">Record Applicability</button><button class="btn outline" type="button" id="projectRiskLinkCancel">Cancel</button></div></div></div>';
+  document.body.appendChild(overlay);
+  const close=()=>{overlay.classList.remove('show')};
+  overlay.querySelector('#projectRiskLinkClose').onclick=close;
+  overlay.querySelector('#projectRiskLinkCancel').onclick=close;
+  overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
+  overlay.querySelector('#projectRiskLinkSave').onclick=async()=>{
+   const riskId=Number(overlay.querySelector('#projectRiskLinkSelect').value);
+   const rationale=overlay.querySelector('#projectRiskLinkReason').value.trim();
+   const status=overlay.querySelector('#projectRiskLinkStatus');
+   if(!Number.isInteger(riskId)||riskId<=0||!rationale){status.textContent='Select a risk and provide a justification.';return}
+   const save=overlay.querySelector('#projectRiskLinkSave');save.disabled=true;status.textContent='Recording decision…';
+   try{
+    const res=await apiFetch(API_BASE+'/risks/'+encodeURIComponent(riskId)+'/applicability',{
+     method:'POST',headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({context_type:'Project',context_id:Number(projectId),action:'Assign',rationale})
+    });
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok)throw Error(data.message||'Applicability decision rejected ('+res.status+')');
+    status.textContent='Risk applicability recorded.';
+    close();
+    await loadProjectRisks(projectId);
+   }catch(e){status.textContent=e.message}
+   finally{save.disabled=false}
+  };
+ }
+ overlay.classList.add('show');
+ const status=overlay.querySelector('#projectRiskLinkStatus'),select=overlay.querySelector('#projectRiskLinkSelect');
+ select.replaceChildren();status.textContent='Checking Risk Office permissions…';
+ try{
+  const rolesResponse=await apiFetch(API_BASE+'/auth/my-roles',{cache:'no-store'});
+  if(!rolesResponse.ok)throw Error('Unable to verify Risk Office permission');
+  const roles=await rolesResponse.json();
+  if(!(roles.roles||[]).some(r=>r.role_name==='Risk Manager'))throw Error('Only authorised Risk Managers may change applicability.');
+  const risksResponse=await apiFetch(API_BASE+'/risks',{cache:'no-store'});
+  if(!risksResponse.ok)throw Error('Unable to load authorised risks');
+  const data=await risksResponse.json();
+  if(!Array.isArray(data.risks))throw Error('Invalid risk response');
+  const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Select a Master Risk…';select.appendChild(placeholder);
+  for(const risk of data.risks){
+   if(!risk.id)continue;
+   const option=document.createElement('option');option.value=String(risk.id);
+   option.textContent=(risk.risk_code||risk.id)+' — '+(risk.risk_title||'Untitled risk');
+   select.appendChild(option);
+  }
+  status.textContent=data.risks.length?'Select the existing risk and explain why it applies to this project.':'No authorised risks available.';
+  overlay.querySelector('#projectRiskLinkSave').disabled=!data.risks.length;
+ }catch(e){status.textContent=e.message;overlay.querySelector('#projectRiskLinkSave').disabled=true}
+}
+
 /* Read-only, project-scoped Risk and Compliance views. */
 const projectLinkedCache={id:null,risks:false,compliance:false};
 function projectListMessage(id,message){const el=document.getElementById(id);if(el)el.textContent=message}
