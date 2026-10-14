@@ -2610,7 +2610,7 @@ table {
 <div id="veroRiskDetailsOverlay" class="vero-risk-details-overlay" hidden>
  <aside class="vero-risk-details-drawer" role="dialog" aria-modal="true" aria-labelledby="veroRiskDetailsTitle">
   <div class="vero-risk-details-header">
-   <div><small>MASTER RISK DETAILS</small><h2 id="veroRiskDetailsTitle">Risk Details</h2><span id="veroRiskDetailsCode"></span></div>
+   <div><p class="vero-risk-details-eyebrow">RISK MANAGEMENT</p><h2 id="veroRiskDetailsTitle">Risk Details</h2><small id="veroRiskDetailsCode">Master Risk</small></div>
    <button type="button" id="veroRiskDetailsClose" aria-label="Close risk details">×</button>
   </div>
   <nav class="vero-risk-details-tabs" aria-label="Risk details">
@@ -2629,7 +2629,11 @@ table {
 .vero-risk-details-overlay{position:fixed;inset:0;z-index:10000;background:rgba(20,25,22,.55);display:flex;justify-content:flex-end}
 .vero-risk-details-drawer{height:100%;width:min(780px,100vw);background:#f7f8f7;display:flex;flex-direction:column;box-shadow:-10px 0 30px #0002}
 .vero-risk-details-header{background:#242526;color:#fff;padding:22px 26px;display:flex;justify-content:space-between;gap:15px}
-.vero-risk-details-header h2{font-size:23px;margin:7px 0}
+.vero-risk-details-header{background:#3D3935;padding:23px;align-items:flex-start}
+.vero-risk-details-header h2{font-size:21px;margin:6px 0;font-weight:700}
+.vero-risk-details-header .vero-risk-details-eyebrow{margin:0;color:#ddd;font-size:10px}
+.vero-risk-details-header small{color:#A9C23F;font-size:11px;font-weight:800}
+#veroRiskDetailsClose{font-size:24px}
 .vero-risk-details-header small{font-size:11px;letter-spacing:1px}
 #veroRiskDetailsClose{background:transparent;border:0;color:#fff;font-size:30px;cursor:pointer}
 .vero-risk-details-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:15px 22px;background:#fff;border-bottom:1px solid #e1e5e2}
