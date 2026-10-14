@@ -31,7 +31,8 @@
    const data=await response.json();
    if(!response.ok)throw Error(data.message||'Unable to record decision');
    selected.status=data.risk_status||selected.status;
-   status.textContent=decision==='Approved'?'Approved. Refresh the register to see updated status.':'Changes requested and recorded.';
+   status.textContent=decision==='Approved'?'Approved. Register updating...':'Changes requested. Register updating...';
+   document.dispatchEvent(new CustomEvent('vero-risk-register-refresh',{detail:{riskId:selected.id,decision}}));
    syncActions();
    document.querySelector('[data-risk-tab="overview"]')?.click();
   }catch(error){status.textContent=error.message;}
