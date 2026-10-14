@@ -3188,6 +3188,11 @@ async function prototypeSubmit(){
   return;
  }
 
+ if(!riskCategoryId){
+  alert('Select a complete Tier 4 to Tier 1 Risk Classification.');
+  return;
+ }
+
  const button=event?.target;
 
  if(button){
