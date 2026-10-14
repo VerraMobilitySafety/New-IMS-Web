@@ -8293,3 +8293,15 @@ function changeSubmissionRiskTier(changedTier){
  });
 }
 </script>
+
+<script>
+async function loadRequirementRiskClassifications(id){
+ const target=document.getElementById('complianceRequirementRiskClassifications');
+ target.textContent='Loading classifications...';
+ try{
+  const data=await complianceRiskRequest('/compliance/obligations/'+id+'/risk-classifications');
+  if(Number(currentLiveObligationId)!==Number(id))return;
+  target.textContent=(data.classifications||[]).map(c=>c.category_name).join(' · ')||'No classification assigned.';
+ }catch(error){target.textContent=error.message;}
+}
+</script>
