@@ -72,6 +72,11 @@
      }
     }
     type.addEventListener('change',populate);populate();
+    // A project deep link may preselect the context, but never bypass Risk Office approval.
+    const projectId=new URLSearchParams(location.search).get('project_id');
+    if(projectId&&[...(contexts.projects||[])].some(item=>String(item.id)===projectId)){
+      type.value='Project';populate();record.value=projectId;
+    }
     form.append(typeLabel,recordLabel,actionLabel,rationaleLabel,save,message);
     form.addEventListener('submit',async event=>{
      event.preventDefault();
