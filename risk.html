@@ -2441,6 +2441,12 @@ table {
     tr.appendChild(td);
    });
 
+   tr.tabIndex=0;
+   tr.setAttribute('role','button');
+   tr.setAttribute('aria-label','View '+(risk.risk_title||risk.risk_code));
+   const show=()=>document.dispatchEvent(new CustomEvent('vero-risk-open-details',{detail:{risk}}));
+   tr.addEventListener('click',show);
+   tr.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();show();}});
    tableBody.appendChild(tr);
   });
  }
@@ -2600,6 +2606,104 @@ table {
 })();
 </script>
 
+<div id="veroRiskDetailsOverlay" class="vero-risk-details-overlay" hidden>
+ <aside class="vero-risk-details-drawer" role="dialog" aria-modal="true" aria-labelledby="veroRiskDetailsTitle">
+  <div class="vero-risk-details-header">
+   <div><small>MASTER RISK DETAILS</small><h2 id="veroRiskDetailsTitle">Risk Details</h2><span id="veroRiskDetailsCode"></span></div>
+   <button type="button" id="veroRiskDetailsClose" aria-label="Close risk details">×</button>
+  </div>
+  <nav class="vero-risk-details-tabs" aria-label="Risk details">
+   <button type="button" data-risk-tab="overview">Overview</button>
+   <button type="button" data-risk-tab="ownership">Ownership</button>
+   <button type="button" data-risk-tab="assessments">Assessments</button>
+   <button type="button" data-risk-tab="controls">Controls</button>
+   <button type="button" data-risk-tab="history">History</button>
+   <button type="button" data-risk-tab="related">Related Records</button>
+  </nav>
+  <div id="veroRiskDetailsContent" class="vero-risk-details-content"></div>
+ </aside>
+</div>
+<style>
+.vero-risk-details-overlay[hidden]{display:none!important}
+.vero-risk-details-overlay{position:fixed;inset:0;z-index:10000;background:rgba(20,25,22,.55);display:flex;justify-content:flex-end}
+.vero-risk-details-drawer{height:100%;width:min(780px,100vw);background:#f7f8f7;display:flex;flex-direction:column;box-shadow:-10px 0 30px #0002}
+.vero-risk-details-header{background:#242526;color:#fff;padding:22px 26px;display:flex;justify-content:space-between;gap:15px}
+.vero-risk-details-header h2{font-size:23px;margin:7px 0}
+.vero-risk-details-header small{font-size:11px;letter-spacing:1px}
+#veroRiskDetailsClose{background:transparent;border:0;color:#fff;font-size:30px;cursor:pointer}
+.vero-risk-details-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:15px 22px;background:#fff;border-bottom:1px solid #e1e5e2}
+.vero-risk-details-tabs button{padding:9px 11px;border:1px solid #dce3de;border-radius:7px;background:#fff;cursor:pointer}
+.vero-risk-details-tabs button[aria-current=true]{background:#0b3d2e;color:white}
+.vero-risk-details-content{padding:24px;overflow:auto;flex:1}
+.vero-risk-details-card{background:#fff;border:1px solid #e1e5e2;border-radius:10px;padding:19px;margin-bottom:14px}
+.vero-risk-details-card h3{margin:0 0 14px;font-size:15px}
+.vero-risk-details-card dl{margin:0 0 12px}
+.vero-risk-details-card dt{font-size:11px;font-weight:700;color:#66716a;text-transform:uppercase}
+.vero-risk-details-card dd{margin:4px 0 0;line-height:1.5;overflow-wrap:anywhere}
+.vero-risk-table tbody tr[role=button]{cursor:pointer}
+.vero-risk-table tbody tr[role=button]:hover{background:#eef5f0}
+.vero-risk-table tbody tr[role=button]:focus-visible{outline:2px solid #2c8259}
+</style>
+<script>
+(function(){
+ const overlay=document.getElementById('veroRiskDetailsOverlay');
+ const content=document.getElementById('veroRiskDetailsContent');
+ const tabs=[...overlay.querySelectorAll('[data-risk-tab]')];
+ let risk=null,active='overview',previous=null;
+ function card(heading,fields){
+  const section=document.createElement('section');section.className='vero-risk-details-card';
+  const h=document.createElement('h3');h.textContent=heading;section.appendChild(h);
+  fields.forEach(([label,value])=>{
+   const dl=document.createElement('dl'),dt=document.createElement('dt'),dd=document.createElement('dd');
+   dt.textContent=label;dd.textContent=value==null||value===''?'Not recorded':String(value);
+   dl.append(dt,dd);section.appendChild(dl);
+  });
+  return section;
+ }
+ function render(){
+  content.replaceChildren();
+  tabs.forEach(t=>t.setAttribute('aria-current',String(t.dataset.riskTab===active)));
+  if(!risk)return;
+  if(active==='overview'){
+   content.appendChild(card('Master Risk',[
+    ['Description',risk.risk_description],['Status',risk.status],['Register',risk.register_name],
+    ['Risk Category',risk.risk_category],['Next Review',risk.next_review_date]
+   ]));
+   content.appendChild(card('Classification',[
+    ['Tier 4 IDs',(risk.tier_4_ids||[]).join(', ')],
+    ['Tier 3 IDs',(risk.tier_3_ids||[]).join(', ')],
+    ['Tier 2 IDs',(risk.tier_2_ids||[]).join(', ')],
+    ['Tier 1 IDs',(risk.tier_1_ids||[]).join(', ')]
+   ]));
+  }else if(active==='ownership'){
+   content.appendChild(card('Ownership', [['Current Risk Owner',risk.risk_owner],['Local Owners','Not yet available']]));
+  }else if(active==='assessments'){
+   content.appendChild(card('Current Risk Values',[
+    ['Inherent likelihood',risk.inherent_likelihood],['Inherent impact',risk.inherent_impact],
+    ['Residual likelihood',risk.residual_likelihood],['Residual impact',risk.residual_impact]
+   ]));
+  }else{
+   const names={controls:'Controls and Treatments',history:'History',related:'Related Records'};
+   content.appendChild(card(names[active],[['Availability','Not yet connected to an authorised data source']]));
+  }
+ }
+ function close(){
+  overlay.hidden=true;document.body.style.overflow='';
+  if(previous&&previous.isConnected)previous.focus();
+ }
+ document.addEventListener('vero-risk-open-details',e=>{
+  risk=e.detail.risk;previous=document.activeElement;active='overview';
+  document.getElementById('veroRiskDetailsTitle').textContent=risk.risk_title||'Risk Details';
+  document.getElementById('veroRiskDetailsCode').textContent=risk.risk_code||'';
+  overlay.hidden=false;document.body.style.overflow='hidden';render();
+  document.getElementById('veroRiskDetailsClose').focus();
+ });
+ document.getElementById('veroRiskDetailsClose').addEventListener('click',close);
+ overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!overlay.hidden)close();});
+ tabs.forEach(t=>t.addEventListener('click',()=>{active=t.dataset.riskTab;render();}));
+})();
+</script>
 <div id="veroRiskDrawerOverlay" class="vero-risk-overlay"
      aria-hidden="true">
  <aside class="vero-risk-drawer"
