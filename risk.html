@@ -1924,6 +1924,23 @@ table {
  justify-content:flex-end;
  gap:12px;
 }
+/* Keep large Risk Registers inside their own scrollable panel. */
+.vero-risk-register-scroll {
+ max-height: 460px;
+ overflow-y: auto;
+ overflow-x: auto;
+ overscroll-behavior: contain;
+ scrollbar-gutter: stable;
+}
+.vero-risk-register-scroll .vero-risk-table {
+ width: 100%;
+}
+.vero-risk-register-scroll .vero-risk-table thead th {
+ position: sticky;
+ top: 0;
+ z-index: 1;
+ background: #f1f3f5;
+}
 </style>
 <div class="vero-risk-dashboard">
 
@@ -1985,7 +2002,7 @@ table {
   </button>
  </div>
 
- <div style="overflow-x:auto">
+ <div class="vero-risk-register-scroll" role="region" aria-label="Risk Register results" tabindex="0">
   <table class="vero-risk-table">
    <thead>
     <tr>
