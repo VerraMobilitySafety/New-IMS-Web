@@ -1508,7 +1508,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
 <input autocomplete="off" id="veroRiskSearch" placeholder="Search code, title, category or description..." type="search"/>
 </div>
 <div class="vero-risk-primary-actions">
-<button class="vero-risk-add-button" id="veroAddRiskButton" type="button">
+<button class="vero-risk-add-button" id="veroAddRiskButton" type="button" hidden>
   ＋ Add Risk
  </button>
 <button class="vero-risk-hierarchy-button" hidden="" id="veroManageRiskHierarchy" type="button">
@@ -2140,7 +2140,7 @@ table {
  document.addEventListener('click',e=>{if(!account.contains(e.target)){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
  signout.addEventListener('click',async()=>{const t=localStorage.getItem(TOKEN);try{if(t)await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+t}})}catch(e){}localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html');});
- load();
+ load().finally(()=>window.VeroPageLoader?.ready('risk'));
 })();
 </script>
 <script>
@@ -2708,7 +2708,7 @@ table {
 
 
 
- load().finally(()=>window.VeroPageLoader?.ready('risk'));
+ load();
 })();
 </script>
 
@@ -2786,6 +2786,26 @@ table {
     ['Risk Category IDs',(risk.tier_2_ids||[]).join(', ')],
     ['Risk Event IDs',(risk.tier_1_ids||[]).join(', ')]
    ]));
+   document.dispatchEvent(new CustomEvent('vero-central-treatments-open',{detail:{risk,container:content}}));
+   const centralCard=card('Risk Office assessment', [['Status','Loading assessment…']]);
+   content.appendChild(centralCard);
+   const centralRiskId=risk.id;
+   fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/risks/'+encodeURIComponent(centralRiskId)+'/central-assessment',{
+    headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},cache:'no-store'
+   }).then(async response=>{const data=await response.json();if(!response.ok)throw Error(data.message||'Unable to load assessment');
+    if(active!=='overview'||!risk||risk.id!==centralRiskId||!centralCard.isConnected)return;
+    if(!data.assessment){centralCard.remove();return;}
+    const a=data.assessment,p=a.package;
+    const bands=[['Low','Low','Low','Moderate','Moderate'],['Low','Moderate','Moderate','Moderate','High'],['Low','Moderate','High','High','Significant'],['Moderate','Moderate','High','Significant','Significant'],['Moderate','High','Significant','Significant','Significant']];
+    const rating=v=>v.likelihood*5*v.impact+' · '+bands[v.likelihood-1][v.impact-1];
+    centralCard.replaceWith(card('Published Risk Office assessment',[
+     ['Inherent',rating(p.inherent)],['Current residual',rating(p.residual)],['Target',rating(p.target)],
+     ['Existing controls',p.controls_summary],['Further controls and treatments',p.treatments_summary],
+     ['Document Library controls',(p.documents||[]).map(d=>d.document_number+' · '+d.document_title+' · Version '+d.version_number).join('\n')],
+     ['Assessment notes',p.justification],['Published',a.created_at],
+     ['Publication authority',a.administrator_override?'Administrator override':'Risk Officer']
+    ]));
+   }).catch(error=>{if(active==='overview'&&risk&&risk.id===centralRiskId&&centralCard.isConnected)centralCard.replaceWith(card('Risk Office assessment',[['Status',error.message]]));});
   }else if(active==='ownership'){
    content.appendChild(card('Ownership', [['Current Risk Owner',risk.risk_owner],['Local Owners','Not yet available']]));
   }else if(active==='applicability'||active==='assessments'){
@@ -2845,335 +2865,16 @@ table {
  tabs.forEach(t=>t.addEventListener('click',()=>{active=t.dataset.riskTab;render();}));
 })();
 </script>
-<div id="veroRiskDrawerOverlay" class="vero-risk-overlay"
-     aria-hidden="true">
- <aside class="vero-risk-drawer"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="veroRiskDrawerTitle">
-
-  <div class="vero-risk-drawer-head">
-   <div>
-    <small>RISK MANAGEMENT</small>
-    <h2 id="veroRiskDrawerTitle">Add Risk</h2>
-    <p>Identify, assess and manage organisational risk.</p>
-   </div>
-   <button id="veroCloseRiskDrawer"
-           type="button"
-           aria-label="Close Risk drawer">×</button>
-  </div>
-
-  <div class="vero-risk-drawer-body">
-
-   <h3>Risk Identification</h3>
-
-   <label for="veroNewRiskRegister">Risk Register</label>
-   <select id="veroNewRiskRegister">
-    <option value="">Select authorised register</option>
-   </select>
-
-   <label for="veroNewRiskTitle">Risk Title</label>
-   <input id="veroNewRiskTitle"
-          placeholder="Enter risk title">
-
-   <label for="veroNewRiskDescription">Risk Description</label>
-   <textarea id="veroNewRiskDescription" rows="4"
-             placeholder="Describe the risk and potential consequences"></textarea>
-
-   <label for="veroNewRiskCategory">Risk Category</label>
-   <input id="veroNewRiskCategory"
-          placeholder="Select or enter category">
-
-   <h3>Risk Ownership</h3>
-   <p class="vero-risk-help">
-    Risk Owner selection will use Vero's existing user directory.
-   </p>
-
-
-   <h3>Risk Assessment</h3>
-
-   <p class="vero-risk-help">
-    Assess each risk using the approved Verra Mobility
-    Risk Assessment Matrix.
-   </p>
-
-   <div class="vero-assessment-section">
-
-    <h4>Inherent Risk</h4>
-    <p class="vero-risk-help">
-     Risk exposure before controls are applied.
-    </p>
-
-    <div class="vero-assessment-row" data-assessment="inherent">
-     <div class="vero-assessment-field">
-      <label>Impact</label>
-      <select class="assessment-impact">
-       <option value="">Select</option>
-       <option value="1">1</option>
-       <option value="2">2</option>
-       <option value="3">3</option>
-       <option value="4">4</option>
-       <option value="5">5</option>
-      </select>
-     </div>
-
-     <div class="vero-assessment-field">
-      <label>Likelihood</label>
-      <select class="assessment-likelihood">
-       <option value="">Select</option>
-       <option value="5">5</option>
-       <option value="10">10</option>
-       <option value="15">15</option>
-       <option value="20">20</option>
-       <option value="25">25</option>
-      </select>
-     </div>
-
-     <div class="vero-assessment-field">
-      <label>Score</label>
-      <div class="assessment-score">—</div>
-     </div>
-
-     <div class="vero-assessment-field">
-      <label>Risk Level</label>
-      <div class="assessment-level">—</div>
-     </div>
-    </div>
-
-   </div>
-
-   <div class="vero-assessment-section">
-
-    <h4>Residual Risk</h4>
-    <p class="vero-risk-help">
-     Risk exposure with existing controls in place.
-    </p>
-
-    <div class="vero-assessment-row" data-assessment="residual">
-     <div class="vero-assessment-field">
-      <label>Impact</label>
-      <select class="assessment-impact">
-       <option value="">Select</option>
-       <option value="1">1</option>
-       <option value="2">2</option>
-       <option value="3">3</option>
-       <option value="4">4</option>
-       <option value="5">5</option>
-      </select>
-     </div>
-
-     <div class="vero-assessment-field">
-      <label>Likelihood</label>
-      <select class="assessment-likelihood">
-       <option value="">Select</option>
-       <option value="5">5</option>
-       <option value="10">10</option>
-       <option value="15">15</option>
-       <option value="20">20</option>
-       <option value="25">25</option>
-      </select>
-     </div>
-
-     <div class="vero-assessment-field">
-      <label>Score</label>
-      <div class="assessment-score">—</div>
-     </div>
-
-     <div class="vero-assessment-field">
-      <label>Risk Level</label>
-      <div class="assessment-level">—</div>
-     </div>
-    </div>
-
-   </div>
-
-   <div class="vero-assessment-section">
-
-    <h4>Target Risk</h4>
-    <p class="vero-risk-help">
-     Intended risk exposure following additional controls.
-    </p>
-
-    <div class="vero-assessment-row" data-assessment="target">
-     <div class="vero-assessment-field">
-      <label>Impact</label>
-      <select class="assessment-impact">
-       <option value="">Select</option>
-       <option value="1">1</option>
-       <option value="2">2</option>
-       <option value="3">3</option>
-       <option value="4">4</option>
-       <option value="5">5</option>
-      </select>
-     </div>
-
-     <div class="vero-assessment-field">
-      <label>Likelihood</label>
-      <select class="assessment-likelihood">
-       <option value="">Select</option>
-       <option value="5">5</option>
-       <option value="10">10</option>
-       <option value="15">15</option>
-       <option value="20">20</option>
-       <option value="25">25</option>
-      </select>
-     </div>
-
-     <div class="vero-assessment-field">
-      <label>Score</label>
-      <div class="assessment-score">—</div>
-     </div>
-
-     <div class="vero-assessment-field">
-      <label>Risk Level</label>
-      <div class="assessment-level">—</div>
-     </div>
-    </div>
-
-   </div>
-
-
-   <h3>Controls</h3>
-   <p class="vero-risk-help">
-    Link existing enterprise Controls from Compliance Management.
-   </p>
-
-   <h3>Risk Treatment</h3>
-   <p class="vero-risk-help">
-    Assign treatment actions, owners and target dates.
-   </p>
-
-  </div>
-
-  <div class="vero-risk-drawer-footer">
-   <button id="veroCancelRisk"
-           class="vero-risk-cancel"
-           type="button">Cancel</button>
-   <button class="vero-risk-save"
-           type="button"
-           disabled
-           title="Risk submission will be enabled after API integration">
-    Save Risk
-   </button>
-  </div>
-
+<div id="veroRiskDrawerOverlay" class="vero-risk-overlay" aria-hidden="true">
+ <aside class="vero-risk-drawer" role="dialog" aria-modal="true" aria-labelledby="veroRiskDrawerTitle">
+  <div class="vero-risk-drawer-head"><div><small>RISK MANAGEMENT</small><h2 id="veroRiskDrawerTitle">Add Risk</h2><p>Identify, assess and publish an organisational risk.</p></div><button id="veroCloseRiskDrawer" type="button" aria-label="Close Risk drawer">×</button></div>
+  <div class="vero-risk-drawer-body"></div>
  </aside>
 </div>
-
-<script>
-(function(){
- const overlay=document.getElementById('veroRiskDrawerOverlay');
- const open=document.getElementById('veroAddRiskButton');
- const close=document.getElementById('veroCloseRiskDrawer');
- const cancel=document.getElementById('veroCancelRisk');
- const registerSelect=document.getElementById('veroNewRiskRegister');
-
- function openDrawer(){
-  const dashboardRegister=document.getElementById('veroRiskRegisterFilter');
-
-  registerSelect.replaceChildren();
-
-  const placeholder=document.createElement('option');
-  placeholder.value='';
-  placeholder.textContent='Select authorised register';
-  registerSelect.appendChild(placeholder);
-
-  [...dashboardRegister.options].forEach(option=>{
-   if(!option.value) return;
-
-   const copy=document.createElement('option');
-   copy.value=option.value;
-   copy.textContent=option.textContent;
-   registerSelect.appendChild(copy);
-  });
-
-  if(dashboardRegister.value){
-   registerSelect.value=dashboardRegister.value;
-  }
-
-  overlay.classList.add('open');
-  overlay.setAttribute('aria-hidden','false');
-  document.getElementById('veroNewRiskTitle').focus();
- }
-
- function closeDrawer(){
-  overlay.classList.remove('open');
-  overlay.setAttribute('aria-hidden','true');
- }
-
- open.addEventListener('click',openDrawer);
- close.addEventListener('click',closeDrawer);
- cancel.addEventListener('click',closeDrawer);
-
- overlay.addEventListener('click',event=>{
-  if(event.target===overlay) closeDrawer();
- });
-
- document.addEventListener('keydown',event=>{
-  if(event.key==='Escape' && overlay.classList.contains('open')){
-   closeDrawer();
-  }
- });
-})();
-</script>
-
-<script>
-(function(){
-
- const matrix=[
-  ['Moderate','High','Significant','Significant','Significant'],
-  ['Moderate','Moderate','High','Significant','Significant'],
-  ['Low','Moderate','High','High','Significant'],
-  ['Low','Moderate','Moderate','Moderate','High'],
-  ['Low','Low','Low','Moderate','Moderate']
- ];
-
- const colours={
-  Low:'#A8C63D',
-  Moderate:'#21869B',
-  High:'#D1B443',
-  Significant:'#BF302D'
- };
-
- document.querySelectorAll('.vero-assessment-row')
-  .forEach(row=>{
-
-   const impact=row.querySelector('.assessment-impact');
-   const likelihood=row.querySelector('.assessment-likelihood');
-   const score=row.querySelector('.assessment-score');
-   const level=row.querySelector('.assessment-level');
-
-   function calculate(){
-
-    if(!impact.value || !likelihood.value){
-     score.textContent='—';
-     level.textContent='—';
-     level.style.background='#F4F6F5';
-     level.style.color='#3D3935';
-     return;
-    }
-
-    const i=Number(impact.value);
-    const l=Number(likelihood.value);
-
-    const rowIndex=[25,20,15,10,5].indexOf(l);
-    const classification=matrix[rowIndex][i-1];
-
-    score.textContent=String(i*l);
-    level.textContent=classification;
-    level.style.background=colours[classification];
-    level.style.color=
-     classification==='Low'||classification==='High'
-      ?'#242424':'#FFFFFF';
-   }
-
-   impact.addEventListener('change',calculate);
-   likelihood.addEventListener('change',calculate);
-
-  });
-
-})();
-</script>
+<link rel="stylesheet" href="risk-central-create.css">
+<script src="risk-assessment-criteria.js"></script>
+<script src="risk-central-create.js"></script>
+<script src="risk-central-treatments.js"></script>
 
 <div id="veroHierarchyOverlay" class="vero-risk-overlay"
      aria-hidden="true">
@@ -4086,7 +3787,7 @@ table {
   const risk=(event.detail?.risks||[]).find(item=>Number(item.id)===riskId);
   if(!risk)return;
   opened=true;
-  document.dispatchEvent(new CustomEvent('vero-risk-open-details',{detail:{risk,tab:'applicability'}}));
+  document.dispatchEvent(new CustomEvent('vero-risk-open-details',{detail:{risk,tab:params.has('central_treatment_id')?'overview':'applicability'}}));
  });
 })();
 </script>

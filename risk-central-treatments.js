@@ -1,0 +1,12 @@
+(()=>{'use strict';
+const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+function node(tag,text){const e=document.createElement(tag);if(text!=null)e.textContent=text;return e;}
+async function api(path,body){const response=await fetch(API+path,{method:body?'POST':'GET',cache:'no-store',headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});const data=await response.json();if(!response.ok)throw Error(data.message||'Unable to load treatments');return data;}
+document.addEventListener('vero-central-treatments-open',async event=>{
+const {risk,container}=event.detail,card=node('section');card.className='vero-risk-details-card';container.append(card);card.append(node('h3','Treatment actions'),node('p','Loading…'));
+try{const data=await api('/risks/'+risk.id+'/central-treatments');if(!card.isConnected)return;if(!data.actions.length){card.remove();return;}card.replaceChildren(node('h3','Treatment actions'));card.append(node('p','Completing a treatment records the work done. It does not automatically change the current rating to the target rating.'));
+for(const action of data.actions){const row=node('section');row.append(node('h4',action.title),node('p',action.owner_name+' · Due '+action.due_date+' · '+action.status));if(action.completion_notes)row.append(node('p',action.completion_notes));
+if(action.can_complete){const notes=node('textarea');notes.placeholder='Describe the work completed and supporting evidence';notes.setAttribute('aria-label','Completion notes for '+action.title);const complete=node('button','Mark completed');complete.type='button';const status=node('p');status.setAttribute('role','status');complete.onclick=async()=>{if(!notes.value.trim()){status.textContent='Completion notes are required.';return;}complete.disabled=true;notes.disabled=true;try{await api('/risks/'+risk.id+'/central-treatments/'+action.id+'/complete',{notes:notes.value.trim()});if(!row.isConnected)return;row.replaceChildren(node('h4',action.title),node('p','Completed'),node('p',notes.value));}catch(error){if(!row.isConnected)return;status.textContent=error.message;complete.disabled=false;notes.disabled=false;}};row.append(notes,complete,status);}card.append(row);}
+}catch(error){if(card.isConnected)card.replaceChildren(node('h3','Treatment actions'),node('p',error.message));}
+});
+})();
