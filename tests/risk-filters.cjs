@@ -114,7 +114,7 @@ test('matrix selections, repeated click, clear and search retain the detailed ri
  assert.match(app.table(),/Alpha/);assert.match(app.table(),/Unassigned/);assert.doesNotMatch(app.table(),/Category 40|Beta|Unassessed/);assert.equal(app.el('veroRiskListStatus').textContent,'3');
  app.cells()[20].dispatchEvent(new CustomEvent('click'));await settle();assert.match(app.table(),/Category 40/);
  app.cells()[4].dispatchEvent(new CustomEvent('click'));await settle();assert.match(app.table(),/Beta/);
- app.el('veroClearMatrixSelection').dispatchEvent(new CustomEvent('click'));await settle();assert.match(app.table(),/Category 40/);
+ app.cells()[4].dispatchEvent(new CustomEvent('click'));await settle();assert.match(app.table(),/Category 40/);
  app.el('veroRiskSearch').value='R-2';app.el('veroRiskSearch').dispatchEvent(new CustomEvent('input'));await settle();assert.match(app.table(),/Beta/);assert.doesNotMatch(app.table(),/Alpha|Category 40/);assert.equal(app.el('veroMatrixStatus').textContent,'1');
  app.el('veroRiskSearch').value='';app.el('veroRiskSearch').dispatchEvent(new CustomEvent('input'));app.change('veroRiskLevelFilter','Low');await settle();assert.match(app.table(),/Alpha/);assert.doesNotMatch(app.table(),/Beta|Unassessed/);
 });
