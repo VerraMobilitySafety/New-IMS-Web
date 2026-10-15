@@ -1989,7 +1989,6 @@ table {
 <div class="vero-risk-filter"><label for="veroTier3Filter">Tier 3</label><select id="veroTier3Filter"><option value="">All Tier 3 categories</option></select></div>
 <div class="vero-risk-filter"><label for="veroTier2Filter">Tier 2</label><select id="veroTier2Filter"><option value="">All Tier 2 categories</option></select></div>
 <div class="vero-risk-filter"><label for="veroTier1Filter">Tier 1</label><select id="veroTier1Filter"><option value="">All Tier 1 categories</option></select></div></div></section>
-<div class="vero-risk-filter" id="veroClassificationDepthControl"><label for="veroClassificationDepth">Classification endpoint</label><select id="veroClassificationDepth"><option value="1">Tier 1 (full hierarchy)</option><option value="2">Tier 2 (e.g. Project Compliance)</option></select><small id="veroClassificationDepthHint" role="status">Select a terminal tier before applying operational filters.</small></div>
 <section class="vero-risk-panel vero-compact-filter-panel vero-risk-filter-panel" aria-label="Operational Context"><h2>Operational Context</h2><div class="vero-risk-secondary-row"><div class="vero-risk-filter"><label for="veroContextTypeFilter">Context Type</label><select id="veroContextTypeFilter"><option value="">All context types</option></select></div>
 <div class="vero-risk-filter"><label for="veroApplicationFilter">Context Name</label><select id="veroApplicationFilter"><option value="">All contexts</option></select></div>
 <div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area</label><select id="veroSiteFilter" disabled aria-describedby="veroContextStatus"><option value="">Site-level filtering unavailable</option></select></div></div><p id="veroContextStatus" role="status">Site-level risk applicability is not available. Context filters cover the whole selected context.</p><button id="veroContextRetry" class="vero-risk-clear" type="button" hidden>Retry context data</button></section>
@@ -2152,7 +2151,6 @@ table {
  const matrix=document.getElementById('veroRiskMatrix');
  const registerFilter=document.getElementById('veroRiskRegisterFilter');
  const assessmentFilter=document.getElementById('veroRiskAssessmentFilter');
- const classificationDepth=document.getElementById('veroClassificationDepth');
  const tier4Filter=document.getElementById('veroTier4Filter');
  const tier3Filter=document.getElementById('veroTier3Filter');
  const tier2Filter=document.getElementById('veroTier2Filter');
@@ -2286,13 +2284,6 @@ table {
   }
 
   function updateTier1Category(){
-    if(classificationDepth.value==='2'){
-     populateTier(tier1CategoryFilter,[],'Stops at Tier 2');
-     tier1CategoryFilter.disabled=true;
-     tier1CategoryFilter.title='Classification stops at Tier 2; use Operational Context filters to narrow results.';
-     return;
-    }
-    tier1CategoryFilter.title='';
     const parentId=Number(tier2Filter.value);
     const items=tierCategories.filter(category=>category.tier===1 && parentIds(category).includes(parentId));
     populateTier(tier1CategoryFilter,items,'All Tier 1 categories');
@@ -2671,12 +2662,6 @@ table {
 
  tier3Filter.addEventListener('change',()=>{
   updateTier2();
-  selectedCell=null;
-  render();
- });
-
- classificationDepth.addEventListener('change',()=>{
-  updateTier1Category();
   selectedCell=null;
   render();
  });
