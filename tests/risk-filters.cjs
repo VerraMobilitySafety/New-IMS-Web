@@ -65,6 +65,7 @@ function setup(override,{delayContext=false}={}){
   if(route==='/risk-registers')return response({registers:[{id:1,register_code:'RISK-GLOBAL',register_name:'Master'},{id:2,register_code:'LOCAL',register_name:'Local'}]});
   if(route==='/risks')return response({risks});
   if(route==='/risk/master-aggregation')return response({aggregations:[]});
+  if(route==='/risk/approved-matrix-positions')return response({positions:[]});
   if(route==='/risk-tiers')return response({categories});
   if(route==='/risk/operational-contexts')return response(contexts);
   if(route==='/risk/hierarchical-register'){
