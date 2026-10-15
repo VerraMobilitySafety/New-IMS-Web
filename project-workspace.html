@@ -499,6 +499,21 @@ function openProjectRiskWorkflow(){
 
 /* Link an existing Master Risk through Risk Office's authorised applicability API.
    This does not create a second risk or bypass server-side Risk Manager checks. */
+<style>
+/* Project Risk creation — match VERO governed drawer styling */
+#projectRiskCreateOverlay .drawer{width:min(760px,96vw);font-family:Montserrat,Verdana,Arial,sans-serif}
+#projectRiskCreateOverlay .drawer-head{padding:24px 28px}
+#projectRiskCreateOverlay .drawer-head h2{font-size:23px;letter-spacing:-.35px}
+#projectRiskCreateOverlay .drawer-body{padding:26px 28px}
+#projectRiskCreateOverlay #projectRiskCreateForm>label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--grey);font-weight:800;margin:18px 0 7px}
+#projectRiskCreateOverlay #projectRiskCreateForm>input,
+#projectRiskCreateOverlay #projectRiskCreateForm>select,
+#projectRiskCreateOverlay #projectRiskCreateForm>textarea{display:block;width:100%;box-sizing:border-box;border:1px solid #d7d3d0;border-radius:8px;padding:12px;font:500 12px Montserrat,Verdana,Arial,sans-serif;margin:0 0 15px;background:#fff}
+#projectRiskCreateOverlay #projectRiskCreateForm>textarea{resize:vertical;min-height:95px}
+#projectRiskCreateOverlay #projectRiskCreateForm .drawer-actions{border-top:1px solid var(--line);padding-top:18px;margin-top:20px}
+#projectRiskCreateOverlay #projectRiskCreateStatus{font-size:12px;line-height:1.5;color:var(--charcoal)}
+#projectRiskCreateOverlay .meta{font-size:11px;line-height:1.5;color:var(--grey)}
+</style>
 async function openProjectRiskCreator(){
  if(!currentProject?.id)return;
  let overlay=document.getElementById('projectRiskCreateOverlay');
