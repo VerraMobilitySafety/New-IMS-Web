@@ -842,7 +842,19 @@ async function loadProjectRisks(id){
   if(body)all.forEach((risk,index)=>{
    const applicabilityId=assessmentLinks.get(Number(risk.id));
    if(!body.rows[index])return;
-   const td=body.rows[index].cells[5];
+   const row=body.rows[index];
+   row.style.cursor='pointer';
+   row.tabIndex=0;
+   row.setAttribute('role','button');
+   row.setAttribute('aria-label','Open Project Risk '+(risk.risk_code||risk.risk_title));
+   const openRisk=()=>{
+    if(applicabilityId)openProjectAssessment(applicabilityId,risk.risk_title);
+    else if(risk.status==='Open')assignApprovedProjectRisk(risk);
+    else window.alert('This risk is awaiting Risk Office approval. Open it from Risk Management → Risk Office.');
+   };
+   row.addEventListener('click',event=>{if(event.target.closest('button,a'))return;openRisk()});
+   row.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openRisk()}});
+   const td=row.cells[5];
    if(!td)return;
    const button=document.createElement('button');button.type='button';
    button.className='btn outline';
