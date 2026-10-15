@@ -186,11 +186,12 @@
   const list=section('Operational assessments');
   const assignments=(data.assignments||[]).filter(a=>a.status==='Applicable');
   if(!assignments.length){list.appendChild(node('p','No applicable operational records. Risk Office must establish applicability first.'));return;}
-  // The API is the authority: display editing only for explicitly assigned operational assessors.
+  // The API is the authority for operational permissions and Project-only Administrator overrides.
   const capabilities=await Promise.all(assignments.map(async a=>{
    try{
     const response=await json(API+'/risk/applicability/'+encodeURIComponent(a.id)+'/capabilities');
-    return {assignment:a,can_create:response.can_create===true,can_approve:response.can_approve===true};
+    return {assignment:a,can_create:response.can_create===true,can_approve:response.can_approve===true,
+      administrator_override:a.context_type==='Project'&&response.administrator_override===true};
    }catch(error){return {assignment:a,can_create:false};}
   }));
   if(seq!==sequence||overlay.hidden)return;
@@ -287,7 +288,8 @@
      if(seq!==sequence||overlay.hidden)return;
      const currentUser=me.user||me;
      const own=Number(assessment.owner_user_id)===Number(currentUser.id);
-     if(assessment.status==='Returned'&&own&&capability?.can_create&&revisionForm){
+     const administratorOverride=capability?.administrator_override===true;
+     if(assessment.status==='Returned'&&(own||administratorOverride)&&capability?.can_create&&revisionForm){
       const revise=node('button','Revise returned assessment');
       revise.type='button';
       revise.addEventListener('click',()=>{
@@ -304,8 +306,8 @@
       detail.appendChild(revise);
      }
      let decision=null;
-     if(assessment.status==='Draft'&&own&&capability?.can_create)decision='Submit';
-     if(assessment.status==='Submitted'&&capability?.can_approve&&!own)decision='Approve';
+     if(assessment.status==='Draft'&&(own||administratorOverride)&&capability?.can_create)decision='Submit';
+     if(assessment.status==='Submitted'&&capability?.can_approve&&(!own||administratorOverride))decision='Approve';
      if(decision){
       const button=node('button',decision==='Submit'?'Submit for approval':'Approve assessment');
       button.type='button';
@@ -369,4 +371,5 @@
   }catch(error){if(seq===sequence&&!overlay.hidden)content.textContent=error.message;}
  });
 })();
+
 

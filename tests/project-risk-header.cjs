@@ -42,7 +42,7 @@ test('malformed Project Risks responses report the original error without a coun
  }
 });
 test('+ Add Risk remains disabled until server capability grants access and fails closed otherwise',async()=>{
- for(const [data,ok] of [[{can_submit:true},true],[{can_submit:false},true],[{},true],[{can_submit:true,message:'Access unavailable'},false]]){
+ for(const [data,ok] of [[{can_submit:true},true],[{can_submit:false},true],[{can_submit:true,administrator_override:true},true],[{can_submit:false,administrator_override:true},true],[{},true],[{can_submit:true,message:'Access unavailable'},false]]){
   const button={disabled:false};let finish;const response=new Promise(resolve=>finish=resolve);
   const scope=vm.createContext({document:{getElementById:id=>id==='projectRiskCreateOpen'?button:null},currentProject:{id:33},API_BASE:'https://fixture/api',apiFetch:()=>response});
   vm.runInContext(capabilitySource,scope);const loading=scope.loadProjectSubmissionCapability(33);assert.equal(button.disabled,true);

@@ -16,14 +16,14 @@ class Element{
  querySelectorAll(selector){if(selector.includes(','))return [...new Set(selector.split(',').flatMap(s=>this.querySelectorAll(s)))];if(selector.includes(' ')){const [first,...rest]=selector.split(' ');return this.querySelectorAll(first).flatMap(el=>el.querySelectorAll(rest.join(' ')));}return this.all().filter(e=>e.matches(selector));}querySelector(s){return this.querySelectorAll(s)[0]||null;}
 }
 const tick=async()=>{for(let n=0;n<10;n++)await new Promise(r=>setImmediate(r));};
-function app({canSubmit=true,submission,post}={}){
+function app({canSubmit=true,administratorOverride,submission,post}={}){
  const body=new Element(),document={body,createElement:tag=>new Element(tag),getElementById:id=>body.all().find(x=>x.id===id)};
  const calls=[],currentProject={id:123,project_name:'Offline project',project_code:'OFFLINE'};
  const docs=[{id:4,document_number:'DOC4',document_title:'Published',version_number:2}];
  const VeroProjectRiskSubmission={node:(tag,text)=>{const el=new Element(tag);if(text)el.textContent=text;return el;},documentPicker:(host,documents,selected)=>{host.replaceChildren();for(const doc of documents){const field=new Element('input');field.dataset.documentId=String(doc.id);field.type='checkbox';field.value=String(doc.id);field.checked=selected.includes(doc.id);host.appendChild(field);}}};
  const apiFetch=async(url,init={})=>{
   const route=url.replace('https://fixture/api','');const request={route,method:init.method||'GET',body:init.body?JSON.parse(init.body):null};calls.push(request);let data={};
-  if(route.endsWith('/risk-submission-capabilities'))data={can_submit:canSubmit};
+  if(route.endsWith('/risk-submission-capabilities'))data={can_submit:canSubmit,administrator_override:administratorOverride};
   else if(route.endsWith('/risk-classifications'))data={categories:[{id:3,tier:3,category_name:'Project Execution',status:'Active'},{id:2,tier:2,category_name:'Delivery',status:'Active'},{id:1,tier:1,category_name:'Delay',status:'Active'}],relationships:[{parent_category_id:3,child_category_id:2},{parent_category_id:2,child_category_id:1}]};
   else if(route.endsWith('/risk-treatment-owners'))data={users:[{id:12,name:'Treatment Owner'}]};
   else if(route==='/users/active')data={users:[{id:11,first_name:'Risk',last_name:'Owner'},{id:12,first_name:'Treatment',last_name:'Owner'}]};
@@ -40,6 +40,10 @@ test('authorised project manager with no Risk role submits published documents a
 });
 test('generic project readers are blocked by server capability without role inference',async()=>{
  const a=app({canSubmit:false});await a.open();assert.equal(a.field('projectRiskCreateSave').disabled,true);assert.match(a.field('projectRiskCreateStatus').textContent,/Only authorised managers/);assert.equal(a.calls.some(c=>c.method==='POST'),false);
+});
+test('Administrator creation uses the server can_submit grant without requiring a project manager role',async()=>{
+ const a=app({administratorOverride:true});await a.open();assert.equal(a.field('projectRiskCreateSave').disabled,false);a.fill();a.submit();await tick();assert.equal(a.calls.find(c=>c.method==='POST').route,'/risks/master-drafts');
+ const denied=app({canSubmit:false,administratorOverride:true});await denied.open();assert.equal(denied.field('projectRiskCreateSave').disabled,true);assert.equal(denied.calls.some(c=>c.method==='POST'),false);
 });
 test('correction resubmits same risk/version/hash and confirms successful project association',async()=>{
  const submission={risk_id:91,project_id:123,version:2,package_hash:'hash-2',classification_category_id:1,risk:{risk_title:'Original',risk_description:'Original description'},reason:'Original reason',proposed_assessment:{inherent_likelihood:4,inherent_impact:5,residual_likelihood:2,residual_impact:3,current_controls:'Current',further_controls:'Future',owner_user_id:11,treatment_owner_user_id:12,treatment_due_date:'2026-11-01',next_review_date:'2027-01-01'},documents:[{id:4}],treatment_actions:[],proposed_controls:[]};
