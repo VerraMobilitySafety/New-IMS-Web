@@ -785,9 +785,10 @@ async function projectRiskFetch(url,label){
 }
 async function loadProjectRisks(id){
  const host='projectRiskList',count='projectRiskCount';
- projectListMessage(host,'Loading project risks…');
- document.getElementById(count).textContent='Loading…';
+ const countElement=document.getElementById(count);
  try{
+  projectListMessage(host,'Loading project risks…');
+  if(countElement)countElement.textContent='Loading…';
   const data=await projectRiskFetch(API_BASE+'/projects/'+encodeURIComponent(id)+'/risk-applicability','Project applicability');
   if(!Array.isArray(data.risks))throw Error('Invalid project risk response');
   const linked=data.risks;
@@ -802,7 +803,7 @@ async function loadProjectRisks(id){
   const known=new Set(linked.map(r=>Number(r.id)));
   const drafts=draftData.drafts.filter(r=>!known.has(Number(r.id)));
   const all=[...linked,...drafts];
-  document.getElementById(count).textContent=linked.length+' applicable · '+drafts.length+' project-originated';
+  if(countElement)countElement.textContent=linked.length+' applicable · '+drafts.length+' project-originated';
   if(!all.length){projectListMessage(host,'No project risks or pending Draft Risks yet.');return}
   all.sort((a,b)=>String(a.risk_code||'').localeCompare(String(b.risk_code||'')));
   projectTable(host,['Reference','Risk','Status','Assessment','Next Review','Action'],all,[
@@ -828,7 +829,7 @@ async function loadProjectRisks(id){
    }else return;
    td.appendChild(button);
   });
- }catch(e){console.error('Project risks',e);document.getElementById(count).textContent='Unavailable';projectListMessage(host,'Unable to load complete project risks: '+e.message)}
+ }catch(e){console.error('Project risks',e);if(countElement)countElement.textContent='Unavailable';projectListMessage(host,'Unable to load complete project risks: '+e.message)}
 }
 async function loadProjectGovernance(id){
  if(projectLinkedCache.id!==id){projectLinkedCache.id=id;projectLinkedCache.risks=false;projectLinkedCache.compliance=false}
