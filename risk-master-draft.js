@@ -1,4 +1,4 @@
-// Create a governed Draft Master Risk within an authorised Tier 1 classification.
+// Create a governed Draft Master Risk within an authorised Risk Event classification.
 (()=>{
  const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
  const overlay=document.getElementById('veroRiskDetailsOverlay');
@@ -59,7 +59,7 @@
   const retained=unresolved.get(Number(category.id));
   if(retained){
    retained.version=++version;active=retained;content.replaceChildren(retained.section);
-   title.textContent='Create Draft Master Risk';subtitle.textContent='Tier 1 · '+retained.category.name;
+   title.textContent='Create Draft Master Risk';subtitle.textContent='Risk Event · '+retained.category.name;
    return;
   }
   const session={version:++version,category,pending:false,uncertain:false,saved:false,fields:[]};active=session;
@@ -81,7 +81,7 @@
   const cancel=make('button','Cancel');cancel.type='button';
   const feedback=make('p','');feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');
   form.append(save,cancel,feedback);section.append(heading,guidance,form);content.replaceChildren(section);
-  title.textContent='Create Draft Master Risk';subtitle.textContent='Tier 1 · '+category.name;
+  title.textContent='Create Draft Master Risk';subtitle.textContent='Risk Event · '+category.name;
   cancel.addEventListener('click',()=>{if(current(session)&&confirmDiscard(session))returnToLinks(category);});
   try{session.requestId=crypto.randomUUID();}catch(error){
    save.disabled=true;feedback.textContent='Draft creation is unavailable in this browser. A secure connection is required.';return;
