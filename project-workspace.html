@@ -635,7 +635,8 @@ async function loadProjectRisks(id){
   const res=await apiFetch(API_BASE+'/risks',{cache:'no-store'});
   if(!res.ok)throw Error('Risk API returned '+res.status);
   const data=await res.json();if(!Array.isArray(data.risks))throw Error('Invalid risk response');
-  const risks=data.risks,linked=[];let next=0;
+  const risks=data.risks.filter(r=>r.status!=='Archived'),linked=[];let next=0;
+  const assessmentStatus=new Map();
   // Reuse the same authorised applicability API and bounded concurrency as risk-context.js.
   // Fail closed: never present a partial result as the full project risk list.
   await Promise.all(Array.from({length:Math.min(6,risks.length)},async()=>{
@@ -644,7 +645,19 @@ async function loadProjectRisks(id){
     const rr=await apiFetch(API_BASE+'/risks/'+encodeURIComponent(risk.id)+'/applicability',{cache:'no-store'});
     if(!rr.ok)throw Error('Risk applicability returned '+rr.status);
     const d=await rr.json();if(!Array.isArray(d.assignments))throw Error('Invalid risk applicability response');
-    if(d.assignments.some(a=>a.status==='Applicable'&&a.context_type==='Project'&&String(a.context_id)===String(id)))linked.push(risk);
+    const applicable=d.assignments.filter(a=>a.status==='Applicable'&&a.context_type==='Project'&&String(a.context_id)===String(id));
+    if(applicable.length){
+     linked.push(risk);
+     const assessments=await Promise.all(applicable.map(async a=>{
+      const response=await apiFetch(API_BASE+'/risk/applicability/'+encodeURIComponent(a.id)+'/assessments',{cache:'no-store'});
+      if(!response.ok)throw Error('Assessment API returned '+response.status);
+      const result=await response.json();
+      if(!Array.isArray(result.assessments))throw Error('Invalid assessment response');
+      return result.assessments;
+     }));
+     const approved=assessments.flat().filter(a=>a.status==='Approved');
+     assessmentStatus.set(Number(risk.id),approved.length?'Assessed':'Assessment Required');
+    }
    }
   }));
   const draftsResponse=await apiFetch(API_BASE+'/projects/'+encodeURIComponent(id)+'/risk-drafts',{cache:'no-store'});
@@ -657,8 +670,10 @@ async function loadProjectRisks(id){
   document.getElementById(count).textContent=linked.length+' applicable · '+drafts.length+' project-originated';
   if(!all.length){projectListMessage(host,'No project risks or pending Draft Risks yet.');return}
   all.sort((a,b)=>String(a.risk_code||'').localeCompare(String(b.risk_code||'')));
-  projectTable(host,['Reference','Risk','Status','Next Review'],all,[
-   r=>r.risk_code,r=>r.risk_title,r=>drafts.includes(r)?(r.status==='Draft'?'Draft — Risk Office review':r.status+' — check applicability'):r.status,r=>fmtDate(r.next_review_date)
+  projectTable(host,['Reference','Risk','Status','Assessment','Next Review'],all,[
+   r=>r.risk_code,r=>r.risk_title,r=>drafts.includes(r)?(r.status==='Draft'?'Draft — Risk Office review':r.status+' — check applicability'):r.status,
+   r=>drafts.includes(r)?'Pending Risk Office review':assessmentStatus.get(Number(r.id))||'Assessment Required',
+   r=>fmtDate(r.next_review_date)
   ]);
  }catch(e){console.error('Project risks',e);document.getElementById(count).textContent='Unavailable';projectListMessage(host,'Unable to load complete project risks: '+e.message)}
 }
