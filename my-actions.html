@@ -1284,7 +1284,7 @@ function openActionDetail(index){
      ? `Record Request · Request #${action.record_request_id||action.source_id}`
      : `${action.action_type||'Action'}${action.source_id?` · #${action.source_id}`:''}`;
 
- document.getElementById('actionDetailStatus').textContent=action.status||'Open';
+ document.getElementById('actionDetailStatus').textContent=(action.action_type==='Project Risk Correction'?'CHANGES REQUIRED':action.status)||'Open';
 
  if(isProject){
   document.getElementById('actionDetailGrid').innerHTML=[
@@ -1309,7 +1309,9 @@ function openActionDetail(index){
    actionField('Submitted',formatActionDate(action.created_at))
   ].join('');
   document.getElementById('actionDetailReason').textContent=
-   action.reason||action.last_reason||action.description||'—';
+   action.action_type==='Project Risk Correction'
+    ? 'Complete or correct this existing risk submission. The original risk and assessment are retained; no new risk is needed.'
+    : (action.reason||action.last_reason||action.description||'—');
   const additional=document.getElementById('actionDetailAdditional');
   additional.replaceChildren();
   const destination=window.VeroRiskActions.destination(action);
