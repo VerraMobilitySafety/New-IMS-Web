@@ -5,10 +5,10 @@
 (()=>{
  'use strict';
  const pending=new Set(['risk']);
- let overlay,observer,finished=false,domReady=false,frame,removalTimer,stopCameras;
+ let overlay,observer,finished=false,domReady=false,frame,removalTimer,cameraMotion,revealing=false;
  const cleanup=()=>{
   observer?.disconnect();
-  stopCameras?.();
+  cameraMotion?.stop();
   window.removeEventListener('resize',schedule);
   window.removeEventListener('scroll',schedule,true);
   if(frame)cancelAnimationFrame(frame);
@@ -39,26 +39,28 @@
   if(frame||finished)return;
   frame=requestAnimationFrame(()=>{frame=null;position();});
  }
- function check(){if(domReady&&!pending.size)finish();}
+ function check(){
+  if(!domReady||pending.size||finished||revealing)return;
+  revealing=true;
+  if(cameraMotion)cameraMotion.reveal(finish);else finish();
+ }
  function mount(){
   if(overlay||finished)return;
   overlay=document.createElement('div');
   overlay.id='veroPageLoader';overlay.className='vero-page-loader';
   overlay.setAttribute('role','status');overlay.setAttribute('aria-label','Preparing your workspace');
-  const background=document.createElement('div');background.className='motion-bg';background.setAttribute('aria-hidden','true');
-  for(const colour of ['green','teal','purple','grey']){
-   const cam=document.createElement('div');cam.className='nk9-floater';cam.dataset.colour=colour;
-   for(const [name,suffix] of [['nk9-angle',''],['nk9-front','-front']]){
-    const image=document.createElement('img');image.className=name;image.alt='';image.src='./assets/nk9-'+colour+suffix+'.png';cam.append(image);
-   }
-   const flash=document.createElement('span');flash.className='nk9-flash';cam.append(flash);background.append(cam);
-  }
-  const img=document.createElement('img');img.className='nk9-status-image';img.alt='';
-  img.onerror=()=>{img.onerror=()=>{img.hidden=true;};img.src='verra-chevron.png';};img.src='./assets/nk9-green.png';
+  const stage=document.createElement('div');stage.className='nk9-camera';stage.setAttribute('aria-hidden','true');
+  const angle=document.createElement('img');angle.className='nk9-angle';angle.alt='';
+  const front=document.createElement('img');front.className='nk9-front';front.alt='';
+  angle.onerror=()=>{front.hidden=true;angle.onerror=()=>{angle.hidden=true;};angle.src='verra-chevron.png';};
+  front.onerror=()=>{front.hidden=true;};
+  const flash=document.createElement('span');flash.className='nk9-flash';
+  stage.append(angle,front,flash);
   const label=document.createElement('span');label.className='vero-loader-label';label.textContent='Preparing your workspace...';
-  overlay.append(background,img,label);document.body.appendChild(overlay);
+  overlay.append(stage,label);document.body.appendChild(overlay);
   position();
-  if(!finished)stopCameras=window.VeroNK9?.start(background);
+  if(!finished)cameraMotion=window.VeroNK9?.start(stage);
+  angle.src='./assets/nk9-green.png';front.src='./assets/nk9-green-front.png';
   if(window.ResizeObserver){
    observer=new ResizeObserver(schedule);
    for(const selector of ['.main','.global-hero, .workspace-hero','.sidebar']){

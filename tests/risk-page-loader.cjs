@@ -8,12 +8,12 @@ const code=fs.readFileSync(path.join(root,'risk-page-loader.js'),'utf8');
 test('Risk alone opts in; every inline script remains valid',()=>{
  for(const file of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
   const html=fs.readFileSync(path.join(root,file),'utf8');
-  assert.equal(html.includes('src="risk-page-loader.js?v=20261016-noticeboard"'),file==='risk.html');
+  assert.equal(html.includes('src="risk-page-loader.js?v=20261016-single-reveal"'),file==='risk.html');
   if(file==='risk.html')for(const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(match[1]);
  }
  const css=fs.readFileSync(path.join(root,'risk-page-loader.css'),'utf8');
  assert.match(css,/prefers-reduced-motion:reduce/);
- assert.match(fs.readFileSync(path.join(root,'risk-nk9-animation.css'),'utf8'),/nk9-floater\{display:none!important\}/);
+ assert.match(fs.readFileSync(path.join(root,'risk-nk9-animation.css'),'utf8'),/nk9-flash,\.vero-page-loader::after\{display:none\}/);
  assert.doesNotMatch(code,/window\.fetch\s*=/);
 });
 function setup(tasks='content'){
@@ -71,11 +71,11 @@ test('timeout, script failures and pagehide expose content even if tasks never s
 });
 test('missing camera falls back to chevron, then readable status if both assets fail',()=>{
  const env=setup();env.api.mount();
- const img=env.overlay.children[1];
+ const img=env.overlay.children[0].children[0];
  assert.equal(img.src,'./assets/nk9-green.png');img.onerror();
  assert.equal(img.src,'verra-chevron.png');
  img.onerror();assert.equal(img.hidden,true);
- assert.equal(env.overlay.children[2].textContent,'Preparing your workspace...');
+ assert.equal(env.overlay.children[1].textContent,'Preparing your workspace...');
  env.api.ready('risk');env.listeners.DOMContentLoaded();assert.ok(env.overlay.classes.has('is-ready'));
 });
 
