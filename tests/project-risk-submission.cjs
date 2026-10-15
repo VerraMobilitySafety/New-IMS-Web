@@ -31,7 +31,8 @@ test('definition-only review sends exact version/hash once and retains non-live 
  const a=app();a.render();const button=a.button('Approve risk and assessment');assert.ok(button);button.click();button.click();await tick();const posts=a.calls.filter(c=>c.method==='POST');assert.equal(posts.length,1);assert.equal(posts[0].url.endsWith('/risks/91/project-submission/decision'),true);assert.deepEqual(posts[0].body,{decision:'Approve',reason:'Reviewed package',version:7,package_hash:'version-seven-hash'});assert.match(a.host.textContent,/No, required approvals are still pending/);
 });
 test('complete approval is exposed only by backend can_complete',()=>{
- const a=app();a.data.capabilities.can_complete=true;a.render();assert.ok(a.button('Approve risk and assessment'));assert.equal(a.button('Approve definition; send assessment for approval'),undefined);
+ const pending=app();pending.render();assert.ok(pending.button('Approve risk — next reviewer required'));assert.equal(pending.button('Approve risk and assessment'),undefined);
+ const complete=app();complete.data.capabilities.can_complete=true;complete.render();assert.ok(complete.button('Approve risk and assessment'));assert.equal(complete.button('Approve risk — next reviewer required'),undefined);
 });
 test('Administrator package actions follow operation capabilities and retain exact versioned decision payload',async()=>{
  const a=app();a.data.capabilities={...a.data.capabilities,administrator_override:true,can_complete:true};a.render();assert.ok(a.button('Approve risk and assessment'));a.button('Approve risk and assessment').click();await tick();assert.deepEqual(a.calls.find(c=>c.method==='POST').body,{decision:'Approve',reason:'Reviewed package',version:7,package_hash:'version-seven-hash'});
