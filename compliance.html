@@ -3833,6 +3833,29 @@ document.addEventListener(
  'DOMContentLoaded',
  loadComplianceRegister
 );
+// Project Workspace deep link: use the existing controlled submission process.
+document.addEventListener('DOMContentLoaded',async()=>{
+ const params=new URLSearchParams(location.search);
+ if(params.get('new')!=='single'||!params.get('project_id'))return;
+ const requestedProjectId=params.get('project_id');
+ openSubmit();
+ showSingleRequirement();
+ const applicability=document.getElementById('singleApplicability');
+ if(!applicability)return;
+ applicability.value='Project';
+ if(typeof updateComplianceApplicability==='function')await updateComplianceApplicability();
+ const project=document.getElementById('singleProject');
+ if(!project)return;
+ // Project options may be populated asynchronously; wait briefly for the
+ // existing selector to resolve rather than inserting an unverified option.
+ const choose=()=>{const option=[...project.options].find(o=>o.value===requestedProjectId);if(option){project.value=requestedProjectId;return true}return false};
+ if(!choose()){
+  const observer=new MutationObserver(()=>{if(choose())observer.disconnect()});
+  observer.observe(project,{childList:true});
+  setTimeout(()=>observer.disconnect(),8000);
+ }
+});
+
 </script>
 
 <script>
