@@ -114,13 +114,13 @@
       <a class="${projectActive ? 'active' : ''}"
          href="project-management.html">
         <span class="ico">▦</span>
-        <span>Projects</span>
+        <span>Project Management</span>
       </a>
 
       <a class="${maintenanceActive ? 'active' : ''}"
          href="maintenance-management.html">
         <span class="ico">⚙</span>
-        <span>Maintenance</span>
+        <span>Contracts Management</span>
       </a>
 
       <a class="${isActive('contractor-management.html') ? 'active' : ''}" href="contractor-management.html">
