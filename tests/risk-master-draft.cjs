@@ -19,6 +19,7 @@ class Element{
  replaceChildren(...els){this.children=[];this._text='';this.append(...els);}
  addEventListener(type,fn){(this.listeners[type]??=[]).push(fn);}
  dispatchEvent(event){event.target??=this;for(const fn of this.listeners[event.type]||[])fn(event);return !event.defaultPrevented;}
+ getAttribute(name){return this.attributes[name];}
  setAttribute(name,value){this.attributes[name]=String(value);if(name.startsWith('data-'))this.dataset[name.slice(5).replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=String(value);}
  click(){if(!this.disabled)this.dispatchEvent(new Event('click'));}
  before(el){const index=this.parent.children.indexOf(this);this.parent.children.splice(index,0,el);el.parent=this.parent;}
@@ -42,6 +43,7 @@ function app(override,options={}){
  const fetch=async(url,init={})=>{
   const route=new URL(url).pathname.slice(4),call={route,...init};calls.push(call);
   const result=override?.(call);if(result!==undefined)return result;
+  if(route.endsWith('/project-submission'))return response({available:false});
   if(route==='/auth/my-roles')return response({roles:[{role_name:'Risk Manager'}]});
   if(route==='/risks/master-drafts')return response({status:'success',created:true,risk_id:71,risk_code:'MR-123',risk_status:'Draft',tier1_category_id:11},201);
   if(route==='/risks')return response({risks:[draft]});
@@ -56,6 +58,7 @@ function app(override,options={}){
   const html=fs.readFileSync(path.join(root,'risk.html'),'utf8');const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(x=>x[1]);
   vm.runInContext(scripts.find(s=>s.includes("let risk=null,active='overview'")),scope,{filename:'risk.html:details'});
   vm.runInContext(scripts.find(s=>s.includes("const nav=make('div','');nav.className='vero-risk-classification-tabs'")),scope,{filename:'risk.html:classification'});
+  scope.window.VeroProjectRiskSubmission={render:()=>{},load:async id=>{const r=await fetch('https://vero.test/api/risks/'+id+'/project-submission');return r.json();}};scope.VeroProjectRiskSubmission=scope.window.VeroProjectRiskSubmission;
   vm.runInContext(fs.readFileSync(path.join(root,'risk-office.js'),'utf8'),scope,{filename:'risk-office.js'});
  }
  vm.runInContext(code,scope,{filename:'risk-master-draft.js'});
@@ -210,4 +213,15 @@ test('late successful closed save refreshes linked records and clears unresolved
  finish(response({risk_id:71,risk_code:'MR-123'},201));await tick();
  assert.ok(a.content.querySelectorAll('button').some(b=>b.textContent==='+ Create Draft Master Risk'));
  assert.match(a.content.textContent,/Linked Master Risks/);assert.equal(a.calls.filter(c=>c.method==='POST').length,1);
+});
+
+
+test('settled approved Project Risk retains authorised archive without restoring definition-only approval',async()=>{
+ const a=app(call=>call.route.endsWith('/project-submission')?response({available:true,is_live:true,approval_state:'Approved',risk_status:'Open',submission:{status:'Approved'}}):undefined,{integration:true});
+ a.emit('vero-risk-open-details',{risk:{...draft,status:'Open'}});await tick();assert.equal(a.document.getElementById('veroRiskOfficeArchive').hidden,false);assert.equal(a.document.getElementById('veroRiskOfficeApprove').hidden,true);assert.equal(a.document.getElementById('veroRiskOfficeEdit').hidden,true);
+});
+test('pending Project Risk and unavailable package remain fail-closed for archive',async()=>{
+ for(const reply of [response({available:true,is_live:false,approval_state:'Submitted',submission:{status:'Submitted'}}),{ok:false,status:500,json:async()=>{throw Error('Unavailable')}}]){
+  const a=app(call=>call.route.endsWith('/project-submission')?reply:undefined,{integration:true});a.emit('vero-risk-open-details',{risk:draft});await tick();assert.equal(a.document.getElementById('veroRiskOfficeArchive').hidden,true);
+ }
 });

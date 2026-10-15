@@ -266,3 +266,4 @@ test('register refresh preserves valid Tier 4 to Tier 1, context, search and mat
  for(const [id,value] of Object.entries({veroTier4Filter:'40',veroTier3Filter:'30',veroTier2Filter:'20',veroTier1Filter:'10',veroContextTypeFilter:'Project',veroApplicationFilter:'101',veroRiskRegisterFilter:'1',veroRiskSearch:'Alpha'}))assert.equal(app.el(id).value,value,id);
  assert.match(app.table(),/Alpha/);assert.doesNotMatch(app.table(),/Beta|Gamma/);assert.equal(app.el('veroMatrixStatus').textContent,'1');
 });
+

@@ -5,6 +5,7 @@
  const title=document.getElementById('veroRiskDetailsTitle');
  const content=document.getElementById('veroRiskDetailsContent');
  const tabs=overlay.querySelector('.vero-risk-details-tabs');
+ const submissionTab=document.createElement('button');submissionTab.type='button';submissionTab.dataset.riskTab='project-submission';submissionTab.textContent='Submitted package';submissionTab.hidden=true;tabs.appendChild(submissionTab);
  const actions=document.createElement('div');
  actions.className='vero-risk-office-actions';
  actions.innerHTML='<button type="button" id="veroRiskOfficeEdit" hidden>Edit Draft Risk</button><button type="button" id="veroRiskOfficeApprove" hidden>Approve</button><button type="button" id="veroRiskOfficeChanges" hidden>Request Changes</button><button type="button" id="veroRiskOfficeArchive" hidden>Archive Master Risk</button><span id="veroRiskOfficeStatus" role="status"></span>';
@@ -13,13 +14,14 @@
  const approve=actions.querySelector('#veroRiskOfficeApprove');
  const changes=actions.querySelector('#veroRiskOfficeChanges');
  const archive=actions.querySelector('#veroRiskOfficeArchive');
+ const canArchivePackage=()=>submissionState==='none'||(submissionState==='package'&&submissionData?.approval_state==='Approved');
  function syncActions(){
-  const show=authorised&&selected?.status==='Draft';
+  const show=authorised&&selected?.status==='Draft'&&submissionState==='none';
   edit.hidden=!show;approve.hidden=!show;changes.hidden=!show;
-  archive.hidden=!(authorised&&selected&&['Draft','Open','Closed'].includes(selected.status));
+  archive.hidden=!(authorised&&selected&&canArchivePackage()&&['Draft','Open','Closed'].includes(selected.status));
  }
  async function decide(decision){
-  if(!authorised||selected?.status!=='Draft')return;
+  if(!authorised||selected?.status!=='Draft'||submissionState!=='none')return;
   const current=selected,seq=version;
   const reason=window.prompt(decision==='Approved'?'Approval rationale (required):':'Reason for requesting changes (required):');
   if(reason===null)return;
@@ -43,7 +45,7 @@
   finally{approve.disabled=false;changes.disabled=false;}
  }
  archive.addEventListener('click',async()=>{
-  if(!authorised||!selected||!['Draft','Open','Closed'].includes(selected.status))return;
+  if(!authorised||!selected||!canArchivePackage()||!['Draft','Open','Closed'].includes(selected.status))return;
   const current=selected,seq=version;
   const reason=window.prompt('Reason for archiving this Master Risk:');
   if(reason===null)return;
@@ -69,7 +71,7 @@
  approve.addEventListener('click',()=>decide('Approved'));
  changes.addEventListener('click',()=>decide('Changes Requested'));
 
- let selected=null,authorised=false,version=0;
+ let selected=null,authorised=false,version=0,submissionState='none',submissionData=null;
  const headers=()=>({Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json','Content-Type':'application/json'});
  const field=(form,label,name,value,tag='input')=>{
   const wrapper=document.createElement('label');wrapper.textContent=label;
@@ -78,7 +80,7 @@
   wrapper.appendChild(el);form.appendChild(wrapper);return el;
  };
  function showEdit(){
-  if(!selected||!authorised||selected.status!=='Draft')return;
+  if(!selected||!authorised||selected.status!=='Draft'||submissionState!=='none')return;
   const current=selected,seq=version;
   const form=document.createElement('form');form.className='vero-risk-office-form';
   const h=document.createElement('h3');h.textContent='Edit Draft Master Risk';form.appendChild(h);
@@ -127,20 +129,32 @@
    }
   }catch(error){if(seq===version)content.textContent=error.message;}
  }
+ function renderSubmission(){
+  if(!submissionData?.available)return;
+  const current=selected,seq=version;
+  for(const tab of tabs.querySelectorAll('[data-risk-tab]'))tab.setAttribute('aria-current',String(tab===submissionTab));
+  VeroProjectRiskSubmission.render(content,submissionData,{isCurrent:()=>seq===version&&!overlay.hidden&&submissionTab.getAttribute('aria-current')==='true',onSaved:async()=>{
+   submissionData=await VeroProjectRiskSubmission.load(current.id);
+   if(submissionData.risk_status)current.status=submissionData.risk_status;syncActions();
+   document.dispatchEvent(new CustomEvent('vero-risk-register-refresh',{detail:{riskId:current.id,submissionUpdated:true}}));
+  }});
+ }
+ submissionTab.addEventListener('click',renderSubmission);
  document.addEventListener('vero-risk-open-details',async event=>{
-  selected=event.detail.risk;authorised=false;syncActions();status.textContent='';version++;
+  selected=event.detail.risk;authorised=false;submissionState='loading';submissionData=null;submissionTab.hidden=true;syncActions();status.textContent='Checking submitted risk package…';version++;
   const seq=version;
   try{
-   const response=await fetch(API+'/auth/my-roles',{headers:headers()});
-   if(!response.ok)return;
-   const data=await response.json();
-   if(seq!==version)return;
+   const [response,packageData]=await Promise.all([fetch(API+'/auth/my-roles',{headers:headers()}),VeroProjectRiskSubmission.load(selected.id)]);
+   if(seq!==version||overlay.hidden)return;
+   const data=response.ok?await response.json():{roles:[]};
+   if(seq!==version||overlay.hidden)return;
    authorised=(data.roles||[]).some(r=>r.role_name==='Risk Manager');
-   syncActions();
-  }catch(error){console.warn('Risk Office role lookup unavailable',error);}
+   submissionData=packageData;if(packageData.risk_status)selected.status=packageData.risk_status;submissionState=packageData.available?'package':'none';submissionTab.hidden=!packageData.available;status.textContent='';syncActions();
+   if(packageData.available&&tabs.querySelector('[data-risk-tab="overview"]')?.getAttribute('aria-current')==='true')renderSubmission();
+  }catch(error){if(seq===version&&!overlay.hidden){submissionState='unavailable';syncActions();status.textContent='Submitted package could not be checked. Approval is unavailable: '+error.message;}}
  });
  for(const event of ['vero-risk-open-classification','vero-risk-create-master','vero-risk-details-close']){
-  document.addEventListener(event,()=>{version++;selected=null;authorised=false;syncActions();status.textContent='';});
+  document.addEventListener(event,()=>{version++;selected=null;authorised=false;submissionState='none';submissionData=null;submissionTab.hidden=true;syncActions();status.textContent='';});
  }
  edit.addEventListener('click',showEdit);
  tabs.addEventListener('click',event=>{
@@ -148,4 +162,5 @@
   if(tab?.dataset.riskTab==='history'){version++;showHistory();}
  });
 })();
+
 

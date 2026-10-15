@@ -344,6 +344,8 @@
 <link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="header.css">
+<link rel="stylesheet" href="project-risk-submission.css">
+<script src="project-risk-submission.js"></script>
 </head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -414,7 +416,7 @@
 
  <section id="actions" class="ws-view"><div class="empty-state"><b>No live project actions yet.</b><br><br>Workflow actions assigned to this project will appear here.</div></section>
 
- <section id="risks" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Risks</h2><div><button type="button" class="btn green" onclick="openProjectRiskCreator()">+ Add Risk</button></div></div><div id="projectRiskList" class="empty-state">Loading authorised project risk applicability…</div></div></section>
+ <section id="risks" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Risks</h2><div><button type="button" class="btn green" id="projectRiskCreateOpen" disabled onclick="openProjectRiskCreator()">+ Add Risk</button></div></div><div id="projectRiskDeepLinkStatus" role="status"></div><div id="projectRiskList" class="empty-state">Loading authorised project risk applicability…</div></div></section>
 
  <section id="compliance" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Compliance</h2><div><button type="button" class="btn green" onclick="createProjectCompliance()">Add Requirement</button> <span id="projectComplianceCount">Loading…</span></div></div><div id="projectComplianceList" class="empty-state">Loading applicable obligations…</div></div></section>
 
@@ -549,35 +551,63 @@ function openProjectRiskWorkflow(){
 /* Link an existing Master Risk through Risk Office's authorised applicability API.
    This does not create a second risk or bypass server-side Risk Manager checks. */
 
-async function openProjectRiskCreator(){
+function readAdditionalProjectTreatments(overlay){
+ return [...overlay.querySelectorAll('#praAdditionalActions .project-risk-treatment-editor')].map(row=>Object.fromEntries(['title','description','owner_user_id','due_date','priority'].map(key=>{const value=row.querySelector('[data-action-field="'+key+'"]').value;return [key,key==='owner_user_id'?Number(value):value.trim()];})));
+}
+function addProjectTreatmentEditor(overlay,action){
+ const node=VeroProjectRiskSubmission.node,row=node('section');row.className='project-risk-treatment-editor project-risk-review-card';row.appendChild(node('h3','Additional treatment action'));
+ for(const [name,label,type] of [['title','Action title','input'],['description','Action description','textarea'],['owner_user_id','Action owner','select'],['due_date','Action due date','input'],['priority','Action priority','select']]){
+  const wrapper=node('label',label),field=node(type);field.dataset.actionField=name;
+  if(name==='due_date')field.type='date';if(name==='title')field.maxLength=255;if(name==='description')field.maxLength=10000;
+  if(name==='owner_user_id'){field.add(new Option('Select owner…',''));for(const user of overlay._treatmentUsers||[])field.add(new Option(user.name||[user.first_name,user.last_name].filter(Boolean).join(' ')||user.email,String(user.id)));}
+  if(name==='priority')for(const value of ['Normal','Low','High','Critical'])field.add(new Option(value,value));
+  field.value=action[name]??(name==='priority'?'Normal':'');if(['title','owner_user_id','due_date'].includes(name))field.required=true;wrapper.appendChild(field);row.appendChild(wrapper);
+ }
+ const remove=node('button','Remove this action');remove.className='btn outline';remove.type='button';remove.onclick=()=>row.remove();row.appendChild(remove);overlay.querySelector('#praAdditionalActions').appendChild(row);
+}
+async function openProjectRiskCreator(options={}){
  if(!currentProject?.id)return;
  let overlay=document.getElementById('projectRiskCreateOverlay');
+ if(overlay?.dataset.saving)return;
+ const proposal=options.submission||null;
+ const resume=overlay&&!proposal&&!overlay.dataset.riskId&&overlay.dataset.projectId===String(currentProject.id);
+ const retained=resume?Object.fromEntries([...overlay.querySelectorAll('input[id],select[id],textarea[id]')].filter(f=>f.type!=='checkbox'&&f.type!=='search').map(f=>[f.id,f.value])):{};
+ const retainedActions=resume?readAdditionalProjectTreatments(overlay):[];
+ const retainedDocuments=resume?[...overlay.querySelectorAll('#praDocuments input[data-document-id]:checked')].map(f=>Number(f.value)):[];
  if(!overlay){
   overlay=document.createElement('div');overlay.id='projectRiskCreateOverlay';overlay.className='modal-back show';
-  overlay.innerHTML='<div class="drawer"><div class="drawer-head"><button type="button" class="close" id="projectRiskCreateClose">×</button><small>RISK MANAGEMENT · GOVERNED CREATION</small><h2>Add Project Risk</h2><small>Project: <span id="projectRiskCreateProject"></span> · Draft pending Risk Office approval</small></div><div class="drawer-body"><form id="projectRiskCreateForm"><label for="projectRiskCreateCategory">Risk Classification · Project Execution (Risk Stream)</label><select required id="projectRiskCreateCategory" style="display:block;width:100%;padding:11px;margin:9px 0 18px"></select><label for="projectRiskCreateTitle">Risk Title</label><input required maxlength="255" id="projectRiskCreateTitle" style="display:block;width:100%;padding:11px;margin:9px 0 18px"><label for="projectRiskCreateDescription">Risk Description</label><textarea maxlength="10000" id="projectRiskCreateDescription" style="display:block;width:100%;min-height:110px;padding:11px;margin:9px 0 18px"></textarea><div class="project-risk-section">Risk assessment</div><div class="project-risk-grid"><label>Inherent likelihood<select id="praIL" required></select></label><label>Inherent consequence<select id="praIC" required></select></label><label>Residual likelihood<select id="praRL" required></select></label><label>Residual consequence<select id="praRC" required></select></label></div><p id="praScores">Inherent: — · Residual: —</p><label>Existing enterprise controls</label><select id="praControls" multiple size="6" aria-label="Existing enterprise controls"></select><p class="meta">Select existing Controls from the enterprise register (Ctrl-click to select multiple). Supporting documents remain linked to the Controls Register.</p><label>Additional control notes</label><textarea id="praCurrent" maxlength="10000"></textarea><label>Further controls and treatment notes</label><textarea id="praFuture" maxlength="10000"></textarea><div class="project-risk-section">Treatment action</div><label>Action title<input id="praActionTitle" maxlength="255" placeholder="Describe the required action"></label><label>Action description<textarea id="praActionDescription" maxlength="10000"></textarea></label><label>Action priority<select id="praActionPriority"><option>Normal</option><option>Low</option><option>High</option><option>Critical</option></select></label><div class="project-risk-section">Ownership and review</div><label>Risk owner<select id="praOwner"></select></label><label>Treatment owner<select id="praTreatmentOwner"></select></label><label>Treatment due date<input type="date" id="praDue"></label><label>Next review date<input type="date" id="praReview"></label><label for="projectRiskCreateReason">Reason for Creation</label><textarea required maxlength="2000" id="projectRiskCreateReason" style="display:block;width:100%;min-height:90px;padding:11px;margin:9px 0 16px"></textarea><p class="meta">Creates a Draft Master Risk in the central register. Risk Office approval and operational assessment remain separate governed steps.</p><p id="projectRiskCreateStatus" role="status"></p><div class="drawer-actions"><button class="btn green" type="submit" id="projectRiskCreateSave">Create Draft Risk</button><button class="btn outline" type="button" id="projectRiskCreateCancel">Cancel</button></div></form><h3>Assessment History and Approval</h3><div id="projectAssessmentHistory"></div></div></div>';
+  overlay.innerHTML='<div class="drawer"><div class="drawer-head"><button type="button" class="close" id="projectRiskCreateClose">×</button><small>RISK MANAGEMENT · GOVERNED CREATION</small><h2>Add Project Risk</h2><small>Project: <span id="projectRiskCreateProject"></span> · Draft pending Risk Office approval</small></div><div class="drawer-body"><form id="projectRiskCreateForm"><label for="projectRiskCreateCategory">Risk Classification · Project Execution (Risk Stream)</label><select required id="projectRiskCreateCategory" style="display:block;width:100%;padding:11px;margin:9px 0 18px"></select><label for="projectRiskCreateTitle">Risk Title</label><input required maxlength="255" id="projectRiskCreateTitle" style="display:block;width:100%;padding:11px;margin:9px 0 18px"><label for="projectRiskCreateDescription">Risk Description</label><textarea maxlength="10000" id="projectRiskCreateDescription" style="display:block;width:100%;min-height:110px;padding:11px;margin:9px 0 18px"></textarea><div class="project-risk-section">Risk assessment</div><div class="project-risk-grid"><label>Inherent likelihood<select id="praIL" required></select></label><label>Inherent consequence<select id="praIC" required></select></label><label>Residual likelihood<select id="praRL" required></select></label><label>Residual consequence<select id="praRC" required></select></label></div><p id="praScores">Inherent: — · Residual: —</p><label>Existing controls from Document Library</label><div id="praDocuments"></div><p class="meta">Select at least one current published control document. Its submitted version is retained with the risk assessment.</p><label>Additional control notes</label><textarea id="praCurrent" maxlength="10000"></textarea><label>Further controls and treatment notes</label><textarea id="praFuture" maxlength="10000"></textarea><div class="project-risk-section">Treatment action</div><label>Action title<input id="praActionTitle" maxlength="255" placeholder="Describe the required action"></label><label>Action description<textarea id="praActionDescription" maxlength="10000"></textarea></label><label>Action priority<select id="praActionPriority"><option>Normal</option><option>Low</option><option>High</option><option>Critical</option></select></label><div id="praAdditionalActions"></div><button type="button" class="btn outline" id="praAddAction">Add another treatment action</button><div class="project-risk-section">Ownership and review</div><label>Risk owner<select id="praOwner"></select></label><label>Treatment owner<select id="praTreatmentOwner"></select></label><label>Treatment due date<input type="date" id="praDue"></label><label>Next review date<input type="date" id="praReview"></label><label for="projectRiskCreateReason">Reason for Creation</label><textarea required maxlength="2000" id="projectRiskCreateReason" style="display:block;width:100%;min-height:90px;padding:11px;margin:9px 0 16px"></textarea><p class="meta">Submits the complete risk, document controls and assessment for review. It becomes live only after all required independent approvals. Each approval step appears in My Actions.</p><p id="projectRiskCreateStatus" role="status"></p><div class="drawer-actions"><button class="btn green" type="submit" id="projectRiskCreateSave">Submit for Risk Office review</button><button class="btn outline" type="button" id="projectRiskCreateCancel">Cancel</button></div></form></div></div>';
   document.body.appendChild(overlay);
-  const close=()=>{if(!overlay.dataset.saving)overlay.classList.remove('show')};
+  const close=()=>{if(!overlay.dataset.saving){overlay.dataset.loadVersion=String(Number(overlay.dataset.loadVersion||0)+1);overlay.classList.remove('show');}};
   overlay.querySelector('#projectRiskCreateClose').onclick=close;
   overlay.querySelector('#projectRiskCreateCancel').onclick=close;
+  overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','Submit Project Risk');
+  overlay.addEventListener('keydown',event=>{if(event.key==='Escape'){event.stopPropagation();close();}});
   overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
   overlay.querySelector('#projectRiskCreateForm').addEventListener('submit',async e=>{
    e.preventDefault();if(overlay.dataset.saving)return;
    const status=overlay.querySelector('#projectRiskCreateStatus'),save=overlay.querySelector('#projectRiskCreateSave');
    const category=Number(overlay.querySelector('#projectRiskCreateCategory').value);
-   const payload={request_id:overlay.dataset.requestId,risk_title:overlay.querySelector('#projectRiskCreateTitle').value.trim(),risk_description:overlay.querySelector('#projectRiskCreateDescription').value.trim(),classification_category_id:category,reason:overlay.querySelector('#projectRiskCreateReason').value.trim(),project_id:Number(currentProject.id),
-    proposed_control_ids:Array.from(overlay.querySelector('#praControls').selectedOptions).map(o=>Number(o.value)),
+   const payload={request_id:overlay.dataset.requestId,risk_title:overlay.querySelector('#projectRiskCreateTitle').value.trim(),risk_description:overlay.querySelector('#projectRiskCreateDescription').value.trim(),classification_category_id:category,reason:overlay.querySelector('#projectRiskCreateReason').value.trim(),project_id:Number(overlay.dataset.projectId),
+    proposed_document_ids:Array.from(overlay.querySelectorAll('#praDocuments input[data-document-id]:checked')).map(o=>Number(o.value)),
+    proposed_control_ids:JSON.parse(overlay.dataset.controlIds||'[]'),
     treatment_actions:overlay.querySelector('#praActionTitle').value.trim()?[{title:overlay.querySelector('#praActionTitle').value.trim(),description:overlay.querySelector('#praActionDescription').value.trim(),owner_user_id:Number(overlay.querySelector('#praTreatmentOwner').value),due_date:overlay.querySelector('#praDue').value,priority:overlay.querySelector('#praActionPriority').value}]:[],
     proposed_assessment:{inherent_likelihood:Number(overlay.querySelector('#praIL').value),inherent_impact:Number(overlay.querySelector('#praIC').value),residual_likelihood:Number(overlay.querySelector('#praRL').value),residual_impact:Number(overlay.querySelector('#praRC').value),current_controls:overlay.querySelector('#praCurrent').value.trim(),further_controls:overlay.querySelector('#praFuture').value.trim(),owner_user_id:Number(overlay.querySelector('#praOwner').value)||null,treatment_owner_user_id:Number(overlay.querySelector('#praTreatmentOwner').value)||null,treatment_due_date:overlay.querySelector('#praDue').value||null,next_review_date:overlay.querySelector('#praReview').value||null}};
-   if(!Number.isInteger(category)||!payload.risk_title||!payload.reason){status.textContent='Complete all required fields.';return}
-   overlay.dataset.saving='1';save.disabled=true;status.textContent='Creating governed Draft Risk…';
+   if(!Number.isInteger(category)||category<=0||!payload.risk_title||!payload.reason||!payload.proposed_document_ids.length){status.textContent='Complete the required fields and select at least one published Document Library control.';return}
+   if(payload.treatment_actions.length&&(!payload.treatment_actions[0].owner_user_id||!payload.treatment_actions[0].due_date)){status.textContent='Select an owner and due date for the treatment action.';return}
+   payload.treatment_actions.push(...readAdditionalProjectTreatments(overlay));
+   if(payload.treatment_actions.some(a=>!a.title||!a.owner_user_id||!a.due_date)){status.textContent='Each treatment action needs a title, owner and due date.';return;}
+   if(overlay.dataset.riskId){payload.version=Number(overlay.dataset.version);payload.package_hash=overlay.dataset.packageHash;delete payload.request_id;delete payload.project_id;}
+   overlay.dataset.saving='1';save.disabled=true;status.textContent='Submitting complete risk package…';
    try{
-    const response=await apiFetch(API_BASE+'/risks/master-drafts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const response=await apiFetch(API_BASE+(overlay.dataset.riskId?'/risks/'+encodeURIComponent(overlay.dataset.riskId)+'/project-submission/resubmit':'/risks/master-drafts'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw Error(data.message||'Risk creation rejected ('+response.status+')');
-    if(!data.risk_id||String(data.project_id)!==String(currentProject.id))throw Error('Server did not confirm the project association');
-    status.textContent='Draft '+(data.risk_code||'')+' created. Risk Office review is required.';
-    overlay.dataset.requestId='';
+    if(!data.risk_id||String(data.project_id)!==overlay.dataset.projectId)throw Error('Server did not confirm the project association. Refresh this project before retrying.');
+    status.textContent='Submitted for review. The risk remains non-live until all required approvals are complete.';
+    overlay.dataset.requestId='';overlay.dataset.riskId='';
     overlay.querySelector('#projectRiskCreateForm').reset();
+    overlay.querySelector('#praAdditionalActions').replaceChildren();overlay.dataset.controlIds='[]';
     overlay.classList.remove('show');
     // The server has confirmed persistence; refresh the register without blocking the drawer.
     const savedProjectId=currentProject.id;
@@ -593,33 +623,38 @@ async function openProjectRiskCreator(){
   if(!field.options.length){field.add(new Option('Select…',''));names.forEach((name,i)=>field.add(new Option((i+1)+' — '+name,String(i+1))))}
   field.onchange=()=>{const n=x=>Number(overlay.querySelector('#'+x).value);overlay.querySelector('#praScores').textContent='Inherent: '+(n('praIL')&&n('praIC')?n('praIL')*n('praIC')+'/25':'—')+' · Residual: '+(n('praRL')&&n('praRC')?n('praRL')*n('praRC')+'/25':'—')};
  }
- overlay.classList.add('show');overlay.querySelector('#projectRiskCreateProject').textContent=currentProject.project_code||currentProject.project_name||currentProject.id;
+ overlay.classList.add('show');overlay.dataset.projectId=String(currentProject.id);overlay.querySelector('#projectRiskCreateProject').textContent=currentProject.project_code||currentProject.project_name||currentProject.id;
  const status=overlay.querySelector('#projectRiskCreateStatus'),select=overlay.querySelector('#projectRiskCreateCategory'),save=overlay.querySelector('#projectRiskCreateSave');
- status.textContent='Loading authorised classification hierarchy…';save.disabled=true;select.replaceChildren();
+ const loadVersion=String(Number(overlay.dataset.loadVersion||0)+1);overlay.dataset.loadVersion=loadVersion;
+ status.textContent='Loading project permissions, classification and published controls…';save.disabled=true;select.replaceChildren();
  try{
-  const [rolesRes,tiersRes,usersRes,controlsRes]=await Promise.all([apiFetch(API_BASE+'/auth/my-roles'),apiFetch(API_BASE+'/risk-tiers'),apiFetch(API_BASE+'/users/active'),apiFetch(API_BASE+'/compliance/controls')]);
-  if(!rolesRes.ok||!tiersRes.ok)throw Error('Unable to verify Risk Office access and classification');
+  const projectPath=API_BASE+'/projects/'+encodeURIComponent(currentProject.id);
+  const [rolesRes,tiersRes,usersRes,controlsRes,treatmentUsersRes]=await Promise.all([apiFetch(projectPath+'/risk-submission-capabilities'),apiFetch(projectPath+'/risk-classifications'),apiFetch(API_BASE+'/users/active'),apiFetch(projectPath+'/risk-control-documents'),apiFetch(projectPath+'/risk-treatment-owners')]);
+  if(!rolesRes.ok||!tiersRes.ok)throw Error('Unable to verify project submission access and classification');
   const roles=await rolesRes.json(),tiers=await tiersRes.json();
+  if(overlay.dataset.loadVersion!==loadVersion||!overlay.classList.contains('show'))return;
   if(!usersRes.ok)throw Error('Unable to load active users');
-  if(!controlsRes.ok)throw Error('Unable to load enterprise Controls Register');
+  if(!controlsRes.ok)throw Error('Unable to load published Document Library controls');
   const controlsPayload=await controlsRes.json();
-  const controlsList=Array.isArray(controlsPayload)?controlsPayload:(controlsPayload.controls||[]);
-  const controlsField=overlay.querySelector('#praControls');controlsField.replaceChildren();
-  controlsList.filter(c=>!['Archived','Superseded'].includes(c.status)).forEach(c=>{
-   controlsField.add(new Option((c.control_code||'')+' · '+c.control_title,String(c.id)));
-  });
+  const controlsList=controlsPayload.documents||[];
+  VeroProjectRiskSubmission.documentPicker(overlay.querySelector('#praDocuments'),controlsList,proposal?(proposal.documents||[]).map(d=>d.id||d.document_id):retainedDocuments);
   const usersPayload=await usersRes.json();
   const users=Array.isArray(usersPayload)?usersPayload:(usersPayload.users||[]);
+  if(!treatmentUsersRes.ok)throw Error('Unable to load authorised treatment owners');
+  const treatmentUsersPayload=await treatmentUsersRes.json(),treatmentUsers=treatmentUsersPayload.users||[];
+  overlay._treatmentUsers=treatmentUsers;overlay.querySelector('#praAdditionalActions').replaceChildren();
+  overlay.querySelector('#praAddAction').onclick=()=>addProjectTreatmentEditor(overlay,{});
+  if(overlay.dataset.loadVersion!==loadVersion||!overlay.classList.contains('show'))return;
   for(const id of ['praOwner','praTreatmentOwner']){
    const field=overlay.querySelector('#'+id);field.replaceChildren();field.add(new Option('Select owner…',''));
-   for(const user of users){const name=[user.first_name,user.last_name].filter(Boolean).join(' ')||user.email;if(user.id&&name)field.add(new Option(name,String(user.id)))}
+   for(const user of id==='praTreatmentOwner'?treatmentUsers:users){const name=user.name||[user.first_name,user.last_name].filter(Boolean).join(' ')||user.email;if(user.id&&name)field.add(new Option(name,String(user.id)))}
   }
-  if(!(roles.roles||[]).some(x=>x.role_name==='Risk Manager'))throw Error('Only authorised Risk Managers can create Master Risk drafts.');
+  if(roles.can_submit!==true)throw Error('Only authorised managers of this project can submit a risk.');
   const categories=(tiers.categories||[]).filter(x=>x.status==='Active');
   const parents=categories.filter(x=>Number(x.tier)===3&&x.category_name==='Project Execution');
   if(parents.length!==1)throw Error('Project Execution Tier 3 classification is missing or ambiguous.');
   const parentId=Number(parents[0].id);
-  const parentIds=c=>Array.isArray(c.parent_category_ids)?c.parent_category_ids.map(Number):(c.parent_category_id==null?[]:[Number(c.parent_category_id)]);
+  const parentIds=c=>Array.isArray(c.parent_category_ids)?c.parent_category_ids.map(Number):(c.parent_category_id==null?(tiers.relationships||[]).filter(r=>Number(r.child_category_id)===Number(c.id)).map(r=>Number(r.parent_category_id)):[Number(c.parent_category_id)]);
   const tier2=categories.filter(c=>Number(c.tier)===2&&parentIds(c).includes(parentId));
   const tier2Ids=new Set(tier2.map(c=>Number(c.id)));
   const tier1=categories.filter(c=>Number(c.tier)===1&&parentIds(c).some(id=>tier2Ids.has(id)));
@@ -632,8 +667,25 @@ async function openProjectRiskCreator(){
    });
    select.appendChild(group);
   });
-  overlay.dataset.requestId=crypto.randomUUID();status.textContent='Select a Risk Category or Risk Event. Risk Event is optional when the classification ends at Risk Category.';save.disabled=false;
- }catch(error){status.textContent=error.message;save.disabled=true}
+  if(proposal){
+   overlay.querySelector('#projectRiskCreateForm').reset();
+   overlay.dataset.riskId=String(proposal.risk_id||proposal.risk.id);overlay.dataset.version=String(proposal.version);overlay.dataset.packageHash=proposal.package_hash;
+   const a=proposal.proposed_assessment||{},r=proposal.risk||{},action=(proposal.treatment_actions||[])[0]||{};
+   const values={projectRiskCreateTitle:r.risk_title,projectRiskCreateDescription:r.risk_description,projectRiskCreateCategory:proposal.classification_category_id||r.classification_category_id,projectRiskCreateReason:proposal.reason||'',praIL:a.inherent_likelihood,praIC:a.inherent_impact,praRL:a.residual_likelihood,praRC:a.residual_impact,praCurrent:a.current_controls??a.controls_summary,praFuture:a.further_controls??a.treatments_summary,praOwner:a.owner_user_id,praTreatmentOwner:action.owner_user_id||a.treatment_owner_user_id,praDue:action.due_date||a.treatment_due_date,praReview:a.next_review_date,praActionTitle:action.title,praActionDescription:action.description,praActionPriority:action.priority||'Normal'};
+   for(const [id,value] of Object.entries(values))overlay.querySelector('#'+id).value=value??'';
+   VeroProjectRiskSubmission.documentPicker(overlay.querySelector('#praDocuments'),controlsList,(proposal.documents||[]).map(d=>d.id||d.document_id));
+   for(const action of (proposal.treatment_actions||[]).slice(1))addProjectTreatmentEditor(overlay,action);
+   overlay.dataset.controlIds=JSON.stringify((proposal.proposed_controls||[]).map(c=>Number(c.control_id||c.id)));
+   save.textContent='Resubmit corrected risk';status.textContent='Revise the returned package. Previous versions remain in history.';
+  }else{
+   if(overlay.dataset.riskId){overlay.querySelector('#projectRiskCreateForm').reset();overlay.dataset.riskId='';}
+   overlay.dataset.controlIds='[]';for(const action of retainedActions)addProjectTreatmentEditor(overlay,action);
+   if(!overlay.dataset.requestId)overlay.dataset.requestId=crypto.randomUUID();
+   for(const [id,value] of Object.entries(retained)){const input=overlay.querySelector('#'+id);if(input)input.value=value;}
+   save.textContent='Submit for Risk Office review';status.textContent='Choose the classification and control documents, then complete the assessment.';
+  }
+  overlay.querySelector('#praIL').onchange();save.disabled=false;
+ }catch(error){if(overlay.dataset.loadVersion===loadVersion){status.textContent=error.message;save.disabled=true}}
 }
 
 /* Read-only, project-scoped Risk and Compliance views. */
@@ -668,39 +720,66 @@ async function loadProjectCompliance(id){
  }catch(e){console.error('Project compliance',e);document.getElementById(count).textContent='Unavailable';projectListMessage(host,'Unable to load project compliance: '+e.message)}
 }
 async function projectAssessmentDecision(assessmentId,decision,applicabilityId){
- const status=document.getElementById('projectAssessmentMessage');
- if(!status)return;
- status.textContent='Processing '+decision.toLowerCase()+'…';
+ const status=document.getElementById('projectAssessmentMessage'),overlay=document.getElementById('projectAssessmentOverlay');
+ if(!status||!overlay||overlay.dataset.saving||overlay.dataset.applicabilityId!==String(applicabilityId))return;
+ const reason=decision==='Return'?window.prompt('Reason for returning this assessment (required):'):null;
+ if(decision==='Return'&&(reason===null||!reason.trim()))return;
+ if(reason&&reason.length>2000){status.textContent='Return reason must be at most 2000 characters.';return;}
+ const ticket=projectAssessmentLoadVersion,projectId=currentProject.id;
+ const isCurrent=()=>ticket===projectAssessmentLoadVersion&&overlay.dataset.applicabilityId===String(applicabilityId)&&overlay.classList.contains('show');
+ overlay.dataset.saving='1';status.textContent='Processing '+decision.toLowerCase()+'…';
  try{
   const response=await apiFetch(API_BASE+'/risk/assessments/'+encodeURIComponent(assessmentId)+'/decision',{
-   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision})
+   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision,...(reason?{reason:reason.trim()}: {})})
   });
   const data=await response.json().catch(()=>({}));
   if(!response.ok)throw Error(data.message||'Assessment decision rejected');
-  status.textContent='Assessment '+data.assessment_status+'.';
-  await loadProjectAssessmentHistory(applicabilityId);
-  await loadProjectRisks(currentProject.id);
- }catch(error){status.textContent=error.message}
+  if(isCurrent()){status.textContent='Assessment '+data.assessment_status+'.';await loadProjectAssessmentHistory(applicabilityId,assessmentId);}
+  if(Number(currentProject?.id)===Number(projectId))await loadProjectRisks(projectId);
+ }catch(error){if(isCurrent())status.textContent=error.message}finally{delete overlay.dataset.saving}
 }
-async function loadProjectAssessmentHistory(applicabilityId){
- const host=document.getElementById('projectAssessmentHistory');
- if(!host)return;
- host.replaceChildren();
+
+let projectAssessmentLoadVersion=0;
+async function loadProjectAssessmentHistory(applicabilityId,selectedId){
+ const host=document.getElementById('projectAssessmentHistory'),overlay=document.getElementById('projectAssessmentOverlay');
+ if(!host||!overlay)return;
+ const ticket=++projectAssessmentLoadVersion;
+ const form=overlay.querySelector('#projectAssessmentForm');form.hidden=true;host.replaceChildren();
  try{
   const response=await apiFetch(API_BASE+'/risk/applicability/'+encodeURIComponent(applicabilityId)+'/assessments',{cache:'no-store'});
   const data=await response.json().catch(()=>({}));
   if(!response.ok)throw Error(data.message||'Unable to load assessment history');
   const rows=data.assessments||[];
-  if(!rows.length){host.textContent='No assessments yet.';return}
+  const [capabilityResponse,meResponse]=await Promise.all([apiFetch(API_BASE+'/risk/applicability/'+encodeURIComponent(applicabilityId)+'/capabilities'),apiFetch(API_BASE+'/auth/me')]);
+  const capability=capabilityResponse.ok?await capabilityResponse.json():{},me=meResponse.ok?await meResponse.json():{};
+  const userId=Number((me.user||me).id);
+  if(ticket!==projectAssessmentLoadVersion||overlay.dataset.applicabilityId!==String(applicabilityId))return;
+  if(!rows.length){host.textContent='No assessments yet.';form.hidden=!capability.can_create;return}
+  const detail=document.createElement('section');detail.className='project-risk-review-card';
+  function inspect(item){
+   detail.replaceChildren();form.hidden=true;overlay.dataset.selectedAssessmentId=String(item.id);delete overlay.dataset.returnedAssessmentId;
+   const heading=document.createElement('h3');heading.textContent='Assessment revision '+item.revision;detail.appendChild(heading);
+   for(const [label,key] of [['Status','status'],['Inherent likelihood','inherent_likelihood'],['Inherent consequence','inherent_impact'],['Residual likelihood','residual_likelihood'],['Residual consequence','residual_impact'],['Current controls','controls_summary'],['Further treatments','treatments_summary'],['Assessment owner','owner_user_id'],['Approved by','approved_by_user_id'],['Approved at','approved_at']]){const row=document.createElement('p'),name=document.createElement('strong');name.textContent=label+': ';row.append(name,document.createTextNode(item[key]==null?'Not recorded':String(item[key])));detail.appendChild(row);}
+   if(item.status==='Returned'&&Number(item.owner_user_id)===userId&&capability.can_create){
+    const revise=document.createElement('button');revise.type='button';revise.className='btn green';revise.textContent='Revise returned assessment';
+    revise.onclick=()=>{for(const [id,key] of [['projectAssessIL','inherent_likelihood'],['projectAssessIC','inherent_impact'],['projectAssessRL','residual_likelihood'],['projectAssessRC','residual_impact'],['projectAssessControls','controls_summary'],['projectAssessTreatments','treatments_summary']])overlay.querySelector('#'+id).value=item[key]??'';overlay.dataset.returnedAssessmentId=String(item.id);form.hidden=false;overlay.querySelector('#projectAssessmentMessage').textContent='A new draft revision will retain this returned assessment in history. Save the correction, then submit it for independent approval.';};detail.appendChild(revise);
+   }
+  }
+  const requestedId=Number(selectedId||overlay.dataset.selectedAssessmentId),selected=rows.find(item=>Number(item.id)===requestedId);
+  if(selectedId&&!selected){host.textContent='The requested assessment is not part of this authorised Project Risk.';return;}
+  inspect(selected||rows[0]);
+  if(capability.can_create&&!rows.some(item=>['Draft','Submitted','Returned'].includes(item.status))){const create=document.createElement('button');create.type='button';create.className='btn outline';create.textContent='Create new assessment revision';create.onclick=()=>{delete overlay.dataset.returnedAssessmentId;form.hidden=false;};host.appendChild(create);}
+
   const table=document.createElement('table');table.className='table';
   const head=table.createTHead().insertRow();
   ['Revision','Status','Residual','Action'].forEach(label=>{const th=document.createElement('th');th.textContent=label;head.appendChild(th)});
   const body=table.createTBody();
   for(const item of rows){
-   const tr=body.insertRow();
+   const tr=body.insertRow();tr.tabIndex=0;tr.setAttribute('role','button');tr.setAttribute('aria-label','View assessment revision '+item.revision);tr.style.cursor='pointer';tr.addEventListener('click',event=>{if(!event.target.closest('button'))inspect(item);});tr.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();inspect(item);}});
    [item.revision,item.status,(item.residual_likelihood&&item.residual_impact)?item.residual_likelihood*item.residual_impact:'—'].forEach(value=>{tr.insertCell().textContent=String(value)});
    const cell=tr.insertCell();
-   const decision=item.status==='Draft'?'Submit':item.status==='Submitted'?'Approve':null;
+   const own=Number(item.owner_user_id)===userId;
+   const decision=item.status==='Draft'&&own&&capability.can_create?'Submit':item.status==='Submitted'&&!own&&capability.can_approve?'Approve':null;
    if(decision){
     const button=document.createElement('button');button.type='button';button.className='btn outline';
     button.textContent=decision;
@@ -714,18 +793,55 @@ async function loadProjectAssessmentHistory(applicabilityId){
     }
    }else cell.textContent='—';
   }
-  host.appendChild(table);
- }catch(error){host.textContent=error.message}
+  host.append(table,detail);
+ }catch(error){if(ticket===projectAssessmentLoadVersion){host.textContent=error.message;const retry=document.createElement('button');retry.type='button';retry.className='btn outline';retry.textContent='Retry assessment history';retry.onclick=()=>loadProjectAssessmentHistory(applicabilityId,selectedId);host.appendChild(retry);}}
 }
-async function openProjectAssessment(applicabilityId,riskTitle){
+let projectSubmissionVersion=0;
+async function openProjectSubmission(risk,applicabilityId){
+ const projectId=currentProject?.id;if(!projectId)return;
+ const ticket=++projectSubmissionVersion;
+ let overlay=document.getElementById('projectRiskReviewOverlay');
+ if(!overlay){
+  overlay=document.createElement('div');overlay.id='projectRiskReviewOverlay';overlay.className='modal-back';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','Project Risk review');
+  overlay.innerHTML='<div class="drawer" style="width:min(760px,96vw)"><div class="drawer-head"><button type="button" class="close" aria-label="Close risk review">×</button><small>PROJECT RISK · SUBMISSION AND APPROVAL</small><h2></h2></div><div class="drawer-body"></div></div>';
+  const close=()=>{if(overlay.querySelector('[data-saving="1"]'))return;projectSubmissionVersion++;overlay.classList.remove('show');};
+  overlay.querySelector('.close').onclick=close;overlay.addEventListener('click',e=>{if(e.target===overlay)close();});overlay.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();close();}});document.body.appendChild(overlay);
+ }
+ overlay.querySelector('h2').textContent=risk.risk_title||'Project Risk';const host=overlay.querySelector('.drawer-body');host.textContent='Loading the complete submitted risk…';overlay.classList.add('show');overlay.querySelector('.close').focus();
+ try{
+  const data=await VeroProjectRiskSubmission.load(risk.id);
+  if(ticket!==projectSubmissionVersion||Number(currentProject?.id)!==Number(projectId))return;
+  if(!data.available){if(applicabilityId){overlay.classList.remove('show');return openProjectAssessment(applicabilityId,risk.risk_title);}host.textContent='No submitted risk package is available for this record.';return;}
+  if(Number(data.submission?.project_id)!==Number(projectId))throw Error('This risk belongs to another project.');
+  overlay.querySelector('h2').textContent=data.submission.risk?.risk_title||risk.risk_title||'Project Risk';
+  VeroProjectRiskSubmission.render(host,data,{isCurrent:()=>ticket===projectSubmissionVersion&&overlay.classList.contains('show'),onSaved:()=>loadProjectRisks(projectId),onAssessments:applicabilityId?()=>{overlay.classList.remove('show');openProjectAssessment(applicabilityId,risk.risk_title);}:null,onRevise:submission=>{overlay.classList.remove('show');openProjectRiskCreator({submission});}});
+ }catch(error){if(ticket===projectSubmissionVersion){host.textContent=error.message;const retry=document.createElement('button');retry.type='button';retry.className='btn outline';retry.textContent='Retry loading this risk';retry.onclick=()=>openProjectSubmission(risk,applicabilityId);host.appendChild(retry);}}
+}
+function projectRiskLinkMessage(message,retry=false){const host=document.getElementById('projectRiskDeepLinkStatus');if(!host)return;host.textContent=message;if(retry){const button=document.createElement('button');button.type='button';button.className='btn outline';button.textContent='Retry opening requested assessment';button.onclick=()=>openProjectRiskDeepLink();host.appendChild(button);}}
+async function openProjectRiskDeepLink(){
+ const params=new URLSearchParams(location.search),riskId=Number(params.get('risk_id')),projectId=currentProject?.id;
+ if(!projectId||!Number.isInteger(riskId)||riskId<=0)return;
+ projectRiskLinkMessage('Opening requested Project Risk…');
+ const tab=[...document.querySelectorAll('.ws-tab')].find(b=>(b.getAttribute('onclick')||'').includes("'risks'"));if(tab)showTab('risks',tab);
+ const action=params.get('risk_action')||'';
+ if(['assessment_review','assessment_correct','assessment_submit'].includes(action)){
+  const applicabilityId=Number(params.get('applicability_id')),assessmentId=Number(params.get('projectRiskAssessmentId'));
+  if(!Number.isInteger(applicabilityId)||applicabilityId<=0||!Number.isInteger(assessmentId)||assessmentId<=0){projectRiskLinkMessage('Invalid Project Risk assessment link.');return;}
+  try{const data=await projectRiskFetch(API_BASE+'/projects/'+encodeURIComponent(projectId)+'/risk-applicability','Project assessment access');if(Number(currentProject?.id)!==Number(projectId))return;const risk=(data.risks||[]).find(r=>Number(r.id)===riskId&&Number(r.applicability_id)===applicabilityId);if(!risk)throw Error('This assessment is not linked to this authorised project.');await openProjectAssessment(applicabilityId,risk.risk_title,assessmentId);projectRiskLinkMessage('');}catch(error){projectRiskLinkMessage(error.message,true);}
+  return;
+ }
+ await openProjectSubmission({id:riskId,risk_title:'Submitted Project Risk'});projectRiskLinkMessage('');
+}
+async function openProjectAssessment(applicabilityId,riskTitle,assessmentId){
  if(!currentProject?.id)return;
  let overlay=document.getElementById('projectAssessmentOverlay');
+ if(overlay?.dataset.saving)return;
  if(!overlay){
   overlay=document.createElement('div');
   overlay.id='projectAssessmentOverlay';overlay.className='modal-back show';
-  overlay.innerHTML='<div class="drawer"><div class="drawer-head"><button type="button" class="close" id="projectAssessmentClose">×</button><small>PROJECT RISK ASSESSMENT</small><h2 id="projectAssessmentTitle"></h2></div><div class="drawer-body"><form id="projectAssessmentForm"><div class="project-risk-grid"><label>Inherent likelihood<select id="projectAssessIL" required></select></label><label>Inherent consequence<select id="projectAssessIC" required></select></label><label>Residual likelihood<select id="projectAssessRL" required></select></label><label>Residual consequence<select id="projectAssessRC" required></select></label></div><label>Current controls<textarea id="projectAssessControls" maxlength="10000"></textarea></label><label>Further treatments<textarea id="projectAssessTreatments" maxlength="10000"></textarea></label><p id="projectAssessmentMessage" role="status"></p><div class="drawer-actions"><button type="submit" class="btn green" id="projectAssessmentSave">Save Draft Assessment</button></div></form></div></div>';
+  overlay.innerHTML='<div class="drawer"><div class="drawer-head"><button type="button" class="close" id="projectAssessmentClose">×</button><small>PROJECT RISK ASSESSMENT</small><h2 id="projectAssessmentTitle"></h2></div><div class="drawer-body"><p id="projectAssessmentMessage" role="status"></p><form id="projectAssessmentForm"><div class="project-risk-grid"><label>Inherent likelihood<select id="projectAssessIL" required></select></label><label>Inherent consequence<select id="projectAssessIC" required></select></label><label>Residual likelihood<select id="projectAssessRL" required></select></label><label>Residual consequence<select id="projectAssessRC" required></select></label></div><label>Current controls<textarea id="projectAssessControls" maxlength="10000"></textarea></label><label>Further treatments<textarea id="projectAssessTreatments" maxlength="10000"></textarea></label><div class="drawer-actions"><button type="submit" class="btn green" id="projectAssessmentSave">Save Draft Assessment</button></div></form><h3>Assessment History and Approval</h3><div id="projectAssessmentHistory"></div></div></div>';
   document.body.appendChild(overlay);
-  overlay.querySelector('#projectAssessmentClose').addEventListener('click',()=>overlay.classList.remove('show'));
+  overlay.querySelector('#projectAssessmentClose').addEventListener('click',()=>{if(overlay.dataset.saving)return;projectAssessmentLoadVersion++;overlay.classList.remove('show');});
   for(const id of ['projectAssessIL','projectAssessIC','projectAssessRL','projectAssessRC']){
    const select=overlay.querySelector('#'+id);select.add(new Option('Select rating…',''));
    for(let n=1;n<=5;n++)select.add(new Option(String(n),String(n)));
@@ -738,6 +854,7 @@ async function openProjectAssessment(applicabilityId,riskTitle){
     residual_likelihood:value('projectAssessRL'),residual_impact:value('projectAssessRC'),
     controls_summary:overlay.querySelector('#projectAssessControls').value.trim(),
     treatments_summary:overlay.querySelector('#projectAssessTreatments').value.trim()};
+   if(overlay.dataset.returnedAssessmentId)payload.returned_assessment_id=Number(overlay.dataset.returnedAssessmentId);
    const status=overlay.querySelector('#projectAssessmentMessage');
    overlay.dataset.saving='1';
    overlay.querySelector('#projectAssessmentSave').disabled=true;
@@ -750,34 +867,18 @@ async function openProjectAssessment(applicabilityId,riskTitle){
     if(!response.ok)throw Error(result.message||'Unable to save assessment');
     status.textContent='Draft assessment saved. Submission and independent approval are required before enterprise reporting.';
     await loadProjectRisks(currentProject.id);
-    await loadProjectAssessmentHistory(overlay.dataset.applicabilityId);
+    delete overlay.dataset.returnedAssessmentId;
+    await loadProjectAssessmentHistory(overlay.dataset.applicabilityId,result.id);
    }catch(error){status.textContent=error.message}
    finally{delete overlay.dataset.saving;overlay.querySelector('#projectAssessmentSave').disabled=false}
   });
  }
- overlay.dataset.applicabilityId=String(applicabilityId);
+ overlay.dataset.applicabilityId=String(applicabilityId);delete overlay.dataset.returnedAssessmentId;overlay.dataset.selectedAssessmentId=assessmentId?String(assessmentId):'';
  overlay.querySelector('#projectAssessmentTitle').textContent=riskTitle;
  overlay.querySelector('#projectAssessmentForm').reset();
  overlay.querySelector('#projectAssessmentMessage').textContent='Draft only — does not affect enterprise averages until approved.';
  overlay.classList.add('show');
- await loadProjectAssessmentHistory(applicabilityId);
- try{
-  const response=await apiFetch(API_BASE+'/risk/applicability/'+encodeURIComponent(applicabilityId)+'/project-draft-prefill',{cache:'no-store'});
-  const result=await response.json().catch(()=>({}));
-  if(response.ok&&result.available&&result.proposed_assessment){
-   const assessment=result.proposed_assessment;
-   for(const [field,key] of [['projectAssessIL','inherent_likelihood'],['projectAssessIC','inherent_impact'],['projectAssessRL','residual_likelihood'],['projectAssessRC','residual_impact']]){
-    overlay.querySelector('#'+field).value=String(assessment[key]??'');
-   }
-   overlay.querySelector('#projectAssessControls').value=assessment.controls_summary||'';
-   overlay.querySelector('#projectAssessTreatments').value=assessment.treatments_summary||'';
-   overlay.querySelector('#projectAssessmentMessage').textContent='Initial Project Risk assessment retrieved from submission. Review the original values; do not create a duplicate assessment.';
-  }else if(!response.ok){
-   overlay.querySelector('#projectAssessmentMessage').textContent='Original assessment could not be retrieved ('+response.status+'). Do not create a duplicate; contact Risk Office.';
-  }
- }catch(error){
-  overlay.querySelector('#projectAssessmentMessage').textContent='Original assessment unavailable. Do not create a duplicate assessment.';
- }
+ await loadProjectAssessmentHistory(applicabilityId,assessmentId);
 }
 async function assignApprovedProjectRisk(risk){
  if(!currentProject?.id||risk.status!=='Open')return;
@@ -833,8 +934,8 @@ async function loadProjectRisks(id){
   if(!all.length){projectListMessage(host,'No project risks or pending Draft Risks yet.');return}
   all.sort((a,b)=>String(a.risk_code||'').localeCompare(String(b.risk_code||'')));
   projectTable(host,['Reference','Risk','Status','Assessment','Next Review','Action'],all,[
-   r=>r.risk_code,r=>r.risk_title,r=>drafts.includes(r)?(r.status==='Draft'?'Draft — Risk Office review':r.status+' — check applicability'):r.status,
-   r=>drafts.includes(r)?'Pending Risk Office review':assessmentStatus.get(Number(r.id))||'Assessment Required',
+   r=>r.risk_code,r=>r.risk_title,r=>r.submission_status||r.approval_state||(drafts.includes(r)?(r.status==='Draft'?'Pending Risk Office review':r.status+' — pending assessment approval'):r.status),
+   r=>r.is_live===false?'Pending approval':drafts.includes(r)?'Submitted with risk':assessmentStatus.get(Number(r.id))||'Assessment Required',
    r=>fmtDate(r.next_review_date),
    r=>''
   ]);
@@ -848,9 +949,7 @@ async function loadProjectRisks(id){
    row.setAttribute('role','button');
    row.setAttribute('aria-label','Open Project Risk '+(risk.risk_code||risk.risk_title));
    const openRisk=()=>{
-    if(applicabilityId)openProjectAssessment(applicabilityId,risk.risk_title);
-    else if(risk.status==='Open')assignApprovedProjectRisk(risk);
-    else window.alert('This risk is awaiting Risk Office approval. Open it from Risk Management → Risk Office.');
+    openProjectSubmission(risk,applicabilityId);
    };
    row.addEventListener('click',event=>{if(event.target.closest('button,a'))return;openRisk()});
    row.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openRisk()}});
@@ -858,23 +957,22 @@ async function loadProjectRisks(id){
    if(!td)return;
    const button=document.createElement('button');button.type='button';
    button.className='btn outline';
-   if(applicabilityId){
-    button.textContent='Assess';
-    button.addEventListener('click',()=>openProjectAssessment(applicabilityId,risk.risk_title));
-   }else if(risk.status==='Open'){
-    button.textContent='Assign to Project';
-    button.addEventListener('click',()=>assignApprovedProjectRisk(risk));
-   }else return;
+   button.textContent='View risk';
+   button.addEventListener('click',()=>openProjectSubmission(risk,applicabilityId));
    td.appendChild(button);
   });
  }catch(e){console.error('Project risks',e);if(countElement)countElement.textContent='Unavailable';projectListMessage(host,'Unable to load complete project risks: '+e.message)}
 }
+async function loadProjectSubmissionCapability(id){
+ const button=document.getElementById('projectRiskCreateOpen');if(!button)return;button.disabled=true;
+ try{const response=await apiFetch(API_BASE+'/projects/'+encodeURIComponent(id)+'/risk-submission-capabilities',{cache:'no-store'});const data=await response.json().catch(()=>({}));if(Number(currentProject?.id)!==Number(id))return;if(!response.ok)throw Error(data.message||'Submission access unavailable');button.hidden=data.can_submit!==true;button.disabled=data.can_submit!==true;button.title=data.can_submit?'Submit a Project Risk':'Only authorised project managers can submit risks.';}catch(error){button.disabled=true;button.title=error.message;}
+}
 async function loadProjectGovernance(id){
  if(projectLinkedCache.id!==id){projectLinkedCache.id=id;projectLinkedCache.risks=false;projectLinkedCache.compliance=false}
- await Promise.all([loadProjectRisks(id),loadProjectCompliance(id)]);
+ await Promise.all([loadProjectRisks(id),loadProjectCompliance(id),loadProjectSubmissionCapability(id)]);
 }
 
-async function loadProject(){const id=new URLSearchParams(location.search).get('id')||new URLSearchParams(location.search).get('project'),err=document.getElementById('loadError');if(!id){err.style.display='block';err.textContent='No project ID was supplied in the URL.';return}try{const res=await apiFetch(PROJECTS_API,{cache:'no-store'});if(!res.ok)throw new Error('Projects API returned '+res.status);const data=await res.json(),rows=Array.isArray(data)?data:(data.projects||[]),p=rows.find(x=>String(x.id)===String(id));if(!p)throw new Error('Project '+id+' was not found in the VERO Projects Register.');renderProject(p);void loadProjectGovernance(p.id);await loadProjectDocuments(p.id);const [rr,mr]=await Promise.all([apiFetch(PROJECT_REQUEST_API(p.id),{cache:'no-store'}),apiFetch(PROJECT_MILESTONES_API(p.id),{cache:'no-store'})]);if(mr.ok)currentMilestones=(await mr.json()).milestones||[];if(rr.status===404){renderNoRequest();renderMilestoneOverview();return}if(!rr.ok)throw new Error('New Project Request API returned '+rr.status);renderRequest((await rr.json()).request);}catch(e){err.style.display='block';err.textContent='Unable to load this project from VERO. '+e.message}}
+async function loadProject(){const id=new URLSearchParams(location.search).get('id')||new URLSearchParams(location.search).get('project'),err=document.getElementById('loadError');if(!id){err.style.display='block';err.textContent='No project ID was supplied in the URL.';return}try{const res=await apiFetch(PROJECTS_API,{cache:'no-store'});if(!res.ok)throw new Error('Projects API returned '+res.status);const data=await res.json(),rows=Array.isArray(data)?data:(data.projects||[]),p=rows.find(x=>String(x.id)===String(id));if(!p)throw new Error('Project '+id+' was not found in the VERO Projects Register.');renderProject(p);void loadProjectGovernance(p.id);void openProjectRiskDeepLink();await loadProjectDocuments(p.id);const [rr,mr]=await Promise.all([apiFetch(PROJECT_REQUEST_API(p.id),{cache:'no-store'}),apiFetch(PROJECT_MILESTONES_API(p.id),{cache:'no-store'})]);if(mr.ok)currentMilestones=(await mr.json()).milestones||[];if(rr.status===404){renderNoRequest();renderMilestoneOverview();return}if(!rr.ok)throw new Error('New Project Request API returned '+rr.status);renderRequest((await rr.json()).request);}catch(e){err.style.display='block';err.textContent='Unable to load this project from VERO. '+e.message}}
 function field(l,v){return `<div class="detail"><label>${esc(l)}</label><strong>${esc(text(v))}</strong></div>`}
 function openRequest(){editRequest();document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';}
 function val(name,def=''){const v=currentRequest?.[name];return v===null||v===undefined?def:v}
@@ -950,3 +1048,4 @@ function toggleNavGroup(id){const group=document.getElementById(id);if(group)gro
 </script>
 <script src="nav.js"></script>
 </body></html>
+
