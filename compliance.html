@@ -863,6 +863,7 @@ button,input,select,textarea{font-family:inherit}
 <link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="header.css">
+<link rel="stylesheet" href="compliance-assessment-risk.css">
 <script src="vero-page-loader.js"></script></head>
 
 <body>
@@ -1165,6 +1166,11 @@ button,input,select,textarea{font-family:inherit}
    </div>
 
 
+   <div class="section compliance-section">
+    <div class="compliance-section-head"><div><h3>Risk Classifications</h3><small>Shared VERO Risk Classification System</small></div></div>
+    <div id="complianceRequirementRiskClassifications">No classification assigned.</div>
+   </div>
+
    <!-- LINKED MASTER RISKS -->
    <div class="section compliance-section">
     <div class="compliance-section-head">
@@ -1293,6 +1299,11 @@ button,input,select,textarea{font-family:inherit}
 
    </div>
 
+
+   <div class="section compliance-section">
+    <div class="compliance-section-head"><div><h3>Risk Assessment History</h3><small>Initial submission and subsequent assessment of non-compliance exposure</small></div></div>
+    <div id="complianceRiskAssessmentHistory" class="timeline">No risk assessments recorded.</div>
+   </div>
 
    <!-- CHANGE HISTORY -->
 
@@ -1676,6 +1687,28 @@ button,input,select,textarea{font-family:inherit}
       ></textarea>
      </div>
 
+     <fieldset class="compliance-risk-assessment field full" id="reviewRiskFields">
+      <legend>Risk Assessment — 5 × 5</legend>
+      <p class="compliance-risk-help">Assess exposure from non-compliance or partial compliance, independently of the compliance result. Inherent risk is before controls; residual risk is with existing controls.</p>
+      <p id="reviewRiskExemption" class="form-note" hidden>Risk scoring is not required for a Not Applicable assessment. The assessment rationale is still required.</p>
+      <div class="form-grid">
+       <div class="field"><label for="reviewRiskInherentLikelihood">Inherent Likelihood (1–5)</label><select id="reviewRiskInherentLikelihood" required></select></div>
+       <div class="field"><label for="reviewRiskInherentImpact">Inherent Impact (1–5)</label><select id="reviewRiskInherentImpact" required></select></div>
+       <div class="field"><label for="reviewRiskResidualLikelihood">Residual Likelihood (1–5)</label><select id="reviewRiskResidualLikelihood" required></select></div>
+       <div class="field"><label for="reviewRiskResidualImpact">Residual Impact (1–5)</label><select id="reviewRiskResidualImpact" required></select></div>
+       <div class="field full compliance-risk-scores" id="reviewRiskScores" aria-live="polite">Inherent: — · Residual: —</div>
+       <div class="field"><label for="reviewRiskControlEffectiveness">Control Effectiveness</label><select id="reviewRiskControlEffectiveness" required><option value="">Select...</option><option>Effective</option><option>Partially Effective</option><option>Ineffective</option><option>Not Assessed</option></select></div>
+       <div class="field"><label for="reviewRiskOwner">Risk Owner</label><select id="reviewRiskOwner" required><option value="">Select owner...</option></select></div>
+       <div class="field full"><label for="reviewRiskLinkedMaster">Linked Master Risk (optional)</label><select id="reviewRiskLinkedMaster"><option value="">No linked master risk</option></select></div>
+       <div class="field full"><label for="reviewRiskControlsSummary">Existing Controls (optional)</label><textarea id="reviewRiskControlsSummary" placeholder="Summarize the controls supporting the residual risk rating..."></textarea></div>
+       <div class="field full"><label for="reviewRiskTreatmentsSummary">Further Treatment (optional)</label><textarea id="reviewRiskTreatmentsSummary" placeholder="Record proposed improvements or further treatment..."></textarea></div>
+       <div class="field full"><label for="reviewRiskJustification">Risk Justification</label><textarea id="reviewRiskJustification" required placeholder="Explain the consequences and likelihood of non-compliance or partial compliance, and how existing controls reduce the exposure..."></textarea></div>
+      </div>
+      <details class="compliance-risk-matrix-help"><summary>View the shared 5 × 5 risk matrix</summary><div id="reviewRiskMatrix" class="compliance-risk-matrix-scroll"></div></details>
+      <div id="reviewRiskMessage" class="compliance-risk-help" role="status"></div>
+      <button type="button" class="btn outline small" id="reviewRiskRetry" hidden onclick="prepareComplianceRiskAssessment('review',false)">Retry risk options</button>
+     </fieldset>
+
      <div class="field">
       <label>Next Assessment Date</label>
       <input
@@ -1704,6 +1737,7 @@ button,input,select,textarea{font-family:inherit}
 
     <button
      class="btn green"
+     id="saveComplianceAssessmentButton"
      onclick="submitComplianceAssessment()"
     >
      Save Assessment
@@ -2555,6 +2589,13 @@ button,input,select,textarea{font-family:inherit}
       </div>
      </div>
 
+     <div class="field full"><h3>Risk Classification (required)</h3><p class="compliance-risk-help">Select the relevant path in VERO's shared Risk Classification System.</p></div>
+     <div class="field"><label for="singleRiskTier4">Tier 4</label><select id="singleRiskTier4" onchange="changeSubmissionRiskTier(4)" required><option value="">Select Tier 4...</option></select></div>
+     <div class="field"><label for="singleRiskTier3">Tier 3</label><select id="singleRiskTier3" onchange="changeSubmissionRiskTier(3)" required><option value="">Select Tier 3...</option></select></div>
+     <div class="field"><label for="singleRiskTier2">Tier 2</label><select id="singleRiskTier2" onchange="changeSubmissionRiskTier(2)" required><option value="">Select Tier 2...</option></select></div>
+     <div class="field"><label for="singleRiskTier1">Tier 1</label><select id="singleRiskTier1" onchange="changeSubmissionRiskTier(1)" required><option value="">Select Tier 1...</option></select></div>
+     <div class="field full"><small id="singleRiskClassificationMessage" role="status"></small> <button type="button" class="btn outline small" id="singleRiskClassificationRetry" hidden onclick="loadSubmissionRiskClassifications()">Retry classifications</button></div>
+
      <div class="field full">
       <label>Requirement Description</label>
 
@@ -2584,6 +2625,28 @@ button,input,select,textarea{font-family:inherit}
       >
      </div>
 
+     <fieldset class="compliance-risk-assessment field full" id="singleRiskFields">
+      <legend>Initial Risk Assessment — 5 × 5</legend>
+      <p class="compliance-risk-help">Assess exposure from non-compliance or partial compliance, independently of the compliance result. Inherent risk is before controls; residual risk is with existing controls.</p>
+      <p id="singleRiskExemption" class="form-note" hidden>Risk scoring is not required for a Not Applicable assessment. The assessment rationale is still required.</p>
+      <div class="form-grid">
+       <div class="field"><label for="singleRiskInherentLikelihood">Inherent Likelihood (1–5)</label><select id="singleRiskInherentLikelihood" required></select></div>
+       <div class="field"><label for="singleRiskInherentImpact">Inherent Impact (1–5)</label><select id="singleRiskInherentImpact" required></select></div>
+       <div class="field"><label for="singleRiskResidualLikelihood">Residual Likelihood (1–5)</label><select id="singleRiskResidualLikelihood" required></select></div>
+       <div class="field"><label for="singleRiskResidualImpact">Residual Impact (1–5)</label><select id="singleRiskResidualImpact" required></select></div>
+       <div class="field full compliance-risk-scores" id="singleRiskScores" aria-live="polite">Inherent: — · Residual: —</div>
+       <div class="field"><label for="singleRiskControlEffectiveness">Control Effectiveness</label><select id="singleRiskControlEffectiveness" required><option value="">Select...</option><option>Effective</option><option>Partially Effective</option><option>Ineffective</option><option>Not Assessed</option></select></div>
+       <div class="field"><label for="singleRiskOwner">Risk Owner</label><select id="singleRiskOwner" required><option value="">Select owner...</option></select></div>
+       
+       <div class="field full"><label for="singleRiskControlsSummary">Existing Controls (optional)</label><textarea id="singleRiskControlsSummary" placeholder="Summarize the controls supporting the residual risk rating..."></textarea></div>
+       <div class="field full"><label for="singleRiskTreatmentsSummary">Further Treatment (optional)</label><textarea id="singleRiskTreatmentsSummary" placeholder="Record proposed improvements or further treatment..."></textarea></div>
+       <div class="field full"><label for="singleRiskJustification">Risk Justification</label><textarea id="singleRiskJustification" required placeholder="Explain the consequences and likelihood of non-compliance or partial compliance, and how existing controls reduce the exposure..."></textarea></div>
+      </div>
+      <details class="compliance-risk-matrix-help"><summary>View the shared 5 × 5 risk matrix</summary><div id="singleRiskMatrix" class="compliance-risk-matrix-scroll"></div></details>
+      <div id="singleRiskMessage" class="compliance-risk-help" role="status"></div>
+      <button type="button" class="btn outline small" id="singleRiskRetry" hidden onclick="prepareComplianceRiskAssessment('single',false)">Retry risk options</button>
+     </fieldset>
+
      <div class="field full">
       <label>Supporting Information</label>
 
@@ -2606,6 +2669,7 @@ button,input,select,textarea{font-family:inherit}
 
      <button
       class="btn green"
+      id="submitComplianceRequirementButton"
       onclick="prototypeSubmit()"
      >
       Submit for Controller Review
@@ -3053,6 +3117,9 @@ function setType(type){
 
 function openSubmit(){
 
+ loadSubmissionRiskClassifications();
+ prepareComplianceRiskAssessment('single');
+
  showChoices();
  document.getElementById('submitModal').classList.add('show');
 }
@@ -3100,6 +3167,8 @@ async function openControllerReview(){
 
 function closeModal(id){
 
+ if(typeof complianceRiskHandleClose==='function')complianceRiskHandleClose(id);
+
  document.getElementById(id).classList.remove('show');
 }
 
@@ -3134,6 +3203,8 @@ async function prototypeSubmit(){
  const source=document.getElementById('singleSource').value.trim();
  const reference=document.getElementById('singleReference').value.trim();
  const additional=document.getElementById('singleAdditional').value.trim();
+ const riskCategoryId=readSubmissionRiskClassification();
+ let riskPosition;
 
  if(!title){
   alert('Enter a requirement title.');
@@ -3163,7 +3234,16 @@ async function prototypeSubmit(){
   return;
  }
 
- const button=event?.target;
+ if(!riskCategoryId){
+  alert('Select a complete Tier 4 to Tier 1 Risk Classification.');
+  return;
+ }
+ try{riskPosition=readComplianceRiskPosition('single');}
+ catch(error){alert(error.message);return;}
+
+ const button=document.getElementById('submitComplianceRequirementButton');
+ const submissionSession=complianceRiskForms.single.sequence;
+ if(button.disabled)return;
 
  if(button){
   button.disabled=true;
@@ -3182,6 +3262,8 @@ async function prototypeSubmit(){
     },
     body:JSON.stringify({
      submission_type:'Single Requirement',
+     risk_classification_ids:[riskCategoryId],
+     risk_position:riskPosition,
      request_title:title,
      description:description,
      compliance_type:type,
@@ -3220,6 +3302,7 @@ async function prototypeSubmit(){
    ' submitted successfully for Compliance Controller review.'
   );
 
+  if(submissionSession!==complianceRiskForms.single.sequence)return;
   closeModal('submitModal');
 
   document.getElementById('singleTitle').value='';
@@ -3262,8 +3345,9 @@ document.addEventListener('keydown',e=>{
 
  if(e.key==='Escape'){
 
+  if(typeof complianceRiskHandleEscape==='function')complianceRiskHandleEscape();
   document.querySelectorAll('.modal-back.show')
-   .forEach(m=>m.classList.remove('show'));
+   .forEach(m=>closeModal(m.id));
 
  }
 
@@ -3864,10 +3948,14 @@ document.addEventListener('DOMContentLoaded',async()=>{
 let currentLiveObligationId=null;
 let currentLiveObligation=null;
 let currentLiveControls=[];
+let complianceObligationLoadSequence=0;
 
 async function openLiveObligation(id){
 
+ const loadSequence=++complianceObligationLoadSequence;
  currentLiveObligationId=id;
+ currentLiveObligation=null;
+ if(document.getElementById('reviewAssessmentModal').classList.contains('show'))closeModal('reviewAssessmentModal');
 
  try{
 
@@ -3905,6 +3993,7 @@ async function openLiveObligation(id){
    );
   }
 
+  if(loadSequence!==complianceObligationLoadSequence||Number(currentLiveObligationId)!==Number(id))return;
   const o=data.obligation;
   currentLiveObligation=o;
 
@@ -3961,6 +4050,8 @@ async function openLiveObligation(id){
   const apps=data.applicability||[];
   const controls=data.controls||[];
   currentLiveControls=controls;
+  loadRequirementRiskClassifications(id);
+  loadComplianceRiskAssessmentHistory(id);
   loadComplianceLinkedRisks(currentLiveObligationId,!!data.permissions?.is_controller);
 
   renderControlGovernanceDocuments(controls);
@@ -4160,6 +4251,7 @@ async function openLiveObligation(id){
 
  }catch(error){
 
+  if(loadSequence!==complianceObligationLoadSequence)return;
   console.error(
    'Unable to load compliance obligation',
    error
@@ -4177,8 +4269,16 @@ async function openLiveObligation(id){
 <script>
 /* OPEN COMPLIANCE CONTROLLER REVIEW FROM MY ACTIONS */
 
+let complianceControllerLoadSequence=0;
 async function openComplianceRequestFromAction(requestId){
-
+ const modal=document.getElementById('controllerModal');
+ closeModal('controllerModal');
+ const requestSequence=++complianceControllerLoadSequence;
+ currentComplianceReview=null;
+ modal.dataset.requestId='';modal.dataset.itemId='';
+ for(const id of ['complianceAmendEditor','linkExistingPicker','controllerProposedRisk'])document.getElementById(id)?.remove();
+ modal.querySelectorAll('input, textarea, select').forEach(field=>{field.value='';});
+ selectedExistingObligationId=null;
  try{
 
   const response=await fetch(
@@ -4189,12 +4289,14 @@ async function openComplianceRequestFromAction(requestId){
    }
   );
 
+  if(requestSequence!==complianceControllerLoadSequence)return;
   if(response.status===401){
    location.replace('login.html?return='+encodeURIComponent(location.href));
    return;
   }
 
   const data=await response.json();
+  if(requestSequence!==complianceControllerLoadSequence)return;
 
   if(!response.ok){
    throw new Error(data.message||'Unable to load compliance request.');
@@ -4230,6 +4332,7 @@ async function openComplianceRequestFromAction(requestId){
 
    if(strong)strong.textContent=item.proposed_title||'—';
    if(para)para.textContent=item.proposed_description||'No description provided.';
+   renderControllerComplianceRisk(item,sections[0]);
   }
 
   if(sections[1]){
@@ -4244,6 +4347,7 @@ async function openComplianceRequestFromAction(requestId){
 
  }catch(error){
 
+  if(requestSequence!==complianceControllerLoadSequence)return;
   console.error('Unable to open compliance review',error);
   alert(error.message);
  }
@@ -6433,122 +6537,47 @@ async function createComplianceActivity(){
 
 <script>
 function openReviewAssessment(){
-
- if(!currentLiveObligationId){
-  alert('Compliance requirement is not loaded.');
-  return;
- }
-
- const title=
-  document.getElementById('obligationTitle')?.textContent||'';
-
- document.getElementById(
-  'reviewAssessmentRequirement'
- ).textContent=title;
-
- document.getElementById('reviewAssessmentStatus').value='';
- document.getElementById('reviewAssessmentRationale').value='';
- document.getElementById('reviewAssessmentGaps').value='';
- document.getElementById('reviewAssessmentNextDate').value='';
-
- const message=
-  document.getElementById('reviewAssessmentMessage');
-
- message.textContent='';
- message.className='action-decision-message';
-
- document.getElementById('reviewAssessmentModal')
-  .classList.add('show');
+ if(!currentLiveObligationId||!currentLiveObligation){alert('Compliance requirement is not loaded.');return;}
+ document.getElementById('reviewAssessmentRequirement').textContent=document.getElementById('obligationTitle').textContent;
+ for(const id of ['reviewAssessmentStatus','reviewAssessmentRationale','reviewAssessmentGaps','reviewAssessmentNextDate'])document.getElementById(id).value='';
+ const message=document.getElementById('reviewAssessmentMessage');
+ message.textContent='';message.className='action-decision-message';
+ document.getElementById('reviewAssessmentModal').classList.add('show');
+ prepareComplianceRiskAssessment('review');
 }
 
-
 async function submitComplianceAssessment(){
-
- const status=
-  document.getElementById('reviewAssessmentStatus').value;
-
- const rationale=
-  document.getElementById('reviewAssessmentRationale')
-   .value.trim();
-
- const gaps=
-  document.getElementById('reviewAssessmentGaps')
-   .value.trim();
-
- const nextDate=
-  document.getElementById('reviewAssessmentNextDate').value;
-
- if(!status){
-  alert('Select the assessment result.');
-  return;
- }
-
- if(!rationale){
-  alert('Enter the assessment rationale.');
-  return;
- }
-
- const message=
-  document.getElementById('reviewAssessmentMessage');
-
- message.textContent='Saving assessment...';
- message.className='action-decision-message';
-
+ const button=document.getElementById('saveComplianceAssessmentButton');
+ if(button.disabled)return;
+ const status=document.getElementById('reviewAssessmentStatus').value;
+ const rationale=document.getElementById('reviewAssessmentRationale').value.trim();
+ const gaps=document.getElementById('reviewAssessmentGaps').value.trim();
+ const nextDate=document.getElementById('reviewAssessmentNextDate').value;
+ const message=document.getElementById('reviewAssessmentMessage');
+ const obligationId=currentLiveObligationId;
+ const session=complianceRiskForms.review.sequence;
+ let riskPosition;
+ if(!status){alert('Select the assessment result.');return;}
+ if(!rationale){alert('Enter the assessment rationale.');return;}
+ try{riskPosition=readComplianceRiskPosition('review',status);}
+ catch(error){message.textContent=error.message;message.className='action-decision-message error';return;}
+ if(!obligationId||Number(complianceRiskForms.review.obligationId)!==Number(obligationId))return;
+ button.disabled=true;button.textContent='Saving...';
+ message.textContent='Saving assessment...';message.className='action-decision-message';
  try{
-
-  const response=await fetch(
-   COMPLIANCE_API+
-   '/compliance/obligations/'+
-   currentLiveObligationId+
-   '/assessments',
-   {
-    method:'POST',
-    headers:{
-     ...complianceAuthHeaders(),
-     'Content-Type':'application/json'
-    },
-    body:JSON.stringify({
-     assessment_status:status,
-     rationale:rationale,
-     gaps_identified:gaps||null,
-     next_assessment_date:nextDate||null
-    })
-   }
-  );
-
-  const data=await response.json();
-
-  if(!response.ok){
-   throw new Error(
-    data.message||
-    'Unable to save assessment.'
-   );
-  }
-
-  message.textContent=
-   `${status} assessment recorded successfully.`;
-
-  message.className='action-decision-message success';
-
-  setTimeout(async()=>{
-
-   closeModal('reviewAssessmentModal');
-
-   await openLiveObligation(
-    currentLiveObligationId
-   );
-
-  },900);
-
+  await complianceRiskRequest('/compliance/obligations/'+obligationId+'/assessments',{
+   method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({assessment_status:status,rationale,gaps_identified:gaps||null,next_assessment_date:nextDate||null,risk_position:riskPosition})
+  });
+  if(session!==complianceRiskForms.review.sequence||Number(currentLiveObligationId)!==Number(obligationId))return;
+  closeModal('reviewAssessmentModal');
+  if(document.getElementById('obligationModal').classList.contains('show'))await openLiveObligation(obligationId);
+  await loadComplianceRegister();
  }catch(error){
-
-  console.error(
-   'Unable to save Compliance assessment',
-   error
-  );
-
-  message.textContent=error.message;
-  message.className='action-decision-message error';
+  if(session!==complianceRiskForms.review.sequence)return;
+  message.textContent=error.message;message.className='action-decision-message error';
+ }finally{
+  button.disabled=false;button.textContent='Save Assessment';
  }
 }
 </script>
@@ -6794,6 +6823,7 @@ function renderLiveCompliancePosition(live){
 
 <script>
 async function loadControllerComplianceOwners(){
+ const requestSequence=complianceControllerLoadSequence;
 
  const select=document.getElementById(
   'controllerComplianceOwner'
@@ -6815,6 +6845,7 @@ async function loadControllerComplianceOwners(){
   );
 
   const data=await response.json();
+  if(requestSequence!==complianceControllerLoadSequence)return;
 
   if(!response.ok){
    throw new Error(
@@ -6835,6 +6866,7 @@ async function loadControllerComplianceOwners(){
    ).join('');
 
  }catch(error){
+  if(requestSequence!==complianceControllerLoadSequence)return;
 
   console.error(
    'Unable to load Compliance Owners',
@@ -8173,3 +8205,6 @@ document.addEventListener('DOMContentLoaded',()=>{
  if(id&&/^\d+$/.test(id))openLiveObligation(Number(id));
 });
 </script>
+
+
+<script src="compliance-assessment-risk.js"></script>

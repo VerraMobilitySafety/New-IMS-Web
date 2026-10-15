@@ -1,0 +1,14 @@
+.compliance-risk-assessment{min-width:0;margin:10px 0 14px;padding:16px;border:1px solid var(--line);border-radius:10px;background:#fafbf8}
+.compliance-risk-assessment legend{padding:0 6px;font-size:12px;font-weight:800;color:var(--charcoal)}
+.compliance-risk-help{font-size:10px;line-height:1.6;color:var(--grey);margin:0 0 12px}
+.compliance-risk-scores{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;font-weight:700}
+.compliance-risk-score{padding:10px;border:1px solid var(--line);border-radius:8px;background:#fff;flex:1;min-width:170px}
+.compliance-risk-score strong{display:block;margin-top:5px}
+.compliance-risk-level{display:inline-block;padding:4px 7px;border-radius:5px;font-size:10px}
+.compliance-risk-low{background:#A8C63D;color:#242424}.compliance-risk-moderate{background:#21869B;color:#fff}.compliance-risk-high{background:#D1B443;color:#242424}.compliance-risk-significant{background:#BF302D;color:#fff}
+.compliance-risk-matrix-help{font-size:10px;margin-bottom:12px}.compliance-risk-matrix-help summary{cursor:pointer;font-weight:700;padding:5px 0}
+.compliance-risk-matrix-scroll{overflow-x:auto;margin-top:8px}.compliance-risk-matrix{width:100%;min-width:350px;border-collapse:separate;border-spacing:3px;text-align:center;font-size:9px}
+.compliance-risk-matrix th{padding:5px;color:var(--grey)}.compliance-risk-matrix td{padding:8px 4px;border-radius:4px}.compliance-risk-matrix caption{text-align:left;color:var(--grey);line-height:1.6;margin-bottom:6px}
+.compliance-risk-history-item{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:14px;font-size:10px}.compliance-risk-history-item small{display:block;margin:5px 0;color:var(--grey);line-height:1.6}.compliance-risk-history-item p{line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.compliance-risk-assessment select:disabled,.compliance-risk-assessment textarea:disabled{background:#eee;color:var(--grey)}
+.compliance-risk-assessment [hidden]{display:none!important}

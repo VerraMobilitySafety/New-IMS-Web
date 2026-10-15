@@ -1,0 +1,20 @@
+name: Compliance assessment risk UI validation
+on:
+  pull_request:
+    paths:
+      - 'compliance.html'
+      - 'compliance-assessment-risk.js'
+      - 'compliance-assessment-risk.css'
+      - 'project-workspace.html'
+      - 'tests/compliance-assessment-risk.cjs'
+      - '.github/workflows/compliance-assessment-risk-validation.yml'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate scripts, matrix, payloads and interrupted flows
+        run: node tests/compliance-assessment-risk.cjs
