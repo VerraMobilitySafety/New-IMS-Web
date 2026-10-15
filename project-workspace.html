@@ -600,11 +600,18 @@ async function loadProjectRisks(id){
     if(d.assignments.some(a=>a.status==='Applicable'&&a.context_type==='Project'&&String(a.context_id)===String(id)))linked.push(risk);
    }
   }));
-  document.getElementById(count).textContent=linked.length+' linked risk(s)';
-  if(!linked.length){projectListMessage(host,'No risks explicitly applicable to this project.');return}
-  linked.sort((a,b)=>String(a.risk_code||'').localeCompare(String(b.risk_code||'')));
-  projectTable(host,['Reference','Risk','Status','Next Review'],linked,[
-   r=>r.risk_code,r=>r.risk_title,r=>r.status,r=>fmtDate(r.next_review_date)
+  const draftsResponse=await apiFetch(API_BASE+'/projects/'+encodeURIComponent(id)+'/risk-drafts',{cache:'no-store'});
+  if(!draftsResponse.ok)throw Error('Project Draft Risk API returned '+draftsResponse.status);
+  const draftData=await draftsResponse.json();
+  if(!Array.isArray(draftData.drafts))throw Error('Invalid project Draft Risk response');
+  const known=new Set(linked.map(r=>Number(r.id)));
+  const drafts=draftData.drafts.filter(r=>!known.has(Number(r.id)));
+  const all=[...linked,...drafts];
+  document.getElementById(count).textContent=linked.length+' applicable · '+drafts.length+' project-originated';
+  if(!all.length){projectListMessage(host,'No project risks or pending Draft Risks yet.');return}
+  all.sort((a,b)=>String(a.risk_code||'').localeCompare(String(b.risk_code||'')));
+  projectTable(host,['Reference','Risk','Status','Next Review'],all,[
+   r=>r.risk_code,r=>r.risk_title,r=>drafts.includes(r)?(r.status==='Draft'?'Draft — Risk Office review':r.status+' — check applicability'):r.status,r=>fmtDate(r.next_review_date)
   ]);
  }catch(e){console.error('Project risks',e);document.getElementById(count).textContent='Unavailable';projectListMessage(host,'Unable to load complete project risks: '+e.message)}
 }
