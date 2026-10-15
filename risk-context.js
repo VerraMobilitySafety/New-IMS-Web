@@ -7,7 +7,6 @@
  const status=document.getElementById('veroContextStatus');
  const retry=document.getElementById('veroContextRetry');
  const keys={'Project':'projects','Contract':'contracts','VM Location':'vm_locations'};
- const siteNote='Site-level risk applicability is not available. Context filters cover the whole selected context.';
  let contexts={},risks=[],assignments=[],dataReady=false,optionsError=false;
  let state='idle',dataState='loading',generation=0,controller=null;
 
@@ -26,7 +25,7 @@
    optionsError?'Operational Context options could not be loaded.':
    type.value&&state==='error'?'Risk applicability could not be loaded. No partial totals are shown.':
    type.value&&state!=='ready'?'Loading authorised risk applicability…':'';
-  status.textContent=[message,siteNote].filter(Boolean).join(' ');
+  status.textContent=message;
   document.dispatchEvent(new CustomEvent('vero-risk-context-assignments',{
    detail:{assignments,ready:state==='ready',state}
   }));
