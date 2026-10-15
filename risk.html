@@ -3405,7 +3405,7 @@ table {
    const node=document.createElement('span');node.className='vero-family-node';
    const label=document.createElement('span');label.className='vero-family-name';
    label.textContent=category.category_name;
-   const badge=document.createElement('small');badge.textContent='Tier '+category.tier;
+   const badge=document.createElement('small');badge.textContent=({4:'Risk Domain',3:'Risk Stream',2:'Risk Category',1:'Risk Event'}[category.tier]||'Tier '+category.tier);
    node.append(label,badge);
    const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';
    edit.className='vero-hierarchy-edit';
@@ -3662,7 +3662,7 @@ table {
  const field=(parent,label,value)=>{const p=make('p','');const strong=make('strong',label+': ');p.append(strong,document.createTextNode(String(value??'Not assessed')));parent.appendChild(p);};
  document.addEventListener('vero-risk-open-classification',event=>{
   const r=event.detail.category,version=++request;
-  title.textContent=r.name;subtitle.textContent='Tier '+r.tier+' · Classification';
+  title.textContent=r.name;subtitle.textContent=({4:'Risk Domain',3:'Risk Stream',2:'Risk Category',1:'Risk Event'}[r.tier]||'Tier '+r.tier)+' · Classification';
   const actions=overlay.querySelector('.vero-risk-office-actions');
   tabs.hidden=true;if(actions)actions.hidden=true;
   content.replaceChildren();
@@ -3692,7 +3692,7 @@ table {
    nav.appendChild(notice);
   }
   if(Number(r.tier)>1){
-   const create=make('button','+ Add Tier '+(Number(r.tier)-1)+' classification');
+   const create=make('button','+ Add '+({4:'Risk Domain',3:'Risk Stream',2:'Risk Category',1:'Risk Event'}[Number(r.tier)-1]||'Tier '+(Number(r.tier)-1))+' classification');
    create.type='button';create.className='vero-risk-classification-create';create.hidden=true;
    fetch(API+'/auth/my-roles',{headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json'},cache:'no-store'}).then(response=>{if(!response.ok)throw Error('Role lookup unavailable');return response.json()}).then(data=>{if(version===request&&!overlay.hidden)create.hidden=!(data.roles||[]).some(role=>role.role_name==='Risk Manager')}).catch(()=>{create.hidden=true});
    create.addEventListener('click',async()=>{
@@ -3700,7 +3700,7 @@ table {
     const panel=card('Add child classification');
     field(panel,'Parent classification',r.name+' · Tier '+r.tier);
     const form=make('form','');
-    const label=make('label','New Tier '+(Number(r.tier)-1)+' classification name');
+    const label=make('label','New '+({4:'Risk Domain',3:'Risk Stream',2:'Risk Category',1:'Risk Event'}[Number(r.tier)-1]||'Tier '+(Number(r.tier)-1))+' classification name');
     const name=document.createElement('input');name.type='text';name.maxLength=255;name.required=true;
     label.appendChild(name);
     const feedback=make('p','');feedback.setAttribute('role','status');
