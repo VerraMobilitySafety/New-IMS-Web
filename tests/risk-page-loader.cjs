@@ -5,16 +5,32 @@ const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const code=fs.readFileSync(path.join(root,'risk-page-loader.js'),'utf8');
-test('Home and Risk opt in; every inline script remains valid',()=>{
+test('all 13 VERO shell screens use one NK9 loader and explicitly settle initial tasks',()=>{
+ let count=0;
  for(const file of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
   const html=fs.readFileSync(path.join(root,file),'utf8');
-  assert.equal(html.includes('src="risk-page-loader.js?'),['risk.html','index.html'].includes(file));
-  if(['risk.html','index.html'].includes(file))for(const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(match[1]);
+  const shell=html.includes('id="vero-nav"');
+  assert.equal(html.includes('src="risk-page-loader.js?'),shell,file);
+  if(!shell)continue;
+  count++;
+  assert.equal([...html.matchAll(/src="risk-page-loader\.js\?/g)].length,1,file);
+  assert.ok(!html.includes('src="vero-page-loader.js"'),file);
+  assert.ok(!html.includes('id="veroPageLoader"'),file);
+  const tasks=html.match(/src="risk-page-loader\.js[^\"]*" data-tasks="([^\"]+)"/)[1].split(/\s+/);
+  for(const task of tasks)assert.ok(html.includes("?.ready('"+task+"')"),file+': '+task);
+  for(const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(match[1],{filename:file});
  }
+ assert.equal(count,13);
  const css=fs.readFileSync(path.join(root,'risk-page-loader.css'),'utf8');
  assert.match(css,/prefers-reduced-motion:reduce/);
  assert.match(fs.readFileSync(path.join(root,'risk-nk9-animation.css'),'utf8'),/nk9-flash,\.vero-page-loader::after\{display:none\}/);
  assert.doesNotMatch(code,/window\.fetch\s*=/);
+});
+test('Risk settles the register, not just its account menu; workspace waits for linked initial loads',()=>{
+ const risk=fs.readFileSync(path.join(root,'risk.html'),'utf8');
+ assert.match(risk,/load\(\)\.finally\(\(\)=>window\.VeroPageLoader\?\.ready\('risk'\)\);\s*\}\)\(\);\s*<\/script>\s*<div id="veroRiskDetailsOverlay"/);
+ const workspace=fs.readFileSync(path.join(root,'project-workspace.html'),'utf8');
+ assert.match(workspace,/await Promise\.allSettled\(initialWorkspaceLoads\)/);
 });
 function setup(tasks='risk'){
  const listeners={},timers=new Map(),frames=new Map();let id=0,element,disconnected=false;

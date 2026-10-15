@@ -186,7 +186,10 @@
 <link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="header.css">
-<script src="vero-page-loader.js"></script></head>
+<link rel="stylesheet" href="risk-page-loader.css?v=20261016-rollout">
+<link rel="stylesheet" href="risk-nk9-animation.css?v=20261016-rollout">
+<script src="risk-nk9-animation.js?v=20261016-rollout"></script>
+<script src="risk-page-loader.js?v=20261016-rollout" data-tasks="account documents"></script></head>
 <body>
 <div class="app">
 <aside class="sidebar">
@@ -1065,7 +1068,7 @@ function openCopyRequest(){if(!selectedDocument){alert('Select a document first.
 function closeCopyRequest(){document.getElementById('copyRequest').classList.remove('show')}
 function sendCopy(){const email=document.getElementById('copyEmail').value.trim();if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return alert('Enter a valid email address.');alert('Prototype: an UNCONTROLLED COPY would now be generated and emailed to '+email+'.');closeCopyRequest();}
 function findInDoc(){const q=document.getElementById('findText').value.trim();if(q)alert('Browser PDF/text search will be enabled as the controlled viewer is refined.');}
-document.addEventListener('DOMContentLoaded',loadDocuments);
+document.addEventListener('DOMContentLoaded',()=>{loadDocuments().finally(()=>window.VeroPageLoader?.ready('documents'));});
 </script>
 <script>function toggleProjectsNav(button){const g=button.closest('.nav-group');const o=g.classList.toggle('open');button.setAttribute('aria-expanded',o?'true':'false')}</script>
 <script>
@@ -1093,7 +1096,7 @@ document.addEventListener('DOMContentLoaded',loadDocuments);
  document.addEventListener('click',e=>{if(!account.contains(e.target)){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
  signout.addEventListener('click',async()=>{const t=localStorage.getItem(TOKEN);try{if(t)await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+t}})}catch(e){}localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html');});
- load();
+ load().finally(()=>window.VeroPageLoader?.ready('account'));
 })();
 </script>
 

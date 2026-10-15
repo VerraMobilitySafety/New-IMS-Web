@@ -186,7 +186,10 @@
 <link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="header.css">
-<script src="vero-page-loader.js"></script></head><body><div class="app"><aside class="sidebar">
+<link rel="stylesheet" href="risk-page-loader.css?v=20261016-rollout">
+<link rel="stylesheet" href="risk-nk9-animation.css?v=20261016-rollout">
+<script src="risk-nk9-animation.js?v=20261016-rollout"></script>
+<script src="risk-page-loader.js?v=20261016-rollout" data-tasks="account"></script></head><body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
  <img class="chev c2" src="verra-chevron.png" alt="">
@@ -242,7 +245,7 @@ filter.addEventListener('input',()=>{const q=filter.value.trim().toLowerCase();l
  document.addEventListener('click',e=>{if(!account.contains(e.target)){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'){account.classList.remove('open');trigger.setAttribute('aria-expanded','false')}});
  signout.addEventListener('click',async()=>{const t=localStorage.getItem(TOKEN);try{if(t)await fetch(API+'/auth/logout',{method:'POST',headers:{Authorization:'Bearer '+t}})}catch(e){}localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html');});
- load();
+ load().finally(()=>window.VeroPageLoader?.ready('account'));
 })();
 </script>
 

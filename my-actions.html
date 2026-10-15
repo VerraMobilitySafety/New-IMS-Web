@@ -356,7 +356,11 @@
 </style><link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="header.css">
-<style id="vero-loader-style">.actions-page{position:relative;min-height:calc(100vh - 245px)}.vero-page-loader{position:fixed;top:245px;bottom:0;left:300px;right:0;background:#0D0D0D;z-index:20;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;transition:opacity .25s ease,visibility .25s ease}.vero-page-loader.is-ready{opacity:0;visibility:hidden;pointer-events:none}.vero-page-loader img{width:80px;height:80px;object-fit:contain;animation:vero-page-spin 1.6s linear infinite}.vero-page-loader span{color:#F4F6F5;font:500 12px Montserrat,Arial,sans-serif}@keyframes vero-page-spin{to{transform:rotate(360deg)}}@media(max-width:720px){.vero-page-loader{left:82px}}@media(prefers-reduced-motion:reduce){.vero-page-loader img{animation:none}}</style></head>
+<style>.actions-page{position:relative;min-height:calc(100vh - 245px)}</style>
+<link rel="stylesheet" href="risk-page-loader.css?v=20261016-rollout">
+<link rel="stylesheet" href="risk-nk9-animation.css?v=20261016-rollout">
+<script src="risk-nk9-animation.js?v=20261016-rollout"></script>
+<script src="risk-page-loader.js?v=20261016-rollout" data-tasks="account actions"></script></head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
@@ -389,7 +393,7 @@
    </div>
   </section>
 
-  <div class="actions-page"><div id="veroPageLoader" class="vero-page-loader" role="status" aria-label="Loading your actions"><img src="verra-chevron.png" alt=""><span>Preparing your workspace...</span></div>
+  <div class="actions-page">
 
    <div class="action-toolbar">
 
@@ -2550,7 +2554,7 @@ async function loadDocumentApprovers(){
  }
 }
 
-function finishInitialActionsLoad(){document.getElementById('veroPageLoader')?.classList.add('is-ready');}
+function finishInitialActionsLoad(){window.VeroPageLoader?.ready('actions');}
 async function loadActions(){
  const sequence=++actionLoadSequence;
  const token=localStorage.getItem(TOKEN_KEY), list=document.getElementById('fullActionList');
@@ -2592,7 +2596,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  document.addEventListener('click',e=>{if(!account.contains(e.target)){account.classList.remove('open');trigger.setAttribute('aria-expanded','false');}});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'){account.classList.remove('open');trigger.setAttribute('aria-expanded','false');closeActionDetail();}});
  signout.addEventListener('click',async()=>{const t=localStorage.getItem(TOKEN_KEY);try{if(t)await fetch(`${API}/auth/logout`,{method:'POST',headers:{Authorization:'Bearer '+t}});}catch(e){}localStorage.removeItem(TOKEN_KEY);localStorage.removeItem(USER_KEY);location.replace('login.html');});
- loadMe();
+ loadMe().finally(()=>window.VeroPageLoader?.ready('account'));
 });
 </script>
 <script src="nav.js"></script>
