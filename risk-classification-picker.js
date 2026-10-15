@@ -2,6 +2,7 @@
 // Usage: VeroRiskClassificationPicker.mount(element,{onSelect(item),value})
 // The picker selects a classification, not a risk score or assessment.
 window.VeroRiskClassificationPicker=(()=>{
+ const tierNames={4:'Risk Domain',3:'Risk Stream',2:'Risk Category',1:'Risk Event'};
  const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
  function mount(host,options={}){
   if(!host)throw Error('Classification picker host required');
@@ -21,11 +22,11 @@ window.VeroRiskClassificationPicker=(()=>{
    // Keep the selected category ID stable even if the displayed path changes.
    select.replaceChildren();
    const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Select a classification';select.appendChild(placeholder);
-   for(const item of unique.values()){const opt=document.createElement('option');opt.value=String(item.category_id);opt.textContent=item.path+' (Tier '+item.tier+')';select.appendChild(opt)}
+   for(const item of unique.values()){const opt=document.createElement('option');opt.value=String(item.category_id);opt.textContent=item.path+' ('+(tierNames[item.tier]||'Tier '+item.tier)+')';select.appendChild(opt)}
    select.value=current==null?'':String(current);
    if(!matches.some(x=>String(x.category_id)===String(current)))select.value='';
    const active=rows.find(x=>String(x.category_id)===String(current));
-   selected.textContent=active?'Selected: '+active.path+' · Tier '+active.tier:'';
+   selected.textContent=active?'Selected: '+active.path+' · '+(tierNames[active.tier]||'Tier '+active.tier):'';
    info.textContent=unique.size+' matching classifications';
    select.disabled=unique.size===0;
   }
@@ -34,7 +35,7 @@ window.VeroRiskClassificationPicker=(()=>{
   select.addEventListener('change',()=>{
    current=select.value||null;
    const item=rows.find(x=>String(x.category_id)===String(current)&&x.path.toLowerCase().includes(search.value.trim().toLowerCase()))||rows.find(x=>String(x.category_id)===String(current));
-   selected.textContent=item?'Selected: '+item.path+' · Tier '+item.tier:'';
+   selected.textContent=item?'Selected: '+item.path+' · '+(tierNames[item.tier]||'Tier '+item.tier):'';
    if(typeof options.onSelect==='function')options.onSelect(item||null);
   });
   async function refresh(){
