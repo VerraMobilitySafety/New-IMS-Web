@@ -8317,3 +8317,45 @@ async function loadRequirementRiskClassifications(id){
  }catch(error){target.textContent=error.message;}
 }
 </script>
+
+<script>
+let submissionRiskPaths=[];
+function renderSubmissionRiskTiers(changedTier){
+ const tiers=[4,3,2,1],values={};
+ tiers.forEach(t=>values[t]=document.getElementById('singleRiskTier'+t).value);
+ tiers.filter(t=>t<changedTier).forEach(t=>values[t]='');
+ for(const tier of tiers){
+  const select=document.getElementById('singleRiskTier'+tier);
+  const choices=new Map();
+  submissionRiskPaths.filter(p=>tiers.filter(t=>t>tier).every(t=>
+   !values[t]||p.path_ids.some((id,i)=>id===Number(values[t])&&
+    Number(p.tier)+p.path_ids.length-1-i===t)
+  )).forEach(p=>p.path_ids.forEach((id,i)=>{
+   if(Number(p.tier)+p.path_ids.length-1-i===tier)
+    choices.set(id,p.path.split(' → ')[i]);
+  }));
+  select.innerHTML='<option value="">Select Tier '+tier+'...</option>'+
+   [...choices.entries()].sort((a,b)=>a[1].localeCompare(b[1]))
+   .map(([id,name])=>'<option value="'+id+'">'+escapeComplianceText(name)+'</option>').join('');
+  select.value=values[tier]||'';
+  select.disabled=tier!==4&&!values[tier+1];
+ }
+}
+async function loadSubmissionRiskClassifications(){
+ const ids=[4,3,2,1];
+ ids.forEach(t=>{
+  const select=document.getElementById('singleRiskTier'+t);
+  select.innerHTML='<option value="">Loading...</option>';
+  select.onchange=()=>renderSubmissionRiskTiers(t);
+ });
+ try{
+  const data=await complianceRiskRequest('/risk/classification-catalogue');
+  submissionRiskPaths=(data.categories||[]).filter(p=>p.is_terminal&&Number(p.tier)===1);
+  renderSubmissionRiskTiers(4);
+ }catch(error){
+  document.getElementById('singleRiskTier4').innerHTML=
+   '<option value="">Classification unavailable</option>';
+  console.error('Unable to load Compliance risk classifications',error);
+ }
+}
+</script>
