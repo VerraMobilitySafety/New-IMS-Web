@@ -27,7 +27,7 @@ const ownerNote=node('p','Select an active VERO user.','muted');ownerNote.setAtt
 const review=field('Next review date');review.el.type='date';identification.append(title.wrap,ownerField.wrap,description.wrap,review.wrap);
 const tierBox=node('div',null,'tiers'),tierFields=[];
 for(let i=0;i<4;i++){const f=field('Tier '+(4-i)+' '+['Risk Domain','Risk Stream','Risk Category','Risk Event'][i],'select');tierFields.push(f.el);tierBox.append(f.wrap);f.el.onchange=()=>renderTiers(i+1);}
-const tierHelp=node('p','Choose Tier 4, then stop at that tier or continue down to a more specific classification.','muted');tierBox.append(tierHelp);
+const tierHelp=node('p','Choose Tier 4, then stop at that tier or continue down to a more specific classification.','muted full');tierBox.append(tierHelp);
 const tabs=node('div',null,'stages');tabs.setAttribute('aria-label','Assessment stages');
 for(let i=0;i<3;i++){const b=button('','stage');b.append(node('b',(i+1)+' '+stages[i]),node('span',['Before controls','With existing controls','After further controls'][i]));b.onclick=()=>{stage=i;renderAssessment();};tabs.append(b);}
 const columns=node('div',null,'columns'),panel=node('section',null,'panel'),summary=node('aside',null,'panel summary');
