@@ -3234,6 +3234,7 @@ async function prototypeSubmit(){
       applicability==='Project'
       ? projectId
       : null,
+     risk_classification_ids:[Number(document.getElementById('singleRiskTier1').value)],
      additional_information:additional
     })
    }
