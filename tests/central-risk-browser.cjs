@@ -17,8 +17,20 @@ for(const viewport of [{width:1500,height:1100},{width:390,height:844}]){
  assert.equal(cells.length,25);assert.ok(cells.every(c=>Math.abs(c.width-c.height)<.5),'Matrix cells must be square');
  const label=page.locator('.vero-central .axis-label.like').first();const colour=await label.evaluate(e=>getComputedStyle(e).color);assert.notEqual(colour,'rgb(255, 255, 255)');assert.notEqual(colour,'rgba(0, 0, 0, 0)');
  await page.getByLabel('Risk title',{exact:true}).fill('Working near moving vehicles');await page.getByLabel('Risk description',{exact:true}).fill('Vehicle interaction during roadside operations.');
- await page.getByLabel('Risk Owner',{exact:true}).fill('owner@');await page.locator('.owner-option').first().click();
+ const before=await page.getByLabel('Risk description',{exact:true}).boundingBox();
+ await page.getByLabel('Risk Owner',{exact:true}).fill('owner@');
+ const after=await page.getByLabel('Risk description',{exact:true}).boundingBox();
+ assert.ok(Math.abs(before.y-after.y)<1,'Opening owner choices must not move the form');
+ await page.locator('.owner-option').first().click();
+ const drawerWidth=await page.locator('#veroRiskDrawerOverlay .vero-risk-drawer').evaluate(e=>e.getBoundingClientRect().width);
+ assert.ok(drawerWidth<=1101,'Drawer must be narrower');
  await page.locator('.vero-central .cell').first().click();await page.locator('.vero-central .stage').nth(1).click();await page.locator('.vero-central .cell').nth(16).click();
+ await page.getByLabel('Find enterprise controls',{exact:true}).fill('Physical');
+ await page.locator('.add-option').filter({hasText:'CTRL-7'}).click();
+ await page.getByLabel('Find Document Library controls',{exact:true}).fill('Traffic');
+ await page.locator('.add-option').filter({hasText:'DOC-9'}).click();
+ assert.equal(await page.locator('.added-item').count(),2,'Controls add individually');
+ assert.equal(await page.locator('.vero-central input[type=checkbox]').count(),0,'Control checkboxes removed');
  // Keep the matrix in view for desktop and mobile geometry/screenshot checks.
  await page.locator('.vero-central .matrix').scrollIntoViewIfNeeded();
  const image=await page.screenshot({type:'jpeg',quality:65});console.log('CENTRAL_RISK_SCREENSHOT_'+(viewport.width>1000?'DESKTOP':'MOBILE')+'='+image.toString('base64'));
