@@ -32,7 +32,7 @@
   const fallbackStatus=status.textContent;
   const loading=make('tr','');
   const cell=make('td','Loading risk classifications…');
-  cell.colSpan=8;
+  cell.colSpan=7;
   cell.style.textAlign='center';
   cell.style.padding='28px';
   loading.appendChild(cell);
@@ -51,11 +51,11 @@
    for(const row of rows){
     const tr=make('tr','');tr.tabIndex=0;tr.setAttribute('role','button');
     const category=row.kind==='category';
-    const values=[category?'Tier '+row.tier:row.code||'Risk',
-     row.name,category?'Aggregate':'Terminal risk',
+    const values=[row.name,
      category?'Classification':'Master Risk',
-     category?(row.average_residual_score??'Not assessed'):'—',
+     category?(row.average_residual_score??'—'):'—',
      category?(row.maximum_residual_score??'—'):'—',
+     category?(row.children??0):'—',
      category?(row.contributing_assessments??0):'—',
      category?(row.awaiting_assessment??0):'—'];
     for(const value of values)tr.appendChild(make('td',value));
@@ -72,7 +72,7 @@
     tr.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
     fragment.appendChild(tr);
    }
-   if(!rows.length){const tr=make('tr','');const td=make('td','No classifications or terminal risks at this level.');td.colSpan=8;tr.appendChild(td);fragment.appendChild(tr);}
+   if(!rows.length){const tr=make('tr','');const td=make('td','No classifications or terminal risks at this level.');td.colSpan=7;tr.appendChild(td);fragment.appendChild(tr);}
    body.replaceChildren(fragment);
    status.textContent=String(rows.length);
   }catch(error){
