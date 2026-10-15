@@ -1,0 +1,33 @@
+name: Compliance assessment risk UI validation
+on:
+  pull_request:
+    paths:
+      - 'compliance.html'
+      - '.github/workflows/compliance-assessment-risk-validation.yml'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate inline scripts and assessment inputs
+        run: |
+          node <<'JS'
+          const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+          const html=fs.readFileSync('compliance.html','utf8');
+          for(const [i,m] of [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].entries()){
+            if(m[1].trim())new vm.Script(m[1],{filename:'compliance.html:'+i});
+          }
+          for(const id of ['reviewRiskInherentLikelihood','reviewRiskInherentImpact','reviewRiskResidualLikelihood','reviewRiskResidualImpact','reviewRiskOwner','reviewRiskControlEffectiveness','reviewRiskJustification']){
+            assert.ok(html.includes('id="'+id+'"'),id);
+          }
+          assert.ok(html.includes('risk_position:readComplianceRiskPosition(status)'));
+          for(const id of ['singleRiskTier4','singleRiskTier3','singleRiskTier2','singleRiskTier1']){
+            assert.ok(html.includes('id="'+id+'"'),id);
+          }
+          assert.ok(html.includes('risk_classification_ids:[riskCategoryId]'));
+          assert.ok(html.includes('loadSubmissionRiskClassifications'));
+          console.log('Compliance assessment UI validation passed');
+          JS

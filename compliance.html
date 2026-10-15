@@ -1165,6 +1165,8 @@ button,input,select,textarea{font-family:inherit}
    </div>
 
 
+   <div class="section compliance-section"><div class="compliance-section-head"><div><h3>Risk Classifications</h3><small>Shared VERO Risk Classification System</small></div></div><div id="complianceRequirementRiskClassifications">Loading...</div></div>
+
    <!-- LINKED MASTER RISKS -->
    <div class="section compliance-section">
     <div class="compliance-section-head">
@@ -1293,6 +1295,8 @@ button,input,select,textarea{font-family:inherit}
 
    </div>
 
+
+   <div class="section compliance-section"><h3>Risk Assessment History</h3><div id="complianceRiskAssessmentHistory" class="timeline">No risk assessments recorded.</div></div>
 
    <!-- CHANGE HISTORY -->
 
@@ -1675,6 +1679,17 @@ button,input,select,textarea{font-family:inherit}
        placeholder="Record any gaps identified, or leave blank if none..."
       ></textarea>
      </div>
+
+     <div class="field full"><h3>Risk Assessment — 5 × 5</h3><small>Assess inherent and residual exposure independently of compliance status.</small></div>
+     <div class="field"><label>Inherent Likelihood</label><select id="reviewRiskInherentLikelihood"></select></div>
+     <div class="field"><label>Inherent Impact</label><select id="reviewRiskInherentImpact"></select></div>
+     <div class="field"><label>Residual Likelihood</label><select id="reviewRiskResidualLikelihood"></select></div>
+     <div class="field"><label>Residual Impact</label><select id="reviewRiskResidualImpact"></select></div>
+     <div class="field"><label>Control Effectiveness</label><select id="reviewRiskControlEffectiveness"><option value="">Select...</option><option>Effective</option><option>Partially Effective</option><option>Ineffective</option><option>Not Assessed</option></select></div>
+     <div class="field"><label>Risk Owner</label><select id="reviewRiskOwner"><option value="">Select owner...</option></select></div>
+     <div class="field full"><label>Linked Master Risk (optional)</label><select id="reviewRiskLinkedMaster"><option value="">No linked master risk</option></select></div>
+     <div class="field full"><label>Risk Justification</label><textarea id="reviewRiskJustification"></textarea></div>
+     <div class="field full"><strong id="reviewRiskScores">Inherent: — · Residual: —</strong></div>
 
      <div class="field">
       <label>Next Assessment Date</label>
@@ -2556,6 +2571,21 @@ button,input,select,textarea{font-family:inherit}
      </div>
 
      <div class="field full">
+      <label>Risk Classification (required)</label>
+      <small>Select the relevant classification from VERO's shared Risk Classification System.</small>
+     </div>
+     <div class="field"><label>Tier 4</label><select id="singleRiskTier4" onchange="changeSubmissionRiskTier(4)"><option value="">Select Tier 4...</option></select></div>
+     <div class="field"><label>Tier 3</label><select id="singleRiskTier3" onchange="changeSubmissionRiskTier(3)"><option value="">Select Tier 3...</option></select></div>
+     <div class="field"><label>Tier 2</label><select id="singleRiskTier2" onchange="changeSubmissionRiskTier(2)"><option value="">Select Tier 2...</option></select></div>
+     <div class="field"><label>Tier 1</label><select id="singleRiskTier1"><option value="">Select Tier 1...</option></select></div>
+     <div class="field full"><small id="singleRiskClassificationMessage"></small></div>
+
+     <div class="field full"><label>Risk Classification (mandatory)</label><small>Select the applicable classification from VERO's shared Risk Classification System.</small></div>
+     <div class="field"><label>Tier 4</label><select id="singleRiskTier4"></select></div>
+     <div class="field"><label>Tier 3</label><select id="singleRiskTier3"></select></div>
+     <div class="field"><label>Tier 2</label><select id="singleRiskTier2"></select></div>
+     <div class="field"><label>Tier 1</label><select id="singleRiskTier1"></select></div>
+     <div class="field full">
       <label>Requirement Description</label>
 
       <textarea
@@ -3052,7 +3082,9 @@ function setType(type){
 
 
 function openSubmit(){
+ loadSubmissionRiskClassifications();
 
+ loadSubmissionRiskClassifications();
  showChoices();
  document.getElementById('submitModal').classList.add('show');
 }
@@ -3134,6 +3166,7 @@ async function prototypeSubmit(){
  const source=document.getElementById('singleSource').value.trim();
  const reference=document.getElementById('singleReference').value.trim();
  const additional=document.getElementById('singleAdditional').value.trim();
+ const riskCategoryId=Number(document.getElementById('singleRiskTier1').value);
 
  if(!title){
   alert('Enter a requirement title.');
@@ -3163,6 +3196,16 @@ async function prototypeSubmit(){
   return;
  }
 
+ if(!riskCategoryId){
+  alert('Select a complete Tier 4 to Tier 1 Risk Classification.');
+  return;
+ }
+
+ if(!document.getElementById('singleRiskTier1').value){
+  alert('Select a Tier 1 Risk Classification.');
+  return;
+ }
+
  const button=event?.target;
 
  if(button){
@@ -3182,6 +3225,7 @@ async function prototypeSubmit(){
     },
     body:JSON.stringify({
      submission_type:'Single Requirement',
+     risk_classification_ids:[riskCategoryId],
      request_title:title,
      description:description,
      compliance_type:type,
@@ -3196,6 +3240,7 @@ async function prototypeSubmit(){
       applicability==='Project'
       ? projectId
       : null,
+     risk_classification_ids:[Number(document.getElementById('singleRiskTier1').value)],
      additional_information:additional
     })
    }
@@ -3961,6 +4006,8 @@ async function openLiveObligation(id){
   const apps=data.applicability||[];
   const controls=data.controls||[];
   currentLiveControls=controls;
+  loadRequirementRiskClassifications(currentLiveObligationId);
+  loadComplianceRiskAssessmentHistory(currentLiveObligationId);
   loadComplianceLinkedRisks(currentLiveObligationId,!!data.permissions?.is_controller);
 
   renderControlGovernanceDocuments(controls);
@@ -4230,6 +4277,14 @@ async function openComplianceRequestFromAction(requestId){
 
    if(strong)strong.textContent=item.proposed_title||'—';
    if(para)para.textContent=item.proposed_description||'No description provided.';
+   let classification=sections[0].querySelector('#controllerProposedRiskClassifications');
+   if(!classification){
+    classification=document.createElement('p');
+    classification.id='controllerProposedRiskClassifications';
+    sections[0].appendChild(classification);
+   }
+   classification.textContent='Risk Classification: '+((item.risk_classifications||[]).map(r=>r.category_name).join(', ')||'Not selected');
+
   }
 
   if(sections[1]){
@@ -6459,8 +6514,57 @@ function openReviewAssessment(){
 
  document.getElementById('reviewAssessmentModal')
   .classList.add('show');
+ prepareComplianceRiskAssessment();
 }
 
+
+function readComplianceRiskPosition(status){
+ if(status==='Not Applicable')return null;
+ const get=id=>document.getElementById(id).value;
+ return {
+  inherent_likelihood:Number(get('reviewRiskInherentLikelihood')),
+  inherent_impact:Number(get('reviewRiskInherentImpact')),
+  residual_likelihood:Number(get('reviewRiskResidualLikelihood')),
+  residual_impact:Number(get('reviewRiskResidualImpact')),
+  control_effectiveness:get('reviewRiskControlEffectiveness'),
+  risk_owner_user_id:Number(get('reviewRiskOwner')),
+  linked_risk_id:get('reviewRiskLinkedMaster')||null,
+  justification:get('reviewRiskJustification').trim()
+ };
+}
+
+async function prepareComplianceRiskAssessment(){
+ const ids=['reviewRiskInherentLikelihood','reviewRiskInherentImpact','reviewRiskResidualLikelihood','reviewRiskResidualImpact'];
+ ids.forEach(id=>{
+  const el=document.getElementById(id);
+  el.innerHTML='<option value="">Select 1–5...</option>'+[1,2,3,4,5].map(n=>'<option value="'+n+'">'+n+'</option>').join('');
+  el.onchange=updateComplianceRiskScores;
+ });
+ document.getElementById('reviewAssessmentStatus').onchange=()=>{
+  const enabled=document.getElementById('reviewAssessmentStatus').value!=='Not Applicable';
+  ids.concat(['reviewRiskControlEffectiveness','reviewRiskOwner','reviewRiskLinkedMaster','reviewRiskJustification']).forEach(id=>
+   document.getElementById(id).disabled=!enabled);
+ };
+ document.getElementById('reviewRiskControlEffectiveness').value='';
+ document.getElementById('reviewRiskJustification').value='';
+ updateComplianceRiskScores();
+ try{
+  const [users,risks]=await Promise.all([
+   complianceRiskRequest('/users/active'),
+   complianceRiskRequest('/compliance/obligations/'+currentLiveObligationId+'/risks')
+  ]);
+  document.getElementById('reviewRiskOwner').innerHTML='<option value="">Select owner...</option>'+
+   (users.users||[]).map(u=>'<option value="'+Number(u.id)+'">'+escapeComplianceText(u.name)+'</option>').join('');
+  document.getElementById('reviewRiskLinkedMaster').innerHTML='<option value="">No linked master risk</option>'+
+   (risks.risks||[]).map(r=>'<option value="'+Number(r.id)+'">'+escapeComplianceText(r.risk_code)+' — '+escapeComplianceText(r.risk_title)+'</option>').join('');
+ }catch(error){document.getElementById('reviewAssessmentMessage').textContent=error.message;}
+}
+function updateComplianceRiskScores(){
+ const v=id=>Number(document.getElementById(id).value);
+ const a=v('reviewRiskInherentLikelihood')*v('reviewRiskInherentImpact');
+ const b=v('reviewRiskResidualLikelihood')*v('reviewRiskResidualImpact');
+ document.getElementById('reviewRiskScores').textContent='Inherent: '+(a||'—')+' / 25 · Residual: '+(b||'—')+' / 25';
+}
 
 async function submitComplianceAssessment(){
 
@@ -6511,7 +6615,8 @@ async function submitComplianceAssessment(){
      assessment_status:status,
      rationale:rationale,
      gaps_identified:gaps||null,
-     next_assessment_date:nextDate||null
+     next_assessment_date:nextDate||null,
+     risk_position:readComplianceRiskPosition(status)
     })
    }
   );
@@ -8172,4 +8277,108 @@ document.addEventListener('DOMContentLoaded',()=>{
  const id=new URLSearchParams(location.search).get('obligation_id');
  if(id&&/^\d+$/.test(id))openLiveObligation(Number(id));
 });
+</script>
+
+<script>
+async function loadComplianceRiskAssessmentHistory(id){
+ const target=document.getElementById('complianceRiskAssessmentHistory');
+ target.textContent='Loading risk assessments...';
+ try{
+  const data=await complianceRiskRequest('/compliance/obligations/'+id+'/risk-assessments');
+  if(Number(currentLiveObligationId)!==Number(id))return;
+  const rows=data.assessments||[];
+  target.innerHTML=rows.length?rows.map(a=>
+   '<div class="compliance-linked-risk"><div><strong>'+escapeComplianceText(a.assessment_date)+' — '+escapeComplianceText(a.assessment_status)+'</strong>'+
+   '<small>Inherent '+a.inherent_score+'/25 · Residual '+a.residual_score+'/25 · Controls: '+escapeComplianceText(a.control_effectiveness)+'</small>'+
+   '<small>'+escapeComplianceText(a.risk_code||'No master risk linked')+'</small>'+
+   '<p>'+escapeComplianceText(a.justification)+'</p></div></div>').join('')
+   :'<div class="compliance-empty-state">No risk assessments recorded.</div>';
+ }catch(error){target.textContent=error.message;}
+}
+</script>
+
+<script>
+let submissionRiskPaths=[];
+async function loadSubmissionRiskClassifications(){
+ const message=document.getElementById('singleRiskClassificationMessage');
+ message.textContent='Loading risk classifications...';
+ try{
+  const data=await complianceRiskRequest('/compliance/risk-classifications');
+  submissionRiskPaths=data.classifications||[];
+  changeSubmissionRiskTier(5);
+  message.textContent=submissionRiskPaths.length?'':'No active classification paths available.';
+ }catch(error){message.textContent=error.message;}
+}
+function changeSubmissionRiskTier(changedTier){
+ const tiers=[4,3,2,1];
+ const selected={};
+ tiers.forEach(t=>selected[t]=document.getElementById('singleRiskTier'+t).value);
+ tiers.forEach(t=>{if(t<changedTier)selected[t]='';});
+ tiers.forEach(t=>{
+  const element=document.getElementById('singleRiskTier'+t);
+  const eligible=submissionRiskPaths.filter(path=>
+   tiers.filter(parent=>parent>t).every(parent=>
+    !selected[parent]||String(path.path_ids[4-parent])===selected[parent]));
+  const values=new Map(eligible.map(path=>
+   [String(path.path_ids[4-t]),path.path_names[4-t]]));
+  element.innerHTML='<option value="">Select Tier '+t+'...</option>'+
+   [...values].sort((a,b)=>a[1].localeCompare(b[1])).map(([id,name])=>
+    '<option value="'+id+'">'+escapeComplianceText(name)+'</option>').join('');
+  element.value=selected[t]||'';
+ });
+}
+</script>
+
+<script>
+async function loadRequirementRiskClassifications(id){
+ const target=document.getElementById('complianceRequirementRiskClassifications');
+ target.textContent='Loading classifications...';
+ try{
+  const data=await complianceRiskRequest('/compliance/obligations/'+id+'/risk-classifications');
+  if(Number(currentLiveObligationId)!==Number(id))return;
+  target.textContent=(data.classifications||[]).map(c=>c.category_name).join(' · ')||'No classification assigned.';
+ }catch(error){target.textContent=error.message;}
+}
+</script>
+
+<script>
+let submissionRiskPaths=[];
+function renderSubmissionRiskTiers(changedTier){
+ const tiers=[4,3,2,1],values={};
+ tiers.forEach(t=>values[t]=document.getElementById('singleRiskTier'+t).value);
+ tiers.filter(t=>t<changedTier).forEach(t=>values[t]='');
+ for(const tier of tiers){
+  const select=document.getElementById('singleRiskTier'+tier);
+  const choices=new Map();
+  submissionRiskPaths.filter(p=>tiers.filter(t=>t>tier).every(t=>
+   !values[t]||p.path_ids.some((id,i)=>id===Number(values[t])&&
+    Number(p.tier)+p.path_ids.length-1-i===t)
+  )).forEach(p=>p.path_ids.forEach((id,i)=>{
+   if(Number(p.tier)+p.path_ids.length-1-i===tier)
+    choices.set(id,p.path.split(' → ')[i]);
+  }));
+  select.innerHTML='<option value="">Select Tier '+tier+'...</option>'+
+   [...choices.entries()].sort((a,b)=>a[1].localeCompare(b[1]))
+   .map(([id,name])=>'<option value="'+id+'">'+escapeComplianceText(name)+'</option>').join('');
+  select.value=values[tier]||'';
+  select.disabled=tier!==4&&!values[tier+1];
+ }
+}
+async function loadSubmissionRiskClassifications(){
+ const ids=[4,3,2,1];
+ ids.forEach(t=>{
+  const select=document.getElementById('singleRiskTier'+t);
+  select.innerHTML='<option value="">Loading...</option>';
+  select.onchange=()=>renderSubmissionRiskTiers(t);
+ });
+ try{
+  const data=await complianceRiskRequest('/compliance/risk-classification-paths');
+  submissionRiskPaths=(data.categories||[]).filter(p=>p.is_terminal&&Number(p.tier)===1);
+  renderSubmissionRiskTiers(4);
+ }catch(error){
+  document.getElementById('singleRiskTier4').innerHTML=
+   '<option value="">Classification unavailable</option>';
+  console.error('Unable to load Compliance risk classifications',error);
+ }
+}
 </script>
