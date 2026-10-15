@@ -356,7 +356,7 @@
 </style><link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="header.css">
-</head>
+<style id="vero-loader-style">.actions-page{position:relative;min-height:280px}.vero-page-loader{position:absolute;inset:0;background:#0D0D0D;z-index:20;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;transition:opacity .25s ease,visibility .25s ease}.vero-page-loader.is-ready{opacity:0;visibility:hidden;pointer-events:none}.vero-page-loader img{width:80px;height:80px;object-fit:contain;animation:vero-page-spin 1.6s linear infinite}.vero-page-loader span{color:#F4F6F5;font:500 12px Montserrat,Arial,sans-serif}@keyframes vero-page-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.vero-page-loader img{animation:none}}</style></head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
@@ -389,7 +389,7 @@
    </div>
   </section>
 
-  <div class="actions-page">
+  <div class="actions-page"><div id="veroPageLoader" class="vero-page-loader" role="status" aria-label="Loading your actions"><img src="verra-chevron.png" alt=""><span>Preparing your workspace...</span></div>
 
    <div class="action-toolbar">
 
@@ -2548,10 +2548,11 @@ async function loadDocumentApprovers(){
  }
 }
 
+function finishInitialActionsLoad(){document.getElementById('veroPageLoader')?.classList.add('is-ready');}
 async function loadActions(){
  const sequence=++actionLoadSequence;
  const token=localStorage.getItem(TOKEN_KEY), list=document.getElementById('fullActionList');
- if(!token){list.innerHTML='<div class="action-error">Please sign in to view your actions.</div>';return;}
+ if(!token){list.innerHTML='<div class="action-error">Please sign in to view your actions.</div>';finishInitialActionsLoad();return;}
  try{
   const r=await fetch(`${API}/my-actions`,{headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store'});
   const d=await r.json(); if(!r.ok)throw new Error(d.message||'Unable to load actions');
@@ -2559,6 +2560,7 @@ async function loadActions(){
   const selectedRiskId=window.VeroRiskActions.isRiskAction(currentAction)?currentAction.id:null;
   allActions=window.VeroRiskActions.normaliseActions(d.actions);
   renderActions();
+  finishInitialActionsLoad();
   if(selectedRiskId){
    const selectedIndex=allActions.findIndex(action=>action.id===selectedRiskId);
    if(selectedIndex<0)closeActionDetail();
@@ -2570,6 +2572,7 @@ async function loadActions(){
   if(window.VeroRiskActions.isRiskAction(currentAction))closeActionDetail();
   list.innerHTML='<div class="action-error">Unable to load your actions right now.</div>';
   document.getElementById('actionListCount').textContent='Unavailable';
+  finishInitialActionsLoad();
  }
 }
 // Returning from a decision refreshes the one authoritative server feed.
