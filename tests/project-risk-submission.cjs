@@ -28,10 +28,10 @@ test('review capabilities drive actions without inferring Risk Manager authority
  const a=app();a.data.capabilities={can_review:true};a.render();assert.equal(a.buttons().some(b=>/Approve|Return|Revise|Complete/.test(b.textContent)),false);assert.match(a.host.textContent,/Read-only review/);
 });
 test('definition-only review sends exact version/hash once and retains non-live state',async()=>{
- const a=app();a.render();const button=a.button('Approve definition; send assessment for approval');assert.ok(button);button.click();button.click();await tick();const posts=a.calls.filter(c=>c.method==='POST');assert.equal(posts.length,1);assert.equal(posts[0].url.endsWith('/risks/91/project-submission/decision'),true);assert.deepEqual(posts[0].body,{decision:'Approve',reason:'Reviewed package',version:7,package_hash:'version-seven-hash'});assert.match(a.host.textContent,/No, required approvals are still pending/);
+ const a=app();a.render();const button=a.button('Approve risk and assessment');assert.ok(button);button.click();button.click();await tick();const posts=a.calls.filter(c=>c.method==='POST');assert.equal(posts.length,1);assert.equal(posts[0].url.endsWith('/risks/91/project-submission/decision'),true);assert.deepEqual(posts[0].body,{decision:'Approve',reason:'Reviewed package',version:7,package_hash:'version-seven-hash'});assert.match(a.host.textContent,/No, required approvals are still pending/);
 });
 test('complete approval is exposed only by backend can_complete',()=>{
- const a=app();a.data.capabilities.can_complete=true;a.render();assert.ok(a.button('Approve risk and assessment'));assert.equal(a.button('Approve definition; send assessment for approval'),undefined);
+ const a=app();a.data.capabilities.can_complete=true;a.render();assert.ok(a.button('Approve risk and assessment'));assert.equal(a.button('Approve risk and assessment'),undefined);
 });
 test('Administrator package actions follow operation capabilities and retain exact versioned decision payload',async()=>{
  const a=app();a.data.capabilities={...a.data.capabilities,administrator_override:true,can_complete:true};a.render();assert.ok(a.button('Approve risk and assessment'));a.button('Approve risk and assessment').click();await tick();assert.deepEqual(a.calls.find(c=>c.method==='POST').body,{decision:'Approve',reason:'Reviewed package',version:7,package_hash:'version-seven-hash'});
@@ -60,10 +60,10 @@ test('independent treatment verification uses explicit permission and required r
  const a=app();a.data.is_live=true;a.data.submission.treatment_actions[0].capabilities={can_verify:true};a.render();assert.equal(a.button('Complete treatment'),undefined);a.button('Return treatment for correction').click();await tick();assert.equal(a.calls[0].url.endsWith('/project-risk/treatment-actions/101/verify'),true);assert.equal(a.calls[0].body.decision,'Rejected');
 });
 test('late successful decision cannot replace a newer or closed detail',async()=>{
- let finish;const pending=new Promise(resolve=>finish=resolve);const a=app({fetch:async()=>{await pending;return {ok:true,json:async()=>({})};}});let current=true;a.render({isCurrent:()=>current});a.button('Approve definition; send assessment for approval').click();current=false;a.host.textContent='Newer risk';finish();await tick();assert.equal(a.host.textContent,'Newer risk');assert.equal(a.calls.length,1);
+ let finish;const pending=new Promise(resolve=>finish=resolve);const a=app({fetch:async()=>{await pending;return {ok:true,json:async()=>({})};}});let current=true;a.render({isCurrent:()=>current});a.button('Approve risk and assessment').click();current=false;a.host.textContent='Newer risk';finish();await tick();assert.equal(a.host.textContent,'Newer risk');assert.equal(a.calls.length,1);
 });
 test('API failure remains explicit and never auto-retries the decision',async()=>{
- const a=app({fetch:async()=>({ok:false,status:409,json:async()=>({message:'Package changed; refresh'})})});a.render();a.button('Approve definition; send assessment for approval').click();await tick();assert.match(a.host.textContent,/Package changed/);assert.equal(a.calls.length,1);
+ const a=app({fetch:async()=>({ok:false,status:409,json:async()=>({message:'Package changed; refresh'})})});a.render();a.button('Approve risk and assessment').click();await tick();assert.match(a.host.textContent,/Package changed/);assert.equal(a.calls.length,1);
 });
 test('creator uses scoped manager capability and published document endpoint; history belongs to actual assessment drawer',()=>{
  const html=fs.readFileSync(path.join(root,'project-workspace.html'),'utf8');const create=html.slice(html.indexOf('async function openProjectRiskCreator'),html.indexOf('/* Read-only, project-scoped'));
@@ -82,7 +82,7 @@ test('returned, archived and live packages do not falsely claim an approval queu
  for(const state of ['returned','archived','live']){const a=app();a.data.reviewer_routing={ready:false,message:'MISSING REVIEWER SENTINEL'};a.data.capabilities={};if(state==='returned')a.data.submission.status='Changes Requested';if(state==='archived')a.data.risk_status='Archived';if(state==='live')a.data.is_live=true;a.render();assert.doesNotMatch(a.host.textContent,/MISSING REVIEWER SENTINEL|Each remaining approval is routed/);}
 });
 test('legacy correction preserves same risk identity and exposes complete existing submission',()=>{
- const a=app();a.data.submission.legacy=true;a.data.capabilities={can_resubmit:true};let selected;a.render({onRevise:s=>selected=s});a.button('Complete existing risk submission').click();assert.equal(selected.risk_id,91);assert.match(a.host.textContent,/resubmit this same risk/);
+ const a=app();a.data.submission.legacy=true;a.data.capabilities={can_resubmit:true};let selected;a.render({onRevise:s=>selected=s});a.button('Complete submission').click();assert.equal(selected.risk_id,91);assert.match(a.host.textContent,/resubmit the same risk/);
 });
 test('live approved package links verified ordinary assessment history without enabling a new package approval',()=>{
  const a=app();a.data.is_live=true;a.data.capabilities={};let opened=0;a.render({onAssessments:()=>opened++});a.button('View assessment history and revisions').click();assert.equal(opened,1);assert.equal(a.buttons().some(b=>b.textContent.startsWith('Approve')),false);
