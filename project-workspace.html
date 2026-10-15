@@ -759,6 +759,8 @@ async function assignApprovedProjectRisk(risk){
 }
 async function loadProjectRisks(id){
  const host='projectRiskList',count='projectRiskCount';
+ projectListMessage(host,'Loading project risks…');
+ document.getElementById(count).textContent='Loading…';
  try{
   const res=await apiFetch(API_BASE+'/risks',{cache:'no-store'});
   if(!res.ok)throw Error('Risk API returned '+res.status);
@@ -767,9 +769,10 @@ async function loadProjectRisks(id){
   const assessmentStatus=new Map(),assessmentLinks=new Map();
   // Reuse the same authorised applicability API and bounded concurrency as risk-context.js.
   // Fail closed: never present a partial result as the full project risk list.
-  await Promise.all(Array.from({length:Math.min(6,risks.length)},async()=>{
+  await Promise.all(Array.from({length:Math.min(12,risks.length)},async()=>{
    while(next<risks.length){
     const risk=risks[next++];
+    if(next%12===0)projectListMessage(host,'Checking project risk applicability… '+next+' / '+risks.length);
     const rr=await apiFetch(API_BASE+'/risks/'+encodeURIComponent(risk.id)+'/applicability',{cache:'no-store'});
     if(!rr.ok)throw Error('Risk applicability returned '+rr.status);
     const d=await rr.json();if(!Array.isArray(d.assignments))throw Error('Invalid risk applicability response');
