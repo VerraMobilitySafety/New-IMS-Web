@@ -520,7 +520,7 @@ async function openProjectRiskCreator(){
  let overlay=document.getElementById('projectRiskCreateOverlay');
  if(!overlay){
   overlay=document.createElement('div');overlay.id='projectRiskCreateOverlay';overlay.className='modal-back show';
-  overlay.innerHTML='<div class="drawer"><div class="drawer-head"><button type="button" class="close" id="projectRiskCreateClose">×</button><small>RISK MANAGEMENT · GOVERNED CREATION</small><h2>Add Project Risk</h2><small>Project: <span id="projectRiskCreateProject"></span> · Draft pending Risk Office approval</small></div><div class="drawer-body"><form id="projectRiskCreateForm"><label for="projectRiskCreateCategory">Risk Classification · Project Execution (Tier 3) → Tier 2 → Tier 1</label><select required id="projectRiskCreateCategory" style="display:block;width:100%;padding:11px;margin:9px 0 18px"></select><label for="projectRiskCreateTitle">Risk Title</label><input required maxlength="255" id="projectRiskCreateTitle" style="display:block;width:100%;padding:11px;margin:9px 0 18px"><label for="projectRiskCreateDescription">Risk Description</label><textarea maxlength="10000" id="projectRiskCreateDescription" style="display:block;width:100%;min-height:110px;padding:11px;margin:9px 0 18px"></textarea><label for="projectRiskCreateReason">Reason for Creation</label><textarea required maxlength="2000" id="projectRiskCreateReason" style="display:block;width:100%;min-height:90px;padding:11px;margin:9px 0 16px"></textarea><p class="meta">Creates a Draft Master Risk in the central register. Risk Office approval and operational assessment remain separate governed steps.</p><p id="projectRiskCreateStatus" role="status"></p><div class="drawer-actions"><button class="btn green" type="submit" id="projectRiskCreateSave">Create Draft Risk</button><button class="btn outline" type="button" id="projectRiskCreateCancel">Cancel</button></div></form></div></div>';
+  overlay.innerHTML='<div class="drawer"><div class="drawer-head"><button type="button" class="close" id="projectRiskCreateClose">×</button><small>RISK MANAGEMENT · GOVERNED CREATION</small><h2>Add Project Risk</h2><small>Project: <span id="projectRiskCreateProject"></span> · Draft pending Risk Office approval</small></div><div class="drawer-body"><form id="projectRiskCreateForm"><label for="projectRiskCreateCategory">Risk Classification · Project Execution (Tier 3)</label><select required id="projectRiskCreateCategory" style="display:block;width:100%;padding:11px;margin:9px 0 18px"></select><label for="projectRiskCreateTitle">Risk Title</label><input required maxlength="255" id="projectRiskCreateTitle" style="display:block;width:100%;padding:11px;margin:9px 0 18px"><label for="projectRiskCreateDescription">Risk Description</label><textarea maxlength="10000" id="projectRiskCreateDescription" style="display:block;width:100%;min-height:110px;padding:11px;margin:9px 0 18px"></textarea><label for="projectRiskCreateReason">Reason for Creation</label><textarea required maxlength="2000" id="projectRiskCreateReason" style="display:block;width:100%;min-height:90px;padding:11px;margin:9px 0 16px"></textarea><p class="meta">Creates a Draft Master Risk in the central register. Risk Office approval and operational assessment remain separate governed steps.</p><p id="projectRiskCreateStatus" role="status"></p><div class="drawer-actions"><button class="btn green" type="submit" id="projectRiskCreateSave">Create Draft Risk</button><button class="btn outline" type="button" id="projectRiskCreateCancel">Cancel</button></div></form></div></div>';
   document.body.appendChild(overlay);
   const close=()=>{if(!overlay.dataset.saving)overlay.classList.remove('show')};
   overlay.querySelector('#projectRiskCreateClose').onclick=close;
@@ -530,7 +530,7 @@ async function openProjectRiskCreator(){
    e.preventDefault();if(overlay.dataset.saving)return;
    const status=overlay.querySelector('#projectRiskCreateStatus'),save=overlay.querySelector('#projectRiskCreateSave');
    const category=Number(overlay.querySelector('#projectRiskCreateCategory').value);
-   const payload={request_id:overlay.dataset.requestId,risk_title:overlay.querySelector('#projectRiskCreateTitle').value.trim(),risk_description:overlay.querySelector('#projectRiskCreateDescription').value.trim(),tier1_category_id:category,reason:overlay.querySelector('#projectRiskCreateReason').value.trim(),project_id:Number(currentProject.id)};
+   const payload={request_id:overlay.dataset.requestId,risk_title:overlay.querySelector('#projectRiskCreateTitle').value.trim(),risk_description:overlay.querySelector('#projectRiskCreateDescription').value.trim(),classification_category_id:category,reason:overlay.querySelector('#projectRiskCreateReason').value.trim(),project_id:Number(currentProject.id)};
    if(!Number.isInteger(category)||!payload.risk_title||!payload.reason){status.textContent='Complete all required fields.';return}
    overlay.dataset.saving='1';save.disabled=true;status.textContent='Creating governed Draft Risk…';
    try{
@@ -563,16 +563,17 @@ async function openProjectRiskCreator(){
   const tier2=categories.filter(c=>Number(c.tier)===2&&parentIds(c).includes(parentId));
   const tier2Ids=new Set(tier2.map(c=>Number(c.id)));
   const tier1=categories.filter(c=>Number(c.tier)===1&&parentIds(c).some(id=>tier2Ids.has(id)));
-  if(!tier1.length)throw Error('No active Tier 1 classifications under Project Execution Tier 3.');
   select.add(new Option('Select classification…',''));
+  select.add(new Option('Tier 3 · Project Execution',String(parentId)));
   tier2.sort((a,b)=>a.category_name.localeCompare(b.category_name)).forEach(parent=>{
-   const group=document.createElement('optgroup');group.label=parent.category_name;
+   const group=document.createElement('optgroup');group.label='Tier 2 · '+parent.category_name;
+   group.appendChild(new Option('Tier 2 · '+parent.category_name,String(parent.id)));
    tier1.filter(c=>parentIds(c).includes(Number(parent.id))).sort((a,b)=>a.category_name.localeCompare(b.category_name)).forEach(child=>{
-    group.appendChild(new Option(child.category_name,String(child.id)));
+    group.appendChild(new Option('Tier 1 · '+child.category_name,String(child.id)));
    });
-   if(group.children.length)select.appendChild(group);
+   select.appendChild(group);
   });
-  overlay.dataset.requestId=crypto.randomUUID();status.textContent='Select a Tier 1 classification grouped by Tier 2 beneath Project Execution (Tier 3).';save.disabled=false;
+  overlay.dataset.requestId=crypto.randomUUID();status.textContent='Select Tier 3, Tier 2 or Tier 1. A Tier 1 classification is optional.';save.disabled=false;
  }catch(error){status.textContent=error.message;save.disabled=true}
 }
 
