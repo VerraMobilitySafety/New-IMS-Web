@@ -102,7 +102,7 @@
    if(decisions.dataset.saving)return;
    const reason=global.prompt(decision==='Return'?'Reason for returning this Project Risk (required):':'Approval rationale (required):');
    if(reason===null)return;if(!reason.trim()||reason.length>2000){status.textContent='Enter a rationale of 1–2000 characters.';return;}
-   if(decision==='Approve'&&!global.confirm('Approve this submitted risk package? Any additional independent approval will remain in My Actions.'))return;
+   if(decision==='Approve'&&!global.confirm(capabilities.can_complete?'Approve this risk and its submitted assessment?':'Approve this stage? An independent reviewer must still approve the assessment before the risk becomes active.'))return;
    decisions.dataset.saving='1';buttons.forEach(b=>b.disabled=true);status.textContent='Recording review…';
    try{
     await json('/risks/'+encodeURIComponent(submission.risk_id||risk.id)+'/project-submission/decision',{method:'POST',body:JSON.stringify({decision,reason:reason.trim(),version:submission.version,package_hash:submission.package_hash})});
@@ -112,7 +112,7 @@
    }catch(error){status.textContent=error.message+' Refresh this risk before retrying; the submitted package may have changed.';}
    finally{delete decisions.dataset.saving;buttons.forEach(b=>b.disabled=false);}
   }
-  if(capabilities.can_approve&&data.reviewer_routing?.ready!==false){const button=node('button',capabilities.can_complete?'Approve risk and assessment':submission.status==='Assessment Approval Pending'?'Approve risk and assessment':'Approve risk and assessment');button.className='btn green';button.type='button';button.addEventListener('click',()=>decide('Approve'));buttons.push(button);decisions.appendChild(button);}
+  if(capabilities.can_approve&&data.reviewer_routing?.ready!==false){const button=node('button',capabilities.can_complete?'Approve risk and assessment':'Approve risk — next reviewer required');button.className='btn green';button.type='button';button.addEventListener('click',()=>decide('Approve'));buttons.push(button);decisions.appendChild(button);}
   if(capabilities.can_request_changes){const button=node('button','Return for changes');button.className='btn outline';button.type='button';button.addEventListener('click',()=>decide('Return'));buttons.push(button);decisions.appendChild(button);}
   if(capabilities.can_resubmit){const button=node('button',submission.legacy?'Complete submission':'Edit and resubmit');button.className='btn green';button.type='button';button.addEventListener('click',()=>{if(options.onRevise)options.onRevise(submission);else global.location.href='project-workspace.html?'+new URLSearchParams({id:String(submission.project_id),risk_id:String(submission.risk_id||risk.id),risk_action:'correct'});});decisions.appendChild(button);}
   if(!capabilities.can_approve&&!capabilities.can_request_changes&&!capabilities.can_resubmit&&!data.is_live)decisions.appendChild(node('p',pending?'Read-only review. Authorised reviewers can act through My Actions once routing is ready.':'Read-only risk history.'));
