@@ -1985,10 +1985,10 @@ table {
 <div class="vero-exposure-navigation"><button id="veroShowClassification" type="button" aria-pressed="true">Risk Classification</button><button id="veroShowExposure" type="button" aria-pressed="false">Operational Exposure</button></div><div class="vero-operational-entry"><button type="button" id="veroOperationalEntry" aria-expanded="false" aria-controls="veroExposurePanel">View Operational Exposure</button><span>VM Sites · Projects · Maintenance Contracts</span></div><section id="veroExposurePanel" class="vero-risk-panel" hidden><div class="vero-exposure-head"><div><h2>Operational Exposure <span id="veroExposureCount">—</span></h2><p>Actual operational applicability and assessments across VM Sites, Projects and Maintenance Contracts.</p></div><button type="button" id="veroExposureRefresh">Refresh</button></div><div class="vero-exposure-filters"><label>Context type<select id="veroExposureType"><option value="">All contexts</option><option>VM Site</option><option>Project</option><option>Maintenance Contract</option></select></label><label>Search<input id="veroExposureSearch" type="search" placeholder="Search name or code"></label></div><div id="veroExposureStatus" role="status"></div><div class="vero-risk-register-scroll"><table class="vero-exposure-table"><thead><tr><th>Operational context</th><th>Type</th><th>Applicable risks</th><th>Approved assessments</th><th>Awaiting assessment</th><th>Maximum residual</th></tr></thead><tbody id="veroExposureBody"></tbody></table></div></section><div id="veroCompactRiskLayout">
 
 <div class="vero-risk-filter-panels">
-<section class="vero-risk-panel vero-compact-filter-panel vero-risk-filter-panel" aria-label="Risk Classification"><h2>Risk Classification</h2><div class="vero-risk-secondary-row"><div class="vero-risk-filter"><label for="veroTier4Filter">Risk Domain</label><select id="veroTier4Filter"><option value="">All Risk Domain categories</option></select></div>
-<div class="vero-risk-filter"><label for="veroTier3Filter">Risk Stream</label><select id="veroTier3Filter"><option value="">All Risk Stream categories</option></select></div>
-<div class="vero-risk-filter"><label for="veroTier2Filter">Risk Category</label><select id="veroTier2Filter"><option value="">All Risk Category categories</option></select></div>
-<div class="vero-risk-filter"><label for="veroTier1Filter">Risk Event</label><select id="veroTier1Filter"><option value="">All Risk Event categories</option></select></div></div></section>
+<section class="vero-risk-panel vero-compact-filter-panel vero-risk-filter-panel" aria-label="Risk Classification"><h2>Risk Classification</h2><div class="vero-risk-secondary-row"><div class="vero-risk-filter"><label for="veroTier4Filter">Risk Domain</label><select id="veroTier4Filter"><option value="">All Risk Domains</option></select></div>
+<div class="vero-risk-filter"><label for="veroTier3Filter">Risk Stream</label><select id="veroTier3Filter"><option value="">All Risk Streams</option></select></div>
+<div class="vero-risk-filter"><label for="veroTier2Filter">Risk Category</label><select id="veroTier2Filter"><option value="">All Risk Categories</option></select></div>
+<div class="vero-risk-filter"><label for="veroTier1Filter">Risk Event</label><select id="veroTier1Filter"><option value="">All Risk Events</option></select></div></div></section>
 <section class="vero-risk-panel vero-compact-filter-panel vero-risk-filter-panel" aria-label="Operational Context"><h2>Operational Context</h2><div class="vero-risk-secondary-row"><div class="vero-risk-filter"><label for="veroContextTypeFilter">Context Type</label><select id="veroContextTypeFilter"><option value="">All context types</option></select></div>
 <div class="vero-risk-filter"><label for="veroApplicationFilter">Context Name</label><select id="veroApplicationFilter"><option value="">All contexts</option></select></div>
 <div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area</label><select id="veroSiteFilter" disabled aria-describedby="veroContextStatus"><option value="">Site-level filtering unavailable</option></select></div></div><p id="veroContextStatus" role="status">Site-level risk applicability is not available. Context filters cover the whole selected context.</p><button id="veroContextRetry" class="vero-risk-clear" type="button" hidden>Retry context data</button></section>
@@ -2261,11 +2261,11 @@ table {
    const items=tierCategories.filter(category=>
     category.tier===3 && parentIds(category).includes(parentId)
    );
-   populateTier(tier3Filter,items,parentId&&!items.length?'No further classifications':'All Risk Stream categories');
+   populateTier(tier3Filter,items,parentId&&!items.length?'No further classifications':'All Risk Streams');
    tier3Filter.disabled=!parentId||!items.length;
-   populateTier(tier2Filter,[],'All Risk Category categories');
+   populateTier(tier2Filter,[],'All Risk Categories');
    tier2Filter.disabled=true;
-    populateTier(tier1CategoryFilter,[],'All Risk Event categories');
+    populateTier(tier1CategoryFilter,[],'All Risk Events');
     tier1CategoryFilter.disabled=true;
   }
 
@@ -2274,7 +2274,7 @@ table {
    const items=tierCategories.filter(category=>
     category.tier===2 && parentIds(category).includes(parentId)
    );
-   populateTier(tier2Filter,items,parentId&&!items.length?'No further classifications':'All Risk Category categories');
+   populateTier(tier2Filter,items,parentId&&!items.length?'No further classifications':'All Risk Categories');
    tier2Filter.disabled=!parentId||!items.length;
     updateTier1Category();
   }
@@ -2282,7 +2282,7 @@ table {
   function updateTier1Category(){
     const parentId=Number(tier2Filter.value);
     const items=tierCategories.filter(category=>category.tier===1 && parentIds(category).includes(parentId));
-    populateTier(tier1CategoryFilter,items,parentId&&!items.length?'No further classifications':'All Risk Event categories');
+    populateTier(tier1CategoryFilter,items,parentId&&!items.length?'No further classifications':'All Risk Events');
     tier1CategoryFilter.disabled=!parentId||!items.length;
   }
 
@@ -2299,7 +2299,7 @@ table {
     .filter(category=>category.status==='Active');
    populateTier(tier4Filter,
     tierCategories.filter(category=>category.tier===4),
-    'All Risk Domain categories');
+    'All Risk Domains');
    tier4Filter.value=selectedTiers[0];
    updateTier3();
    tier3Filter.value=selectedTiers[1];
