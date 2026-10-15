@@ -724,6 +724,21 @@ async function openProjectAssessment(applicabilityId,riskTitle){
  overlay.classList.add('show');
  await loadProjectAssessmentHistory(applicabilityId);
 }
+async function assignApprovedProjectRisk(risk){
+ if(!currentProject?.id||risk.status!=='Open')return;
+ const rationale=window.prompt('Why does this approved Master Risk apply to this project?');
+ if(rationale===null)return;
+ if(!rationale.trim()||rationale.length>2000){window.alert('A justification of up to 2000 characters is required.');return}
+ try{
+  const response=await apiFetch(API_BASE+'/risks/'+encodeURIComponent(risk.id)+'/applicability',{
+   method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({context_type:'Project',context_id:Number(currentProject.id),action:'Assign',rationale:rationale.trim()})
+  });
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok)throw Error(result.message||'Unable to link risk to project');
+  await loadProjectRisks(currentProject.id);
+ }catch(error){window.alert('Project risk applicability not saved: '+error.message)}
+}
 async function loadProjectRisks(id){
  const host='projectRiskList',count='projectRiskCount';
  try{
@@ -766,19 +781,27 @@ async function loadProjectRisks(id){
   document.getElementById(count).textContent=linked.length+' applicable · '+drafts.length+' project-originated';
   if(!all.length){projectListMessage(host,'No project risks or pending Draft Risks yet.');return}
   all.sort((a,b)=>String(a.risk_code||'').localeCompare(String(b.risk_code||'')));
-  projectTable(host,['Reference','Risk','Status','Assessment','Next Review'],all,[
+  projectTable(host,['Reference','Risk','Status','Assessment','Next Review','Action'],all,[
    r=>r.risk_code,r=>r.risk_title,r=>drafts.includes(r)?(r.status==='Draft'?'Draft — Risk Office review':r.status+' — check applicability'):r.status,
    r=>drafts.includes(r)?'Pending Risk Office review':assessmentStatus.get(Number(r.id))||'Assessment Required',
-   r=>fmtDate(r.next_review_date)
+   r=>fmtDate(r.next_review_date),
+   r=>''
   ]);
   const body=document.querySelector('#projectRiskList table tbody');
   if(body)all.forEach((risk,index)=>{
    const applicabilityId=assessmentLinks.get(Number(risk.id));
-   if(!applicabilityId||!body.rows[index])return;
-   const td=body.rows[index].insertCell();
+   if(!body.rows[index])return;
+   const td=body.rows[index].cells[5];
+   if(!td)return;
    const button=document.createElement('button');button.type='button';
-   button.className='btn outline';button.textContent='Assess';
-   button.addEventListener('click',()=>openProjectAssessment(applicabilityId,risk.risk_title));
+   button.className='btn outline';
+   if(applicabilityId){
+    button.textContent='Assess';
+    button.addEventListener('click',()=>openProjectAssessment(applicabilityId,risk.risk_title));
+   }else if(risk.status==='Open'){
+    button.textContent='Assign to Project';
+    button.addEventListener('click',()=>assignApprovedProjectRisk(risk));
+   }else return;
    td.appendChild(button);
   });
  }catch(e){console.error('Project risks',e);document.getElementById(count).textContent='Unavailable';projectListMessage(host,'Unable to load complete project risks: '+e.message)}
