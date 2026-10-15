@@ -761,6 +761,23 @@ async function openProjectAssessment(applicabilityId,riskTitle){
  overlay.querySelector('#projectAssessmentMessage').textContent='Draft only — does not affect enterprise averages until approved.';
  overlay.classList.add('show');
  await loadProjectAssessmentHistory(applicabilityId);
+ try{
+  const response=await apiFetch(API_BASE+'/risk/applicability/'+encodeURIComponent(applicabilityId)+'/project-draft-prefill',{cache:'no-store'});
+  const result=await response.json().catch(()=>({}));
+  if(response.ok&&result.available&&result.proposed_assessment){
+   const assessment=result.proposed_assessment;
+   for(const [field,key] of [['projectAssessIL','inherent_likelihood'],['projectAssessIC','inherent_impact'],['projectAssessRL','residual_likelihood'],['projectAssessRC','residual_impact']]){
+    overlay.querySelector('#'+field).value=String(assessment[key]??'');
+   }
+   overlay.querySelector('#projectAssessControls').value=assessment.controls_summary||'';
+   overlay.querySelector('#projectAssessTreatments').value=assessment.treatments_summary||'';
+   overlay.querySelector('#projectAssessmentMessage').textContent='Initial Project Risk assessment retrieved from submission. Review the original values; do not create a duplicate assessment.';
+  }else if(!response.ok){
+   overlay.querySelector('#projectAssessmentMessage').textContent='Original assessment could not be retrieved ('+response.status+'). Do not create a duplicate; contact Risk Office.';
+  }
+ }catch(error){
+  overlay.querySelector('#projectAssessmentMessage').textContent='Original assessment unavailable. Do not create a duplicate assessment.';
+ }
 }
 async function assignApprovedProjectRisk(risk){
  if(!currentProject?.id||risk.status!=='Open')return;
