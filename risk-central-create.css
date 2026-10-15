@@ -32,3 +32,5 @@
 .vero-central .control-options{max-height:230px;overflow:auto}.vero-central .status{white-space:pre-line;color:#21869b;min-height:24px}
 @media(max-width:1200px){.vero-central .columns{grid-template-columns:1fr}.vero-central .summary{position:static}.vero-central .tiers{grid-template-columns:1fr 1fr}}
 @media(max-width:650px){.vero-central{padding:15px}.vero-central .fields,.vero-central .tiers{grid-template-columns:1fr}.vero-central .stage{padding:9px}.vero-central .stage b{font-size:15px}.vero-central .matrix{grid-template-columns:116px 46px repeat(5,76px)}.vero-central .matrix .cell{width:76px;height:76px}.vero-central .matrix .cell .score{font-size:21px}.vero-central .matrix .cell small{font-size:10px}}
+
+.vero-central .matrix .axis-label.like{position:sticky;left:0;z-index:2;background:white}.vero-central .matrix .like-number{position:sticky;left:148px;z-index:2}@media(max-width:650px){.vero-central .matrix .like-number{left:119px}}

@@ -1,10 +1,10 @@
 name: Central Risk form validation
 on:
   pull_request:
-    paths: ['risk.html', 'risk-central-create.*', 'risk-assessment-criteria.js', 'tests/risk-central-create.cjs', 'tests/risk-central-browser.cjs', '.github/workflows/central-risk-validation.yml']
+    paths: ['risk.html', 'risk-central-create.*', 'risk-assessment-criteria.js', 'tests/risk-central-create.cjs', 'tests/central-risk-browser.cjs', '.github/workflows/central-risk-validation.yml']
   push:
     branches: [main, 'vero/central-risk-live-20261016']
-    paths: ['risk.html', 'risk-central-create.*', 'risk-assessment-criteria.js', 'tests/risk-central-create.cjs', 'tests/risk-central-browser.cjs', '.github/workflows/central-risk-validation.yml']
+    paths: ['risk.html', 'risk-central-create.*', 'risk-assessment-criteria.js', 'tests/risk-central-create.cjs', 'tests/central-risk-browser.cjs', '.github/workflows/central-risk-validation.yml']
 permissions:
   contents: read
 jobs:
@@ -19,4 +19,4 @@ jobs:
       - run: node --test tests/risk-central-create.cjs
       - run: npm install --no-save playwright@1.56.1
       - run: npx playwright install --with-deps chromium
-      - run: node tests/risk-central-browser.cjs
+      - run: node tests/central-risk-browser.cjs
