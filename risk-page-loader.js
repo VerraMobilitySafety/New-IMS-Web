@@ -4,7 +4,7 @@
  */
 (()=>{
  'use strict';
- const pending=new Set(['risk']);
+ const pending=new Set((document.currentScript?.dataset.tasks||'risk').split(/\s+/).filter(Boolean));
  let overlay,observer,finished=false,domReady=false,frame,removalTimer,cameraMotion,revealing=false;
  const cleanup=()=>{
   observer?.disconnect();

@@ -5,18 +5,18 @@ const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const code=fs.readFileSync(path.join(root,'risk-page-loader.js'),'utf8');
-test('Risk alone opts in; every inline script remains valid',()=>{
+test('Home and Risk opt in; every inline script remains valid',()=>{
  for(const file of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
   const html=fs.readFileSync(path.join(root,file),'utf8');
-  assert.equal(html.includes('src="risk-page-loader.js?v=20261016-single-reveal"'),file==='risk.html');
-  if(file==='risk.html')for(const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(match[1]);
+  assert.equal(html.includes('src="risk-page-loader.js?'),['risk.html','index.html'].includes(file));
+  if(['risk.html','index.html'].includes(file))for(const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(match[1]);
  }
  const css=fs.readFileSync(path.join(root,'risk-page-loader.css'),'utf8');
  assert.match(css,/prefers-reduced-motion:reduce/);
  assert.match(fs.readFileSync(path.join(root,'risk-nk9-animation.css'),'utf8'),/nk9-flash,\.vero-page-loader::after\{display:none\}/);
  assert.doesNotMatch(code,/window\.fetch\s*=/);
 });
-function setup(tasks='content'){
+function setup(tasks='risk'){
  const listeners={},timers=new Map(),frames=new Map();let id=0,element,disconnected=false;
  const rects={main:{left:300,right:1200},hero:{bottom:245},sidebar:{right:300}};
  const main={getBoundingClientRect:()=>rects.main,querySelector:()=>hero};
@@ -47,8 +47,21 @@ test('waits for all critical rendered tasks and DOM, then fades once',()=>{
  env.api.mount();env.api.ready('risk');assert.equal(env.timers.size,1);
  env.timers.values().next().value.fn();assert.ok(env.overlay.removed);
 });
+test('Home waits for account and actions, with the same single reveal controller',()=>{
+ const env=setup('home-actions home-account');let reveal,stopped=false,reveals=0;
+ env.window.VeroNK9={start:()=>({reveal(done){reveals++;reveal=done;},stop(){stopped=true;}})};
+ env.listeners.DOMContentLoaded();env.api.ready('home-account');
+ assert.equal(reveals,0);assert.ok(!env.overlay.classes.has('is-ready'));
+ env.api.ready('home-actions');assert.equal(reveals,1);assert.ok(!env.overlay.classes.has('is-ready'));
+ env.api.ready('home-actions');assert.equal(reveals,1);
+ reveal();assert.ok(env.overlay.classes.has('is-ready'));assert.ok(stopped);
+ const home=fs.readFileSync(path.join(root,'index.html'),'utf8');
+ assert.match(home,/loadMyActions\(\)\.finally\(\(\)=>window\.VeroPageLoader\?\.ready\('home-actions'\)\)/);
+ assert.match(home,/load\(\)\.finally\(\(\)=>window\.VeroPageLoader\?\.ready\('home-account'\)\)/);
+ assert.ok(!home.includes('src="vero-page-loader.js"'));
+});
 test('fast results cannot dismiss before the document is parsed; static pages finish at DOM ready',()=>{
- for(const tasks of ['content','']){const env=setup(tasks);env.api.mount();env.api.ready('risk');
+ for(const tasks of ['risk','']){const env=setup(tasks);env.api.mount();env.api.ready('risk');
  assert.ok(!env.overlay.classes.has('is-ready'));env.listeners.DOMContentLoaded();assert.ok(env.overlay.classes.has('is-ready'));}
 });
 test('positions against actual sidebar, main and hero at desktop, responsive, scroll and hidden sidebar',()=>{
