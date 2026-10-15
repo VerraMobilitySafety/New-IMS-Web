@@ -564,7 +564,6 @@ async function openProjectRiskCreator(){
   const tier2Ids=new Set(tier2.map(c=>Number(c.id)));
   const tier1=categories.filter(c=>Number(c.tier)===1&&parentIds(c).some(id=>tier2Ids.has(id)));
   select.add(new Option('Select classification…',''));
-  select.add(new Option('Tier 3 · Project Execution',String(parentId)));
   tier2.sort((a,b)=>a.category_name.localeCompare(b.category_name)).forEach(parent=>{
    const group=document.createElement('optgroup');group.label='Tier 2 · '+parent.category_name;
    group.appendChild(new Option('Tier 2 · '+parent.category_name,String(parent.id)));
