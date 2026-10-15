@@ -8349,7 +8349,7 @@ async function loadSubmissionRiskClassifications(){
   select.onchange=()=>renderSubmissionRiskTiers(t);
  });
  try{
-  const data=await complianceRiskRequest('/risk/classification-catalogue');
+  const data=await complianceRiskRequest('/compliance/risk-classification-paths');
   submissionRiskPaths=(data.categories||[]).filter(p=>p.is_terminal&&Number(p.tier)===1);
   renderSubmissionRiskTiers(4);
  }catch(error){
