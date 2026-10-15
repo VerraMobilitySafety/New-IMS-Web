@@ -48,7 +48,7 @@
   const img=document.createElement('img');img.alt='';
   const flash=document.createElement('i');flash.className='vero-risk-flash';flash.setAttribute('aria-hidden','true');
   img.onerror=()=>{camera.className='vero-risk-camera is-fallback';flash.hidden=true;img.onerror=()=>{img.hidden=true;};img.src='verra-chevron.png';};
-  img.src='nk9-camera-trial.svg';camera.append(img,flash);
+  img.src='nk9-camera.png';camera.append(img,flash);
   const label=document.createElement('span');label.textContent='Preparing your workspace...';
   overlay.append(camera,label);document.body.appendChild(overlay);
   position();
