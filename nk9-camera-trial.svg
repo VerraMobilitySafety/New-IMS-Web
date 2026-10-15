@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 180" fill="none">
+<!-- Temporary vector camera illustration; replace with the original transparent NK9 asset when recovered. -->
+<path d="M101 139h38l10 25H91z" fill="#6c716f"/>
+<path d="M70 36 171 24l22 18v93l-103 14-20-18z" fill="#777e7b"/>
+<path d="m90 53 103-11v93L90 149z" fill="#c3c9c5"/>
+<path d="m70 36 20 17v96l-20-18z" fill="#525955"/>
+<path d="m100 63 80-9v67l-80 11z" fill="#262d2b"/>
+<ellipse cx="140" cy="91" rx="27" ry="26" fill="#535f59"/>
+<ellipse cx="140" cy="91" rx="20" ry="20" fill="#111b1a" stroke="#8c9991" stroke-width="3"/>
+<ellipse cx="140" cy="91" rx="12" ry="13" fill="#253f40"/>
+<ellipse cx="135" cy="86" rx="4" ry="5" fill="#81a7a3" opacity=".65"/>
+<path d="m104 119 23-3v8l-23 3z" fill="#e2e7e1"/>
+<path d="m83 29 86-10 15 10-94 11z" fill="#9ca59f"/>
+</svg>
