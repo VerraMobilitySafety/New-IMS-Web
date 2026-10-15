@@ -313,6 +313,24 @@
 .main{margin-left:260px!important;width:calc(100% - 260px)!important;padding:0 28px 35px!important;min-height:100vh!important}
 .global-hero{margin:0 -28px 24px!important}
 </style>
+<style id="vero-project-assessment-styles">
+#projectAssessmentOverlay .drawer{width:min(700px,96vw)}
+#projectAssessmentOverlay .drawer-head{padding:24px 30px}
+#projectAssessmentOverlay .drawer-body{padding:28px 30px 36px}
+#projectAssessmentOverlay #projectAssessmentForm{display:flex;flex-direction:column;gap:20px}
+#projectAssessmentOverlay .project-risk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 22px}
+#projectAssessmentOverlay label{display:block;font-size:11px;font-weight:700;color:#615c58;letter-spacing:.15px}
+#projectAssessmentOverlay select,#projectAssessmentOverlay textarea{display:block;box-sizing:border-box;width:100%;min-width:0;margin-top:8px;padding:12px 13px;border:1px solid #d8d8d5;border-radius:8px;background:#fff;color:#242526;font:500 13px Montserrat,Verdana,Arial,sans-serif}
+#projectAssessmentOverlay select{min-height:44px}
+#projectAssessmentOverlay textarea{min-height:105px;resize:vertical;line-height:1.5}
+#projectAssessmentOverlay select:focus-visible,#projectAssessmentOverlay textarea:focus-visible{outline:2px solid #2c8259;outline-offset:1px}
+#projectAssessmentOverlay #projectAssessmentMessage{margin:0;padding:13px 15px;background:#f4f6f5;border-left:3px solid #2c8259;border-radius:6px;font-size:12px;line-height:1.5;color:#3d3935}
+#projectAssessmentOverlay .drawer-actions{margin-top:0;padding-top:18px;border-top:1px solid #e5e7e5}
+#projectAssessmentOverlay #projectAssessmentSave{padding:13px 20px}
+#projectAssessmentOverlay #projectAssessmentHistory{margin-top:14px;overflow-x:auto}
+#projectAssessmentOverlay .drawer-body>h3{font-size:14px;border-top:1px solid #e5e7e5;padding-top:24px;margin:28px 0 8px}
+@media(max-width:560px){#projectAssessmentOverlay .project-risk-grid{grid-template-columns:1fr}#projectAssessmentOverlay .drawer-body{padding:22px 18px}}
+</style>
 <link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="header.css">
