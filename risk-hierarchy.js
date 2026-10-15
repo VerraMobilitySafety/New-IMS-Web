@@ -51,8 +51,12 @@
    for(const row of rows){
     const tr=make('tr','');tr.tabIndex=0;tr.setAttribute('role','button');
     const category=row.kind==='category';
+    const endpoint=category&&Number(row.children)===0;
+    const awaiting=Number(row.awaiting_assessment||0);
+    const applicable=Number(row.applicable_contexts||0);
+    const assessmentStatus=!category?'Master Risk':endpoint?(awaiting>0?'Assessment Required':applicable===0?'Ready for Assessment':'Assessment Current'):'Classification';
     const values=[row.name,
-     category?'Classification':'Master Risk',
+     assessmentStatus,
      category?(row.average_residual_score??'—'):'—',
      category?(row.maximum_residual_score??'—'):'—',
      category?(row.children??0):'—',
