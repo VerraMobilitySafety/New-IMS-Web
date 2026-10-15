@@ -2016,10 +2016,10 @@ table {
    <thead>
     <tr>
      <th>Risk</th>
-     <th>Rating</th>
      <th>Status</th>
-     <th>Average</th>
-     <th>Maximum</th>
+     <th>Average Score</th>
+     <th>Maximum Score</th>
+     <th>Children</th>
      <th>Assessed</th>
      <th>Awaiting</th>
     </tr>
@@ -2483,12 +2483,10 @@ table {
 
    [
     risk.risk_title,
-    values
-     ?classifications[values.row][values.col]
-     :'Not assessed',
     risk.status,
     riskAggregation.get(Number(risk.id))?.average_residual_score??'—',
     riskAggregation.get(Number(risk.id))?.maximum_residual_score??'—',
+    '—',
     riskAggregation.get(Number(risk.id))?.contributing_assessments??0,
     riskAggregation.get(Number(risk.id))?.awaiting_assessment??'—'
    ].forEach(value=>{
