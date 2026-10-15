@@ -1985,10 +1985,10 @@ table {
 <div class="vero-exposure-navigation"><button id="veroShowClassification" type="button" aria-pressed="true">Risk Classification</button><button id="veroShowExposure" type="button" aria-pressed="false">Operational Exposure</button></div><div class="vero-operational-entry"><button type="button" id="veroOperationalEntry" aria-expanded="false" aria-controls="veroExposurePanel">View Operational Exposure</button><span>VM Sites · Projects · Maintenance Contracts</span></div><section id="veroExposurePanel" class="vero-risk-panel" hidden><div class="vero-exposure-head"><div><h2>Operational Exposure <span id="veroExposureCount">—</span></h2><p>Actual operational applicability and assessments across VM Sites, Projects and Maintenance Contracts.</p></div><button type="button" id="veroExposureRefresh">Refresh</button></div><div class="vero-exposure-filters"><label>Context type<select id="veroExposureType"><option value="">All contexts</option><option>VM Site</option><option>Project</option><option>Maintenance Contract</option></select></label><label>Search<input id="veroExposureSearch" type="search" placeholder="Search name or code"></label></div><div id="veroExposureStatus" role="status"></div><div class="vero-risk-register-scroll"><table class="vero-exposure-table"><thead><tr><th>Operational context</th><th>Type</th><th>Applicable risks</th><th>Approved assessments</th><th>Awaiting assessment</th><th>Maximum residual</th></tr></thead><tbody id="veroExposureBody"></tbody></table></div></section><div id="veroCompactRiskLayout">
 
 <div class="vero-risk-filter-panels">
-<section class="vero-risk-panel vero-compact-filter-panel vero-risk-filter-panel" aria-label="Risk Classification"><h2>Risk Classification</h2><div class="vero-risk-secondary-row"><div class="vero-risk-filter"><label for="veroTier4Filter">Tier 4</label><select id="veroTier4Filter"><option value="">All Tier 4 categories</option></select></div>
-<div class="vero-risk-filter"><label for="veroTier3Filter">Tier 3</label><select id="veroTier3Filter"><option value="">All Tier 3 categories</option></select></div>
-<div class="vero-risk-filter"><label for="veroTier2Filter">Tier 2</label><select id="veroTier2Filter"><option value="">All Tier 2 categories</option></select></div>
-<div class="vero-risk-filter"><label for="veroTier1Filter">Tier 1</label><select id="veroTier1Filter"><option value="">All Tier 1 categories</option></select></div></div></section>
+<section class="vero-risk-panel vero-compact-filter-panel vero-risk-filter-panel" aria-label="Risk Classification"><h2>Risk Classification</h2><div class="vero-risk-secondary-row"><div class="vero-risk-filter"><label for="veroTier4Filter">Risk Domain</label><select id="veroTier4Filter"><option value="">All Risk Domain categories</option></select></div>
+<div class="vero-risk-filter"><label for="veroTier3Filter">Risk Stream</label><select id="veroTier3Filter"><option value="">All Risk Stream categories</option></select></div>
+<div class="vero-risk-filter"><label for="veroTier2Filter">Risk Category</label><select id="veroTier2Filter"><option value="">All Risk Category categories</option></select></div>
+<div class="vero-risk-filter"><label for="veroTier1Filter">Risk Event</label><select id="veroTier1Filter"><option value="">All Risk Event categories</option></select></div></div></section>
 <section class="vero-risk-panel vero-compact-filter-panel vero-risk-filter-panel" aria-label="Operational Context"><h2>Operational Context</h2><div class="vero-risk-secondary-row"><div class="vero-risk-filter"><label for="veroContextTypeFilter">Context Type</label><select id="veroContextTypeFilter"><option value="">All context types</option></select></div>
 <div class="vero-risk-filter"><label for="veroApplicationFilter">Context Name</label><select id="veroApplicationFilter"><option value="">All contexts</option></select></div>
 <div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area</label><select id="veroSiteFilter" disabled aria-describedby="veroContextStatus"><option value="">Site-level filtering unavailable</option></select></div></div><p id="veroContextStatus" role="status">Site-level risk applicability is not available. Context filters cover the whole selected context.</p><button id="veroContextRetry" class="vero-risk-clear" type="button" hidden>Retry context data</button></section>
@@ -2265,11 +2265,11 @@ table {
    const items=tierCategories.filter(category=>
     category.tier===3 && parentIds(category).includes(parentId)
    );
-   populateTier(tier3Filter,items,parentId&&!items.length?'No further classifications':'All Tier 3 categories');
+   populateTier(tier3Filter,items,parentId&&!items.length?'No further classifications':'All Risk Stream categories');
    tier3Filter.disabled=!parentId||!items.length;
-   populateTier(tier2Filter,[],'All Tier 2 categories');
+   populateTier(tier2Filter,[],'All Risk Category categories');
    tier2Filter.disabled=true;
-    populateTier(tier1CategoryFilter,[],'All Tier 1 categories');
+    populateTier(tier1CategoryFilter,[],'All Risk Event categories');
     tier1CategoryFilter.disabled=true;
   }
 
@@ -2278,7 +2278,7 @@ table {
    const items=tierCategories.filter(category=>
     category.tier===2 && parentIds(category).includes(parentId)
    );
-   populateTier(tier2Filter,items,parentId&&!items.length?'No further classifications':'All Tier 2 categories');
+   populateTier(tier2Filter,items,parentId&&!items.length?'No further classifications':'All Risk Category categories');
    tier2Filter.disabled=!parentId||!items.length;
     updateTier1Category();
   }
@@ -2286,7 +2286,7 @@ table {
   function updateTier1Category(){
     const parentId=Number(tier2Filter.value);
     const items=tierCategories.filter(category=>category.tier===1 && parentIds(category).includes(parentId));
-    populateTier(tier1CategoryFilter,items,parentId&&!items.length?'No further classifications':'All Tier 1 categories');
+    populateTier(tier1CategoryFilter,items,parentId&&!items.length?'No further classifications':'All Risk Event categories');
     tier1CategoryFilter.disabled=!parentId||!items.length;
   }
 
@@ -2303,7 +2303,7 @@ table {
     .filter(category=>category.status==='Active');
    populateTier(tier4Filter,
     tierCategories.filter(category=>category.tier===4),
-    'All Tier 4 categories');
+    'All Risk Domain categories');
    tier4Filter.value=selectedTiers[0];
    updateTier3();
    tier3Filter.value=selectedTiers[1];
@@ -2761,10 +2761,10 @@ table {
     ['Risk Category',risk.risk_category],['Next Review',risk.next_review_date]
    ]));
    content.appendChild(card('Classification',[
-    ['Tier 4 IDs',(risk.tier_4_ids||[]).join(', ')],
-    ['Tier 3 IDs',(risk.tier_3_ids||[]).join(', ')],
-    ['Tier 2 IDs',(risk.tier_2_ids||[]).join(', ')],
-    ['Tier 1 IDs',(risk.tier_1_ids||[]).join(', ')]
+    ['Risk Domain IDs',(risk.tier_4_ids||[]).join(', ')],
+    ['Risk Stream IDs',(risk.tier_3_ids||[]).join(', ')],
+    ['Risk Category IDs',(risk.tier_2_ids||[]).join(', ')],
+    ['Risk Event IDs',(risk.tier_1_ids||[]).join(', ')]
    ]));
   }else if(active==='ownership'){
    content.appendChild(card('Ownership', [['Current Risk Owner',risk.risk_owner],['Local Owners','Not yet available']]));
@@ -3185,10 +3185,10 @@ table {
 
     <label for="veroHierarchyTier">Tier</label>
     <select id="veroHierarchyTier" required>
-     <option value="4">Tier 4</option>
-     <option value="3">Tier 3</option>
-     <option value="2">Tier 2</option>
-     <option value="1">Tier 1</option>
+     <option value="4">Risk Domain</option>
+     <option value="3">Risk Stream</option>
+     <option value="2">Risk Category</option>
+     <option value="1">Risk Event</option>
     </select>
 
     <label id="veroHierarchyParentLabel">
@@ -3309,7 +3309,7 @@ table {
   parent.replaceChildren();
 
   if(selectedTier===4){
-   parent.textContent='Tier 4 categories have no parents.';
+   parent.textContent='Risk Domain categories have no parents.';
    return;
   }
 
@@ -3455,7 +3455,7 @@ table {
    }
    if(!canvas.children.length){
     const empty=document.createElement('p');
-    empty.textContent=q?'No matching classifications.':'No active Tier 4 classifications.';
+    empty.textContent=q?'No matching classifications.':'No active Risk Domain classifications.';
     canvas.appendChild(empty);
    }
   }
@@ -3958,7 +3958,7 @@ table {
      c.replaceChildren(make('h3','Linked Master Risks ('+risks.length+')'));
      const info=make('p','Master Risk definitions are governed by Risk Office. Select a record to inspect its definition, review status and approvals.');c.appendChild(info);
      risks.sort((a,b)=>String(a.risk_title||'').localeCompare(String(b.risk_title||'')));
-     if(!risks.length)c.appendChild(make('p','No Master Risks are linked to this Tier 1 classification.'));
+     if(!risks.length)c.appendChild(make('p','No Master Risks are linked to this Risk Event classification.'));
      for(const risk of risks){
       const line=make('div','');line.className='vero-risk-classification-row';
       const open=make('button',risk.risk_title||risk.risk_code);open.type='button';open.className='vero-risk-classification-open';
