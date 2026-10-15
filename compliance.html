@@ -3200,6 +3200,11 @@ async function prototypeSubmit(){
   return;
  }
 
+ if(!document.getElementById('singleRiskTier1').value){
+  alert('Select a Tier 1 Risk Classification.');
+  return;
+ }
+
  const button=event?.target;
 
  if(button){
