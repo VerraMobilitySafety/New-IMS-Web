@@ -365,7 +365,7 @@
 
  <section id="actions" class="ws-view"><div class="empty-state"><b>No live project actions yet.</b><br><br>Workflow actions assigned to this project will appear here.</div></section>
 
- <section id="risks" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Risks</h2><div><button type="button" class="btn outline" onclick="openProjectRiskWorkflow()">Manage Risks</button> <button type="button" class="btn green" onclick="openProjectRiskLinker()">Link Existing Risk</button> <span id="projectRiskCount">Loading…</span></div></div><div id="projectRiskList" class="empty-state">Loading authorised project risk applicability…</div></div></section>
+ <section id="risks" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Risks</h2><div><button type="button" class="btn outline" onclick="openProjectRiskWorkflow()">Manage Risks</button> <button type="button" class="btn green" onclick="openProjectRiskCreator()">Add Risk</button> <span id="projectRiskCount">Loading…</span></div></div><div id="projectRiskList" class="empty-state">Loading authorised project risk applicability…</div></div></section>
 
  <section id="compliance" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Compliance</h2><div><button type="button" class="btn green" onclick="createProjectCompliance()">Add Requirement</button> <span id="projectComplianceCount">Loading…</span></div></div><div id="projectComplianceList" class="empty-state">Loading applicable obligations…</div></div></section>
 
@@ -499,60 +499,56 @@ function openProjectRiskWorkflow(){
 
 /* Link an existing Master Risk through Risk Office's authorised applicability API.
    This does not create a second risk or bypass server-side Risk Manager checks. */
-async function openProjectRiskLinker(){
+async function openProjectRiskCreator(){
  if(!currentProject?.id)return;
- const projectId=String(currentProject.id);
- let overlay=document.getElementById('projectRiskLinkOverlay');
+ let overlay=document.getElementById('projectRiskCreateOverlay');
  if(!overlay){
-  overlay=document.createElement('div');overlay.id='projectRiskLinkOverlay';overlay.className='modal-back show';
-  overlay.innerHTML='<div class="drawer"><div class="drawer-head"><button type="button" class="close" id="projectRiskLinkClose">×</button><small>RISK OFFICE</small><h2>Link Existing Risk</h2><small>Record a governed project applicability decision.</small></div><div class="drawer-body"><label for="projectRiskLinkSelect">Master Risk</label><select id="projectRiskLinkSelect" style="display:block;width:100%;padding:11px;margin:9px 0 18px"></select><label for="projectRiskLinkReason">Justification (required)</label><textarea id="projectRiskLinkReason" maxlength="2000" style="display:block;width:100%;min-height:110px;padding:11px;margin:9px 0 16px"></textarea><div id="projectRiskLinkStatus" role="status"></div><div class="drawer-actions"><button class="btn green" type="button" id="projectRiskLinkSave">Record Applicability</button><button class="btn outline" type="button" id="projectRiskLinkCancel">Cancel</button></div></div></div>';
+  overlay=document.createElement('div');overlay.id='projectRiskCreateOverlay';overlay.className='modal-back show';
+  overlay.innerHTML='<div class="drawer"><div class="drawer-head"><button type="button" class="close" id="projectRiskCreateClose">×</button><small>RISK MANAGEMENT · GOVERNED CREATION</small><h2>Add Project Risk</h2><small>Project: <span id="projectRiskCreateProject"></span> · Draft pending Risk Office approval</small></div><div class="drawer-body"><form id="projectRiskCreateForm"><label for="projectRiskCreateCategory">Risk Classification · Project Execution / Tier 1</label><select required id="projectRiskCreateCategory" style="display:block;width:100%;padding:11px;margin:9px 0 18px"></select><label for="projectRiskCreateTitle">Risk Title</label><input required maxlength="255" id="projectRiskCreateTitle" style="display:block;width:100%;padding:11px;margin:9px 0 18px"><label for="projectRiskCreateDescription">Risk Description</label><textarea maxlength="10000" id="projectRiskCreateDescription" style="display:block;width:100%;min-height:110px;padding:11px;margin:9px 0 18px"></textarea><label for="projectRiskCreateReason">Reason for Creation</label><textarea required maxlength="2000" id="projectRiskCreateReason" style="display:block;width:100%;min-height:90px;padding:11px;margin:9px 0 16px"></textarea><p class="meta">Creates a Draft Master Risk in the central register. Risk Office approval and operational assessment remain separate governed steps.</p><p id="projectRiskCreateStatus" role="status"></p><div class="drawer-actions"><button class="btn green" type="submit" id="projectRiskCreateSave">Create Draft Risk</button><button class="btn outline" type="button" id="projectRiskCreateCancel">Cancel</button></div></form></div></div>';
   document.body.appendChild(overlay);
-  const close=()=>{overlay.classList.remove('show')};
-  overlay.querySelector('#projectRiskLinkClose').onclick=close;
-  overlay.querySelector('#projectRiskLinkCancel').onclick=close;
+  const close=()=>{if(!overlay.dataset.saving)overlay.classList.remove('show')};
+  overlay.querySelector('#projectRiskCreateClose').onclick=close;
+  overlay.querySelector('#projectRiskCreateCancel').onclick=close;
   overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
-  overlay.querySelector('#projectRiskLinkSave').onclick=async()=>{
-   const riskId=Number(overlay.querySelector('#projectRiskLinkSelect').value);
-   const rationale=overlay.querySelector('#projectRiskLinkReason').value.trim();
-   const status=overlay.querySelector('#projectRiskLinkStatus');
-   if(!Number.isInteger(riskId)||riskId<=0||!rationale){status.textContent='Select a risk and provide a justification.';return}
-   const save=overlay.querySelector('#projectRiskLinkSave');save.disabled=true;status.textContent='Recording decision…';
+  overlay.querySelector('#projectRiskCreateForm').addEventListener('submit',async e=>{
+   e.preventDefault();if(overlay.dataset.saving)return;
+   const status=overlay.querySelector('#projectRiskCreateStatus'),save=overlay.querySelector('#projectRiskCreateSave');
+   const category=Number(overlay.querySelector('#projectRiskCreateCategory').value);
+   const payload={request_id:overlay.dataset.requestId,risk_title:overlay.querySelector('#projectRiskCreateTitle').value.trim(),risk_description:overlay.querySelector('#projectRiskCreateDescription').value.trim(),tier1_category_id:category,reason:overlay.querySelector('#projectRiskCreateReason').value.trim(),project_id:Number(currentProject.id)};
+   if(!Number.isInteger(category)||!payload.risk_title||!payload.reason){status.textContent='Complete all required fields.';return}
+   overlay.dataset.saving='1';save.disabled=true;status.textContent='Creating governed Draft Risk…';
    try{
-    const res=await apiFetch(API_BASE+'/risks/'+encodeURIComponent(riskId)+'/applicability',{
-     method:'POST',headers:{'Content-Type':'application/json'},
-     body:JSON.stringify({context_type:'Project',context_id:Number(projectId),action:'Assign',rationale})
-    });
-    const data=await res.json().catch(()=>({}));
-    if(!res.ok)throw Error(data.message||'Applicability decision rejected ('+res.status+')');
-    status.textContent='Risk applicability recorded.';
-    close();
-    await loadProjectRisks(projectId);
-   }catch(e){status.textContent=e.message}
-   finally{save.disabled=false}
-  };
+    const response=await apiFetch(API_BASE+'/risks/master-drafts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw Error(data.message||'Risk creation rejected ('+response.status+')');
+    if(!data.risk_id||String(data.project_id)!==String(currentProject.id))throw Error('Server did not confirm the project association');
+    status.textContent='Draft '+(data.risk_code||'')+' created. Risk Office review is required.';
+    overlay.dataset.requestId='';
+    overlay.querySelector('#projectRiskCreateForm').reset();
+    await loadProjectRisks(currentProject.id);
+    overlay.classList.remove('show');
+   }catch(error){status.textContent=error.message+' If the save outcome is uncertain, do not create another draft until the register has been checked.'}
+   finally{delete overlay.dataset.saving;save.disabled=false}
+  });
  }
- overlay.classList.add('show');
- const status=overlay.querySelector('#projectRiskLinkStatus'),select=overlay.querySelector('#projectRiskLinkSelect');
- select.replaceChildren();status.textContent='Checking Risk Office permissions…';
+ overlay.classList.add('show');overlay.querySelector('#projectRiskCreateProject').textContent=currentProject.project_code||currentProject.project_name||currentProject.id;
+ const status=overlay.querySelector('#projectRiskCreateStatus'),select=overlay.querySelector('#projectRiskCreateCategory'),save=overlay.querySelector('#projectRiskCreateSave');
+ status.textContent='Loading authorised classification hierarchy…';save.disabled=true;select.replaceChildren();
  try{
-  const rolesResponse=await apiFetch(API_BASE+'/auth/my-roles',{cache:'no-store'});
-  if(!rolesResponse.ok)throw Error('Unable to verify Risk Office permission');
-  const roles=await rolesResponse.json();
-  if(!(roles.roles||[]).some(r=>r.role_name==='Risk Manager'))throw Error('Only authorised Risk Managers may change applicability.');
-  const risksResponse=await apiFetch(API_BASE+'/risks',{cache:'no-store'});
-  if(!risksResponse.ok)throw Error('Unable to load authorised risks');
-  const data=await risksResponse.json();
-  if(!Array.isArray(data.risks))throw Error('Invalid risk response');
-  const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Select a Master Risk…';select.appendChild(placeholder);
-  for(const risk of data.risks){
-   if(!risk.id)continue;
-   const option=document.createElement('option');option.value=String(risk.id);
-   option.textContent=(risk.risk_code||risk.id)+' — '+(risk.risk_title||'Untitled risk');
-   select.appendChild(option);
-  }
-  status.textContent=data.risks.length?'Select the existing risk and explain why it applies to this project.':'No authorised risks available.';
-  overlay.querySelector('#projectRiskLinkSave').disabled=!data.risks.length;
- }catch(e){status.textContent=e.message;overlay.querySelector('#projectRiskLinkSave').disabled=true}
+  const [rolesRes,tiersRes]=await Promise.all([apiFetch(API_BASE+'/auth/my-roles'),apiFetch(API_BASE+'/risk-tiers')]);
+  if(!rolesRes.ok||!tiersRes.ok)throw Error('Unable to verify Risk Office access and classification');
+  const roles=await rolesRes.json(),tiers=await tiersRes.json();
+  if(!(roles.roles||[]).some(x=>x.role_name==='Risk Manager'))throw Error('Only authorised Risk Managers can create Master Risk drafts.');
+  const categories=(tiers.categories||[]).filter(x=>x.status==='Active');
+  const parents=categories.filter(x=>Number(x.tier)===2&&x.category_name==='Project Execution');
+  if(parents.length!==1)throw Error('Project Execution Tier 2 classification is missing or ambiguous.');
+  const parentId=Number(parents[0].id);
+  const children=categories.filter(x=>Number(x.tier)===1&&(Array.isArray(x.parent_category_ids)?x.parent_category_ids.map(Number).includes(parentId):Number(x.parent_category_id)===parentId));
+  if(!children.length)throw Error('No active Tier 1 classifications under Project Execution.');
+  select.add(new Option('Select classification…',''));
+  children.sort((a,b)=>a.category_name.localeCompare(b.category_name)).forEach(x=>select.add(new Option(x.category_name,String(x.id))));
+  overlay.dataset.requestId=crypto.randomUUID();status.textContent='Select a Tier 1 classification beneath Project Execution.';save.disabled=false;
+ }catch(error){status.textContent=error.message;save.disabled=true}
 }
 
 /* Read-only, project-scoped Risk and Compliance views. */
