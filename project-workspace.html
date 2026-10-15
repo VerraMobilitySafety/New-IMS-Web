@@ -526,7 +526,7 @@ async function openProjectRiskCreator(){
  let overlay=document.getElementById('projectRiskCreateOverlay');
  if(!overlay){
   overlay=document.createElement('div');overlay.id='projectRiskCreateOverlay';overlay.className='modal-back show';
-  overlay.innerHTML='<div class="drawer"><div class="drawer-head"><button type="button" class="close" id="projectRiskCreateClose">×</button><small>RISK MANAGEMENT · GOVERNED CREATION</small><h2>Add Project Risk</h2><small>Project: <span id="projectRiskCreateProject"></span> · Draft pending Risk Office approval</small></div><div class="drawer-body"><form id="projectRiskCreateForm"><label for="projectRiskCreateCategory">Risk Classification · Project Execution (Risk Stream)</label><select required id="projectRiskCreateCategory" style="display:block;width:100%;padding:11px;margin:9px 0 18px"></select><label for="projectRiskCreateTitle">Risk Title</label><input required maxlength="255" id="projectRiskCreateTitle" style="display:block;width:100%;padding:11px;margin:9px 0 18px"><label for="projectRiskCreateDescription">Risk Description</label><textarea maxlength="10000" id="projectRiskCreateDescription" style="display:block;width:100%;min-height:110px;padding:11px;margin:9px 0 18px"></textarea><div class="project-risk-section">Risk assessment</div><div class="project-risk-grid"><label>Inherent likelihood<select id="praIL" required></select></label><label>Inherent consequence<select id="praIC" required></select></label><label>Residual likelihood<select id="praRL" required></select></label><label>Residual consequence<select id="praRC" required></select></label></div><p id="praScores">Inherent: — · Residual: —</p><label>Current controls</label><textarea id="praCurrent" maxlength="10000"></textarea><label>Further controls and treatment</label><textarea id="praFuture" maxlength="10000"></textarea><div class="project-risk-section">Ownership and review</div><label>Risk owner<select id="praOwner"></select></label><label>Treatment owner<select id="praTreatmentOwner"></select></label><label>Treatment due date<input type="date" id="praDue"></label><label>Next review date<input type="date" id="praReview"></label><label for="projectRiskCreateReason">Reason for Creation</label><textarea required maxlength="2000" id="projectRiskCreateReason" style="display:block;width:100%;min-height:90px;padding:11px;margin:9px 0 16px"></textarea><p class="meta">Creates a Draft Master Risk in the central register. Risk Office approval and operational assessment remain separate governed steps.</p><p id="projectRiskCreateStatus" role="status"></p><div class="drawer-actions"><button class="btn green" type="submit" id="projectRiskCreateSave">Create Draft Risk</button><button class="btn outline" type="button" id="projectRiskCreateCancel">Cancel</button></div></form></div></div>';
+  overlay.innerHTML='<div class="drawer"><div class="drawer-head"><button type="button" class="close" id="projectRiskCreateClose">×</button><small>RISK MANAGEMENT · GOVERNED CREATION</small><h2>Add Project Risk</h2><small>Project: <span id="projectRiskCreateProject"></span> · Draft pending Risk Office approval</small></div><div class="drawer-body"><form id="projectRiskCreateForm"><label for="projectRiskCreateCategory">Risk Classification · Project Execution (Risk Stream)</label><select required id="projectRiskCreateCategory" style="display:block;width:100%;padding:11px;margin:9px 0 18px"></select><label for="projectRiskCreateTitle">Risk Title</label><input required maxlength="255" id="projectRiskCreateTitle" style="display:block;width:100%;padding:11px;margin:9px 0 18px"><label for="projectRiskCreateDescription">Risk Description</label><textarea maxlength="10000" id="projectRiskCreateDescription" style="display:block;width:100%;min-height:110px;padding:11px;margin:9px 0 18px"></textarea><div class="project-risk-section">Risk assessment</div><div class="project-risk-grid"><label>Inherent likelihood<select id="praIL" required></select></label><label>Inherent consequence<select id="praIC" required></select></label><label>Residual likelihood<select id="praRL" required></select></label><label>Residual consequence<select id="praRC" required></select></label></div><p id="praScores">Inherent: — · Residual: —</p><label>Current controls</label><textarea id="praCurrent" maxlength="10000"></textarea><label>Further controls and treatment</label><textarea id="praFuture" maxlength="10000"></textarea><div class="project-risk-section">Ownership and review</div><label>Risk owner<select id="praOwner"></select></label><label>Treatment owner<select id="praTreatmentOwner"></select></label><label>Treatment due date<input type="date" id="praDue"></label><label>Next review date<input type="date" id="praReview"></label><label for="projectRiskCreateReason">Reason for Creation</label><textarea required maxlength="2000" id="projectRiskCreateReason" style="display:block;width:100%;min-height:90px;padding:11px;margin:9px 0 16px"></textarea><p class="meta">Creates a Draft Master Risk in the central register. Risk Office approval and operational assessment remain separate governed steps.</p><p id="projectRiskCreateStatus" role="status"></p><div class="drawer-actions"><button class="btn green" type="submit" id="projectRiskCreateSave">Create Draft Risk</button><button class="btn outline" type="button" id="projectRiskCreateCancel">Cancel</button></div></form><h3>Assessment History and Approval</h3><div id="projectAssessmentHistory"></div></div></div>';
   document.body.appendChild(overlay);
   const close=()=>{if(!overlay.dataset.saving)overlay.classList.remove('show')};
   overlay.querySelector('#projectRiskCreateClose').onclick=close;
@@ -629,6 +629,56 @@ async function loadProjectCompliance(id){
   ]);
  }catch(e){console.error('Project compliance',e);document.getElementById(count).textContent='Unavailable';projectListMessage(host,'Unable to load project compliance: '+e.message)}
 }
+async function projectAssessmentDecision(assessmentId,decision,applicabilityId){
+ const status=document.getElementById('projectAssessmentMessage');
+ if(!status)return;
+ status.textContent='Processing '+decision.toLowerCase()+'…';
+ try{
+  const response=await apiFetch(API_BASE+'/risk/assessments/'+encodeURIComponent(assessmentId)+'/decision',{
+   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision})
+  });
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw Error(data.message||'Assessment decision rejected');
+  status.textContent='Assessment '+data.assessment_status+'.';
+  await loadProjectAssessmentHistory(applicabilityId);
+  await loadProjectRisks(currentProject.id);
+ }catch(error){status.textContent=error.message}
+}
+async function loadProjectAssessmentHistory(applicabilityId){
+ const host=document.getElementById('projectAssessmentHistory');
+ if(!host)return;
+ host.replaceChildren();
+ try{
+  const response=await apiFetch(API_BASE+'/risk/applicability/'+encodeURIComponent(applicabilityId)+'/assessments',{cache:'no-store'});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw Error(data.message||'Unable to load assessment history');
+  const rows=data.assessments||[];
+  if(!rows.length){host.textContent='No assessments yet.';return}
+  const table=document.createElement('table');table.className='table';
+  const head=table.createTHead().insertRow();
+  ['Revision','Status','Residual','Action'].forEach(label=>{const th=document.createElement('th');th.textContent=label;head.appendChild(th)});
+  const body=table.createTBody();
+  for(const item of rows){
+   const tr=body.insertRow();
+   [item.revision,item.status,(item.residual_likelihood&&item.residual_impact)?item.residual_likelihood*item.residual_impact:'—'].forEach(value=>{tr.insertCell().textContent=String(value)});
+   const cell=tr.insertCell();
+   const decision=item.status==='Draft'?'Submit':item.status==='Submitted'?'Approve':null;
+   if(decision){
+    const button=document.createElement('button');button.type='button';button.className='btn outline';
+    button.textContent=decision;
+    button.addEventListener('click',()=>projectAssessmentDecision(item.id,decision,applicabilityId));
+    cell.appendChild(button);
+    if(item.status==='Submitted'){
+     const back=document.createElement('button');back.type='button';back.className='btn outline';
+     back.textContent='Return';
+     back.addEventListener('click',()=>projectAssessmentDecision(item.id,'Return',applicabilityId));
+     cell.appendChild(back);
+    }
+   }else cell.textContent='—';
+  }
+  host.appendChild(table);
+ }catch(error){host.textContent=error.message}
+}
 async function openProjectAssessment(applicabilityId,riskTitle){
  if(!currentProject?.id)return;
  let overlay=document.getElementById('projectAssessmentOverlay');
@@ -662,6 +712,7 @@ async function openProjectAssessment(applicabilityId,riskTitle){
     if(!response.ok)throw Error(result.message||'Unable to save assessment');
     status.textContent='Draft assessment saved. Submission and independent approval are required before enterprise reporting.';
     await loadProjectRisks(currentProject.id);
+    await loadProjectAssessmentHistory(overlay.dataset.applicabilityId);
    }catch(error){status.textContent=error.message}
    finally{delete overlay.dataset.saving;overlay.querySelector('#projectAssessmentSave').disabled=false}
   });
@@ -671,6 +722,7 @@ async function openProjectAssessment(applicabilityId,riskTitle){
  overlay.querySelector('#projectAssessmentForm').reset();
  overlay.querySelector('#projectAssessmentMessage').textContent='Draft only — does not affect enterprise averages until approved.';
  overlay.classList.add('show');
+ await loadProjectAssessmentHistory(applicabilityId);
 }
 async function loadProjectRisks(id){
  const host='projectRiskList',count='projectRiskCount';
