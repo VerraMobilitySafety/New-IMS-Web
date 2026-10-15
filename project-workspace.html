@@ -629,6 +629,49 @@ async function loadProjectCompliance(id){
   ]);
  }catch(e){console.error('Project compliance',e);document.getElementById(count).textContent='Unavailable';projectListMessage(host,'Unable to load project compliance: '+e.message)}
 }
+async function openProjectAssessment(applicabilityId,riskTitle){
+ if(!currentProject?.id)return;
+ let overlay=document.getElementById('projectAssessmentOverlay');
+ if(!overlay){
+  overlay=document.createElement('div');
+  overlay.id='projectAssessmentOverlay';overlay.className='modal-back show';
+  overlay.innerHTML='<div class="drawer"><div class="drawer-head"><button type="button" class="close" id="projectAssessmentClose">×</button><small>PROJECT RISK ASSESSMENT</small><h2 id="projectAssessmentTitle"></h2></div><div class="drawer-body"><form id="projectAssessmentForm"><div class="project-risk-grid"><label>Inherent likelihood<select id="projectAssessIL" required></select></label><label>Inherent consequence<select id="projectAssessIC" required></select></label><label>Residual likelihood<select id="projectAssessRL" required></select></label><label>Residual consequence<select id="projectAssessRC" required></select></label></div><label>Current controls<textarea id="projectAssessControls" maxlength="10000"></textarea></label><label>Further treatments<textarea id="projectAssessTreatments" maxlength="10000"></textarea></label><p id="projectAssessmentMessage" role="status"></p><div class="drawer-actions"><button type="submit" class="btn green" id="projectAssessmentSave">Save Draft Assessment</button></div></form></div></div>';
+  document.body.appendChild(overlay);
+  overlay.querySelector('#projectAssessmentClose').addEventListener('click',()=>overlay.classList.remove('show'));
+  for(const id of ['projectAssessIL','projectAssessIC','projectAssessRL','projectAssessRC']){
+   const select=overlay.querySelector('#'+id);select.add(new Option('Select rating…',''));
+   for(let n=1;n<=5;n++)select.add(new Option(String(n),String(n)));
+  }
+  overlay.querySelector('#projectAssessmentForm').addEventListener('submit',async event=>{
+   event.preventDefault();
+   if(overlay.dataset.saving)return;
+   const value=id=>Number(overlay.querySelector('#'+id).value);
+   const payload={inherent_likelihood:value('projectAssessIL'),inherent_impact:value('projectAssessIC'),
+    residual_likelihood:value('projectAssessRL'),residual_impact:value('projectAssessRC'),
+    controls_summary:overlay.querySelector('#projectAssessControls').value.trim(),
+    treatments_summary:overlay.querySelector('#projectAssessTreatments').value.trim()};
+   const status=overlay.querySelector('#projectAssessmentMessage');
+   overlay.dataset.saving='1';
+   overlay.querySelector('#projectAssessmentSave').disabled=true;
+   status.textContent='Saving draft assessment…';
+   try{
+    const response=await apiFetch(API_BASE+'/risk/applicability/'+encodeURIComponent(overlay.dataset.applicabilityId)+'/assessments',{
+     method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+    });
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok)throw Error(result.message||'Unable to save assessment');
+    status.textContent='Draft assessment saved. Submission and independent approval are required before enterprise reporting.';
+    await loadProjectRisks(currentProject.id);
+   }catch(error){status.textContent=error.message}
+   finally{delete overlay.dataset.saving;overlay.querySelector('#projectAssessmentSave').disabled=false}
+  });
+ }
+ overlay.dataset.applicabilityId=String(applicabilityId);
+ overlay.querySelector('#projectAssessmentTitle').textContent=riskTitle;
+ overlay.querySelector('#projectAssessmentForm').reset();
+ overlay.querySelector('#projectAssessmentMessage').textContent='Draft only — does not affect enterprise averages until approved.';
+ overlay.classList.add('show');
+}
 async function loadProjectRisks(id){
  const host='projectRiskList',count='projectRiskCount';
  try{
@@ -636,7 +679,7 @@ async function loadProjectRisks(id){
   if(!res.ok)throw Error('Risk API returned '+res.status);
   const data=await res.json();if(!Array.isArray(data.risks))throw Error('Invalid risk response');
   const risks=data.risks.filter(r=>r.status!=='Archived'),linked=[];let next=0;
-  const assessmentStatus=new Map();
+  const assessmentStatus=new Map(),assessmentLinks=new Map();
   // Reuse the same authorised applicability API and bounded concurrency as risk-context.js.
   // Fail closed: never present a partial result as the full project risk list.
   await Promise.all(Array.from({length:Math.min(6,risks.length)},async()=>{
@@ -648,6 +691,7 @@ async function loadProjectRisks(id){
     const applicable=d.assignments.filter(a=>a.status==='Applicable'&&a.context_type==='Project'&&String(a.context_id)===String(id));
     if(applicable.length){
      linked.push(risk);
+     assessmentLinks.set(Number(risk.id),applicable[0].id);
      const assessments=await Promise.all(applicable.map(async a=>{
       const response=await apiFetch(API_BASE+'/risk/applicability/'+encodeURIComponent(a.id)+'/assessments',{cache:'no-store'});
       if(!response.ok)throw Error('Assessment API returned '+response.status);
@@ -675,6 +719,16 @@ async function loadProjectRisks(id){
    r=>drafts.includes(r)?'Pending Risk Office review':assessmentStatus.get(Number(r.id))||'Assessment Required',
    r=>fmtDate(r.next_review_date)
   ]);
+  const body=document.querySelector('#projectRiskList table tbody');
+  if(body)all.forEach((risk,index)=>{
+   const applicabilityId=assessmentLinks.get(Number(risk.id));
+   if(!applicabilityId||!body.rows[index])return;
+   const td=body.rows[index].insertCell();
+   const button=document.createElement('button');button.type='button';
+   button.className='btn outline';button.textContent='Assess';
+   button.addEventListener('click',()=>openProjectAssessment(applicabilityId,risk.risk_title));
+   td.appendChild(button);
+  });
  }catch(e){console.error('Project risks',e);document.getElementById(count).textContent='Unavailable';projectListMessage(host,'Unable to load complete project risks: '+e.message)}
 }
 async function loadProjectGovernance(id){
