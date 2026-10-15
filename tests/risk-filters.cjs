@@ -65,7 +65,8 @@ function setup(override,{delayContext=false}={}){
   if(route==='/risk-registers')return response({registers:[{id:1,register_code:'RISK-GLOBAL',register_name:'Master'},{id:2,register_code:'LOCAL',register_name:'Local'}]});
   if(route==='/risks')return response({risks});
   if(route==='/risk/master-aggregation')return response({aggregations:[]});
-  if(route==='/risk/approved-matrix-positions')return response({positions:[]});
+  if(route==='/risk/classification-exposure-summary')return response({summaries:[]});
+  if(route==='/risk/approved-matrix-positions')return response({positions:risks.flatMap(r=>(assignments[r.id]||[]).filter(a=>a.status==='Applicable').map(a=>({assessment_id:r.id,risk_id:r.id,context_type:a.context_type,context_id:a.context_id,inherent_likelihood:r.inherent_likelihood,inherent_impact:r.inherent_impact,residual_likelihood:r.residual_likelihood,residual_impact:r.residual_impact})))});
   if(route==='/risk-tiers')return response({categories});
   if(route==='/risk/operational-contexts')return response(contexts);
   if(route==='/risk/hierarchical-register'){
@@ -94,13 +95,13 @@ test('Tier 4 → 1 cascades support multiple parents and exclude archived catego
  app.change('veroTier2Filter',20);assert.deepEqual(app.ids('veroTier1Filter'),['','10','12']);
  app.change('veroTier1Filter',10);await settle();
  assert.match(app.table(),/Alpha/);assert.doesNotMatch(app.table(),/Beta/);
- assert.equal(app.el('veroMatrixStatus').textContent,'3');
+ assert.equal(app.el('veroMatrixStatus').textContent,'2');
  app.change('veroTier4Filter',41);await settle();
  assert.deepEqual(app.ids('veroTier3Filter'),['','31','32']);
  for(const id of ['veroTier3Filter','veroTier2Filter','veroTier1Filter'])assert.equal(app.el(id).value,'');
  assert.equal(app.el('veroTier2Filter').disabled,true);assert.equal(app.el('veroTier1Filter').disabled,true);
  app.change('veroTier4Filter','');await settle();
- assert.equal(app.el('veroTier3Filter').disabled,true);assert.equal(app.el('veroMatrixStatus').textContent,'7');
+ assert.equal(app.el('veroTier3Filter').disabled,true);assert.equal(app.el('veroMatrixStatus').textContent,'6');
 });
 
 test('changing Tier 3 or Tier 2 clears every descendant before rendering',async()=>{
@@ -136,7 +137,7 @@ test('context filters share current applicability, reset child selections and re
  const reads=app.calls.filter(c=>c.route.endsWith('/applicability'));assert.equal(reads.length,6);assert.equal(reads.some(c=>c.route.includes('/99/')),false,'do not call unsupported local registers');
  assert.equal(app.calls.some(c=>c.route==='/risk/context-assignments'),false,'do not revive legacy assignments');
  assert.equal(app.el('veroSiteFilter').disabled,true);assert.equal(app.el('veroSiteFilter').value,'');assert.match(app.el('veroContextStatus').textContent,/Site-level risk applicability is not available/);
- app.change('veroContextTypeFilter','');await settle();assert.equal(app.el('veroApplicationFilter').disabled,true);assert.equal(app.el('veroMatrixStatus').textContent,'7');
+ app.change('veroContextTypeFilter','');await settle();assert.equal(app.el('veroApplicationFilter').disabled,true);assert.equal(app.el('veroMatrixStatus').textContent,'6');
 });
 
 test('loading and failed applicability never masquerade as zero; explicit retry works',async()=>{
@@ -190,7 +191,7 @@ test('late context controller replays initial risk failure and exposes retry',as
  assert.equal(app.el('veroOverdueReviews').textContent,'—');
  assert.ok(app.cells().every(c=>c.children.at(-1).textContent==='—'));
  fail=false;app.el('veroContextRetry').dispatchEvent(new CustomEvent('click'));await settle();
- assert.equal(app.el('veroMatrixStatus').textContent,'7');assert.match(app.table(),/Category 40/);
+ assert.equal(app.el('veroMatrixStatus').textContent,'6');assert.match(app.table(),/Category 40/);
 });
 
 test('register read failure remains unavailable without a context selection',async()=>{
@@ -268,3 +269,35 @@ test('register refresh preserves valid Tier 4 to Tier 1, context, search and mat
  assert.match(app.table(),/Alpha/);assert.doesNotMatch(app.table(),/Beta|Gamma/);assert.equal(app.el('veroMatrixStatus').textContent,'1');
 });
 
+
+
+test('context matrix counts approved assessments, not applicable unassessed risks',async()=>{
+ const app=setup(route=>route==='/risk/approved-matrix-positions'?response({positions:[]}):undefined);
+ await settle();app.change('veroContextTypeFilter','Project');await settle();
+ assert.match(app.table(),/Alpha/);assert.match(app.table(),/Beta/);
+ assert.equal(app.el('veroMatrixStatus').textContent,'0');
+ assert.ok(app.cells().every(cell=>cell.children.at(-1).textContent==='0'));
+});
+
+test('approved assessment coordinates override legacy risk coordinates without double counting',async()=>{
+ const positions=[{assessment_id:101,risk_id:1,context_type:'Project',context_id:101,inherent_likelihood:5,inherent_impact:5,residual_likelihood:4,residual_impact:2}];
+ const app=setup(route=>route==='/risk/approved-matrix-positions'?response({positions}):undefined);
+ await settle();app.change('veroContextTypeFilter','Project');app.change('veroApplicationFilter',101);await settle();
+ assert.equal(app.el('veroMatrixStatus').textContent,'1');
+ assert.equal(app.cells()[6].children.at(-1).textContent,'1');
+ assert.equal(app.cells()[20].children.at(-1).textContent,'0');
+});
+
+test('multiple approved context assessments count separately and selected context narrows them',async()=>{
+ const positions=[101,102].map((id,index)=>({assessment_id:100+index,risk_id:2,context_type:'Project',context_id:id,inherent_likelihood:5,inherent_impact:5,residual_likelihood:5,residual_impact:5}));
+ const app=setup(route=>route==='/risk/approved-matrix-positions'?response({positions}):undefined);
+ await settle();app.change('veroContextTypeFilter','Project');await settle();
+ assert.equal(app.el('veroMatrixStatus').textContent,'2');
+ app.change('veroApplicationFilter',102);await settle();assert.equal(app.el('veroMatrixStatus').textContent,'1');
+});
+
+test('failed approved-assessment read is unavailable, never a successful zero',async()=>{
+ const app=setup(route=>route==='/risk/approved-matrix-positions'?response({},503):undefined);
+ await settle();assert.equal(app.el('veroMatrixStatus').textContent,'Unavailable');
+ assert.ok(app.cells().every(cell=>cell.disabled));
+});
