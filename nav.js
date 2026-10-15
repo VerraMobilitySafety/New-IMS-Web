@@ -87,7 +87,7 @@
     <div class="nav-section">
       <a class="${isActive('index.html') ? 'active' : ''}"
          href="index.html">
-        <span class="ico">⌂</span>
+        <span class="ico" data-lucide="house"></span>
         <span>Home</span>
       </a>
     </div>
@@ -97,7 +97,7 @@
 
       <a class="${isActive('my-actions.html') ? 'active' : ''}"
          href="my-actions.html">
-        <span class="ico">✓</span>
+        <span class="ico" data-lucide="list-checks"></span>
         <span>My Actions</span>
       </a>
     </div>
@@ -107,24 +107,24 @@
 
       <a class="${isActive('sites.html') ? 'active' : ''}"
          href="sites.html">
-        <span class="ico">⌖</span>
+        <span class="ico" data-lucide="map-pin"></span>
         <span>Verra Mobility Locations</span>
       </a>
 
       <a class="${projectActive ? 'active' : ''}"
          href="project-management.html">
-        <span class="ico">▦</span>
+        <span class="ico" data-lucide="folder-kanban"></span>
         <span>Project Management</span>
       </a>
 
       <a class="${maintenanceActive ? 'active' : ''}"
          href="maintenance-management.html">
-        <span class="ico">⚙</span>
+        <span class="ico" data-lucide="file-signature"></span>
         <span>Contracts Management</span>
       </a>
 
       <a class="${isActive('contractor-management.html') ? 'active' : ''}" href="contractor-management.html">
-        <span class="ico">♙</span>
+        <span class="ico" data-lucide="hard-hat"></span>
         <span>Contractor Management</span>
       </a>
     </div>
@@ -133,17 +133,17 @@
       <div class="nav-label">Management Systems</div>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">✚</span>
+        <span class="ico" data-lucide="shield-alert"></span>
         <span>Safety Risks</span>
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">◆</span>
+        <span class="ico" data-lucide="badge-check"></span>
         <span>Quality Risks</span>
       </a>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">♻</span>
+        <span class="ico" data-lucide="leaf"></span>
         <span>Environment Risks</span>
       </a>
     </div>
@@ -153,30 +153,30 @@
 
       <a class="${isActive('documents.html') ? 'active' : ''}"
          href="documents.html">
-        <span class="ico">▱</span>
+        <span class="ico" data-lucide="files"></span>
         <span>Document Management</span>
       </a>
 
       <a class="${isActive('records.html') ? 'active' : ''}"
          href="records.html">
-        <span class="ico">▤</span>
+        <span class="ico" data-lucide="archive"></span>
         <span>Records Management</span>
       </a>
 
       <a class="${isActive('risk.html') ? 'active' : ''}"
          href="risk.html">
-        <span class="ico">▥</span>
+        <span class="ico" data-lucide="triangle-alert"></span>
         <span>Risk Management</span>
       </a>
 
       <a class="${isActive('insurance.html') ? 'active' : ''}" href="insurance.html">
-        <span class="ico">◇</span>
+        <span class="ico" data-lucide="shield-check"></span>
         <span>Insurance Management</span>
       </a>
 
       <a class="${isActive('compliance.html') ? 'active' : ''}"
          href="compliance.html">
-        <span class="ico">◇</span>
+        <span class="ico" data-lucide="scale"></span>
         <span>Compliance Management</span>
       </a>
 
@@ -188,7 +188,7 @@
           <a class="${incidentActive ? 'active' : 'placeholder'}"
              href="${incidentActive ? 'incident-management.html' : '#'}"
              ${incidentActive ? '' : 'onclick="return false"'}>
-            <span class="ico">✚</span>
+            <span class="ico" data-lucide="siren"></span>
             <span>Incident Management</span>
           </a>
 
@@ -210,11 +210,29 @@
       </div>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico">◎</span>
+        <span class="ico" data-lucide="clipboard-check"></span>
         <span>Assurance Management</span>
       </a>
     </div>
   `;
+
+  /* Consistent Lucide line icons, loaded once for all VERO pages. */
+  const lucideScriptId = 'vero-lucide-script';
+  function renderNavIcons() {
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons({ attrs: { 'stroke-width': 1.8 } });
+    }
+  }
+  if (window.lucide) {
+    renderNavIcons();
+  } else if (!document.getElementById(lucideScriptId)) {
+    const script = document.createElement('script');
+    script.id = lucideScriptId;
+    script.src = 'https://unpkg.com/lucide@0.456.0/dist/umd/lucide.min.js';
+    script.onload = renderNavIcons;
+    script.onerror = () => console.warn('VERO navigation icons could not be loaded');
+    document.head.appendChild(script);
+  }
 
   /* DROPDOWN STYLING */
   const styleId = 'vero-nav-dropdown-style';
@@ -224,6 +242,8 @@
     style.id = styleId;
 
     style.textContent = `
+      #vero-nav .ico { width:20px;min-width:20px;display:inline-flex;align-items:center;justify-content:center; }
+      #vero-nav .ico svg { width:17px;height:17px;display:block;stroke:currentColor; }
       #vero-nav .vero-nav-parent {
         display: flex;
         align-items: center;
