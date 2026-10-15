@@ -49,6 +49,8 @@
 .action-decision-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
 .action-decision-actions button{border:0;border-radius:8px;padding:11px 14px;font:800 10px Montserrat,Verdana,Arial,sans-serif;cursor:pointer}
 .action-btn-approve{background:var(--green);color:var(--charcoal)}
+.risk-action-link{display:inline-block;border-radius:8px;padding:11px 14px;font:800 11px Montserrat,Verdana,Arial,sans-serif;text-decoration:none}
+.risk-action-link:focus-visible{outline:2px solid var(--charcoal);outline-offset:3px}
 .action-btn-more{background:#fff0d9;color:#7d5815;border:1px solid #ead5a9!important}
 .action-btn-reject{background:#fbe4e4;color:#8f2929}
 .action-decision-actions button:disabled{opacity:.55;cursor:wait}
@@ -896,10 +898,12 @@
  </aside>
 </div>
 
+<script src="risk-actions.js"></script>
 <script>
 const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
 const TOKEN_KEY='vero_session_token', USER_KEY='vero_current_user';
 let allActions=[], currentFilter='all', currentAction=null;
+let actionLoadSequence=0;
 
 function updateGreeting(firstName){
  const hour=new Date().getHours();
@@ -997,6 +1001,7 @@ function filteredActions(){
     a.record_code,
     a.request_code,
     a.project_code,
+    a.risk_code,
     a.document_number,
     from
    ]
@@ -1028,6 +1033,7 @@ function renderActions(){
    a.record_code ||
    a.request_code ||
    a.project_code ||
+   a.risk_code ||
    a.document_number ||
    '';
 
@@ -1200,6 +1206,7 @@ function openActionDetail(index){
   action.action_type==='Document Review';
 
  const isProject=action.source==='Projects';
+ const isRisk=window.VeroRiskActions.isRiskAction(action);
 
  const isCompliance=
   action.source==='Compliance' &&
@@ -1291,6 +1298,30 @@ function openActionDetail(index){
 
   document.getElementById('actionDetailReason').textContent=action.next_step||action.title||'—';
   document.getElementById('actionDetailAdditional').textContent='Continue this action in the Project Workspace.';
+
+ }else if(isRisk){
+  document.getElementById('actionDetailGrid').innerHTML=[
+   actionField('Risk',action.risk_code||action.risk_id),
+   actionField('Project',action.project_name||action.project_code||action.project_id),
+   actionField('Action',action.action_type),
+   actionField('Requested by',action.requested_by),
+   actionField('Due date',formatDate(action.due_at)),
+   actionField('Submitted',formatActionDate(action.created_at))
+  ].join('');
+  document.getElementById('actionDetailReason').textContent=
+   action.reason||action.last_reason||action.description||'—';
+  const additional=document.getElementById('actionDetailAdditional');
+  additional.replaceChildren();
+  const destination=window.VeroRiskActions.destination(action);
+  if(destination){
+   const link=document.createElement('a');
+   link.className='action-btn-approve risk-action-link';
+   link.href=destination.href;
+   link.textContent=destination.label+' →';
+   additional.appendChild(link);
+  }else{
+   additional.textContent='This action cannot be opened. Refresh My Actions to retrieve its current details.';
+  }
 
  }else if(isDocumentReview){
 
@@ -2518,15 +2549,33 @@ async function loadDocumentApprovers(){
 }
 
 async function loadActions(){
+ const sequence=++actionLoadSequence;
  const token=localStorage.getItem(TOKEN_KEY), list=document.getElementById('fullActionList');
  if(!token){list.innerHTML='<div class="action-error">Please sign in to view your actions.</div>';return;}
  try{
   const r=await fetch(`${API}/my-actions`,{headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store'});
   const d=await r.json(); if(!r.ok)throw new Error(d.message||'Unable to load actions');
-  allActions=d.actions||[];
+  if(sequence!==actionLoadSequence)return;
+  const selectedRiskId=window.VeroRiskActions.isRiskAction(currentAction)?currentAction.id:null;
+  allActions=window.VeroRiskActions.normaliseActions(d.actions);
   renderActions();
- }catch(e){console.error(e);list.innerHTML='<div class="action-error">Unable to load your actions right now.</div>';document.getElementById('actionListCount').textContent='Unavailable';}
+  if(selectedRiskId){
+   const selectedIndex=allActions.findIndex(action=>action.id===selectedRiskId);
+   if(selectedIndex<0)closeActionDetail();
+   else openActionDetail(selectedIndex);
+  }
+ }catch(e){
+  if(sequence!==actionLoadSequence)return;
+  console.error(e);
+  if(window.VeroRiskActions.isRiskAction(currentAction))closeActionDetail();
+  list.innerHTML='<div class="action-error">Unable to load your actions right now.</div>';
+  document.getElementById('actionListCount').textContent='Unavailable';
+ }
 }
+// Returning from a decision refreshes the one authoritative server feed.
+window.addEventListener('pageshow',event=>{if(event.persisted)loadActions();});
+window.addEventListener('focus',()=>{if(document.visibilityState!=='hidden')loadActions();});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadActions();});
 document.addEventListener('DOMContentLoaded',()=>{
  const saved=JSON.parse(localStorage.getItem(USER_KEY)||'{}');updateGreeting(saved.first_name||'');loadActions();
  const trigger=document.getElementById('veroAccountTrigger'),account=document.getElementById('veroAccount'),avatar=document.getElementById('veroAccountAvatar'),name=document.getElementById('veroAccountName'),full=document.getElementById('veroAccountFullName'),email=document.getElementById('veroAccountEmail'),admin=document.getElementById('veroUserManagement'),signout=document.getElementById('veroAccountSignOut');
@@ -3357,3 +3406,4 @@ async function submitControlVerification(){
  filter:brightness(.96);
 }
 </style>
+

@@ -75,3 +75,4 @@ test('excludes archived and invalid classifications from new selections',async()
  a.picker.setValue(2);
  assert.equal(a.picker.getSelected(),null);
 });
+

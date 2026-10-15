@@ -3,6 +3,11 @@ on:
   pull_request:
     paths:
       - 'risk.html'
+      - 'project-workspace.html'
+      - 'my-actions.html'
+      - 'project-risk-*.js'
+      - 'project-risk-*.css'
+      - 'tests/project-risk-*.cjs'
       - 'risk-*.js'
       - 'tests/risk-*.cjs'
       - '.github/workflows/vero-risk-frontend-validation.yml'
@@ -42,3 +47,16 @@ jobs:
       - name: Run offline Risk filter regressions
         run: node --test tests/risk-*.cjs
 
+
+
+      - name: Validate Project Risk submission UI and offline workflows
+        run: |
+          node <<'JS'
+          const fs=require('fs'),vm=require('vm');
+          for(const name of ['project-workspace.html','my-actions.html']){
+            const html=fs.readFileSync(name,'utf8');
+            for(const [index,match] of [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].entries())new vm.Script(match[1],{filename:name+':'+index});
+          }
+          new vm.Script(fs.readFileSync('project-risk-submission.js','utf8'),{filename:'project-risk-submission.js'});
+          JS
+          node --test tests/project-risk-*.cjs

@@ -56,6 +56,8 @@
 .action-decision-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px;padding-top:18px;border-top:1px solid var(--line)}
 .action-decision-actions button{border:0;border-radius:8px;padding:11px 14px;font:800 10px Montserrat,Verdana,Arial,sans-serif;cursor:pointer}
 .action-btn-approve{background:var(--green);color:var(--charcoal)}
+.risk-action-link{display:inline-block;border-radius:8px;padding:11px 14px;font:800 11px Montserrat,Verdana,Arial,sans-serif;text-decoration:none}
+.risk-action-link:focus-visible{outline:2px solid var(--charcoal);outline-offset:3px}
 .action-btn-more{background:#fff0d9;color:#7d5815;border:1px solid #ead5a9!important}
 .action-btn-reject{background:#fbe4e4;color:#8f2929}
 .action-decision-actions button:disabled{opacity:.55;cursor:wait}
@@ -283,7 +285,9 @@
 
 <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Home • v2.9</span></footer>
 </div></main></div>
+<script src="risk-actions.js"></script>
 <script>
+let homeActionLoadSequence=0;
 window.updateGreeting=function(firstName){
  const hour=new Date().getHours();
  const greeting=hour<12?'Morning':hour<18?"G'day":'Hey there';
@@ -310,6 +314,7 @@ function actionDotClass(action){
  return '';
 }
 function actionTarget(action){
+ if(window.VeroRiskActions.isRiskAction(action))return window.VeroRiskActions.destination(action)?.href||'#';
  if(
   action.source === 'Records' &&
   ['Disposition Review','Disposition Completion']
@@ -327,6 +332,7 @@ function actionTarget(action){
  return action.target||'#';
 }
 function renderMyActions(actions){
+ actions=window.VeroRiskActions.normaliseActions(actions);
  const count=document.getElementById('myActionsCount');
  const list=document.getElementById('myActionsList');
  if(!count||!list)return;
@@ -340,7 +346,7 @@ function renderMyActions(actions){
   const dot=actionDotClass(action);
   const title=action.title||'Action required';
   const description=action.description||action.action_type||'Action requires your attention';
-  const meta=[action.source, action.status].filter(Boolean).join(' · ');
+  const meta=[action.source,action.status,...(window.VeroRiskActions.isRiskAction(action)&&action.due_at?['Due '+formatActionDate(action.due_at)]:[])].filter(Boolean).join(' · ');
   return `<div class="home-action" onclick="openActionDetail(${index})" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' ')openActionDetail(${index})">
    <span class="action-dot ${dot}"></span>
    <div><b>${escapeHtml(title)}</b><small>${escapeHtml(description)}${meta?' · '+escapeHtml(meta):''}</small></div>
@@ -378,6 +384,7 @@ function openActionDetail(index){
  window.currentAction=action; resetDecisionUI();
  const isDocumentRequest=action.source==='Documents'&&action.action_type==='Document Request';
  const isProject=action.source==='Projects';
+ const isRisk=window.VeroRiskActions.isRiskAction(action);
 
  document.getElementById('actionDetailKicker').textContent=action.source||'MY ACTION';
  document.getElementById('actionDetailTitle').textContent=action.description||action.title||'Action';
@@ -395,6 +402,25 @@ function openActionDetail(index){
   ].join('');
   document.getElementById('actionDetailReason').textContent=action.next_step||action.title||'—';
   document.getElementById('actionDetailAdditional').textContent='Continue this action in the Project Workspace.';
+ }else if(isRisk){
+  document.getElementById('actionDetailGrid').innerHTML=[
+   actionField('Risk',action.risk_code||action.risk_id),
+   actionField('Project',action.project_name||action.project_code||action.project_id),
+   actionField('Action',action.action_type),
+   actionField('Requested by',action.requested_by),
+   actionField('Due date',formatActionDate(action.due_at)),
+   actionField('Submitted',formatActionDate(action.created_at))
+  ].join('');
+  document.getElementById('actionDetailReason').textContent=action.reason||action.last_reason||action.description||'—';
+  const additional=document.getElementById('actionDetailAdditional');
+  additional.replaceChildren();
+  const destination=window.VeroRiskActions.destination(action);
+  if(destination){
+   const link=document.createElement('a');link.className='action-btn-approve risk-action-link';
+   link.href=destination.href;link.textContent=destination.label+' →';additional.appendChild(link);
+  }else{
+   additional.textContent='This action cannot be opened. Refresh My Actions to retrieve its current details.';
+  }
  }else{
   document.getElementById('actionDetailGrid').innerHTML=[
    actionField('Request type',action.action_type==='Document Request'?'New Document':action.action_type),
@@ -545,6 +571,7 @@ function escapeHtml(value){
  return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
 async function loadMyActions(){
+ const sequence=++homeActionLoadSequence;
  const token=localStorage.getItem('vero_session_token');
  const count=document.getElementById('myActionsCount');
  const list=document.getElementById('myActionsList');
@@ -553,20 +580,33 @@ async function loadMyActions(){
   const r=await fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/my-actions',{
    headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store'
   });
+  if(sequence!==homeActionLoadSequence)return;
   if(r.status===401){
+   if(window.VeroRiskActions.isRiskAction(window.currentAction))closeActionDetail();
    if(count)count.textContent='—';
    if(list)list.innerHTML='<div class="empty">Your session has expired. Please sign in again.</div>';
    return;
   }
   const d=await r.json();
   if(!r.ok)throw new Error(d.message||'Unable to load actions');
+  if(sequence!==homeActionLoadSequence)return;
+  const selectedRiskId=window.VeroRiskActions.isRiskAction(window.currentAction)?window.currentAction.id:null;
   renderMyActions(d.actions||[]);
+  if(selectedRiskId){
+   const index=window.myActions.findIndex(action=>action.id===selectedRiskId);
+   if(index<0)closeActionDetail();else openActionDetail(index);
+  }
  }catch(e){
+  if(sequence!==homeActionLoadSequence)return;
+  if(window.VeroRiskActions.isRiskAction(window.currentAction))closeActionDetail();
   console.error('Unable to load My Actions',e);
   if(count)count.textContent='Unavailable';
   if(list)list.innerHTML='<div class="empty">Unable to load your actions right now.</div>';
  }
 }
+window.addEventListener('pageshow',event=>{if(event.persisted)loadMyActions();});
+window.addEventListener('focus',()=>{if(document.visibilityState!=='hidden')loadMyActions();});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadMyActions();});
 document.addEventListener('DOMContentLoaded',()=>{
  window.updateGreeting?.();
  loadMyActions();
@@ -609,3 +649,4 @@ function setQ(b){document.getElementById('homeAI').value=b.textContent;document.
 
 <script src="nav.js"></script>
 </body></html>
+
