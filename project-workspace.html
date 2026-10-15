@@ -547,13 +547,25 @@ async function openProjectRiskCreator(){
    finally{delete overlay.dataset.saving;save.disabled=false}
   });
  }
+ for(const [id,names] of [['praIL',['Rare','Unlikely','Possible','Likely','Very Likely']],['praIC',['Insignificant','Minor','Moderate','Major','Catastrophic']],['praRL',['Rare','Unlikely','Possible','Likely','Very Likely']],['praRC',['Insignificant','Minor','Moderate','Major','Catastrophic']]]){
+  const field=overlay.querySelector('#'+id);
+  if(!field.options.length){field.add(new Option('Select…',''));names.forEach((name,i)=>field.add(new Option((i+1)+' — '+name,String(i+1))))}
+  field.onchange=()=>{const n=x=>Number(overlay.querySelector('#'+x).value);overlay.querySelector('#praScores').textContent='Inherent: '+(n('praIL')&&n('praIC')?n('praIL')*n('praIC')+'/25':'—')+' · Residual: '+(n('praRL')&&n('praRC')?n('praRL')*n('praRC')+'/25':'—')};
+ }
  overlay.classList.add('show');overlay.querySelector('#projectRiskCreateProject').textContent=currentProject.project_code||currentProject.project_name||currentProject.id;
  const status=overlay.querySelector('#projectRiskCreateStatus'),select=overlay.querySelector('#projectRiskCreateCategory'),save=overlay.querySelector('#projectRiskCreateSave');
  status.textContent='Loading authorised classification hierarchy…';save.disabled=true;select.replaceChildren();
  try{
-  const [rolesRes,tiersRes]=await Promise.all([apiFetch(API_BASE+'/auth/my-roles'),apiFetch(API_BASE+'/risk-tiers')]);
+  const [rolesRes,tiersRes,usersRes]=await Promise.all([apiFetch(API_BASE+'/auth/my-roles'),apiFetch(API_BASE+'/risk-tiers'),apiFetch(API_BASE+'/users/active')]);
   if(!rolesRes.ok||!tiersRes.ok)throw Error('Unable to verify Risk Office access and classification');
   const roles=await rolesRes.json(),tiers=await tiersRes.json();
+  if(!usersRes.ok)throw Error('Unable to load active users');
+  const usersPayload=await usersRes.json();
+  const users=Array.isArray(usersPayload)?usersPayload:(usersPayload.users||[]);
+  for(const id of ['praOwner','praTreatmentOwner']){
+   const field=overlay.querySelector('#'+id);field.replaceChildren();field.add(new Option('Select owner…',''));
+   for(const user of users){const name=[user.first_name,user.last_name].filter(Boolean).join(' ')||user.email;if(user.id&&name)field.add(new Option(name,String(user.id)))}
+  }
   if(!(roles.roles||[]).some(x=>x.role_name==='Risk Manager'))throw Error('Only authorised Risk Managers can create Master Risk drafts.');
   const categories=(tiers.categories||[]).filter(x=>x.status==='Active');
   const parents=categories.filter(x=>Number(x.tier)===3&&x.category_name==='Project Execution');
