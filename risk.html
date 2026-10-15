@@ -2178,6 +2178,8 @@ table {
  let registers=[];
  let risks=[];
  let riskAggregation=new Map();
+ let approvedMatrixPositions=[];
+ let matrixPositionsReady=false;
  let riskDataState='loading',loadSerial=0;
  function publishRiskData(state){
   riskDataState=state;
@@ -2373,6 +2375,23 @@ table {
   matrix.appendChild(el);
  }
 
+ function matrixPositionsForVisibleRisks(visible){
+  const ids=new Set(visible.map(r=>Number(r.id)));
+  const context={'Project':'Project','Contract':'Maintenance Contract','VM Location':'VM Site'}[contextTypeFilter.value];
+  return approvedMatrixPositions.filter(p=>ids.has(Number(p.risk_id)) &&
+   (!context || (p.context_type===context &&
+    (!contextNameFilter.value || String(p.context_id)===contextNameFilter.value))));
+ }
+ function matrixCellRisks(visible,row,col){
+  const type=assessmentFilter.value;
+  const approved=matrixPositionsForVisibleRisks(visible);
+  const represented=new Set(approved.map(p=>Number(p.risk_id)));
+  const operational=approved.filter(p=>Number(p[type+'_likelihood'])===5-row &&
+   Number(p[type+'_impact'])===col+1);
+  const legacy=visible.filter(r=>!represented.has(Number(r.id)) &&
+   (!contextTypeFilter.value) && (()=>{const v=assessmentValues(r);return v&&v.row===row&&v.col===col})());
+  return {count:operational.length+legacy.length,ids:new Set([...operational.map(p=>Number(p.risk_id)),...legacy.map(r=>Number(r.id))])};
+ }
  function renderMatrix(){
   matrix.replaceChildren();
 
@@ -2387,10 +2406,7 @@ table {
    for(let col=0;col<5;col++){
     const impact=col+1;
     const classification=classifications[row][col];
-    const count=visible.filter(r=>{
-     const values=assessmentValues(r);
-     return values && values.row===row && values.col===col;
-    }).length;
+    const count=matrixCellRisks(visible,row,col).count;
 
     const cell=document.createElement('button');
     cell.type='button';
@@ -2437,7 +2453,7 @@ table {
    }
   });
 
-  matrixStatus.textContent=dataUnavailable()?dataStatus():String(visible.length);
+  matrixStatus.textContent=dataUnavailable()?dataStatus():String(matrixPositionsForVisibleRisks(visible).length+visible.filter(r=>!approvedMatrixPositions.some(p=>Number(p.risk_id)===Number(r.id))&&!contextTypeFilter.value&&assessmentValues(r)).length);
  }
 
  function renderTable(){
@@ -2445,10 +2461,7 @@ table {
 
   const visible=filteredRisks().filter(risk=>{
    if(!selectedCell) return true;
-   const values=assessmentValues(risk);
-   return values &&
-     values.row===selectedCell.row &&
-     values.col===selectedCell.col;
+   return matrixCellRisks(filteredRisks(),selectedCell.row,selectedCell.col).ids.has(Number(risk.id));
   });
 
   listStatus.textContent=String(visible.length);
@@ -2612,6 +2625,20 @@ table {
     riskAggregation=new Map();
    }
 
+   try{
+    const response=await fetch(API+'/risk/approved-matrix-positions',{headers,cache:'no-store'});
+    if(!response.ok)throw Error('Approved matrix positions unavailable');
+    const data=await response.json();
+    if(ticket!==loadSerial)return;
+    if(!Array.isArray(data.positions))throw Error('Invalid matrix response');
+    approvedMatrixPositions=data.positions;
+    matrixPositionsReady=true;
+   }catch(error){
+    if(ticket!==loadSerial)return;
+    console.warn('VERO approved matrix positions unavailable',error);
+    approvedMatrixPositions=[];
+    matrixPositionsReady=false;
+   }
    await loadTierCategories(headers,ticket);
    if(ticket!==loadSerial)return;
 
