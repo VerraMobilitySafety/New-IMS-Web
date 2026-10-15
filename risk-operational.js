@@ -223,6 +223,32 @@
    const message=node('p');message.setAttribute('role','status');
    form.append(controlsLabel,treatmentsLabel,button,message);
    revisionForm={form,target,ratings,controls,treatments,message};
+   if(editable.some(a=>a.context_type==='Project')){
+    const loadProposal=node('button','Load proposed Project Risk assessment');
+    loadProposal.type='button';
+    loadProposal.addEventListener('click',async()=>{
+     if(revisionSource!==null){message.textContent='Finish or discard the returned assessment revision before loading a proposal.';return;}
+     const selected=editable.find(a=>String(a.id)===String(target.value));
+     if(!selected||selected.context_type!=='Project'){message.textContent='Select an applicable Project record to load its proposal.';return;}
+     loadProposal.disabled=true;message.textContent='Loading proposed assessment…';
+     const requestedId=String(target.value);
+     try{
+      const response=await json(API+'/risk/applicability/'+encodeURIComponent(requestedId)+'/project-draft-prefill');
+      if(seq!==sequence||overlay.hidden||String(target.value)!==requestedId)return;
+      if(!response.available){message.textContent='No proposed assessment was saved for this Project Risk.';return;}
+      const proposal=response.proposed_assessment||{};
+      for(const [key,control] of Object.entries(ratings)){
+       const value=Number(proposal[key]);
+       if(Number.isInteger(value)&&value>=1&&value<=5)control.value=String(value);
+      }
+      controls.value=proposal.controls_summary||'';
+      treatments.value=proposal.treatments_summary||'';
+      message.textContent='Proposal loaded. Review the ratings and controls, then save the formal draft assessment. No approval has been recorded.';
+     }catch(error){message.textContent=error.message;}
+     finally{loadProposal.disabled=false;}
+    });
+    form.insertBefore(loadProposal,button);
+   }
    target.addEventListener('change',()=>{revisionSource=null;message.textContent='';});
    form.addEventListener('submit',async event=>{
     event.preventDefault();button.disabled=true;message.textContent='Saving draft...';
