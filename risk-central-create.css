@@ -1,4 +1,4 @@
-#veroRiskDrawerOverlay .vero-risk-drawer{width:min(1440px,96vw);max-width:96vw;color:#292725;background:white}
+#veroRiskDrawerOverlay .vero-risk-drawer{width:min(1100px,96vw);max-width:96vw;color:#292725;background:white}
 .vero-central{--line:#e5e1de;--teal:#21869b;--ink:#292725;color:var(--ink);padding:24px;line-height:1.5}
 .vero-central *{box-sizing:border-box}.vero-central [hidden]{display:none!important}
 .vero-central button,.vero-central input,.vero-central textarea,.vero-central select{font:inherit;color:var(--ink)}
@@ -34,3 +34,10 @@
 @media(max-width:650px){.vero-central{padding:15px}.vero-central .fields,.vero-central .tiers{grid-template-columns:1fr}.vero-central .stage{padding:9px}.vero-central .stage b{font-size:15px}.vero-central .matrix{grid-template-columns:116px 46px repeat(5,76px)}.vero-central .matrix .cell{width:76px;height:76px}.vero-central .matrix .cell .score{font-size:21px}.vero-central .matrix .cell small{font-size:10px}}
 
 .vero-central .matrix .axis-label.like{position:sticky;left:0;z-index:2;background:white}.vero-central .matrix .like-number{position:sticky;left:148px;z-index:2}@media(max-width:650px){.vero-central .matrix .like-number{left:119px}}
+
+.vero-central .picker-anchor{position:relative;min-width:0}
+.vero-central .owner-options,.vero-central .add-options{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:30;background:white;max-height:240px;overflow:auto;border:1px solid #ccc;border-radius:7px;box-shadow:0 8px 24px #0002}
+.vero-central .add-option{display:block;width:100%;text-align:left;border:0;background:white;padding:11px 13px;color:var(--ink);border-bottom:1px solid var(--line)}
+.vero-central .add-option:hover,.vero-central .add-option[aria-selected=true],.vero-central .owner-option:hover{background:#eef6f7}
+.vero-central .added-items{margin:10px 0 16px}.vero-central .added-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;margin-top:7px;background:#f5f6ef;border:1px solid var(--line);border-radius:6px}
+.vero-central .added-item span{min-width:0;overflow-wrap:anywhere}.vero-central .added-item button{flex-shrink:0;border:0;background:none;padding:4px;color:#21869b;text-decoration:underline}.vero-central .picker-empty{padding:12px;margin:0;font-size:13px;color:#716864}
