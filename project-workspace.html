@@ -757,14 +757,27 @@ async function assignApprovedProjectRisk(risk){
   await loadProjectRisks(currentProject.id);
  }catch(error){window.alert('Project risk applicability not saved: '+error.message)}
 }
+async function projectRiskFetch(url,label){
+ const controller=new AbortController();
+ const timeout=setTimeout(()=>controller.abort(),12000);
+ try{
+  const response=await apiFetch(url,{cache:'no-store',signal:controller.signal});
+  if(!response.ok){
+   const body=await response.json().catch(()=>({}));
+   throw Error(label+': '+(body.message||'HTTP '+response.status));
+  }
+  return await response.json();
+ }catch(error){
+  if(error.name==='AbortError')throw Error(label+' timed out. Please retry.');
+  throw error;
+ }finally{clearTimeout(timeout)}
+}
 async function loadProjectRisks(id){
  const host='projectRiskList',count='projectRiskCount';
  projectListMessage(host,'Loading project risks…');
  document.getElementById(count).textContent='Loading…';
  try{
-  const res=await apiFetch(API_BASE+'/projects/'+encodeURIComponent(id)+'/risk-applicability',{cache:'no-store'});
-  if(!res.ok)throw Error('Project Risk API returned '+res.status);
-  const data=await res.json();
+  const data=await projectRiskFetch(API_BASE+'/projects/'+encodeURIComponent(id)+'/risk-applicability','Project applicability');
   if(!Array.isArray(data.risks))throw Error('Invalid project risk response');
   const linked=data.risks;
   const assessmentStatus=new Map(),assessmentLinks=new Map();
@@ -772,9 +785,8 @@ async function loadProjectRisks(id){
    assessmentLinks.set(Number(risk.id),risk.applicability_id);
    assessmentStatus.set(Number(risk.id),risk.assessed?'Assessed':'Assessment Required');
   }
-  const draftsResponse=await apiFetch(API_BASE+'/projects/'+encodeURIComponent(id)+'/risk-drafts',{cache:'no-store'});
-  if(!draftsResponse.ok)throw Error('Project Draft Risk API returned '+draftsResponse.status);
-  const draftData=await draftsResponse.json();
+  projectListMessage(host,'Loading project-originated risks…');
+  const draftData=await projectRiskFetch(API_BASE+'/projects/'+encodeURIComponent(id)+'/risk-drafts','Project risk drafts');
   if(!Array.isArray(draftData.drafts))throw Error('Invalid project Draft Risk response');
   const known=new Set(linked.map(r=>Number(r.id)));
   const drafts=draftData.drafts.filter(r=>!known.has(Number(r.id)));
