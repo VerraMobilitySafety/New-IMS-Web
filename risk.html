@@ -2378,6 +2378,7 @@ table {
  function matrixPositionsForVisibleRisks(visible){
   const ids=new Set(visible.map(r=>Number(r.id)));
   const context={'Project':'Project','Contract':'Maintenance Contract','VM Location':'VM Site'}[contextTypeFilter.value];
+  if(!matrixPositionsReady)return [];
   return approvedMatrixPositions.filter(p=>ids.has(Number(p.risk_id)) &&
    (!context || (p.context_type===context &&
     (!contextNameFilter.value || String(p.context_id)===contextNameFilter.value))));
@@ -2388,7 +2389,7 @@ table {
   const represented=new Set(approved.map(p=>Number(p.risk_id)));
   const operational=approved.filter(p=>Number(p[type+'_likelihood'])===5-row &&
    Number(p[type+'_impact'])===col+1);
-  const legacy=visible.filter(r=>!represented.has(Number(r.id)) &&
+  const legacy=visible.filter(r=>matrixPositionsReady&&!represented.has(Number(r.id)) &&
    (!contextTypeFilter.value) && (()=>{const v=assessmentValues(r);return v&&v.row===row&&v.col===col})());
   return {count:operational.length+legacy.length,ids:new Set([...operational.map(p=>Number(p.risk_id)),...legacy.map(r=>Number(r.id))])};
  }
@@ -2434,7 +2435,7 @@ table {
     badge.className='vero-matrix-count';
     badge.textContent=dataUnavailable()?'—':String(count);
     badge.setAttribute('aria-label',dataUnavailable()?'Risk count unavailable':count+' risks');
-    cell.disabled=dataUnavailable();
+    cell.disabled=dataUnavailable()||!matrixPositionsReady;
 
     cell.append(score,level,badge);
 
@@ -2453,7 +2454,7 @@ table {
    }
   });
 
-  matrixStatus.textContent=dataUnavailable()?dataStatus():String(matrixPositionsForVisibleRisks(visible).length+visible.filter(r=>!approvedMatrixPositions.some(p=>Number(p.risk_id)===Number(r.id))&&!contextTypeFilter.value&&assessmentValues(r)).length);
+  matrixStatus.textContent=dataUnavailable()?dataStatus():!matrixPositionsReady?'Unavailable':String(matrixPositionsForVisibleRisks(visible).length+visible.filter(r=>!approvedMatrixPositions.some(p=>Number(p.risk_id)===Number(r.id))&&!contextTypeFilter.value&&assessmentValues(r)).length);
  }
 
  function renderTable(){
