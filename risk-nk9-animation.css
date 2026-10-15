@@ -1,0 +1,90 @@
+/* Original HSE-Board NK9 styles, scoped to the Risk loader. Source: 8f036586. */
+.vero-page-loader .motion-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.vero-page-loader .nk9-status-image{width:112px;height:86px;object-fit:contain}
+.vero-page-loader.nk9-running .nk9-status-image{display:none}
+.vero-page-loader:not(.nk9-running) .motion-bg{display:none}
+.vero-page-loader .vero-loader-label{position:relative;z-index:2}
+.vero-page-loader .motion-bg .nk9-floater{
+  position:absolute;
+  width:112px;
+  height:86px;
+  opacity:.14;
+  pointer-events:none;
+  user-select:none;
+  will-change:transform,left;
+  z-index:1;
+  filter:saturate(.92);
+}
+
+.vero-page-loader .motion-bg .nk9-floater img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  transition:opacity .38s ease, transform .38s ease;
+}
+
+.vero-page-loader .motion-bg .nk9-angle{
+  opacity:1;
+  transform:scale(1);
+}
+.vero-page-loader .motion-bg .nk9-front{
+  opacity:0;
+  transform:scaleX(.12) scaleY(.96);
+}
+
+/* Random "looks at you" state */
+.vero-page-loader .motion-bg .nk9-floater.is-facing{
+  opacity:.28;
+}
+.vero-page-loader .motion-bg .nk9-floater.is-facing .nk9-angle{
+  opacity:0;
+  transform:scaleX(.12) scaleY(.96);
+}
+.vero-page-loader .motion-bg .nk9-floater.is-facing .nk9-front{
+  opacity:1;
+  transform:scale(1);
+}
+
+/* Flash comes from the lens area, not the whole screen */
+.vero-page-loader .motion-bg .nk9-flash{
+  position:absolute;
+  left:50%;
+  top:40%;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  transform:translate(-50%,-50%) scale(.2);
+  opacity:0;
+  background:rgba(255,255,255,.98);
+  box-shadow:
+    0 0 12px 5px rgba(255,255,255,.95),
+    0 0 28px 12px rgba(244,246,245,.68),
+    0 0 52px 20px rgba(169,194,63,.20);
+}
+
+.vero-page-loader .motion-bg .nk9-floater.do-flash .nk9-flash{
+  animation:nk9LensFlash .42s ease-out 1;
+}
+
+@keyframes nk9LensFlash{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}
+  18%{opacity:1;transform:translate(-50%,-50%) scale(2.2)}
+  38%{opacity:.92;transform:translate(-50%,-50%) scale(1.45)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(3.1)}
+}
+
+
+/* v1.0.29 — NK9 routes use the actual visible board edges */
+.vero-page-loader .motion-bg .nk9-floater{
+  left:0;
+  top:20%;
+  animation:none !important;
+  transition:none;
+}
+@media (prefers-reduced-motion: reduce){
+  .vero-page-loader .motion-bg .nk9-floater{display:none!important}
+}
+
+

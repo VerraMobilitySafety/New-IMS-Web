@@ -5,9 +5,10 @@
 (()=>{
  'use strict';
  const pending=new Set(['risk']);
- let overlay,observer,finished=false,domReady=false,frame,removalTimer;
+ let overlay,observer,finished=false,domReady=false,frame,removalTimer,stopCameras;
  const cleanup=()=>{
   observer?.disconnect();
+  stopCameras?.();
   window.removeEventListener('resize',schedule);
   window.removeEventListener('scroll',schedule,true);
   if(frame)cancelAnimationFrame(frame);
@@ -44,14 +45,20 @@
   overlay=document.createElement('div');
   overlay.id='veroPageLoader';overlay.className='vero-page-loader';
   overlay.setAttribute('role','status');overlay.setAttribute('aria-label','Preparing your workspace');
-  const camera=document.createElement('div');camera.className='vero-risk-camera';
-  const img=document.createElement('img');img.alt='';
-  const flash=document.createElement('i');flash.className='vero-risk-flash';flash.setAttribute('aria-hidden','true');
-  img.onerror=()=>{camera.className='vero-risk-camera is-fallback';flash.hidden=true;img.onerror=()=>{img.hidden=true;};img.src='verra-chevron.png';};
-  img.src='nk9-camera.png';camera.append(img,flash);
-  const label=document.createElement('span');label.textContent='Preparing your workspace...';
-  overlay.append(camera,label);document.body.appendChild(overlay);
+  const background=document.createElement('div');background.className='motion-bg';background.setAttribute('aria-hidden','true');
+  for(const colour of ['green','teal','purple','grey']){
+   const cam=document.createElement('div');cam.className='nk9-floater';cam.dataset.colour=colour;
+   for(const [name,suffix] of [['nk9-angle',''],['nk9-front','-front']]){
+    const image=document.createElement('img');image.className=name;image.alt='';image.src='./assets/nk9-'+colour+suffix+'.png';cam.append(image);
+   }
+   const flash=document.createElement('span');flash.className='nk9-flash';cam.append(flash);background.append(cam);
+  }
+  const img=document.createElement('img');img.className='nk9-status-image';img.alt='';
+  img.onerror=()=>{img.onerror=()=>{img.hidden=true;};img.src='verra-chevron.png';};img.src='./assets/nk9-green.png';
+  const label=document.createElement('span');label.className='vero-loader-label';label.textContent='Preparing your workspace...';
+  overlay.append(background,img,label);document.body.appendChild(overlay);
   position();
+  if(!finished)stopCameras=window.VeroNK9?.start(background);
   if(window.ResizeObserver){
    observer=new ResizeObserver(schedule);
    for(const selector of ['.main','.global-hero, .workspace-hero','.sidebar']){
