@@ -547,8 +547,12 @@ async function openProjectRiskCreator(){
     status.textContent='Draft '+(data.risk_code||'')+' created. Risk Office review is required.';
     overlay.dataset.requestId='';
     overlay.querySelector('#projectRiskCreateForm').reset();
-    await loadProjectRisks(currentProject.id);
     overlay.classList.remove('show');
+    // The server has confirmed persistence; refresh the register without blocking the drawer.
+    const savedProjectId=currentProject.id;
+    Promise.resolve().then(()=>loadProjectRisks(savedProjectId)).catch(error=>{
+     console.error('Project Risk saved, but register refresh failed:',error);
+    });
    }catch(error){status.textContent=error.message+' If the save outcome is uncertain, do not create another draft until the register has been checked.'}
    finally{delete overlay.dataset.saving;save.disabled=false}
   });
