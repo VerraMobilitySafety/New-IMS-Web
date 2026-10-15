@@ -2009,16 +2009,12 @@ table {
   <div>
    <h2 class="vero-risk-heading-with-count">Risk Register <span class="vero-risk-heading-count" id="veroRiskListStatus" aria-live="polite">—</span></h2>
   </div>
-  <button class="vero-risk-clear" id="veroClearMatrixSelection">
-   Clear Matrix Selection
-  </button>
- </div>
+</div>
 
  <div class="vero-risk-register-scroll" role="region" aria-label="Risk Register results" tabindex="0">
   <table class="vero-risk-table">
    <thead>
     <tr>
-     <th>Risk Code</th>
      <th>Risk</th>
      <th>Rating</th>
      <th>Status</th>
@@ -2460,7 +2456,7 @@ table {
   if(!visible.length){
    const tr=document.createElement('tr');
    const td=document.createElement('td');
-   td.colSpan=8;
+   td.colSpan=7;
    if(riskDataState!=='ready'){
     listStatus.textContent=dataStatus();
     td.textContent=riskDataState==='error'
@@ -2486,7 +2482,6 @@ table {
    const values=assessmentValues(risk);
 
    [
-    risk.risk_code,
     risk.risk_title,
     values
      ?classifications[values.row][values.col]
@@ -2682,11 +2677,7 @@ table {
   render();
  });
 
- document.getElementById('veroClearMatrixSelection')
-  .addEventListener('click',()=>{
-   selectedCell=null;
-   render();
-  });
+
 
  load();
 })();
