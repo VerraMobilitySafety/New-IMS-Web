@@ -2265,8 +2265,8 @@ table {
    const items=tierCategories.filter(category=>
     category.tier===3 && parentIds(category).includes(parentId)
    );
-   populateTier(tier3Filter,items,'All Tier 3 categories');
-   tier3Filter.disabled=!parentId;
+   populateTier(tier3Filter,items,parentId&&!items.length?'No further classifications':'All Tier 3 categories');
+   tier3Filter.disabled=!parentId||!items.length;
    populateTier(tier2Filter,[],'All Tier 2 categories');
    tier2Filter.disabled=true;
     populateTier(tier1CategoryFilter,[],'All Tier 1 categories');
@@ -2278,16 +2278,16 @@ table {
    const items=tierCategories.filter(category=>
     category.tier===2 && parentIds(category).includes(parentId)
    );
-   populateTier(tier2Filter,items,'All Tier 2 categories');
-   tier2Filter.disabled=!parentId;
+   populateTier(tier2Filter,items,parentId&&!items.length?'No further classifications':'All Tier 2 categories');
+   tier2Filter.disabled=!parentId||!items.length;
     updateTier1Category();
   }
 
   function updateTier1Category(){
     const parentId=Number(tier2Filter.value);
     const items=tierCategories.filter(category=>category.tier===1 && parentIds(category).includes(parentId));
-    populateTier(tier1CategoryFilter,items,'All Tier 1 categories');
-    tier1CategoryFilter.disabled=!parentId;
+    populateTier(tier1CategoryFilter,items,parentId&&!items.length?'No further classifications':'All Tier 1 categories');
+    tier1CategoryFilter.disabled=!parentId||!items.length;
   }
 
   async function loadTierCategories(headers,ticket){
