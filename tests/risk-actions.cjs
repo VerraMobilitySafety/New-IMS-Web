@@ -196,3 +196,10 @@ test('Home late loads do not resurrect decided work',async()=>{
  pending[0]({ok:true,status:200,json:async()=>({actions:[risk()]})});await old;
  assert.equal(context.window.myActions.length,0);
 });
+
+test('central treatments use validated risk/action identifiers without a project',()=>{
+ const {api}=setup();
+ const action={source:'Risks',action_type:'Central Risk Treatment',risk_id:21,treatment_action_id:9,target:'https://attacker.invalid'};
+ assert.equal(api.destination(action).href,'risk.html?risk_id=21&central_treatment_id=9');
+ for(const value of [null,0,-1,'../bad',true])assert.equal(api.destination({...action,treatment_action_id:value}),null);
+});

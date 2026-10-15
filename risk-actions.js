@@ -36,6 +36,12 @@
  function destination(action) {
   if (!isRiskAction(action)) return null;
   const type = Object.hasOwn(types, action.action_type) ? types[action.action_type] : null;
+  if (action.action_type === 'Central Risk Treatment') {
+   const riskId = positiveId(action.risk_id);
+   const treatmentId = positiveId(action.treatment_action_id);
+   if (!riskId || !treatmentId) return null;
+   return {href:'risk.html?' + new URLSearchParams({risk_id:riskId,central_treatment_id:treatmentId}).toString(),label:'Open Risk Treatment'};
+  }
   const projectId = positiveId(action.project_id);
   const riskId = positiveId(action.risk_id);
   if (!type || !projectId || !riskId) return null;
@@ -59,3 +65,4 @@
  }
  window.VeroRiskActions = Object.freeze({isRiskAction, normaliseActions, destination});
 })();
+

@@ -136,7 +136,7 @@ test('context filters share current applicability, reset child selections and re
  app.change('veroContextTypeFilter','VM Location');await settle();assert.match(app.table(),/Delta/);
  const reads=app.calls.filter(c=>c.route.endsWith('/applicability'));assert.equal(reads.length,6);assert.equal(reads.some(c=>c.route.includes('/99/')),false,'do not call unsupported local registers');
  assert.equal(app.calls.some(c=>c.route==='/risk/context-assignments'),false,'do not revive legacy assignments');
- assert.equal(app.el('veroSiteFilter').disabled,true);assert.equal(app.el('veroSiteFilter').value,'');assert.match(app.el('veroContextStatus').textContent,/Site-level risk applicability is not available/);
+ assert.equal(app.el('veroSiteFilter').disabled,true);assert.equal(app.el('veroSiteFilter').value,'');assert.equal(app.el('veroContextStatus').textContent,'','removed site-level notice stays hidden');
  app.change('veroContextTypeFilter','');await settle();assert.equal(app.el('veroApplicationFilter').disabled,true);assert.equal(app.el('veroMatrixStatus').textContent,'6');
 });
 
@@ -301,3 +301,4 @@ test('failed approved-assessment read is unavailable, never a successful zero',a
  await settle();assert.equal(app.el('veroMatrixStatus').textContent,'Unavailable');
  assert.ok(app.cells().every(cell=>cell.disabled));
 });
+
