@@ -762,36 +762,16 @@ async function loadProjectRisks(id){
  projectListMessage(host,'Loading project risks…');
  document.getElementById(count).textContent='Loading…';
  try{
-  const res=await apiFetch(API_BASE+'/risks',{cache:'no-store'});
-  if(!res.ok)throw Error('Risk API returned '+res.status);
-  const data=await res.json();if(!Array.isArray(data.risks))throw Error('Invalid risk response');
-  const risks=data.risks.filter(r=>r.status!=='Archived'),linked=[];let next=0;
+  const res=await apiFetch(API_BASE+'/projects/'+encodeURIComponent(id)+'/risk-applicability',{cache:'no-store'});
+  if(!res.ok)throw Error('Project Risk API returned '+res.status);
+  const data=await res.json();
+  if(!Array.isArray(data.risks))throw Error('Invalid project risk response');
+  const linked=data.risks;
   const assessmentStatus=new Map(),assessmentLinks=new Map();
-  // Reuse the same authorised applicability API and bounded concurrency as risk-context.js.
-  // Fail closed: never present a partial result as the full project risk list.
-  await Promise.all(Array.from({length:Math.min(12,risks.length)},async()=>{
-   while(next<risks.length){
-    const risk=risks[next++];
-    if(next%12===0)projectListMessage(host,'Checking project risk applicability… '+next+' / '+risks.length);
-    const rr=await apiFetch(API_BASE+'/risks/'+encodeURIComponent(risk.id)+'/applicability',{cache:'no-store'});
-    if(!rr.ok)throw Error('Risk applicability returned '+rr.status);
-    const d=await rr.json();if(!Array.isArray(d.assignments))throw Error('Invalid risk applicability response');
-    const applicable=d.assignments.filter(a=>a.status==='Applicable'&&a.context_type==='Project'&&String(a.context_id)===String(id));
-    if(applicable.length){
-     linked.push(risk);
-     assessmentLinks.set(Number(risk.id),applicable[0].id);
-     const assessments=await Promise.all(applicable.map(async a=>{
-      const response=await apiFetch(API_BASE+'/risk/applicability/'+encodeURIComponent(a.id)+'/assessments',{cache:'no-store'});
-      if(!response.ok)throw Error('Assessment API returned '+response.status);
-      const result=await response.json();
-      if(!Array.isArray(result.assessments))throw Error('Invalid assessment response');
-      return result.assessments;
-     }));
-     const approved=assessments.flat().filter(a=>a.status==='Approved');
-     assessmentStatus.set(Number(risk.id),approved.length?'Assessed':'Assessment Required');
-    }
-   }
-  }));
+  for(const risk of linked){
+   assessmentLinks.set(Number(risk.id),risk.applicability_id);
+   assessmentStatus.set(Number(risk.id),risk.assessed?'Assessed':'Assessment Required');
+  }
   const draftsResponse=await apiFetch(API_BASE+'/projects/'+encodeURIComponent(id)+'/risk-drafts',{cache:'no-store'});
   if(!draftsResponse.ok)throw Error('Project Draft Risk API returned '+draftsResponse.status);
   const draftData=await draftsResponse.json();
