@@ -753,6 +753,8 @@ async function loadProjectAssessmentHistory(applicabilityId,selectedId){
   const [capabilityResponse,meResponse]=await Promise.all([apiFetch(API_BASE+'/risk/applicability/'+encodeURIComponent(applicabilityId)+'/capabilities'),apiFetch(API_BASE+'/auth/me')]);
   const capability=capabilityResponse.ok?await capabilityResponse.json():{},me=meResponse.ok?await meResponse.json():{};
   const userId=Number((me.user||me).id);
+  // This Project-only exception is verified by the API, never inferred from the signed-in profile.
+  const administratorOverride=capability.administrator_override===true;
   if(ticket!==projectAssessmentLoadVersion||overlay.dataset.applicabilityId!==String(applicabilityId))return;
   if(!rows.length){host.textContent='No assessments yet.';form.hidden=!capability.can_create;return}
   const detail=document.createElement('section');detail.className='project-risk-review-card';
@@ -760,7 +762,7 @@ async function loadProjectAssessmentHistory(applicabilityId,selectedId){
    detail.replaceChildren();form.hidden=true;overlay.dataset.selectedAssessmentId=String(item.id);delete overlay.dataset.returnedAssessmentId;
    const heading=document.createElement('h3');heading.textContent='Assessment revision '+item.revision;detail.appendChild(heading);
    for(const [label,key] of [['Status','status'],['Inherent likelihood','inherent_likelihood'],['Inherent consequence','inherent_impact'],['Residual likelihood','residual_likelihood'],['Residual consequence','residual_impact'],['Current controls','controls_summary'],['Further treatments','treatments_summary'],['Assessment owner','owner_user_id'],['Approved by','approved_by_user_id'],['Approved at','approved_at']]){const row=document.createElement('p'),name=document.createElement('strong');name.textContent=label+': ';row.append(name,document.createTextNode(item[key]==null?'Not recorded':String(item[key])));detail.appendChild(row);}
-   if(item.status==='Returned'&&Number(item.owner_user_id)===userId&&capability.can_create){
+   if(item.status==='Returned'&&(Number(item.owner_user_id)===userId||administratorOverride)&&capability.can_create){
     const revise=document.createElement('button');revise.type='button';revise.className='btn green';revise.textContent='Revise returned assessment';
     revise.onclick=()=>{for(const [id,key] of [['projectAssessIL','inherent_likelihood'],['projectAssessIC','inherent_impact'],['projectAssessRL','residual_likelihood'],['projectAssessRC','residual_impact'],['projectAssessControls','controls_summary'],['projectAssessTreatments','treatments_summary']])overlay.querySelector('#'+id).value=item[key]??'';overlay.dataset.returnedAssessmentId=String(item.id);form.hidden=false;overlay.querySelector('#projectAssessmentMessage').textContent='A new draft revision will retain this returned assessment in history. Save the correction, then submit it for independent approval.';};detail.appendChild(revise);
    }
@@ -779,7 +781,7 @@ async function loadProjectAssessmentHistory(applicabilityId,selectedId){
    [item.revision,item.status,(item.residual_likelihood&&item.residual_impact)?item.residual_likelihood*item.residual_impact:'—'].forEach(value=>{tr.insertCell().textContent=String(value)});
    const cell=tr.insertCell();
    const own=Number(item.owner_user_id)===userId;
-   const decision=item.status==='Draft'&&own&&capability.can_create?'Submit':item.status==='Submitted'&&!own&&capability.can_approve?'Approve':null;
+   const decision=item.status==='Draft'&&(own||administratorOverride)&&capability.can_create?'Submit':item.status==='Submitted'&&(!own||administratorOverride)&&capability.can_approve?'Approve':null;
    if(decision){
     const button=document.createElement('button');button.type='button';button.className='btn outline';
     button.textContent=decision;

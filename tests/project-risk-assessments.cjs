@@ -24,7 +24,7 @@ test('package review retains package route without assessment parameters',async(
 test('assessment drawer shows stored four ratings and summaries, gates decisions and returns a new linked revision',()=>{
  const history=html.slice(html.indexOf('async function loadProjectAssessmentHistory'),html.indexOf('let projectSubmissionVersion'));
  for(const field of ['inherent_likelihood','inherent_impact','residual_likelihood','residual_impact','controls_summary','treatments_summary','owner_user_id'])assert.ok(history.includes(field),field);
- assert.match(history,/item.status==='Draft'&&own&&capability.can_create/);assert.match(history,/item.status==='Submitted'&&!own&&capability.can_approve/);assert.match(history,/item.status==='Returned'&&Number\(item.owner_user_id\)===userId&&capability.can_create/);
+ assert.match(history,/capability.administrator_override===true/);assert.match(history,/item.status==='Draft'&&\(own\|\|administratorOverride\)&&capability.can_create/);assert.match(history,/item.status==='Submitted'&&\(!own\|\|administratorOverride\)&&capability.can_approve/);assert.match(history,/item.status==='Returned'&&\(Number\(item.owner_user_id\)===userId\|\|administratorOverride\)&&capability.can_create/);
  const editor=html.slice(html.indexOf('async function openProjectAssessment'),html.indexOf('async function assignApprovedProjectRisk'));assert.match(editor,/payload.returned_assessment_id=Number/);assert.match(editor,/loadProjectAssessmentHistory\(overlay.dataset.applicabilityId,result.id\)/);assert.doesNotMatch(editor,/project-draft-prefill/);
 });
 
