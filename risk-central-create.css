@@ -1,0 +1,34 @@
+#veroRiskDrawerOverlay .vero-risk-drawer{width:min(1440px,96vw);max-width:96vw;color:#292725;background:white}
+.vero-central{--line:#e5e1de;--teal:#21869b;--ink:#292725;color:var(--ink);padding:24px;line-height:1.5}
+.vero-central *{box-sizing:border-box}.vero-central [hidden]{display:none!important}
+.vero-central button,.vero-central input,.vero-central textarea,.vero-central select{font:inherit;color:var(--ink)}
+.vero-central button{cursor:pointer}.vero-central button:disabled{cursor:default;opacity:.55}
+.vero-central button:focus-visible,.vero-central input:focus-visible,.vero-central select:focus-visible,.vero-central textarea:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+.vero-central input,.vero-central select,.vero-central textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:10px;background:white}
+.vero-central textarea{min-height:90px;resize:vertical}.vero-central label{display:block;font-weight:500;margin:10px 0 6px}
+.vero-central .fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}.vero-central .tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.vero-central .full{grid-column:1/-1}.vero-central .stages{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:24px 0}
+.vero-central .stage{background:#fafaf8;border:1px solid var(--line);border-radius:9px;padding:16px;text-align:left}
+.vero-central .stage b{display:block;font-size:19px}.vero-central .stage[aria-pressed=true]{border:2px solid var(--teal);background:#eef6f7;color:var(--teal)}
+.vero-central .columns{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px}.vero-central .panel{border:1px solid var(--line);border-radius:9px;padding:18px;min-width:0}
+.vero-central .summary{background:#fafaf8;align-self:start}.vero-central .matrix-scroll{overflow:auto;padding-bottom:12px}
+.vero-central .matrix{display:grid;grid-template-columns:145px 58px repeat(5,90px);gap:3px;width:max-content;margin:14px 0}
+.vero-central .matrix .axis{background:#3d3935;color:white;display:grid;place-items:center;font-size:21px;min-height:44px}
+.vero-central .matrix .axis-label{border:0;background:white;color:#292725;padding:8px 3px;font-size:13px;font-weight:400}
+.vero-central .matrix .axis-label.like{text-align:left;font-size:14px;padding-right:12px}
+.vero-central .matrix .axis-label:hover{text-decoration:underline;color:var(--teal)}
+.vero-central .matrix .cell{width:90px;height:90px;aspect-ratio:1;border:3px solid transparent;border-radius:0;padding:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.vero-central .cell .score{font-size:23px;font-weight:400}.vero-central .cell small{font-size:11px}
+.vero-central .cell[aria-pressed=true]{border-color:#242424;box-shadow:inset 0 0 0 2px white}
+.vero-central .badge{display:block;padding:12px;border-radius:7px;margin:5px 0 18px;font-size:18px}
+.vero-central .guidance{white-space:pre-line;font-size:14px}.vero-central .muted{color:#716864;font-size:13px}
+.vero-central .button{border:1px solid var(--line);background:white;border-radius:7px;padding:10px 16px}
+.vero-central .primary{background:#a8c63d;font-weight:600;border-color:#a8c63d}
+.vero-central .footer{display:flex;justify-content:space-between;gap:15px;margin-top:24px}
+.vero-central .owner-options{max-height:220px;overflow:auto;border:1px solid var(--line)}
+.vero-central .owner-option{display:block;background:white;border:0;border-bottom:1px solid var(--line);text-align:left;padding:10px;width:100%}
+.vero-central .owner-option small{display:block}.vero-central .owner-option[aria-selected=true]{background:#eef6f7}
+.vero-central .control-option{display:flex;gap:8px;align-items:start;font-weight:400}.vero-central .control-option input{width:auto;margin-top:7px}
+.vero-central .control-options{max-height:230px;overflow:auto}.vero-central .status{white-space:pre-line;color:#21869b;min-height:24px}
+@media(max-width:1200px){.vero-central .columns{grid-template-columns:1fr}.vero-central .summary{position:static}.vero-central .tiers{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){.vero-central{padding:15px}.vero-central .fields,.vero-central .tiers{grid-template-columns:1fr}.vero-central .stage{padding:9px}.vero-central .stage b{font-size:15px}.vero-central .matrix{grid-template-columns:116px 46px repeat(5,76px)}.vero-central .matrix .cell{width:76px;height:76px}.vero-central .matrix .cell .score{font-size:21px}.vero-central .matrix .cell small{font-size:10px}}
