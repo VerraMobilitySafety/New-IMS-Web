@@ -31,21 +31,21 @@ test('definition-only review sends exact version/hash once and retains non-live 
  const a=app();a.render();const button=a.button('Approve risk and assessment');assert.ok(button);button.click();button.click();await tick();const posts=a.calls.filter(c=>c.method==='POST');assert.equal(posts.length,1);assert.equal(posts[0].url.endsWith('/risks/91/project-submission/decision'),true);assert.deepEqual(posts[0].body,{decision:'Approve',reason:'Reviewed package',version:7,package_hash:'version-seven-hash'});assert.match(a.host.textContent,/No, required approvals are still pending/);
 });
 test('complete approval is exposed only by backend can_complete',()=>{
- const a=app();a.data.capabilities.can_complete=true;a.render();assert.ok(a.button('Approve risk and assessment'));assert.equal(a.button('Approve risk and assessment'),undefined);
+ const a=app();a.data.capabilities.can_complete=true;a.render();assert.ok(a.button('Approve risk and assessment'));assert.equal(a.button('Approve definition; send assessment for approval'),undefined);
 });
 test('Administrator package actions follow operation capabilities and retain exact versioned decision payload',async()=>{
  const a=app();a.data.capabilities={...a.data.capabilities,administrator_override:true,can_complete:true};a.render();assert.ok(a.button('Approve risk and assessment'));a.button('Approve risk and assessment').click();await tick();assert.deepEqual(a.calls.find(c=>c.method==='POST').body,{decision:'Approve',reason:'Reviewed package',version:7,package_hash:'version-seven-hash'});
  const denied=app();denied.data.capabilities={administrator_override:true};denied.render();assert.equal(denied.buttons().some(b=>/Approve|Return|Revise|Complete/.test(b.textContent)),false);
 });
 test('Administrator correction preserves another submitter’s complete returned package and identity',()=>{
- const a=app();a.data.submission.status='Changes Requested';a.data.submission.submitted_by_user_id=22;a.data.capabilities={administrator_override:true,can_resubmit:true};let original;a.render({onRevise:value=>original=value});a.button('Revise returned submission').click();assert.equal(original,a.data.submission);assert.equal(original.risk_id,91);assert.equal(original.version,7);assert.equal(original.package_hash,'version-seven-hash');assert.equal(original.proposed_assessment.owner_user_id,11);
+ const a=app();a.data.submission.status='Changes Requested';a.data.submission.submitted_by_user_id=22;a.data.capabilities={administrator_override:true,can_resubmit:true};let original;a.render({onRevise:value=>original=value});a.button('Edit and resubmit').click();assert.equal(original,a.data.submission);assert.equal(original.risk_id,91);assert.equal(original.version,7);assert.equal(original.package_hash,'version-seven-hash');assert.equal(original.proposed_assessment.owner_user_id,11);
 });
 test('return requires nonblank rationale and sends Return against the displayed version',async()=>{
  const blank=app({prompt:'  '});blank.render();blank.button('Return for changes').click();await tick();assert.equal(blank.calls.length,0);
  const a=app();a.render();a.button('Return for changes').click();await tick();assert.equal(a.calls[0].body.decision,'Return');assert.equal(a.calls[0].body.version,7);
 });
 test('revisions use the existing risk and keep the full original package',()=>{
- const a=app();a.data.capabilities={can_resubmit:true};let original;a.render({onRevise:value=>original=value});a.button('Revise returned submission').click();assert.equal(original,a.data.submission);assert.equal(original.documents[0].id,44);assert.equal(original.proposed_assessment.owner_user_id,11);
+ const a=app();a.data.capabilities={can_resubmit:true};let original;a.render({onRevise:value=>original=value});a.button('Edit and resubmit').click();assert.equal(original,a.data.submission);assert.equal(original.documents[0].id,44);assert.equal(original.proposed_assessment.owner_user_id,11);
 });
 test('document picker uses exact IDs and versions; filtering does not clear a selection',()=>{
  const a=app();a.api.documentPicker(a.host,a.data.submission.documents,[44]);const inputs=a.host.querySelectorAll('input'),search=inputs.find(i=>i.type==='search'),checkbox=inputs.find(i=>i.type==='checkbox');assert.equal(checkbox.value,'44');assert.equal(checkbox.checked,true);assert.match(a.host.textContent,/v3/);search.value='not-a-match';search.emit('input');assert.equal(checkbox.checked,true);assert.equal(checkbox.parent.parent.hidden,true);
