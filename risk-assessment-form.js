@@ -25,6 +25,7 @@ const review=field('Next review date');review.el.type='date';const reviewHelp=no
 const tierBox=node('div',null,'tiers'),tierFields=[];
 for(let i=0;i<4;i++){const f=field('Tier '+(4-i)+' '+['Risk Domain','Risk Stream','Risk Category','Risk Event'][i],'select');tierFields.push(f.el);tierBox.append(f.wrap);if(config.projectMode&&i<2)f.wrap.hidden=true;f.el.onchange=()=>renderTiers(i+1);}
 if(config.fixedCategory){tierBox.hidden=true;title.el.readOnly=true;}
+if(config.assessmentOnly){tierBox.hidden=true;title.wrap.hidden=true;description.wrap.hidden=true;}
 const tierHelp=node('p',config.projectMode?'Project Execution · Choose Tier 2 and Tier 1 for this project risk.':'Choose Tier 4, then stop at that tier or continue down to a more specific classification.','muted full');tierBox.append(tierHelp);
 const tabs=node('div',null,'stages');tabs.setAttribute('aria-label','Assessment stages');
 for(let i=0;i<3;i++){const b=button('','stage');b.append(node('b',(i+1)+' '+stages[i]),node('span',['Before controls','With existing controls','After further controls'][i]));b.onclick=()=>{stage=i;renderAssessment();};tabs.append(b);}
@@ -46,7 +47,7 @@ Object.keys(criteria.impact['1']).forEach(name=>{const o=node('option',name);o.v
 summary.append(node('h3','Assessment summary'),summaries,node('h3','Rating definitions'),category.wrap,explanation);
 category.el.onchange=()=>showExplanation(ratings[stage]);columns.append(panel,summary);
 const notes=field('Assessment notes and justification','textarea'),footer=node('div',null,'footer'),cancel=button('Cancel','button'),save=button(config.submitLabel||'Save Risk · Make live','button primary'),status=node('p',null,'status');status.setAttribute('role','status');
-notes.el.maxLength=config.notesMaxLength||20000;footer.append(cancel,save);host.append(identification,tierBox,tabs,columns,notes.wrap,footer,status);
+notes.el.maxLength=config.notesMaxLength||20000;if(config.embedded)footer.hidden=true;footer.append(cancel,save);host.append(identification,tierBox,tabs,columns,notes.wrap,footer,status);
 const fullCriteria=node('details');fullCriteria.append(node('summary','View full rating criteria'));
 for(let l=5;l>=1;l--){fullCriteria.append(node('h4',names[l-1]),node('p',criteria.likelihood[names[l-1]]));}
 for(const group of Object.keys(criteria.impact['1'])){const block=node('details');block.append(node('summary',group));for(let impact=5;impact>=1;impact--)block.append(node('h4',impacts[impact-1]),node('p',criteria.impact[String(impact)][group]));fullCriteria.append(block);}summary.append(fullCriteria);
@@ -120,7 +121,7 @@ function setValue(v={}){
 cancel.onclick=()=>{if(!busy){closePickers();config.onCancel?.();}};
 save.onclick=async()=>{
  if(busy)return;status.textContent='';const body=value();
- const validClassification=config.fixedCategory?true:config.projectMode?Boolean(tierFields[2].value&&tierFields[3].value):Boolean(tierFields[0].value);
+ const validClassification=config.assessmentOnly?true:config.fixedCategory?true:config.projectMode?Boolean(tierFields[2].value&&tierFields[3].value):Boolean(tierFields[0].value);
  if(!body.risk_title||!body.risk_description||!owner||!validClassification||ratings.some(r=>!r)||!body.next_review_date||!body.justification.trim()){
   status.textContent='Complete the title, description, Risk Owner, classification, all three ratings, review date and assessment notes.';return;
  }

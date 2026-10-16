@@ -1,0 +1,8 @@
+.compliance-shared-editor{max-width:730px;margin:18px 0 0}.compliance-shared-editor[hidden]{display:none!important}
+.compliance-risk-assessment [hidden]{display:none!important}
+.compliance-shared-editor .matrix-scroll{isolation:isolate}
+#singleSharedRiskAssessment.vero-central,#reviewSharedRiskAssessment.vero-central{font-size:13px;padding:0}
+#singleSharedRiskAssessment.vero-central input,#singleSharedRiskAssessment.vero-central select,#singleSharedRiskAssessment.vero-central textarea,
+#reviewSharedRiskAssessment.vero-central input,#reviewSharedRiskAssessment.vero-central select,#reviewSharedRiskAssessment.vero-central textarea{font-size:13px}
+
+#reviewAssessmentModal .field[hidden]{display:none!important}

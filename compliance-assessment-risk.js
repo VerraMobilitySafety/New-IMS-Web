@@ -19,7 +19,7 @@ function complianceRiskElement(prefix,suffix){return document.getElementById(pre
 function complianceRiskScore(likelihood,impact){
  const l=Number(likelihood),i=Number(impact);
  return Number.isInteger(l)&&l>=1&&l<=5&&Number.isInteger(i)&&i>=1&&i<=5
-  ? {score:l*i,rating:COMPLIANCE_RISK_MATRIX[l-1][i-1]} : null;
+  ? {score:l*5*i,rating:COMPLIANCE_RISK_MATRIX[l-1][i-1]} : null;
 }
 function complianceRiskOptions(select,placeholder,items){
  select.replaceChildren();
@@ -28,15 +28,15 @@ function complianceRiskOptions(select,placeholder,items){
 }
 function renderComplianceRiskMatrix(prefix){
  const labels=[5,4,3,2,1];
- complianceRiskElement(prefix,'Matrix').innerHTML='<table class="compliance-risk-matrix"><caption>Shared matrix ratings using normalized likelihood levels 1–5 (equivalent to 5–25 in the Risk register). Scores here are likelihood × impact, out of 25.</caption><thead><tr><th scope="col">Likelihood / Impact</th>'+[1,2,3,4,5].map(i=>'<th scope="col">'+i+'</th>').join('')+'</tr></thead><tbody>'+labels.map(l=>'<tr><th scope="row">'+l+'</th>'+[1,2,3,4,5].map(i=>{const value=complianceRiskScore(l,i);return '<td class="compliance-risk-'+value.rating.toLowerCase()+'">'+value.score+'<br>'+value.rating+'</td>';}).join('')+'</tr>').join('')+'</tbody></table>';
+ complianceRiskElement(prefix,'Matrix').innerHTML='<table class="compliance-risk-matrix"><caption>Shared matrix ratings using normalized likelihood levels 1–5 (equivalent to 5–25 in the Risk register). Scores here are likelihood × 5 × consequence, out of 125.</caption><thead><tr><th scope="col">Likelihood / Impact</th>'+[1,2,3,4,5].map(i=>'<th scope="col">'+i+'</th>').join('')+'</tr></thead><tbody>'+labels.map(l=>'<tr><th scope="row">'+l+'</th>'+[1,2,3,4,5].map(i=>{const value=complianceRiskScore(l,i);return '<td class="compliance-risk-'+value.rating.toLowerCase()+'">'+value.score+'<br>'+value.rating+'</td>';}).join('')+'</tr>').join('')+'</tbody></table>';
 }
 function updateComplianceRiskScores(prefix='review'){
  const exempt=prefix==='review'&&document.getElementById('reviewAssessmentStatus').value==='Not Applicable';
  const target=complianceRiskElement(prefix,'Scores');
  if(exempt){target.textContent='Risk assessment exempt: Not Applicable';return;}
- target.innerHTML=['Inherent','Residual'].map(kind=>{
-  const result=complianceRiskScore(complianceRiskElement(prefix,kind+'Likelihood').value,complianceRiskElement(prefix,kind+'Impact').value);
-  return '<div class="compliance-risk-score">'+kind+' risk<strong>'+(result?result.score+' / 25 · <span class="compliance-risk-level compliance-risk-'+result.rating.toLowerCase()+'">'+result.rating+'</span>':'Select likelihood and impact')+'</strong></div>';
+ target.innerHTML=['Inherent','Residual','Target'].map(kind=>{
+  const result=complianceRiskScore(complianceRiskElement(prefix,kind+'Likelihood')?.value,complianceRiskElement(prefix,kind+'Impact')?.value);
+  return '<div class="compliance-risk-score">'+kind+' risk<strong>'+(result?result.score+' / 125 · <span class="compliance-risk-level compliance-risk-'+result.rating.toLowerCase()+'">'+result.rating+'</span>':'Select likelihood and impact')+'</strong></div>';
  }).join('');
 }
 function updateComplianceRiskExemption(){
@@ -163,13 +163,17 @@ async function loadRequirementRiskClassifications(id){
  }catch(error){if(sequence===complianceRequirementClassificationSequence&&Number(currentLiveObligationId)===Number(id))target.textContent='Unable to load classifications: '+error.message;}
 }
 function complianceRiskSummary(position){
+ if(position?.shared_assessment?.target){position={...position,target_likelihood:position.shared_assessment.target.likelihood,target_impact:position.shared_assessment.target.impact};}
  const e=escapeComplianceText;
  if(!position)return '<p>No initial risk assessment was recorded.</p>';
  if(position.assessment_status==='Not Applicable')return '<p>Not Applicable: risk scoring exempt.</p>';
- return '<div class="compliance-risk-scores">'+['Inherent','Residual'].map(kind=>{
+ return '<div class="compliance-risk-scores">'+['Inherent','Residual','Target'].map(kind=>{
   const key=kind.toLowerCase(),result=complianceRiskScore(position[key+'_likelihood'],position[key+'_impact']);
-  return '<div class="compliance-risk-score">'+kind+' risk<strong>'+(result?result.score+' / 25 · <span class="compliance-risk-level compliance-risk-'+result.rating.toLowerCase()+'">'+result.rating+'</span>':'Not recorded')+'</strong></div>';
- }).join('')+'</div><small>Controls: '+e(position.control_effectiveness||'Not recorded')+' · Risk Owner: '+e(position.risk_owner_name||position.owner_name||position.risk_owner_user_id||'Not recorded')+'</small>'+(position.risk_code?'<small>Linked master risk: '+e(position.risk_code)+' — '+e(position.risk_title||'')+'</small>':'')+'<p>'+e(position.justification||'')+'</p>'+(position.controls_summary?'<p><strong>Existing controls:</strong> '+e(position.controls_summary)+'</p>':'')+(position.treatments_summary?'<p><strong>Further treatment:</strong> '+e(position.treatments_summary)+'</p>':'');
+  return '<div class="compliance-risk-score">'+kind+' risk<strong>'+(result?result.score+' / 125 · <span class="compliance-risk-level compliance-risk-'+result.rating.toLowerCase()+'">'+result.rating+'</span>':'Not recorded')+'</strong></div>';
+ }).join('')+'</div><small>Controls: '+e(position.control_effectiveness||'Not recorded')+' · Risk Owner: '+e(position.risk_owner_name||position.owner_name||position.risk_owner_user_id||'Not recorded')+'</small>'+(position.risk_code?'<small>Linked master risk: '+e(position.risk_code)+' — '+e(position.risk_title||'')+'</small>':'')+(position.shared_assessment?.next_review_date?'<p><strong>Next Review Date:</strong> '+e(position.shared_assessment.next_review_date)+'</p>':'')+'<p>'+e(position.justification||'')+'</p>'+(position.controls_summary?'<p><strong>Existing controls:</strong> '+e(position.controls_summary)+'</p>':'')+(position.treatments_summary?'<p><strong>Further Treatment:</strong> '+e(position.treatments_summary)+'</p>':'')
+ +(position.shared_assessment?.controls||[]).map(c=>'<p><strong>Enterprise Control:</strong> '+e(c.code)+' · '+e(c.title)+'</p>').join('')
+ +(position.shared_assessment?.documents||[]).map(d=>'<p><strong>Document Control:</strong> '+e(d.code)+' · '+e(d.title)+' · Version '+e(d.version)+'</p>').join('')
+ +(position.shared_assessment?.treatment_actions||[]).map(a=>'<p><strong>Proposed Treatment:</strong> '+e(a.title)+' · Owner #'+e(a.owner_user_id)+' · Due '+e(a.due_date)+'</p>').join('');
 }
 async function loadComplianceRiskAssessmentHistory(id){
  const sequence=++complianceRiskHistorySequence;
@@ -196,3 +200,4 @@ function renderControllerComplianceRisk(item,section){
  renderComplianceRiskMatrix(prefix);updateComplianceRiskScores(prefix);
 });
 document.getElementById('reviewAssessmentStatus').addEventListener('change',updateComplianceRiskExemption);
+

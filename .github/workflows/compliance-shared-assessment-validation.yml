@@ -1,0 +1,22 @@
+name: Shared Compliance assessment browser validation
+on:
+  pull_request:
+    paths: ['compliance.html', 'compliance-assessment-risk.js', 'compliance-shared-assessment.*', 'risk-assessment-form.js', 'risk-review-policy.js', 'tests/compliance*.cjs', '.github/workflows/compliance-shared-assessment-validation.yml']
+  push:
+    branches: [main, 'vero/compliance-shared-assessment-20261016']
+    paths: ['compliance.html', 'compliance-assessment-risk.js', 'compliance-shared-assessment.*', 'risk-assessment-form.js', 'risk-review-policy.js', 'tests/compliance*.cjs', '.github/workflows/compliance-shared-assessment-validation.yml']
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check compliance-shared-assessment.js && node --check compliance-assessment-risk.js
+      - run: node --test tests/compliance-assessment-risk.cjs tests/risk-central-create.cjs tests/project-risk-creator.cjs tests/risk-review-policy.cjs
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/compliance-shared-browser.cjs
