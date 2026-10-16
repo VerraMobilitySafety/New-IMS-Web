@@ -16,18 +16,24 @@ for(const viewport of [{width:1500,height:1100},{width:390,height:844}]){
  const cells=await page.locator('.vero-central .cell').evaluateAll(els=>els.map(e=>{const r=e.getBoundingClientRect();return {width:r.width,height:r.height};}));
  assert.equal(cells.length,25);assert.ok(cells.every(c=>Math.abs(c.width-c.height)<.5),'Matrix cells must be square');
  const label=page.locator('.vero-central .axis-label.like').first();const colour=await label.evaluate(e=>getComputedStyle(e).color);assert.notEqual(colour,'rgb(255, 255, 255)');assert.notEqual(colour,'rgba(0, 0, 0, 0)');
- await page.getByLabel('Risk title',{exact:true}).fill('Working near moving vehicles');await page.getByLabel('Risk description',{exact:true}).fill('Vehicle interaction during roadside operations.');
- const before=await page.getByLabel('Risk description',{exact:true}).boundingBox();
+ await page.getByLabel('Risk Title',{exact:true}).fill('Working near moving vehicles');await page.getByLabel('Risk Description',{exact:true}).fill('Vehicle interaction during roadside operations.');
+ const before=await page.getByLabel('Risk Description',{exact:true}).boundingBox();
  await page.getByLabel('Risk Owner',{exact:true}).fill('owner@');
- const after=await page.getByLabel('Risk description',{exact:true}).boundingBox();
+ const after=await page.getByLabel('Risk Description',{exact:true}).boundingBox();
  assert.ok(Math.abs(before.y-after.y)<1,'Opening owner choices must not move the form');
  await page.locator('.owner-option').first().click();
  const drawerWidth=await page.locator('#veroRiskDrawerOverlay .vero-risk-drawer').evaluate(e=>e.getBoundingClientRect().width);
- assert.ok(drawerWidth<=1101,'Drawer must be narrower');
+ assert.ok(drawerWidth<=731,'Drawer must be narrower');
+ if(viewport.width>1000){
+  const font=await page.getByLabel('Risk Title',{exact:true}).evaluate(e=>parseFloat(getComputedStyle(e).fontSize));assert.ok(font<=13,'Compact form input font');
+  const titleBox=await page.getByLabel('Risk Title',{exact:true}).boundingBox(),descriptionBox=await page.getByLabel('Risk Description',{exact:true}).boundingBox();
+  assert.ok(descriptionBox.y-(titleBox.y+titleBox.height)<=48,'Title-to-description spacing must be compact');
+ }
+
  await page.locator('.vero-central .cell').first().click();await page.locator('.vero-central .stage').nth(1).click();await page.locator('.vero-central .cell').nth(16).click();
- await page.getByLabel('Find enterprise controls',{exact:true}).fill('Physical');
+ await page.getByLabel('Find Enterprise Controls',{exact:true}).fill('Physical');
  await page.locator('.add-option').filter({hasText:'CTRL-7'}).click();
- await page.getByLabel('Find Document Library controls',{exact:true}).fill('Traffic');
+ await page.getByLabel('Find Document Library Controls',{exact:true}).fill('Traffic');
  await page.locator('.add-option').filter({hasText:'DOC-9'}).click();
  assert.equal(await page.locator('.added-item').count(),2,'Controls add individually');
  assert.equal(await page.locator('.vero-central input[type=checkbox]').count(),0,'Control checkboxes removed');
