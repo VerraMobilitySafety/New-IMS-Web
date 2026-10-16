@@ -12,7 +12,7 @@ function schedule(likelihood,impact,config={}){
   const start=config.project_start,end=config.project_end;
   if(!start||!end||end>addMonths(start,3)||end<start){const limit=addMonths(reference,3);if(limit<due){due=limit;reasons.push('Quarterly project review required; duration exceeds three months or is not yet confirmed');}}
   if(end&&end>=reference&&end<due){due=end;reasons.push('Project completion is an earlier review milestone');}
- }else throw Error('Unknown review context');
+ }else if(context!=='Compliance')throw Error('Unknown review context');
  if(config.earlier_date&&config.earlier_date<due){due=config.earlier_date;reasons.push('Earlier scheduled review retained');}
  return {policy_version:'2026-10-16',reference_date:reference,residual_rating:band,default_interval_months:interval,next_review_date:due,context,constraints:reasons,event_driven_review_required:true,immediate_escalation:band==='Significant'};
 }

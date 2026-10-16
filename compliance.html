@@ -1692,7 +1692,7 @@ button,input,select,textarea{font-family:inherit}
 
      <fieldset class="compliance-risk-assessment field full" id="reviewRiskFields">
       <legend>Risk Assessment — 5 × 5</legend>
-      <p class="compliance-risk-help">Assess exposure from non-compliance or partial compliance, independently of the compliance result. Inherent risk is before controls; residual risk is with existing controls.</p>
+      <p class="compliance-risk-help">Assess exposure from non-compliance or partial compliance, independently of the compliance result. Inherent risk is before controls; Current Residual reflects existing controls; Target reflects the planned further controls.</p>
       <p id="reviewRiskExemption" class="form-note" hidden>Risk scoring is not required for a Not Applicable assessment. The assessment rationale is still required.</p>
       <div class="form-grid">
        <div class="field"><label for="reviewRiskInherentLikelihood">Inherent Likelihood (1–5)</label><select id="reviewRiskInherentLikelihood" required></select></div>
@@ -2630,7 +2630,7 @@ button,input,select,textarea{font-family:inherit}
 
      <fieldset class="compliance-risk-assessment field full" id="singleRiskFields">
       <legend>Initial Risk Assessment — 5 × 5</legend>
-      <p class="compliance-risk-help">Assess exposure from non-compliance or partial compliance, independently of the compliance result. Inherent risk is before controls; residual risk is with existing controls.</p>
+      <p class="compliance-risk-help">Assess exposure from non-compliance or partial compliance, independently of the compliance result. Inherent risk is before controls; Current Residual reflects existing controls; Target reflects the planned further controls.</p>
       <p id="singleRiskExemption" class="form-note" hidden>Risk scoring is not required for a Not Applicable assessment. The assessment rationale is still required.</p>
       <div class="form-grid">
        <div class="field"><label for="singleRiskInherentLikelihood">Inherent Likelihood (1–5)</label><select id="singleRiskInherentLikelihood" required></select></div>
@@ -5714,8 +5714,7 @@ async function openComplianceRecord(recordId){
 </style>
 
 <style>
-/* =========================================
-   COMPLIANCE DRAWER TYPOGRAPHY NORMALISATION
+/* ==================================   COMPLIANCE DRAWER TYPOGRAPHY NORMALISATION
 ========================================= */
 
 .compliance-requirement-drawer,
@@ -6578,7 +6577,7 @@ async function submitComplianceAssessment(){
  try{
   await complianceRiskRequest('/compliance/obligations/'+obligationId+'/assessments',{
    method:'POST',headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({assessment_status:status,rationale,gaps_identified:gaps||null,next_assessment_date:nextDate||null,risk_position:riskPosition})
+   body:JSON.stringify({assessment_status:status,rationale,gaps_identified:gaps||null,next_assessment_date:riskPosition?.shared_assessment?.next_review_date||nextDate||null,risk_position:riskPosition})
   });
   if(session!==complianceRiskForms.review.sequence||Number(currentLiveObligationId)!==Number(obligationId))return;
   closeModal('reviewAssessmentModal');
@@ -8027,8 +8026,7 @@ function renderComplianceChangeHistory(history){
 </script>
 
 <style>
-/* =========================================
-   COMPLIANCE DRAWER FINAL UI CLEANUP
+/* ==================================   COMPLIANCE DRAWER FINAL UI CLEANUP
 ========================================= */
 
 /* Never render modal backdrops until explicitly opened */
@@ -8218,6 +8216,13 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 
 
+<link rel="stylesheet" href="risk-central-create.css">
+<link rel="stylesheet" href="compliance-shared-assessment.css">
+<script src="risk-assessment-criteria.js"></script>
+<script src="risk-review-policy.js"></script>
+<script src="risk-assessment-form.js"></script>
 <script src="compliance-assessment-risk.js"></script>
+<script src="compliance-shared-assessment.js"></script>
+
 
 <script src="ims-requirements-import.js?v=20261016-risk-review"></script>
