@@ -23,6 +23,7 @@ class Element{
  setAttribute(name,value){this.attributes[name]=String(value);if(name.startsWith('data-'))this.dataset[name.slice(5).replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=String(value);}
  click(){if(!this.disabled)this.dispatchEvent(new Event('click'));}
  before(el){const index=this.parent.children.indexOf(this);this.parent.children.splice(index,0,el);el.parent=this.parent;}
+ remove(){const index=this.parent?.children.indexOf(this);if(index>=0)this.parent.children.splice(index,1);this.parent=null;}
  prepend(el){this.children.unshift(el);el.parent=this;}
  closest(selector){return this.matches(selector)?this:this.parent?.closest(selector)||null;}
  matches(selector){if(selector.startsWith('#'))return this.id===selector.slice(1);if(selector.startsWith('.'))return this.className.split(' ').includes(selector.slice(1));if(selector.startsWith('[')){const [name,value]=selector.slice(1,-1).split('=');const actual=this.attributes[name]??this[name];return value===undefined?actual!==undefined:String(actual)===value.replace(/[\"']/g,'');}return this.tagName===selector;}
@@ -49,7 +50,7 @@ function app(override,options={}){
   if(route==='/risks')return response({risks:[draft]});
   throw Error('Unexpected API '+route);
  };
- const scope=vm.createContext({document,fetch,crypto:options.crypto??{randomUUID},localStorage:{getItem:()=> 'offline-token'},CustomEvent:Event,console,window:{addEventListener:(type,fn)=>document.addEventListener('window:'+type,fn),prompt:()=> 'Reviewed and approved',confirm:message=>{prompts.push(message);return options.confirm??true;}}});
+ const scope=vm.createContext({document,fetch,crypto:options.crypto??{randomUUID},localStorage:{getItem:()=> 'offline-token'},CustomEvent:Event,console,window:{addEventListener:(type,fn)=>document.addEventListener('window:'+type,fn),prompt:options.prompt||(()=> 'Reviewed and approved'),confirm:message=>{prompts.push(message);return options.confirm??true;}}});
  if(options.integration){
   document.appendChild(overlay);overlay.append(title,subtitle,content);
   const tabs=new Element();tabs.className='vero-risk-details-tabs';overlay.appendChild(tabs);
@@ -74,6 +75,19 @@ function app(override,options={}){
  return {document,content,overlay,title,subtitle,calls,events,prompts,open,click,emit,form,field,feedback,start,fill,submit};
 }
 
+test('unsupported native prompts require an explicit inline registration reason and confirmation',async()=>{
+ const saved={...draft};const a=app(call=>call.route==='/risks/71/office-decision'?response({risk_status:'Open'}):undefined,{integration:true,prompt:()=>{throw Error('prompt unavailable');}});
+ a.emit('vero-risk-open-details',{risk:saved});await tick();a.click(a.document.getElementById('veroRiskOfficeApprove'));await tick();
+ const form=a.overlay.querySelector('form');assert.ok(form);assert.equal(a.calls.some(c=>c.route.endsWith('/office-decision')),false);
+ form.dispatchEvent(new Event('submit'));await tick();assert.equal(a.calls.some(c=>c.route.endsWith('/office-decision')),false);
+ form.querySelector('[name=decision_reason]').value='Register definition only; owner unassigned; assessments unconfirmed.';form.dispatchEvent(new Event('submit'));await tick();
+ assert.equal(a.calls.filter(c=>c.route.endsWith('/office-decision')).length,1);assert.equal(saved.status,'Open');
+});
+test('inline registration cancellation and navigation do not submit a decision',async()=>{
+ const a=app(undefined,{integration:true,prompt:()=>{throw Error('prompt unavailable');}});a.emit('vero-risk-open-details',{risk:{...draft,status:'Draft'}});await tick();a.click(a.document.getElementById('veroRiskOfficeApprove'));await tick();
+ let form=a.overlay.querySelector('form');a.click(form.querySelectorAll('button').find(b=>b.textContent==='Cancel Decision'));await tick();assert.equal(a.calls.some(c=>c.route.endsWith('/office-decision')),false);
+ a.click(a.document.getElementById('veroRiskOfficeApprove'));await tick();form=a.overlay.querySelector('form');a.open();await tick();assert.equal(a.overlay.querySelector('form'),null);assert.equal(a.calls.some(c=>c.route.endsWith('/office-decision')),false);
+});
 test('creation control is limited to Tier 1 and an authorised Risk Manager',async()=>{
  for(const roles of [[],[{role_name:'Global Admin'}],[{role_name:'Risk Assessor'}]]){
   const a=app(call=>call.route==='/auth/my-roles'?response({roles}):undefined);const nav=a.open();await tick();assert.equal(nav.querySelector('button').hidden,true);a.click(nav.querySelector('button'));assert.equal(a.form(),null);
@@ -225,3 +239,5 @@ test('pending Project Risk and unavailable package remain fail-closed for archiv
   const a=app(call=>call.route.endsWith('/project-submission')?reply:undefined,{integration:true});a.emit('vero-risk-open-details',{risk:draft});await tick();assert.equal(a.document.getElementById('veroRiskOfficeArchive').hidden,true);
  }
 });
+
+

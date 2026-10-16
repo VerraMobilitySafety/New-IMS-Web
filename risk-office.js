@@ -20,14 +20,36 @@
   edit.hidden=!show;approve.hidden=!show;changes.hidden=!show;
   archive.hidden=!(authorised&&selected&&canArchivePackage()&&['Draft','Open','Closed'].includes(selected.status));
  }
+ let activeDecisionPrompt=null;
+ function inlineDecisionReason(decision){
+  if(activeDecisionPrompt)return Promise.resolve(null);
+  return new Promise(resolve=>{
+   const form=document.createElement('form');form.className='vero-risk-office-form';form.style.margin='0 22px 16px';
+   const heading=document.createElement('h3');heading.textContent=decision==='Approved'?'Confirm Risk Registration':'Confirm Changes Requested';
+   const note=document.createElement('p');note.textContent=decision==='Approved'?'Register this Master Risk definition. Registration does not verify controls, approve assessment ratings or accept the risk.':'Record the requested changes with a reason.';
+   const label=document.createElement('label');label.textContent='Decision reason';
+   const input=document.createElement('textarea');input.name='decision_reason';input.required=true;input.maxLength=2000;label.appendChild(input);
+   const confirm=document.createElement('button');confirm.type='submit';confirm.textContent=decision==='Approved'?'Confirm Registration':'Confirm Changes Requested';
+   const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Cancel Decision';
+   const finish=value=>{form.remove();activeDecisionPrompt=null;resolve(value);};
+   cancel.addEventListener('click',()=>finish(null));
+   form.addEventListener('submit',event=>{event.preventDefault();const value=input.value.trim();if(!value||value.length>2000){status.textContent='A reason of up to 2000 characters is required.';return;}finish(value);});
+   form.append(heading,note,label,confirm,cancel);tabs.before(form);activeDecisionPrompt={cancel:()=>finish(null)};input.focus();
+   status.textContent='Enter a reason and confirm the decision.';
+  });
+ }
+ for(const event of ['vero-risk-open-details','vero-risk-open-classification','vero-risk-create-master','vero-risk-details-close'])document.addEventListener(event,()=>activeDecisionPrompt?.cancel());
  async function decide(decision){
   if(!authorised||selected?.status!=='Draft'||submissionState!=='none')return;
   const current=selected,seq=version;
-  const reason=window.prompt(decision==='Approved'?'Approval rationale (required):':'Reason for requesting changes (required):');
+  let reason,inlineConfirmed=false;
+  try{reason=window.prompt(decision==='Approved'?'Approval rationale (required):':'Reason for requesting changes (required):');}
+  catch(error){reason=await inlineDecisionReason(decision);inlineConfirmed=true;}
+  if(seq!==version||overlay.hidden||selected!==current)return;
   if(reason===null)return;
   if(!reason.trim()){status.textContent='A reason is required.';return;}
   if(reason.length>2000){status.textContent='Reason must be 2000 characters or fewer.';return;}
-  if(decision==='Approved'&&!window.confirm('Approve this Master Risk definition?'))return;
+  if(decision==='Approved'&&!inlineConfirmed&&!window.confirm('Approve this Master Risk definition?'))return;
   approve.disabled=true;changes.disabled=true;status.textContent='Recording decision...';
   try{
    const response=await fetch(API+'/risks/'+encodeURIComponent(current.id)+'/office-decision',{
