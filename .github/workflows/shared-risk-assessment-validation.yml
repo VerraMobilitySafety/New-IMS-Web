@@ -1,0 +1,21 @@
+name: Shared Project Risk assessment validation
+on:
+  pull_request:
+    paths: ['project-workspace.html', 'risk-assessment-form.js', 'risk-review-policy.js', 'risk-central-create.*', 'project-risk-create.*', 'project-risk-submission.js', 'tests/project-shared-browser.cjs', 'tests/project-risk-*.cjs', 'tests/risk-review-policy.cjs', '.github/workflows/shared-risk-assessment-validation.yml']
+  push:
+    branches: [main, 'vero/shared-project-assessment-20261016']
+    paths: ['project-workspace.html', 'risk-assessment-form.js', 'risk-review-policy.js', 'risk-central-create.*', 'project-risk-create.*', 'project-risk-submission.js', 'tests/project-shared-browser.cjs', 'tests/project-risk-*.cjs', 'tests/risk-review-policy.cjs', '.github/workflows/shared-risk-assessment-validation.yml']
+permissions:
+  contents: read
+jobs:
+  project-browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/project-risk-*.cjs tests/risk-review-policy.cjs tests/risk-central-create.cjs
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/project-shared-browser.cjs

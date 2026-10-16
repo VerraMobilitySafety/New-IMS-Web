@@ -1,0 +1,5 @@
+#projectRiskCreateOverlay{z-index:11000}
+#projectRiskCreateOverlay .drawer{width:min(730px,96vw);max-width:96vw}
+#projectRiskCreateOverlay .drawer-head{flex-shrink:0}
+#projectRiskCreateOverlay .vero-central input,#projectRiskCreateOverlay .vero-central select,#projectRiskCreateOverlay .vero-central textarea{font-size:13px}
+@media(max-width:500px){#projectRiskCreateOverlay .vero-central input,#projectRiskCreateOverlay .vero-central select,#projectRiskCreateOverlay .vero-central textarea{font-size:14px}}
