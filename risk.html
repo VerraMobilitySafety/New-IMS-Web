@@ -2767,7 +2767,7 @@ table {
   fields.forEach(([label,value])=>{
    const dl=document.createElement('dl'),dt=document.createElement('dt'),dd=document.createElement('dd');
    dt.textContent=label;dd.textContent=value==null||value===''?'Not recorded':String(value);
-   if(label==='Description')dd.classList.add('vero-risk-description');
+   if(label==='Description')dd.className='vero-risk-description';
    dl.append(dt,dd);section.appendChild(dl);
   });
   return section;
