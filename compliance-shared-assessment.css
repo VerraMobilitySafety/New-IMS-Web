@@ -11,7 +11,7 @@
 #singleSharedRiskAssessment .matrix>.like-number:nth-child(9),#reviewSharedRiskAssessment .matrix>.like-number:nth-child(9){font-size:14px}
 #singleRiskFields label,#reviewRiskFields label{text-transform:none!important;letter-spacing:normal!important;font-size:12px;font-weight:500}
 @media(max-width:600px){
- #submitModal .drawer-head,#reviewAssessmentModal .drawer-head{display:block;position:relative;padding:20px}
+ #submitModal .drawer-head,#reviewAssessmentModal .drawer-head{display:block;position:sticky;top:0;z-index:40;padding:20px}
  #submitModal .drawer-head .close,#reviewAssessmentModal .drawer-head .close{position:absolute;right:18px;top:18px}
  #submitModal .drawer-head h2,#reviewAssessmentModal .drawer-head h2{font-size:21px;max-width:100%;padding-right:35px;margin:8px 0}
  #submitModal .drawer-head>p{max-width:100%;margin:6px 0;font-size:11px}
