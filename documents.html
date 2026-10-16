@@ -216,6 +216,7 @@
 
  <div class="actions document-actions">
   <button class="btn green" onclick="openRequest()">＋ Request Document Action</button>
+  <button class="btn dark" type="button" onclick="openApprovedImport()">Import Approved Documents</button>
   <button class="btn dark" type="button" onclick="openGovernanceAI()">✦ Ask Governance AI</button>
  </div>
 
@@ -282,7 +283,7 @@
   <div class="detail-grid">
    <div class="detail"><label>Document Type</label><strong id="dType"></strong></div><div class="detail"><label>Version</label><strong id="dVersion"></strong></div>
    <div class="detail"><label>Owner</label><strong id="dOwner"></strong></div><div class="detail"><label>Author</label><strong id="dAuthor">—</strong></div>
-   <div class="detail"><label>Effective Date</label><strong id="dEffective">—</strong></div><div class="detail"><label>Next Review</label><strong id="dReview"></strong></div>
+   <div class="detail"><label>Approval Date</label><strong id="dApproval">—</strong></div><div class="detail"><label>Effective Date</label><strong id="dEffective">—</strong></div><div class="detail"><label>Next Review</label><strong id="dReview"></strong></div>
   </div>
   <div class="section"><h3>Purpose</h3><p id="dPurpose" style="font-size:13px;color:#625d59"></p></div>
   <div class="section"><h3>What changed?</h3><div style="background:#f2f5e8;padding:13px;border-radius:8px;font-size:13px"><span id="dChangeSummary">No change summary recorded.</span></div></div>
@@ -432,7 +433,7 @@ function fmtDate(value){if(!value)return '—';const d=new Date(value);return Nu
 function statusClass(status){const s=(status||'').toLowerCase();if(s==='current')return 'current';if(s.includes('review'))return 'review';if(s.includes('approval')||s.includes('approved'))return 'approval';if(s.includes('draft'))return 'draft';if(s.includes('overdue'))return 'overdue';return 'draft';}
 function displayStatus(status){return status||'Draft';}
 function documentTypeShort(type){const map={'Procedure':'PRO','Policy':'POL','Standard':'STD','Work Instruction':'WI','Management Plan':'MP','Form':'FRM','Template':'TMP','Guideline':'GUI'};return map[type]||type||'—';}
-function normaliseDocument(r){return {id:r.id,documentNumber:r.document_number||'—',documentTitle:r.document_title||r.file_name||'Untitled document',documentType:r.document_type||'—',documentOwnerUserId:r.document_owner_user_id??null,documentOwner:r.document_owner_name||r.document_owner||'—',documentOwnerEmail:r.document_owner_email||'',documentAuthor:r.uploaded_by||'—',workflowStatus:r.status||'Draft',controlledVersion:r.version_number||'—',effectiveDate:r.effective_date||null,nextReviewDate:r.review_date||null,changeSummary:r.description||'',purpose:r.description||'Controlled document managed in VERO.',fileName:r.file_name||'',contentType:r.content_type||'',aiSearchable:!!r.ai_searchable,allowView:r.allow_view!==false,allowDownload:!!r.allow_download,accessLevel:r.access_level||'Internal',createdAt:r.created_at||null,updatedAt:r.updated_at||null};}
+function normaliseDocument(r){return {id:r.id,documentNumber:r.document_number||'—',documentTitle:r.document_title||r.file_name||'Untitled document',documentType:r.document_type||'—',documentOwnerUserId:r.document_owner_user_id??null,documentOwner:r.document_owner_name||r.document_owner||'—',documentOwnerEmail:r.document_owner_email||'',documentAuthor:r.uploaded_by||'—',workflowStatus:r.status||'Draft',controlledVersion:r.version_number||'—',approvalDate:r.approval_date||null,effectiveDate:r.effective_date||null,nextReviewDate:r.review_date||null,changeSummary:r.description||'',purpose:r.description||'Controlled document managed in VERO.',fileName:r.file_name||'',contentType:r.content_type||'',aiSearchable:!!r.ai_searchable,allowView:r.allow_view!==false,allowDownload:!!r.allow_download,accessLevel:r.access_level||'Internal',createdAt:r.created_at||null,updatedAt:r.updated_at||null};}
 
 function openDocById(id){
  const d=liveDocuments.find(x=>String(x.id)===String(id));if(!d)return;selectedDocument=d;
@@ -445,6 +446,7 @@ function openDocById(id){
  document.getElementById('dStatus').textContent=displayStatus(d.workflowStatus);
  document.getElementById('dReview').textContent=fmtDate(d.nextReviewDate);
  document.getElementById('dEffective').textContent=fmtDate(d.effectiveDate);
+ document.getElementById('dApproval').textContent=fmtDate(d.approvalDate);
  document.getElementById('dChangeSummary').textContent=d.changeSummary||'No change summary recorded.';
  document.getElementById('dPurpose').textContent=d.purpose;
 
@@ -692,7 +694,7 @@ function renderDocuments(documents=currentDocuments()){
    </td>
    <td>v${esc(d.controlledVersion)}</td>
    <td>${esc(d.documentOwner)}</td>
-   <td>${esc(fmtDate(d.createdAt))}</td>
+   <td>${esc(fmtDate(d.effectiveDate||d.createdAt))}</td>
    <td>${esc(fmtDate(d.nextReviewDate))}</td>
   </tr>
  `).join('');
@@ -1102,6 +1104,19 @@ document.addEventListener('DOMContentLoaded',()=>{loadDocuments().finally(()=>wi
 
 <script>function toggleNavGroup(id){const group=document.getElementById(id);if(group)group.classList.toggle("open");}</script>
 <script src="nav.js"></script>
+<dialog id="approvedImport" aria-labelledby="approvedImportTitle" style="box-sizing:border-box;width:min(1400px,94vw);max-height:90vh;overflow:auto;border:0;border-radius:12px;padding:24px;font:13px Montserrat,Verdana,Arial,sans-serif">
+ <h2 id="approvedImportTitle">Import approved documents</h2>
+ <p>Load existing approved PDFs as Current documents. This does not run a new approval workflow.</p>
+ <p>Enter the approved version and owner for every file. Enter the original approval date, effective date and next review date. Past review dates are preserved so overdue documents remain visible.</p>
+ <label>Approved PDF files <input id="approvedImportFiles" type="file" accept=".pdf,application/pdf" multiple></label>
+ <p><label>Optional prepared inventory (JSON) <input id="approvedImportInventory" type="file" accept=".json,application/json"></label></p>
+ <div style="overflow:auto"><table class="table" style="min-width:1750px"><thead><tr><th>File</th><th>Number</th><th>Title</th><th>Type</th><th>Version</th><th>Owner</th><th>Approval date</th><th>Effective date</th><th>Next review</th><th>Result</th></tr></thead><tbody id="approvedImportRows"></tbody></table></div>
+ <p><label><input id="approvedImportConfirm" type="checkbox"> I confirm these documents are already approved and their entered details match the approved PDFs.</label></p>
+ <p id="approvedImportMessage" role="status" aria-live="polite"></p>
+ <button class="btn green" type="button" id="approvedImportSubmit">Import approved documents</button>
+ <button class="btn dark" type="button" id="approvedImportClose">Close</button>
+</dialog>
+<script src="approved-document-import.js?v=20261016-dates"></script>
 </body></html>
 
 <style id="document-library-ui">
@@ -1223,3 +1238,5 @@ document.addEventListener('DOMContentLoaded',()=>{loadDocuments().finally(()=>wi
   }
 }
 </style>
+
+
