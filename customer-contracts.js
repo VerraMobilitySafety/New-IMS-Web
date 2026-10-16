@@ -71,7 +71,6 @@ async function openImport(){
  }catch(e){alert(e.message);}
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeContract();});
-load().finally(()=>window.VeroPageLoader?.ready('contracts'));
 request('/maintenance-contracts/import-options').then(options=>{importOptions=options;const button=document.querySelector('.project-tools button');if(button){button.textContent='Import Contracts';button.hidden=!options.can_import;button.onclick=openImport;}}).catch(()=>{});
 const initialContract=new URLSearchParams(location.search).get('contract_id');
 if(initialContract){const timer=setInterval(()=>{const c=contracts.find(x=>String(x.id)===initialContract);if(c){clearInterval(timer);openContract(c);}},300);setTimeout(()=>clearInterval(timer),15000);}
