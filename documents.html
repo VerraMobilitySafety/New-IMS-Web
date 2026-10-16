@@ -730,12 +730,23 @@ async function loadDocuments(){
   liveDocuments=rows.map(normaliseDocument);
   populateDocumentTypeFilter();
   applyDocumentFilters();
+  await openLinkedImsSource();
 
  }catch(err){
   console.error('Unable to load VERO Governance documents',err);
   body.innerHTML=
    '<tr><td colspan="5" class="empty">Unable to load controlled documents from VERO. Please refresh or contact Governance.</td></tr>';
  }
+}
+let linkedImsSource=null;
+async function openLinkedImsSource(){
+ const params=new URLSearchParams(location.search),id=params.get('document_id');
+ if(!id || !/^\d+$/.test(id))return;
+ const doc=liveDocuments.find(d=>String(d.id)===id);
+ if(!doc){alert('The linked source document is unavailable.');return;}
+ const page=params.get('page')||'1';
+ linkedImsSource={id,page:/^\d+$/.test(page)&&Number(page)>0&&Number(page)<=10000?Number(page):1,clause:(params.get('clause')||'').slice(0,160)};
+ openDocById(id);await openSelectedDocument();
 }
 async function openSelectedDocument(){
  if(!selectedDocument){alert('Select a document first.');return;}
@@ -748,9 +759,9 @@ async function openSelectedDocument(){
   if(!response.ok)throw new Error(`Document API returned ${response.status}`);
   const blob=await response.blob();
   if(currentViewerBlobUrl)URL.revokeObjectURL(currentViewerBlobUrl);
-  currentViewerBlobUrl=URL.createObjectURL(blob);frame.src=currentViewerBlobUrl+'#toolbar=0&navpanes=0&scrollbar=1';
+  currentViewerBlobUrl=URL.createObjectURL(blob);frame.src=currentViewerBlobUrl+'#page='+((linkedImsSource&&String(selectedDocument.id)===linkedImsSource.id)?linkedImsSource.page:1)+'&toolbar=0&navpanes=0&scrollbar=1';
   document.getElementById('viewerTitle').textContent=`${selectedDocument.documentNumber} — ${selectedDocument.documentTitle}`;
-  document.getElementById('viewerMeta').textContent=`Version ${selectedDocument.controlledVersion} • ${selectedDocument.workflowStatus.toUpperCase()} • ${selectedDocument.accessLevel}`;
+  document.getElementById('viewerMeta').textContent=`Version ${selectedDocument.controlledVersion} • ${selectedDocument.workflowStatus.toUpperCase()} • ${selectedDocument.accessLevel}${linkedImsSource&&String(selectedDocument.id)===linkedImsSource.id?' • '+linkedImsSource.clause+' • PDF page '+linkedImsSource.page:''}`;
   document.getElementById('viewer').classList.add('show');closeDrawer();
  }catch(err){console.error('Unable to open controlled document',err);alert('Unable to open this controlled document. Please try again.');}
 }
@@ -1242,9 +1253,3 @@ document.addEventListener('DOMContentLoaded',()=>{loadDocuments().finally(()=>wi
   }
 }
 </style>
-
-
-
-
-
-
