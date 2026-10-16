@@ -1,5 +1,7 @@
 #projectRiskCreateOverlay{z-index:11000}
 #projectRiskCreateOverlay .drawer{width:min(730px,96vw);max-width:96vw}
-#projectRiskCreateOverlay .drawer-head{flex-shrink:0}
+#projectRiskCreateOverlay .drawer-head{flex-shrink:0;z-index:40}
+#projectRiskCreateOverlay .matrix-scroll{isolation:isolate}
+#projectRiskCreateOverlay .matrix>.like-number:nth-child(9){font-size:14px}
 #projectRiskCreateOverlay .vero-central input,#projectRiskCreateOverlay .vero-central select,#projectRiskCreateOverlay .vero-central textarea{font-size:13px}
 @media(max-width:500px){#projectRiskCreateOverlay .vero-central input,#projectRiskCreateOverlay .vero-central select,#projectRiskCreateOverlay .vero-central textarea{font-size:14px}}

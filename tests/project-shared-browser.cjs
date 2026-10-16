@@ -19,7 +19,7 @@ for(const viewport of [{width:1500,height:1100},{width:390,height:844}]){
  await form.locator('.stage').nth(2).click();await form.locator('.cell').nth(21).click();await form.getByLabel('Further Controls And Treatments',{exact:true}).fill('Install physical separation.');
  await form.getByLabel('Assessment Notes And Justification',{exact:true}).fill('Exposure and controls reviewed for the project.');
  const cells=await form.locator('.cell').evaluateAll(items=>items.map(e=>{const r=e.getBoundingClientRect();return [r.width,r.height];}));assert.equal(cells.length,25);assert.ok(cells.every(([w,h])=>Math.abs(w-h)<.5));
- await form.locator('.matrix').scrollIntoViewIfNeeded();const shot=await page.screenshot({type:'jpeg',quality:65});console.log('PROJECT_SHARED_SCREENSHOT_'+(viewport.width>1000?'DESKTOP':'MOBILE')+'='+shot.toString('base64'));
+ await form.locator('.matrix').scrollIntoViewIfNeeded();assert.ok(await form.evaluate(e=>{const h=e.querySelector('.drawer-head'),r=h.getBoundingClientRect();return h.contains(document.elementFromPoint(r.left+40,r.top+50));}),'Sticky matrix must not cover the drawer header');const shot=await page.screenshot({type:'jpeg',quality:65});console.log('PROJECT_SHARED_SCREENSHOT_'+(viewport.width>1000?'DESKTOP':'MOBILE')+'='+shot.toString('base64'));
  await form.getByRole('button',{name:'Cancel',exact:true}).click();await page.evaluate(()=>window.VeroProjectRiskCreator.open(window.fixtureProjectConfig));
  assert.equal(await form.getByLabel('Risk Title',{exact:true}).inputValue(),'Roadside project risk');assert.equal(await form.locator('.added-item').count(),1);
  await form.getByRole('button',{name:'Submit For Risk Officer Review',exact:true}).evaluate(button=>{button.click();button.click();});
