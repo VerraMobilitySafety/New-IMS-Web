@@ -66,7 +66,7 @@
    if(!response.ok)throw Error('Cannot check the library ('+response.status+'). No files imported.');
    const data=await response.json();if(!Array.isArray(data.documents))throw Error('Unexpected library response. No files imported.');
    const existing=new Set(data.documents.map(row=>key(row.document_number)));
-   for(const row of pending)if(existing.has(key(row.document_number)))throw Error('Document number already exists in VERO: '+row.document_number+'. Use the revision workflow for existing documents.');
+   for(const row of pending)if(existing.has(key(row.document_number))){const matches=data.documents.filter(doc=>key(doc.document_number)===key(row.document_number));throw Error('Document number already exists in VERO: '+row.document_number+'. Existing records: '+matches.map(doc=>'ID '+doc.id+' | '+(doc.document_title||doc.file_name||'Untitled')+' | version '+(doc.version_number||'unknown')+' | status '+(doc.status||'unknown')+' | owner '+(doc.document_owner_name||doc.document_owner||'unknown')+' | approval '+(doc.approval_date||'unknown')+' | effective '+(doc.effective_date||'unknown')+' | review '+(doc.review_date||'unknown')).join('; ')+'. Use the revision workflow for existing documents.');}
    for(const row of pending){
     const form=new FormData();for(const field of ['document_number','document_title','document_type','version_number','document_owner','approval_date','effective_date','review_date'])form.append(field,row[field]);
     for(const [field,value]of Object.entries({import_approved:'true',entity_type:'Governance',status:'Current',access_level:'Internal',allow_view:'true',allow_download:'false',ai_searchable:'false',description:'Migrated existing approved document.'}))form.append(field,value);
