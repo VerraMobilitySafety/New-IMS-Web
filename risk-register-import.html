@@ -92,5 +92,63 @@ async function verifyPlan(){
 }
 $('verify').onclick=async()=>{if(busy||!plan.length)return;lock(true);$('status').textContent='Verifying existing records without changing risks…';try{await loadLive();plan=bundle.records.map(classify);await verifyPlan();}catch(error){$('status').textContent='Verification stopped: '+error.message;}finally{$('download').disabled=false;lock(false);}};
 $('download').onclick=()=>{const value={source_sha256:bundle?.source_sha256,checked_at:new Date().toISOString(),status:$('status').textContent,created_classifications:created,results};const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='vero-risk-import-results.json';a.click();URL.revokeObjectURL(url);};
+</script><script>
+/* Draft-only review notes. Existing Risk Office endpoints enforce authority and Draft status. */
+window.VeroDraftReview=(()=>{'use strict';
+function validateBundle(bundle){
+ if(bundle?.schema!=='vero-draft-review-v1'||!Array.isArray(bundle.records)||!bundle.records.length||bundle.records.length>100||!Array.isArray(bundle.ignored_risk_ids))throw Error('Invalid draft-review bundle.');
+ const ids=new Set();
+ for(const r of bundle.records){
+  if(!Number.isInteger(r.risk_id)||r.risk_id<=0||ids.has(r.risk_id)||bundle.ignored_risk_ids.includes(r.risk_id))throw Error('Invalid, repeated or ignored risk ID.');
+  for(const [key,max] of [['title',255],['description',10000],['expected_description',10000],['reason',2000]])if(typeof r[key]!=='string'||!r[key].trim()||r[key].length>max)throw Error('Invalid '+key+' for risk '+r.risk_id);
+  if(!r.description.endsWith(r.expected_description)||!r.description.includes('Owner: Unassigned.')||!r.description.includes('Status: Draft.'))throw Error('Preserve the imported source and explicitly retain unassigned Draft status.');
+  ids.add(r.risk_id);
+ }return bundle;
+}
+function checkRisk(review,risks){
+ const found=risks.filter(r=>Number(r.id)===review.risk_id);if(found.length!==1)throw Error('Risk '+review.risk_id+' is missing or inaccessible.');
+ const r=found[0];
+ if(r.status!=='Draft'||String(r.risk_owner||'').trim()||['inherent_likelihood','inherent_impact','residual_likelihood','residual_impact'].some(k=>r[k]!=null))throw Error('Risk '+r.id+' must remain an unassigned, unassessed Draft.');
+ if(r.risk_title!==review.title)throw Error('Risk '+r.id+' title has changed; review the current definition first.');
+ if(r.risk_description!==review.expected_description&&r.risk_description!==review.description)throw Error('Risk '+r.id+' has changed since the review was prepared.');
+ return {risk:r,already:r.risk_description===review.description};
+}
+function verifyRecords(bundle,risks,before){
+ const results=[];
+ for(const review of bundle.records){const match=checkRisk(review,risks);if(!match.already)throw Error('Review notes not saved for risk '+review.risk_id);
+  const original=before.find(r=>Number(r.id)===review.risk_id);if(!original)throw Error('Missing baseline for risk '+review.risk_id);
+  for(const key of ['tier_1_ids','tier_2_ids','tier_3_ids','tier_4_ids'])if(JSON.stringify([...(original[key]||[])].sort((a,b)=>a-b))!==JSON.stringify([...(match.risk[key]||[])].sort((a,b)=>a-b)))throw Error('Classification changed for risk '+review.risk_id);
+  results.push({risk_id:review.risk_id,title:review.title,status:'Verified Draft',owner:'Unassigned',assessment_fields:'Unassessed',classification_unchanged:true});
+ }
+ for(const id of bundle.ignored_risk_ids){const a=before.find(r=>Number(r.id)===id),b=risks.find(r=>Number(r.id)===id);if(JSON.stringify(a)!==JSON.stringify(b))throw Error('Ignored risk '+id+' changed during this review.');}
+ return results;
+}
+return {validateBundle,checkRisk,verifyRecords};
+})();
+// Draft review UI
+(()=>{'use strict';
+const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api',logic=window.VeroDraftReview;
+const section=document.createElement('section');
+section.innerHTML='<h2>Draft Risk Review</h2><p>Save proposed descriptions, candidate controls and provisional ratings as draft review notes. Owners stay unassigned, classifications are preserved, and risks are not approved or published as live assessments.</p><label for="draftReviewBundle">Prepared draft review</label> <input id="draftReviewBundle" type="file" accept=".json,application/json"><br><button id="draftReviewPreview">Check Draft Review</button><button id="draftReviewApply" disabled>Save Review Notes to Drafts</button><button id="draftReviewVerify" disabled>Verify Saved Draft Reviews</button><button id="draftReviewDownload" disabled>Download Draft Review Results</button><p id="draftReviewStatus" role="status" aria-live="polite">Choose a prepared draft review.</p><p id="draftReviewSummary"></p><div id="draftReviewRows"></div><pre id="draftReviewActivity"></pre>';
+document.querySelector('section').before(section);
+const $=id=>document.getElementById(id);let bundle,before=[],plan=[],results=[],busy=false;
+const log=text=>{$('draftReviewActivity').textContent+=text+'\n';};
+function lock(value){busy=value;for(const id of ['draftReviewBundle','draftReviewPreview'])$(id).disabled=value;for(const id of ['draftReviewApply','draftReviewVerify'])$(id).disabled=value||!plan.length;}
+async function api(path,method='GET',body){const response=await fetch(API+path,{method,headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),cache:'no-store'});let data;try{data=await response.json();}catch{throw Error('Server response unreadable; verify existing drafts before retrying.');}if(!response.ok)throw Error(data.message||'Draft review request failed');return data;}
+async function live(){const response=await api('/risks');if(!Array.isArray(response.risks))throw Error('Risk register unavailable');return response.risks;}
+function render(){
+ $('draftReviewRows').replaceChildren();
+ for(const p of plan){const details=document.createElement('details'),summary=document.createElement('summary'),text=document.createElement('pre');summary.textContent='#'+p.review.risk_id+' '+p.review.title+' — '+(p.already?'Review notes already saved':'Ready for draft review');text.textContent=p.review.description;details.append(summary,text);$('draftReviewRows').append(details);}
+ $('draftReviewSummary').textContent=plan.length+' drafts; '+plan.filter(p=>p.already).length+' already updated; owners unassigned; '+bundle.ignored_risk_ids.length+' ignored. No live ratings or classifications will be changed.';
+}
+$('draftReviewBundle').onchange=()=>{plan=[];lock(false);};
+$('draftReviewPreview').onclick=async()=>{if(busy)return;lock(true);plan=[];try{const file=$('draftReviewBundle').files[0];if(!file)throw Error('Choose a prepared draft review.');bundle=logic.validateBundle(JSON.parse(await file.text()));before=await live();plan=bundle.records.map(review=>({review,...logic.checkRisk(review,before)}));render();$('draftReviewStatus').textContent='Draft review checked: '+plan.length+' records ready. No records changed.';}catch(error){plan=[];$('draftReviewStatus').textContent=error.message;}finally{lock(false);}};
+async function verify(){const fresh=await live();results=logic.verifyRecords(bundle,fresh,before);$('draftReviewStatus').textContent='Draft review complete: '+results.length+' drafts verified; owners blank; live assessments unchanged; '+bundle.ignored_risk_ids.length+' ignored.';plan=bundle.records.map(review=>({review,...logic.checkRisk(review,fresh)}));render();log('Verified descriptions, Draft status, unassigned owners, unassessed live fields, unchanged classifications and ignored records.');$('draftReviewDownload').disabled=false;}
+$('draftReviewApply').onclick=async()=>{if(busy||!plan.length)return;lock(true);try{const fresh=await live();plan=bundle.records.map(review=>({review,...logic.checkRisk(review,fresh)}));for(const p of plan){if(p.already)continue;const current=logic.checkRisk(p.review,await live());if(current.already)continue;$('draftReviewStatus').textContent='Saving draft review #'+p.review.risk_id+' '+p.review.title;await api('/risks/'+p.review.risk_id+'/definition','PUT',{risk_title:p.review.title,risk_description:p.review.description,reason:p.review.reason});log('Saved draft review #'+p.review.risk_id+' '+p.review.title);}await verify();}catch(error){$('draftReviewStatus').textContent='Draft review stopped: '+error.message;log('Verify the saved notes before retrying the same review bundle.');}finally{lock(false);$('draftReviewDownload').disabled=false;}};
+$('draftReviewVerify').onclick=async()=>{if(busy||!plan.length)return;lock(true);try{await verify();}catch(error){$('draftReviewStatus').textContent='Verification stopped: '+error.message;}finally{lock(false);}};
+$('draftReviewDownload').onclick=()=>{const data={checked_at:new Date().toISOString(),status:$('draftReviewStatus').textContent,ignored_risk_ids:bundle?.ignored_risk_ids,results};const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='vero-draft-review-results.json';a.click();URL.revokeObjectURL(url);};
+})();
+
+
 </script></body></html>
 
