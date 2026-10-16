@@ -2929,6 +2929,10 @@ table {
            required
            placeholder="Enter category name">
 
+    <label for="veroHierarchyReason">Reason for Classification Change</label>
+    <input id="veroHierarchyReason" maxlength="2000" required
+           placeholder="Explain why this classification change is needed">
+
     <label for="veroHierarchyStatus">Status</label>
     <select id="veroHierarchyStatus">
      <option value="Active">Active</option>
@@ -3271,8 +3275,7 @@ table {
    return;
   }
 
-  const justification=window.prompt('Risk Office justification for this classification change:');
-  if(justification===null){setMessage('Change cancelled.');return;}
+  const justification=document.getElementById('veroHierarchyReason').value;
   if(!justification.trim()||justification.length>2000){setMessage('A justification of up to 2000 characters is required.');return;}
   const payload={
    category_name:categoryName,
