@@ -15,7 +15,8 @@
  }
  function field(host,label,value){const row=node('div');row.className='project-risk-value';row.append(node('dt',label),node('dd',value==null||value===''?'Not recorded':value));host.appendChild(row);}
  function card(host,title){const el=node('section');el.className='project-risk-review-card vero-risk-details-card';el.appendChild(node('h3',title));host.appendChild(el);return el;}
- const score=(a,b)=>Number.isInteger(Number(a))&&Number(a)>=1&&Number(a)<=5&&Number.isInteger(Number(b))&&Number(b)>=1&&Number(b)<=5?Number(a)*Number(b)+' / 25':'Not assessed';
+ const bands=[['Low','Low','Low','Moderate','Moderate'],['Low','Moderate','Moderate','Moderate','High'],['Low','Moderate','High','High','Significant'],['Moderate','Moderate','High','Significant','Significant'],['Moderate','High','Significant','Significant','Significant']];
+ const score=(a,b)=>Number.isInteger(Number(a))&&Number(a)>=1&&Number(a)<=5&&Number.isInteger(Number(b))&&Number(b)>=1&&Number(b)<=5?Number(a)*5*Number(b)+' / 125 · '+bands[Number(a)-1][Number(b)-1]:'Not Assessed';
  async function openDocument(documentId,message,riskId){
   try{
    const response=await fetch(API+(riskId?'/risks/'+encodeURIComponent(riskId)+'/project-submission/documents/'+encodeURIComponent(documentId)+'/content':'/documents/'+encodeURIComponent(documentId)+'/content'),{headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token')},cache:'no-store'});
@@ -54,10 +55,10 @@
   if(submission.status==='Changes Requested'&&(submission.return_reason||data.return_reason||submission.last_reason||data.last_reason))field(summary,'Changes requested',submission.return_reason||data.return_reason||submission.last_reason||data.last_reason);
   const ratings=card(host,'Submitted risk assessment');
   for(const [label,key] of [['Inherent likelihood','inherent_likelihood'],['Inherent consequence','inherent_impact'],['Residual likelihood','residual_likelihood'],['Residual consequence','residual_impact']])field(ratings,label,assessment[key]);
-  field(ratings,'Inherent rating',score(assessment.inherent_likelihood,assessment.inherent_impact));field(ratings,'Residual rating',score(assessment.residual_likelihood,assessment.residual_impact));
+  field(ratings,'Inherent rating',score(assessment.inherent_likelihood,assessment.inherent_impact));field(ratings,'Current Residual Rating',score(assessment.residual_likelihood,assessment.residual_impact));field(ratings,'Target Rating',score(assessment.target_likelihood,assessment.target_impact));field(ratings,'Assessment Notes',assessment.assessment_notes);
   field(ratings,'Current control notes',assessment.current_controls??assessment.controls_summary);field(ratings,'Further controls and treatment',assessment.further_controls??assessment.treatments_summary);
   field(ratings,'Risk owner',assessment.owner_name||assessment.owner_user_id);field(ratings,'Treatment owner',assessment.treatment_owner_name||assessment.treatment_owner_user_id);
-  field(ratings,'Treatment due date',assessment.treatment_due_date);field(ratings,'Next review date',assessment.next_review_date);
+  field(ratings,'Treatment due date',assessment.treatment_due_date);field(ratings,'Next Review Date',assessment.next_review_date);if(assessment.review_schedule){const schedule=assessment.review_schedule;field(ratings,'Review Basis',schedule.residual_rating+' · '+schedule.default_interval_months+' month default');if(schedule.constraints?.length)field(ratings,'Earlier Review Requirements',schedule.constraints.join('; '));if(schedule.immediate_escalation)field(ratings,'Escalation','Significant risk requires immediate escalation; the review date does not defer it.');}
   const documents=card(host,'Document Library controls');const documentStatus=node('p');documentStatus.setAttribute('role','status');documents.appendChild(documentStatus);
   if(!submission.documents?.length)documents.appendChild(node('p','No Document Library controls were recorded in this submission.'));
   for(const doc of submission.documents||[]){const row=node('div');row.className='project-risk-document-option';row.appendChild(node('span',(doc.document_number||'Document')+' · '+(doc.document_title||'Untitled')+' · submitted version '+doc.version_number));const view=node('button','View submitted document');view.type='button';view.className='btn outline';view.addEventListener('click',()=>openDocument(doc.id||doc.document_id,documentStatus,submission.risk_id||risk.id));row.appendChild(view);documents.appendChild(row);}
@@ -89,7 +90,7 @@
    }
    treatments.appendChild(row);
   }
-  if(data.assessment){const formal=card(host,'Formal assessment and approval');for(const [label,key] of [['Assessment ID','id'],['Revision','revision'],['Status','status'],['Inherent likelihood','inherent_likelihood'],['Inherent consequence','inherent_impact'],['Residual likelihood','residual_likelihood'],['Residual consequence','residual_impact'],['Current controls','controls_summary'],['Further treatments','treatments_summary'],['Owner','owner_user_id'],['Approved by','approved_by_user_id'],['Approved at','approved_at']])field(formal,label,data.assessment[key]);}
+  if(data.assessment){const formal=card(host,'Formal assessment and approval');for(const [label,key] of [['Assessment ID','id'],['Revision','revision'],['Status','status'],['Inherent likelihood','inherent_likelihood'],['Inherent consequence','inherent_impact'],['Residual likelihood','residual_likelihood'],['Residual consequence','residual_impact'],['Current controls','controls_summary'],['Further treatments','treatments_summary'],['Owner','owner_user_id'],['Approved by','approved_by_user_id'],['Approved at','approved_at'],['Target Likelihood','target_likelihood'],['Target Consequence','target_impact'],['Assessment Notes','assessment_notes'],['Next Review Date','next_review_date']])field(formal,label,data.assessment[key]);field(formal,'Target Rating',score(data.assessment.target_likelihood,data.assessment.target_impact));}
   if(Array.isArray(data.history)&&data.history.length){const history=card(host,'Submission history');for(const event of data.history)field(history,event.action||event.status,[event.actor_name||event.actor||event.actor_user_id,event.occurred_at||event.created_at,event.reason].filter(Boolean).join(' · '));}
   const decisions=card(host,'Risk approval');
   if(submission.legacy&&capabilities.can_resubmit)decisions.appendChild(node('p','Your original risk and assessment are saved. Complete any missing controls or documents, then resubmit the same risk. No new assessment is needed.'));
@@ -120,3 +121,4 @@
  const load=riskId=>json('/risks/'+encodeURIComponent(riskId)+'/project-submission');
  global.VeroProjectRiskSubmission={json,node,load,render,documentPicker,score};
 })(window);
+

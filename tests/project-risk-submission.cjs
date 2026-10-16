@@ -22,7 +22,7 @@ function app(options={}){
  return {api,host,data,calls,buttons:()=>host.querySelectorAll('button'),button:text=>host.querySelectorAll('button').find(b=>b.textContent===text),render:opts=>api.render(host,data,opts)};
 }
 test('complete submitted package shows four ratings, document version, owners, dates and treatments before approval',()=>{
- const a=app();a.render();const text=a.host.textContent;for(const expected of ['20 / 25','6 / 25','Existing notes','Proposed notes','2027-01-01','2026-11-01','submitted version 3','Published procedure','New barrier','Install safely','High','11','12'])assert.ok(text.includes(expected),expected);assert.ok(text.includes('<script>not markup</script>'));assert.equal(a.host.querySelectorAll('script').length,0);assert.ok(text.includes('No, required approvals are still pending'));
+ const a=app();a.render();const text=a.host.textContent;for(const expected of ['100 / 125','30 / 125','Existing notes','Proposed notes','2027-01-01','2026-11-01','submitted version 3','Published procedure','New barrier','Install safely','High','11','12'])assert.ok(text.includes(expected),expected);assert.ok(text.includes('<script>not markup</script>'));assert.equal(a.host.querySelectorAll('script').length,0);assert.ok(text.includes('No, required approvals are still pending'));
 });
 test('review capabilities drive actions without inferring Risk Manager authority',()=>{
  const a=app();a.data.capabilities={can_review:true};a.render();assert.equal(a.buttons().some(b=>/Approve|Return|Revise|Complete/.test(b.textContent)),false);assert.match(a.host.textContent,/Read-only review/);
@@ -67,8 +67,8 @@ test('API failure remains explicit and never auto-retries the decision',async()=
  const a=app({fetch:async()=>({ok:false,status:409,json:async()=>({message:'Package changed; refresh'})})});a.render();a.button('Approve risk — next reviewer required').click();await tick();assert.match(a.host.textContent,/Package changed/);assert.equal(a.calls.length,1);
 });
 test('creator uses scoped manager capability and published document endpoint; history belongs to actual assessment drawer',()=>{
- const html=fs.readFileSync(path.join(root,'project-workspace.html'),'utf8');const create=html.slice(html.indexOf('async function openProjectRiskCreator'),html.indexOf('/* Read-only, project-scoped'));
- assert.match(create,/risk-submission-capabilities/);assert.match(create,/roles.can_submit!==true/);assert.match(create,/risk-control-documents/);assert.match(create,/risk-classifications/);assert.doesNotMatch(create,/compliance\/controls/);assert.doesNotMatch(create,/role_name==='Risk Manager'/);assert.match(create,/proposed_document_ids/);assert.doesNotMatch(create,/id="projectAssessmentHistory"/);
+ const html=fs.readFileSync(path.join(root,'project-workspace.html'),'utf8');const create=fs.readFileSync(path.join(root,'project-risk-create.js'),'utf8');
+ assert.match(create,/risk-submission-options/);assert.match(create,/options.can_submit!==true/);assert.match(create,/requireDocument:true/);assert.match(create,/fixedTier3Id:options.project_execution_id/);assert.doesNotMatch(create,/compliance\/controls/);assert.doesNotMatch(create,/role_name==='Risk Manager'/);assert.match(create,/proposed_document_ids/);assert.doesNotMatch(create,/id="projectAssessmentHistory"/);
  const editor=html.slice(html.indexOf('async function openProjectAssessment'),html.indexOf('async function assignApprovedProjectRisk'));assert.match(editor,/id="projectAssessmentHistory"/);
 });
 test('full row routes to complete package rather than an approval alert or duplicate assessment editor',()=>{
@@ -95,3 +95,6 @@ test('submitted document preview uses scoped immutable package document endpoint
 test('existing shared legacy formal assessment uses explicit assessment-workflow capability without package bypass',()=>{
  const a=app();a.data.capabilities={can_use_assessment_workflow:true};a.data.submission.legacy=true;let opened=0;a.render({onAssessments:()=>opened++});assert.ok(a.button('View assessment history and revisions'));a.button('View assessment history and revisions').click();assert.equal(opened,1);assert.equal(a.buttons().some(b=>b.textContent.startsWith('Approve')),false);
 });
+
+
+test('Target and residual-based review requirements remain visible to the reviewer',()=>{const a=app();a.data.submission.proposed_assessment={...a.data.submission.proposed_assessment,target_likelihood:1,target_impact:2,assessment_notes:'Target assumptions',review_schedule:{residual_rating:'Significant',default_interval_months:1,constraints:['Earlier project milestone'],immediate_escalation:true}};a.render();assert.match(a.host.textContent,/10 \/ 125/);assert.match(a.host.textContent,/Target assumptions/);assert.match(a.host.textContent,/Earlier project milestone/);assert.match(a.host.textContent,/immediate escalation/);});
