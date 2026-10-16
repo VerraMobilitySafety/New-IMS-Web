@@ -6,3 +6,6 @@
 #reviewSharedRiskAssessment.vero-central input,#reviewSharedRiskAssessment.vero-central select,#reviewSharedRiskAssessment.vero-central textarea{font-size:13px}
 
 #reviewAssessmentModal .field[hidden]{display:none!important}
+
+#singleSharedRiskAssessment.vero-central label,#reviewSharedRiskAssessment.vero-central label{text-transform:none!important;letter-spacing:normal!important;font-size:12px;font-weight:500}
+#singleSharedRiskAssessment .matrix>.like-number:nth-child(9),#reviewSharedRiskAssessment .matrix>.like-number:nth-child(9){font-size:14px}

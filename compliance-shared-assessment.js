@@ -22,5 +22,7 @@ readComplianceRiskPosition=function(prefix='review',status){if(prefix==='review'
  const linked=complianceRiskElement(prefix,'LinkedMaster')?.value||'';
  return {inherent_likelihood:v.inherent.likelihood,inherent_impact:v.inherent.impact,residual_likelihood:v.residual.likelihood,residual_impact:v.residual.impact,risk_owner_user_id:v.risk_owner_user_id,control_effectiveness:effect,justification:v.justification,controls_summary:v.controls_summary||null,treatments_summary:v.treatments_summary||null,linked_risk_id:linked?Number(linked):null,shared_assessment:{format_version:'shared-v1',request_id:s.requestId,target:v.target,control_ids:v.control_ids,document_ids:v.document_ids,treatment_actions:v.treatment_actions,next_review_date:v.next_review_date}};
 };
+document.getElementById('reviewAssessmentStatus').removeEventListener('change',originalExemption);
+document.getElementById('reviewAssessmentStatus').addEventListener('change',updateComplianceRiskExemption);
 complianceRiskHandleClose=function(id){originalClose(id);if(id==='submitModal')resetEditor('single');if(id==='reviewAssessmentModal'||id==='obligationModal')resetEditor('review');};
 })();
