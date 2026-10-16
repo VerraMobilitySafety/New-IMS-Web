@@ -3358,9 +3358,9 @@ table {
 #veroRiskDetailsOverlay .vero-risk-details-card form input,
 #veroRiskDetailsOverlay .vero-risk-details-card form select{height:40px}
 #veroRiskDetailsOverlay .vero-risk-details-card form textarea{min-height:88px;resize:vertical}
-#veroRiskDetailsOverlay .vero-risk-details-card form button,
-#veroRiskDetailsOverlay .vero-risk-details-card>button,
-#veroRiskDetailsOverlay .vero-risk-details-card div>button{width:max-content;max-width:100%;min-height:38px;padding:9px 14px;border:0;border-radius:7px;background:#0b3d2e;color:#fff;font-size:12px;font-weight:700;cursor:pointer}
+#veroRiskDetailsOverlay .vero-risk-details-card form button:not(.vero-central button),
+#veroRiskDetailsOverlay .vero-risk-details-card>button:not(.vero-central button),
+#veroRiskDetailsOverlay .vero-risk-details-card div>button:not(.vero-central button){width:max-content;max-width:100%;min-height:38px;padding:9px 14px;border:0;border-radius:7px;background:#0b3d2e;color:#fff;font-size:12px;font-weight:700;cursor:pointer}
 #veroRiskDetailsOverlay .vero-risk-details-card form button:disabled{opacity:.6;cursor:wait}
 #veroRiskDetailsOverlay .vero-risk-details-card form [role=status]{grid-column:1/-1;font-size:12px}
 #veroRiskDetailsOverlay .vero-risk-details-tabs{gap:6px;padding:12px 20px}
@@ -3390,7 +3390,7 @@ table {
   tabs.hidden=true;if(actions)actions.hidden=true;
   content.replaceChildren();
   const nav=make('div','');nav.className='vero-risk-classification-tabs';
-  const pages=['Overview','Child Classifications','Terminal Risks','Operational Exposure','History'];
+  const pages=['Overview','Manual Assessment','Child Classifications','Terminal Risks','Operational Exposure','History'];
   const pickerButton=make('button','Find Classification');
   pickerButton.type='button';
   pickerButton.className='vero-risk-classification-create';
@@ -3592,16 +3592,18 @@ table {
   });
   async function show(page){
    if(version!==request||overlay.hidden)return;
+   if(window.VeroTierAssessment?.destroy()===false)return;
    content.replaceChildren(nav);
    [...nav.children].forEach(btn=>btn.setAttribute('aria-current',String(btn.textContent===page)));
+   if(page==='Manual Assessment'){const c=card('Manual Risk Assessment');if(window.VeroTierAssessment)await window.VeroTierAssessment.mount(c,r);else c.append(make('p','Assessment editor unavailable. Refresh and try again.'));return;}
    if(page==='Overview'){
     const c=card('Classification overview');
+    const riskSummary=make('div','');c.append(riskSummary);if(window.VeroTierAssessment)window.VeroTierAssessment.overview(riskSummary,r);else riskSummary.textContent='Tier assessment summary unavailable.';
     field(c,'Classification',r.name);field(c,'Tier',r.tier);
     field(c,'Underlying Master Risks',r.master_risks);
     field(c,'Applicable records',r.applicable_contexts);
     field(c,'Approved assessments',r.contributing_assessments);
-    field(c,'Average residual score',r.average_residual_score);
-    field(c,'Maximum residual score',r.maximum_residual_score);
+
     field(c,'Awaiting assessment',r.awaiting_assessment);
     return;
    }
@@ -3640,8 +3642,7 @@ table {
     const c=card('Operational exposure');
     field(c,'Applicable records',r.applicable_contexts);
     field(c,'Approved assessments',r.contributing_assessments);
-    field(c,'Average residual score',r.average_residual_score);
-    field(c,'Maximum residual score',r.maximum_residual_score);
+
     field(c,'Awaiting assessment',r.awaiting_assessment);
     const details=card('Contributing operational assessments');
     details.appendChild(make('p','Loading operational records...'));
@@ -3730,7 +3731,7 @@ table {
    const btn=make('button',page);btn.type='button';btn.addEventListener('click',()=>show(page));nav.appendChild(btn);
   }
   overlay.hidden=false;document.body.style.overflow='hidden';
-  show(event.detail.page==='Terminal Risks'?'Terminal Risks':'Overview');
+  show(['Terminal Risks','Manual Assessment'].includes(event.detail.page)?event.detail.page:'Overview');
   document.getElementById('veroRiskDetailsClose').focus();
  });
  document.addEventListener('vero-risk-open-details',()=>{
@@ -3771,7 +3772,10 @@ table {
 <style id="vero-family-tree-styles">#veroHierarchyTree .vero-family-explorer{font-size:13px}#veroHierarchyTree .vero-family-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}#veroHierarchyTree .vero-family-toolbar input{flex:1;min-width:180px;padding:11px;border:1px solid #dce3de;border-radius:8px}#veroHierarchyTree .vero-family-toolbar span{color:#68766e;font-size:12px}#veroHierarchyTree .vero-family-canvas{max-height:55vh;overflow:auto;padding:14px;background:#f7faf8;border:1px solid #e0e7e1;border-radius:10px}#veroHierarchyTree .vero-family-branch{position:relative;margin:8px 0}#veroHierarchyTree .vero-family-branch>summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:revert}#veroHierarchyTree .vero-family-node{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0;flex:1;background:#fff;border:1px solid #dce5de;border-left:3px solid #2c8259;border-radius:8px;padding:11px 12px}#veroHierarchyTree .vero-family-name{font-weight:650;overflow-wrap:anywhere}#veroHierarchyTree .vero-family-node small{white-space:nowrap;color:#587565}#veroHierarchyTree .vero-family-children{margin-left:20px;padding-left:18px;border-left:2px solid #a8cbb5}#veroHierarchyTree .vero-family-children>.vero-family-branch:before{content:"";position:absolute;top:23px;left:-18px;width:16px;border-top:2px solid #a8cbb5}#veroHierarchyTree .vero-family-branch summary:focus-visible{outline:2px solid #2c8259;outline-offset:3px}</style>
 <script src="risk-exposure.js"></script>
 <script src="risk-classification-picker.js"></script>
-<script src="risk-hierarchy.js?v=20261015-endpoints"></script>
+<link rel="stylesheet" href="risk-tier-assessment.css">
+<script src="risk-tier-assessment.js"></script>
+<script src="risk-tier-matrix.js"></script>
+<script src="risk-hierarchy.js?v=20261016-tier-assessment"></script>
 <script src="risk-operational.js"></script>
 <link rel="stylesheet" href="project-risk-submission.css">
 <script src="project-risk-submission.js"></script>

@@ -1,0 +1,11 @@
+.tier-assessment-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+.tier-assessment-stat{border:1px solid #e5e1de;border-radius:8px;padding:12px;min-width:0;font-size:13px}
+.tier-assessment-stat p{padding:10px;border-radius:5px;margin-bottom:0;font-size:16px}
+.tier-assessment-help{font-size:13px;color:#716864;line-height:1.5}
+.tier-manual-editor{max-width:730px;margin-top:18px}.tier-manual-editor .matrix-scroll{isolation:isolate}
+.tier-treatment-row{padding:14px;border:1px solid #e5e1de;border-radius:7px;margin:10px 0}.tier-treatment-row textarea{width:100%;min-height:60px}
+.tier-matrix-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:13px;margin-bottom:14px}
+.tier-matrix-controls select{padding:8px}.tier-matrix-help{font-size:12px;color:#716864}
+@media(max-width:600px){.tier-assessment-stats{grid-template-columns:1fr}}
+
+.tier-matrix-controls[hidden]{display:none}
