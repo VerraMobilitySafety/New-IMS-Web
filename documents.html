@@ -241,13 +241,14 @@
   </div>
 
   <table class="table">
-   <thead><tr><th>Document</th><th>Current Version</th><th>Document Owner</th><th>Published Date</th><th>Next Review</th></tr></thead>
+   <thead><tr><th scope="col" data-doc-sort="document" aria-sort="none"><button class="doc-sort" type="button" data-doc-sort-button="document">Document <span aria-hidden="true" class="doc-sort-mark">↕</span></button><details class="doc-column-filter"><summary>Filter</summary><div><input id="docColumnDocument" type="search" placeholder="Number or title" aria-label="Filter document number or title"></div></details></th><th scope="col" data-doc-sort="version" aria-sort="none"><button class="doc-sort" type="button" data-doc-sort-button="version">Current Version <span aria-hidden="true" class="doc-sort-mark">↕</span></button><details class="doc-column-filter"><summary>Filter</summary><div><input id="docColumnVersion" type="search" placeholder="Version" aria-label="Filter current version"></div></details></th><th scope="col" data-doc-sort="owner" aria-sort="none"><button class="doc-sort" type="button" data-doc-sort-button="owner">Document Owner <span aria-hidden="true" class="doc-sort-mark">↕</span></button><details class="doc-column-filter"><summary>Filter</summary><div><select id="docColumnOwner" aria-label="Filter document owner"><option value="">All owners</option></select></div></details></th><th scope="col" data-doc-sort="published" aria-sort="none"><button class="doc-sort" type="button" data-doc-sort-button="published">Published Date <span aria-hidden="true" class="doc-sort-mark">↕</span></button><details class="doc-column-filter"><summary>Filter</summary><div><label>From <input id="docColumnPublishedFrom" type="date" aria-label="Published date from"></label><label>To <input id="docColumnPublishedTo" type="date" aria-label="Published date to"></label></div></details></th><th scope="col" data-doc-sort="review" aria-sort="none"><button class="doc-sort" type="button" data-doc-sort-button="review">Next Review <span aria-hidden="true" class="doc-sort-mark">↕</span></button><details class="doc-column-filter"><summary>Filter</summary><div><label>From <input id="docColumnReviewFrom" type="date" aria-label="Next review date from"></label><label>To <input id="docColumnReviewTo" type="date" aria-label="Next review date to"></label></div></details></th></tr></thead>
    <tbody id="documentsBody">
     <tr><td colspan="5" class="empty">Loading documents from VERO…</td></tr>
    </tbody>
   </table>
  </section>
 
+ <div class="doc-table-status"><span id="documentTableCount" role="status" aria-live="polite"></span><button class="btn" type="button" id="documentTableReset">Reset table</button></div>
  <div class="footer"><span>Controlled documents • Current versions only for employees</span><span>Verra Governance • Document Management • v2.0</span></div>
 </main>
 </div>
@@ -668,6 +669,7 @@ function applyDocumentFilters(){
   docs=docs.filter(documentIsDueForReview);
  }
 
+ if(window.transformDocumentTable)docs=window.transformDocumentTable(docs);
  renderDocuments(docs);
 }
 
@@ -727,6 +729,7 @@ async function loadDocuments(){
 
   liveDocuments=rows.map(normaliseDocument);
   populateDocumentTypeFilter();
+  window.refreshDocumentColumnOwners?.();
   applyDocumentFilters();
 
  }catch(err){
@@ -1117,6 +1120,8 @@ document.addEventListener('DOMContentLoaded',()=>{loadDocuments().finally(()=>wi
  <button class="btn dark" type="button" id="approvedImportClose">Close</button>
 </dialog>
 <script src="approved-document-import.js?v=20261016-dates"></script>
+<link rel="stylesheet" href="documents-table.css?v=20261016">
+<script src="documents-table.js?v=20261016"></script>
 </body></html>
 
 <style id="document-library-ui">
@@ -1238,5 +1243,7 @@ document.addEventListener('DOMContentLoaded',()=>{loadDocuments().finally(()=>wi
   }
 }
 </style>
+
+
 
 
