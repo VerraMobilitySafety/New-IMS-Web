@@ -3119,6 +3119,7 @@ function setType(type){
 
 
 function openSubmit(){
+ window.resetImsPreparedReview?.();
 
  loadSubmissionRiskClassifications();
  prepareComplianceRiskAssessment('single');
@@ -3265,7 +3266,9 @@ async function prototypeSubmit(){
     },
     body:JSON.stringify({
      submission_type:'Single Requirement',
-     risk_classification_ids:[riskCategoryId],
+     risk_classification_ids:typeof getImsSubmissionClassificationIds==='function'?getImsSubmissionClassificationIds(riskCategoryId):[riskCategoryId],
+     frequency:document.getElementById('singleImsFrequency')?.value.trim()||null,
+     evidence_required:document.getElementById('singleImsEvidence')?.value.trim()||null,
      risk_position:riskPosition,
      request_title:title,
      description:description,
@@ -8217,4 +8220,4 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 <script src="compliance-assessment-risk.js"></script>
 
-<script src="ims-requirements-import.js?v=20261016-drafts"></script>
+<script src="ims-requirements-import.js?v=20261016-risk-review"></script>
