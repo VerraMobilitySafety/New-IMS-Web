@@ -25,7 +25,7 @@ function documentFor(elements){
 }
 async function projectApp({row=assessment(),capability=granted,capabilityStatus=200,user={id:11,vero_role:'User'}}={}){
  const overlay=new Element(),host=new Element(),form=new Element('form');overlay.dataset.applicabilityId='55';form.id='projectAssessmentForm';overlay.appendChild(form);
- for(const id of ['projectAssessIL','projectAssessIC','projectAssessRL','projectAssessRC','projectAssessControls','projectAssessTreatments','projectAssessmentMessage']){const field=new Element();field.id=id;overlay.appendChild(field);}
+ for(const id of ['projectAssessIL','projectAssessIC','projectAssessRL','projectAssessRC','projectAssessControls','projectAssessTreatments','projectAssessTL','projectAssessTC','projectAssessDue','projectAssessNotes','projectAssessmentMessage']){const field=new Element();field.id=id;overlay.appendChild(field);}
  const document=documentFor({projectAssessmentOverlay:overlay,projectAssessmentHistory:host}),calls=[];
  const apiFetch=async url=>url.endsWith('/assessments')?response({assessments:row?[row]:[]}):url.endsWith('/capabilities')?response(capability,capabilityStatus):response({user});
  const scope=vm.createContext({document,API_BASE:'https://fixture/api',apiFetch,projectAssessmentDecision:(...args)=>calls.push(args)});
@@ -60,7 +60,7 @@ for(const [name,app,labels] of surfaces){
   if(name==='Project workspace'){
    assert.equal(a.overlay.dataset.returnedAssessmentId,'77');assert.equal(a.form.hidden,false);assert.equal(a.overlay.querySelector('#projectAssessIL').value,4);assert.equal(a.overlay.querySelector('#projectAssessControls').value,'Stored current controls');
   }else{
-   const form=a.host.querySelector('form');assert.deepEqual(form.querySelectorAll('textarea').map(el=>el.value),['Stored current controls','Stored treatment notes']);await form.emit('submit');const post=a.calls.find(c=>c.method==='POST');assert.equal(post.route,'/risk/applicability/55/assessments');assert.deepEqual(post.body,{inherent_likelihood:4,inherent_impact:5,residual_likelihood:2,residual_impact:3,controls_summary:'Stored current controls',treatments_summary:'Stored treatment notes',returned_assessment_id:77});
+   const form=a.host.querySelector('form');assert.deepEqual(form.querySelectorAll('textarea').map(el=>el.value),['Stored current controls','Stored treatment notes','']);await form.emit('submit');const post=a.calls.find(c=>c.method==='POST');assert.equal(post.route,'/risk/applicability/55/assessments');assert.deepEqual(post.body,{inherent_likelihood:4,inherent_impact:5,residual_likelihood:2,residual_impact:3,controls_summary:'Stored current controls',treatments_summary:'Stored treatment notes',target_likelihood:null,target_impact:null,review_due_at:null,assessment_notes:null,returned_assessment_id:77});
   }
  });
  test(name+': ordinary users retain ownership and independent-approval restrictions',async()=>{
@@ -98,3 +98,19 @@ test('Enterprise operational drawer never applies Administrator ownership except
   assert.ok((await operationalApp({contextType,row:assessment('Submitted',22)})).button('Approve assessment'));
  }
 });
+
+for(const [name,app] of [['Project workspace',projectApp],['Enterprise operational drawer',operationalApp]]){
+ test(name+': returned Target, review date and notes survive correction without replacing current axes',async()=>{
+  const extra={target_likelihood:1,target_impact:2,review_due_at:'2026-11-20',assessment_notes:'Controls remain planned'};
+  const a=await app({row:{...assessment('Returned',22),...extra}});
+  assert.match(a.host.textContent,/2026-11-20/);assert.match(a.host.textContent,/Controls remain planned/);
+  await a.button('Revise returned assessment').click();
+  if(name==='Project workspace'){
+   for(const [id,key] of [['projectAssessTL','target_likelihood'],['projectAssessTC','target_impact'],['projectAssessDue','review_due_at'],['projectAssessNotes','assessment_notes']])assert.equal(a.overlay.querySelector('#'+id).value,extra[key]);
+  }else{
+   await a.host.querySelector('form').emit('submit');const payload=a.calls.find(c=>c.method==='POST').body;
+   for(const key of Object.keys(extra))assert.equal(payload[key],extra[key]);
+   assert.equal(payload.residual_likelihood,2);assert.equal(payload.residual_impact,3);assert.equal(payload.returned_assessment_id,77);
+  }
+ });
+}

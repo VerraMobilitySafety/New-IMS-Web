@@ -210,9 +210,10 @@
    }
    targetLabel.appendChild(target);form.appendChild(targetLabel);
    const ratings={};
-   for(const key of ['inherent_likelihood','inherent_impact','residual_likelihood','residual_impact']){
+   for(const key of ['inherent_likelihood','inherent_impact','residual_likelihood','residual_impact','target_likelihood','target_impact']){
     const label=node('label',key.replaceAll('_',' '));
-    const select=node('select');select.required=true;
+    const select=node('select');select.required=!key.startsWith('target_');
+    if(key.startsWith('target_')){const blank=node('option','Not recorded');blank.value='';select.appendChild(blank);}
     for(let n=1;n<=5;n++){const option=node('option',n);option.value=String(n);select.appendChild(option);}
     ratings[key]=select;label.appendChild(select);form.appendChild(label);
    }
@@ -220,10 +221,12 @@
    const controls=node('textarea');controls.rows=3;controls.maxLength=10000;controlsLabel.appendChild(controls);
    const treatmentsLabel=node('label','Additional treatments');
    const treatments=node('textarea');treatments.rows=3;treatments.maxLength=10000;treatmentsLabel.appendChild(treatments);
+   const dueLabel=node('label','Review date'),due=node('input');due.type='date';dueLabel.appendChild(due);
+   const notesLabel=node('label','Assessment notes'),notes=node('textarea');notes.maxLength=20000;notesLabel.appendChild(notes);
    const button=node('button','Save draft assessment');button.type='submit';
    const message=node('p');message.setAttribute('role','status');
-   form.append(controlsLabel,treatmentsLabel,button,message);
-   revisionForm={form,target,ratings,controls,treatments,message};
+   form.append(controlsLabel,treatmentsLabel,dueLabel,notesLabel,button,message);
+   revisionForm={form,target,ratings,controls,treatments,due,notes,message};
    if(editable.some(a=>a.context_type==='Project')){
     const loadProposal=node('button','Load proposed Project Risk assessment');
     loadProposal.type='button';
@@ -254,7 +257,8 @@
    form.addEventListener('submit',async event=>{
     event.preventDefault();button.disabled=true;message.textContent='Saving draft...';
     try{
-     const payload=Object.fromEntries(Object.entries(ratings).map(([k,v])=>[k,Number(v.value)]));
+     const payload=Object.fromEntries(Object.entries(ratings).map(([k,v])=>[k,v.value?Number(v.value):null]));
+     payload.review_due_at=due.value||null;payload.assessment_notes=notes.value.trim()||null;
      payload.controls_summary=controls.value.trim();
      payload.treatments_summary=treatments.value.trim();
      if(revisionSource!==null)payload.returned_assessment_id=revisionSource;
@@ -283,6 +287,8 @@
      const score=assessment.residual_likelihood!=null&&assessment.residual_impact!=null
        ?assessment.residual_likelihood*5*assessment.residual_impact:'—';
      field(detail,'Revision '+assessment.revision,assessment.status+' · Residual score '+score);
+     field(detail,'Target',assessment.target_likelihood==null?'Not recorded':assessment.target_likelihood+' x '+assessment.target_impact);
+     field(detail,'Review date',assessment.review_due_at||'Not recorded');field(detail,'Assessment notes',assessment.assessment_notes||'Not recorded');
      const capability=capabilities.find(c=>Number(c.assignment.id)===Number(a.id));
      const me=await json(API+'/auth/me');
      if(seq!==sequence||overlay.hidden)return;
@@ -296,10 +302,11 @@
        revisionForm.target.value=String(a.id);
        revisionSource=assessment.id;
        for(const [key,control] of Object.entries(revisionForm.ratings)){
-        control.value=String(assessment[key]||1);
+        control.value=assessment[key]==null?(key.startsWith('target_')?'':'1'):String(assessment[key]);
        }
        revisionForm.controls.value=assessment.controls_summary||'';
        revisionForm.treatments.value=assessment.treatments_summary||'';
+       revisionForm.due.value=assessment.review_due_at||'';revisionForm.notes.value=assessment.assessment_notes||'';
        revisionForm.message.textContent='A new draft revision will be created. The returned assessment remains in history.';
        revisionForm.form.scrollIntoView({block:'start',behavior:'smooth'});
       });
