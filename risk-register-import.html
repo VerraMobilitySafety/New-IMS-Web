@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VERO Risk Register Import</title>
+<style>body{font:16px Arial,sans-serif;background:#f4f7f9;color:#00263e;max-width:1100px;margin:32px auto;padding:0 24px}section{background:white;padding:24px;border-radius:10px;margin:20px 0}button{background:#00263e;color:white;border:0;border-radius:5px;padding:12px 18px;margin:12px 12px 12px 0;cursor:pointer}button:disabled{opacity:.5;cursor:default}table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:9px;border-bottom:1px solid #ddd;text-align:left}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}#status{font-weight:bold}a{color:#006e80}</style>
+</head><body><h1>Risk Register Import</h1><p><a href="risk.html">Return to Risk Management</a></p>
+<section><p>Load a prepared legacy risk bundle, compare it against the live hierarchy, then import. Existing classifications are reused. Missing values stay unassessed in Draft risks. Source details remain attached to each imported definition.</p><label for="bundle">Prepared risk bundle</label> <input id="bundle" type="file" accept=".json,application/json"><br><button id="preview">Check Live Tiers and Preview</button><button id="apply" disabled>Create Missing Tiers and Import</button><button id="download" disabled>Download Import Results</button><p id="status" role="status" aria-live="polite">Choose a prepared bundle.</p></section>
+<section><h2>Preview and Results</h2><p id="summary"></p><table><thead><tr><th>Source row</th><th>Risk</th><th>Classification</th><th>Action</th></tr></thead><tbody id="rows"></tbody></table><h3>Activity</h3><pre id="activity"></pre></section>
+<script src="risk-review-policy.js"></script>
+<script>
+'use strict';
+const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+const $=id=>document.getElementById(id),normal=s=>String(s||'').trim().toLowerCase();
+let bundle,options,categories=[],existing=[],plan=[],results=[],created=[],busy=false;
+const log=t=>{$('activity').textContent+=t+'\n';};
+function lock(value){busy=value;$('bundle').disabled=value;$('preview').disabled=value;$('apply').disabled=value||!plan.length;}
+async function api(path,body){
+ const response=await fetch(API+path,{method:body?'POST':'GET',headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),cache:'no-store'});
+ let data;try{data=await response.json();}catch{throw Error('Unreadable server response. Check existing records before retrying.');}
+ if(!response.ok){const error=Error(data.message||'Request failed');error.status=response.status;throw error;}return data;
+}
+function validateBundle(value){
+ if(value?.schema!=='vero-legacy-risk-import-v1'||!/^[a-f0-9]{64}$/.test(value.source_sha256)||!Array.isArray(value.records)||value.records.length>500||!value.records.length)throw Error('Invalid prepared import bundle.');
+ const keys=new Set(),markers=new Set();
+ for(const r of value.records){
+  if(!Number.isInteger(r.source_row)||keys.has(r.request_id)||markers.has(r.marker)||!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(r.request_id))throw Error('Invalid or repeated import identity.');
+  if(typeof r.marker!=='string'||!r.marker||!r.description?.includes(r.marker)||typeof r.title!=='string'||!r.title.trim()||r.title.length>255||r.description.length>10000||typeof r.reason!=='string'||!r.reason.trim()||r.reason.length>2000)throw Error('Invalid risk definition.');
+  if(!Array.isArray(r.classification_names)||r.classification_names.length!==3||r.classification_names.some(s=>typeof s!=='string'||!s.trim()||s.length>255)||typeof r.draft_event_name!=='string'||!r.draft_event_name.trim()||r.draft_event_name.length>255)throw Error('A complete Domain / Stream / Category path is required.');
+  if(r.assessed_candidate)for(const stage of ['inherent','residual','target'])for(const key of ['likelihood','impact']){const v=r.ratings?.[stage]?.[key];if(!Number.isInteger(v)||v<1||v>5)throw Error('Invalid source rating.');}
+  keys.add(r.request_id);markers.add(r.marker);
+ }return value;
+}
+function matches(name,tier,parent){return categories.filter(c=>c.status==='Active'&&c.tier===tier&&normal(c.category_name)===normal(name)&&(parent==null||c.parent_category_ids.includes(parent)));}
+function findPath(names){let ids=[];for(let i=0;i<names.length;i++){const found=matches(names[i],4-i,ids.at(-1));if(found.length>1)throw Error('Ambiguous classification: '+names.slice(0,i+1).join(' / '));if(!found.length)return {ids,missing:names.slice(i)};ids.push(found[0].id);}return {ids,missing:[]};}
+function classify(r){
+ const already=existing.filter(x=>(x.risk_description||'').includes(r.marker)||x.risk_code==='MR-'+r.request_id.replaceAll('-',''));
+ if(already.length>1)throw Error('Multiple existing records for source row '+r.source_row);
+ const owners=options.users.filter(u=>normal(u.name)===normal(r.source['Risk Owner']));
+ const assessed=Boolean(r.assessed_candidate&&owners.length===1);
+ if(!assessed&&r.classification_names[1]==='Health and Safety')throw Error('Source row '+r.source_row+': safety owner not uniquely matched; hold for owner resolution rather than create a broad safety event.');
+ const path=assessed?r.classification_names:[...r.classification_names,r.draft_event_name];
+ const found=findPath(path);
+ const sameTitle=existing.filter(x=>normal(x.risk_title)===normal(r.title)&&!already.includes(x));
+ return {record:r,path,found,owner:owners.length===1?owners[0]:null,mode:assessed?'Assessed':'Draft',already:already[0]||null,conflict:sameTitle.length?('Existing same-title risk: '+sameTitle.map(x=>x.risk_code).join(', ')):null};
+}
+function render(){
+ $('rows').replaceChildren();for(const p of plan){const tr=document.createElement('tr');for(const text of [p.record.source_rows.join(', '),p.record.title,p.path.join(' → '),p.already?'Already imported #'+p.already.id:p.conflict?'Hold: '+p.conflict:p.mode+(p.found.missing.length?' · create missing path':' · reuse path')]){const td=document.createElement('td');td.textContent=text;tr.append(td);}$('rows').append(tr);}
+ const missing=new Set();for(const p of plan.filter(p=>!p.already&&!p.conflict))for(let n=p.found.ids.length+1;n<=p.path.length;n++)missing.add(p.path.slice(0,n).join(' → '));
+ $('summary').textContent=plan.length+' distinct risks; '+plan.filter(p=>!p.already&&!p.conflict&&p.mode==='Assessed').length+' assessed; '+plan.filter(p=>!p.already&&!p.conflict&&p.mode==='Draft').length+' drafts; '+plan.filter(p=>p.already).length+' already imported; '+plan.filter(p=>p.conflict).length+' held for duplicate review; '+missing.size+' missing classification paths. '+(bundle.excluded_source_rows||[]).length+' excluded source rows.';
+}
+async function loadLive(){const data=await Promise.all([api('/risk-tiers'),api('/risk/central-creation-options'),api('/risks'),api('/auth/my-roles')]);categories=data[0].categories;options=data[1];existing=data[2].risks;
+ if(!Array.isArray(categories)||!Array.isArray(existing)||!Array.isArray(options.users)||!options.can_create||!options.schema_ready||!(data[3].roles||[]).some(r=>r.role_name==='Risk Manager'))throw Error('Active Risk Manager access and ready risk creation services are required.');
+ categories=categories.map(c=>({...c,tier:Number(c.tier),id:Number(c.id),parent_category_ids:(c.parent_category_ids||[]).map(Number)}));
+}
+async function ensurePath(names,reason){let ids=[];for(let i=0;i<names.length;i++){
+ let found=matches(names[i],4-i,ids.at(-1));if(found.length>1)throw Error('Ambiguous classification: '+names[i]);
+ if(!found.length){if(i===0)throw Error('Required root domain is missing. Root domains are never created by this importer.');
+  try{const saved=await api('/risk-tiers',{tier:4-i,category_name:names[i],parent_category_ids:[ids.at(-1)],reason});const id=Number(saved.id);if(!Number.isInteger(id)||id<=0)throw Error('Classification save outcome unconfirmed.');const c={id,tier:4-i,category_name:names[i],parent_category_ids:[ids.at(-1)],status:'Active'};categories.push(c);found=[c];created.push(c);log('Created classification '+id+': '+names.slice(0,i+1).join(' → '));}
+  catch(error){if(error.status!==409)throw error;categories=(await api('/risk-tiers')).categories;found=matches(names[i],4-i,ids.at(-1));if(found.length!==1)throw error;}
+ }ids.push(found[0].id);
+}return ids;}
+function makePayload(p,ids){const r=p.record,s=r.source;
+ if(p.mode==='Draft')return {request_id:r.request_id,risk_title:r.title,risk_description:r.description,tier1_category_id:ids.at(-1),reason:r.reason+' Saved as unassessed Draft because the legacy source lacks required assessment fields or an owner cannot be uniquely matched.'};
+ const earlier=typeof s['Next Review']==='string'?s['Next Review'].slice(0,10):undefined;
+ const schedule=window.VeroRiskReviewPolicy.schedule(r.ratings.residual.likelihood,r.ratings.residual.impact,{reference_date:options.review_policy.reference_date,context:'Master',earlier_date:earlier});
+ return {request_id:r.request_id,risk_title:r.title,risk_description:r.description,classification_path:ids,risk_owner_user_id:p.owner.id,...r.ratings,controls_summary:s['Current Mitigations']||'',treatments_summary:s['Proposed Mitigations']||'',justification:r.reason+' Original assessment, review dates, mitigation ownership and status are preserved in the source record within the risk description. Imported controls are source statements, not newly verified evidence.',next_review_date:schedule.next_review_date,control_ids:[],document_ids:[],treatment_actions:[]};
+}
+$('bundle').onchange=()=>{plan=[];$('apply').disabled=true;$('summary').textContent='';$('rows').replaceChildren();};
+$('preview').onclick=async()=>{if(busy)return;lock(true);$('activity').textContent='';plan=[];try{
+ const file=$('bundle').files[0];if(!file)throw Error('Choose a prepared import bundle.');bundle=validateBundle(JSON.parse(await file.text()));await loadLive();plan=bundle.records.map(classify);render();$('status').textContent='Live comparison complete. Ready to import.';log('Live hierarchy checked: '+categories.filter(c=>c.status==='Active').length+' active classifications. No records changed.');
+}catch(error){plan=[];$('status').textContent=error.message;}finally{lock(false);}};
+$('apply').onclick=async()=>{if(busy||!plan.length)return;lock(true);try{
+ await loadLive();plan=bundle.records.map(classify);render();
+ for(const p of plan){const r=p.record;$('status').textContent='Importing source row '+r.source_row+': '+r.title;
+  if(p.conflict){results.push({source_row:r.source_row,status:'Held',reason:p.conflict});continue;}
+  if(p.already){results.push({source_row:r.source_row,status:'Already imported',risk_id:p.already.id,mode:p.mode});continue;}
+  const ids=await ensurePath(p.path,r.reason),payload=makePayload(p,ids),saved=await api(p.mode==='Draft'?'/risks/master-drafts':'/risks/central',payload);
+  if(!Number.isInteger(Number(saved.risk_id))||Number(saved.risk_id)<=0)throw Error('Risk save outcome unconfirmed for row '+r.source_row+'. Retry the same bundle only.');
+  const result={source_row:r.source_row,source_rows:r.source_rows,risk_id:Number(saved.risk_id),mode:p.mode,status:'Saved',classification_path:ids,request_id:r.request_id};results.push(result);log('Saved '+p.mode+' #'+saved.risk_id+' — row '+r.source_row+' '+r.title);$('download').disabled=false;
+ }
+ const fresh=(await api('/risks')).risks;let verified=0;
+ for(const p of plan.filter(p=>!p.conflict)){const found=fresh.filter(x=>(x.risk_description||'').includes(p.record.marker));if(found.length!==1||found[0].risk_title!==p.record.title||found[0].risk_description!==p.record.description)throw Error('Read-back definition mismatch for row '+p.record.source_row);if(p.mode==='Draft'&&found[0].status!=='Draft')throw Error('Expected unassessed Draft for row '+p.record.source_row);if(p.mode==='Assessed'){
+   const a=(await api('/risks/'+found[0].id+'/central-assessment')).assessment?.package;
+   if(!a||a.request_id!==p.record.request_id||a.risk_owner_user_id!==p.owner.id||['inherent','residual','target'].some(stage=>a[stage]?.likelihood!==p.record.ratings[stage].likelihood||a[stage]?.impact!==p.record.ratings[stage].impact)||a.controls_summary!==(p.record.source['Current Mitigations']||'').trim()||a.treatments_summary!==(p.record.source['Proposed Mitigations']||'').trim())throw Error('Assessment read-back mismatch for row '+p.record.source_row);
+  }verified++;
+ }
+ log('Read-back verified '+verified+' risk definitions and assessed request identities.');$('status').textContent='Import complete: '+verified+' risks verified. '+plan.filter(p=>p.conflict).length+' held for duplicate review.';
+ existing=fresh;plan=bundle.records.map(classify);render();
+}catch(error){$('status').textContent='Import stopped: '+error.message;log('Stopped. Retain this bundle and its stable request IDs; do not create a second import.');}finally{$('download').disabled=false;lock(false);}};
+$('download').onclick=()=>{const value={source_sha256:bundle?.source_sha256,checked_at:new Date().toISOString(),status:$('status').textContent,created_classifications:created,results};const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='vero-risk-import-results.json';a.click();URL.revokeObjectURL(url);};
+</script></body></html>
+
