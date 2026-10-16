@@ -1,0 +1,22 @@
+name: Tier Risk assessment browser validation
+on:
+  pull_request:
+    paths: ['risk.html', 'risk-tier-*', 'risk-hierarchy.js', 'risk-assessment-form.js', 'tests/tier-risk-browser.cjs', '.github/workflows/tier-risk-assessment-validation.yml']
+  push:
+    branches: [main, 'vero/tier-risk-assessments-20261016']
+    paths: ['risk.html', 'risk-tier-*', 'risk-hierarchy.js', 'risk-assessment-form.js', 'tests/tier-risk-browser.cjs', '.github/workflows/tier-risk-assessment-validation.yml']
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check risk-tier-assessment.js && node --check risk-tier-matrix.js && node --check risk-hierarchy.js
+      - run: node --test tests/risk-central-create.cjs tests/project-risk-creator.cjs tests/risk-review-policy.cjs
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/tier-risk-browser.cjs

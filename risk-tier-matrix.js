@@ -1,0 +1,21 @@
+/* Classification matrix: manual residual by default, highest residual on request. */
+(()=>{'use strict';
+const matrix=document.getElementById('veroRiskMatrix'),status=document.getElementById('veroMatrixStatus'),stage=document.getElementById('veroRiskAssessmentFilter');
+const colours={Low:'#A8C63D',Moderate:'#21869B',High:'#D1B443',Significant:'#BF302D'};
+const bands=[['Low','Low','Low','Moderate','Moderate'],['Low','Moderate','Moderate','Moderate','High'],['Low','Moderate','High','High','Significant'],['Moderate','Moderate','High','Significant','Significant'],['Moderate','High','Significant','Significant','Significant']];
+const node=(tag,text)=>{const n=document.createElement(tag);if(text!=null)n.textContent=String(text);return n;};
+const controls=node('div');controls.className='tier-matrix-controls';const label=node('label','Tier Matrix: '),select=node('select');select.setAttribute('aria-label','Tier Matrix Assessment Source');for(const [v,t] of [['manual','Manual (Highest If Unassessed)'],['highest','Highest Aggregated']]){const o=node('option',t);o.value=v;select.append(o);}label.append(select);const help=node('span');help.className='tier-matrix-help';controls.append(label,help);controls.hidden=true;matrix.before(controls);
+let rows=[],summaries=new Map(),context={},deepLinkDone=false;const choices=node('div');choices.className='tier-matrix-controls';matrix.after(choices);
+function hide(){controls.hidden=true;choices.replaceChildren();if(stage)stage.disabled=false;}
+function unavailable(){hide();status.textContent='Tier Assessments Unavailable';}
+function render(newRows,newSummaries,newContext){rows=newRows;summaries=newSummaries;context=newContext;controls.hidden=false;choices.replaceChildren();if(stage){stage.disabled=true;stage.value='residual';}
+ const cats=rows.filter(r=>r.kind==='category'),positions=[];let missing=0,fallback=0;
+ for(const category of cats){const s=summaries.get(Number(category.id));const p=select.value==='highest'?s?.highest:s?.manual||s?.highest;if(!p){missing++;continue;}if(select.value==='manual'&&!s?.manual)fallback++;positions.push({category,position:p,source:select.value==='highest'||!s?.manual?'Aggregated':'Manual'});}
+ matrix.replaceChildren();for(const text of ['L / C',1,2,3,4,5]){const n=node('div',text);n.className='vero-matrix-heading';matrix.append(n);}
+ for(let l=5;l>=1;l--){const head=node('div',l*5);head.className='vero-matrix-heading';matrix.append(head);for(let i=1;i<=5;i++){const band=bands[l-1][i-1],items=positions.filter(p=>p.position.likelihood===l&&p.position.impact===i),button=node('button');button.type='button';button.className='vero-matrix-cell';button.style.background=colours[band];button.style.color=['Low','High'].includes(band)?'#242424':'white';const score=node('div',l*5*i),level=node('div',band),count=node('div',items.length);score.className='vero-matrix-score';level.className='vero-matrix-level';count.className='vero-matrix-count';button.append(score,level,count);button.setAttribute('aria-label',`${items.length} Classifications · Likelihood ${l*5}, Consequence ${i} · ${band}`);button.onclick=()=>{choices.replaceChildren();if(!items.length){choices.append(node('p','No classifications in this cell.'));return;}for(const item of items){const open=node('button',item.category.name+' · '+item.source);open.type='button';open.onclick=()=>document.dispatchEvent(new CustomEvent('vero-risk-open-classification',{detail:{category:item.category}}));choices.append(open);}};matrix.append(button);}}
+ status.textContent=positions.length+' Classifications';help.textContent=`${missing} Not Assessed${fallback?' · '+fallback+' Using Highest Aggregated':''}${context.context_type?' · Context-Filtered Exposure':''}. Average scores are shown in the container.`;
+ if(!cats.length)help.textContent='No child classifications at this level. Open the current classification to see its assessment.';
+ if(!deepLinkDone){const id=Number(new URLSearchParams(location.search).get('category_id'));if(id){deepLinkDone=true;const s=summaries.get(id);if(s)document.dispatchEvent(new CustomEvent('vero-risk-open-classification',{detail:{category:{id,tier:s.tier,name:s.name},page:'Manual Assessment'}}));}}
+}
+select.onchange=()=>render(rows,summaries,context);window.VeroTierMatrix={render,hide,unavailable};
+})();

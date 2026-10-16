@@ -24,6 +24,7 @@ const ownerNote=node('p','Select an active VERO user.','muted owner-note');owner
 const review=field('Next review date');review.el.type='date';const reviewHelp=node('p','', 'muted');reviewHelp.setAttribute('aria-live','polite');review.wrap.append(reviewHelp);identification.append(title.wrap,ownerField.wrap,description.wrap,review.wrap);
 const tierBox=node('div',null,'tiers'),tierFields=[];
 for(let i=0;i<4;i++){const f=field('Tier '+(4-i)+' '+['Risk Domain','Risk Stream','Risk Category','Risk Event'][i],'select');tierFields.push(f.el);tierBox.append(f.wrap);if(config.projectMode&&i<2)f.wrap.hidden=true;f.el.onchange=()=>renderTiers(i+1);}
+if(config.fixedCategory){tierBox.hidden=true;title.el.readOnly=true;}
 const tierHelp=node('p',config.projectMode?'Project Execution · Choose Tier 2 and Tier 1 for this project risk.':'Choose Tier 4, then stop at that tier or continue down to a more specific classification.','muted full');tierBox.append(tierHelp);
 const tabs=node('div',null,'stages');tabs.setAttribute('aria-label','Assessment stages');
 for(let i=0;i<3;i++){const b=button('','stage');b.append(node('b',(i+1)+' '+stages[i]),node('span',['Before controls','With existing controls','After further controls'][i]));b.onclick=()=>{stage=i;renderAssessment();};tabs.append(b);}
@@ -97,13 +98,13 @@ summaries.replaceChildren();ratings.forEach((r,i)=>{const group=node('div');grou
 function closePickers(){enterprisePicker.hide();documentPicker.hide();ownerList.hidden=true;ownerField.el.setAttribute('aria-expanded','false');}
 function setBusy(value){busy=value;host.querySelectorAll('input,textarea,select,button').forEach(el=>el.disabled=value);if(!value)tierFields.forEach((el,i)=>el.disabled=config.projectMode&&i<2?true:i>0&&!tierFields[i-1].value);config.onBusy?.(value);}
 function value(){return {risk_title:title.el.value.trim(),risk_description:description.el.value.trim(),
- classification_path:tierFields.filter(s=>s.value).map(s=>Number(s.value)),risk_owner_user_id:owner,
+ classification_path:config.fixedCategory?[config.fixedCategory.id]:tierFields.filter(s=>s.value).map(s=>Number(s.value)),risk_owner_user_id:owner,
  inherent:ratings[0],residual:ratings[1],target:ratings[2],controls_summary:existing.el.value,
  treatments_summary:further.el.value,justification:notes.el.value,next_review_date:review.el.value,
  control_ids:[...selectedControls].sort((a,b)=>a-b),document_ids:[...selectedDocuments].sort((a,b)=>a-b),
  treatment_actions:actionRows.map(a=>({title:a.title.trim(),owner_user_id:a.owner_user_id,due_date:a.due_date,...(config.projectMode?{description:a.description||'',priority:a.priority||'Normal'}:{})}))};}
 function setValue(v={}){
- title.el.value=v.risk_title||'';description.el.value=v.risk_description||'';notes.el.value=v.justification||'';
+ title.el.value=config.fixedCategory?.name||v.risk_title||'';description.el.value=v.risk_description||'';notes.el.value=v.justification||'';
  existing.el.value=v.controls_summary||'';further.el.value=v.treatments_summary||'';review.el.value=v.next_review_date||'';
  ratings=[v.inherent||null,v.residual||null,v.target||null];
  owner=null;ownerField.el.value='';const user=options.users.find(u=>u.id===v.risk_owner_user_id);if(user)chooseOwner(user);
@@ -119,7 +120,7 @@ function setValue(v={}){
 cancel.onclick=()=>{if(!busy){closePickers();config.onCancel?.();}};
 save.onclick=async()=>{
  if(busy)return;status.textContent='';const body=value();
- const validClassification=config.projectMode?Boolean(tierFields[2].value&&tierFields[3].value):Boolean(tierFields[0].value);
+ const validClassification=config.fixedCategory?true:config.projectMode?Boolean(tierFields[2].value&&tierFields[3].value):Boolean(tierFields[0].value);
  if(!body.risk_title||!body.risk_description||!owner||!validClassification||ratings.some(r=>!r)||!body.next_review_date||!body.justification.trim()){
   status.textContent='Complete the title, description, Risk Owner, classification, all three ratings, review date and assessment notes.';return;
  }
