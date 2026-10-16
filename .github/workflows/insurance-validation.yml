@@ -1,0 +1,20 @@
+name: Insurance frontend validation
+on:
+  pull_request:
+    paths:
+      - 'insurance.html'
+      - 'insurance-live.js'
+      - '.github/workflows/insurance-validation.yml'
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Insurance JavaScript syntax
+        run: node --check insurance-live.js
+      - name: Check page integration
+        run: |
+          grep -q 'src="insurance-live.js"' insurance.html
+          grep -q 'src="nav.js"' insurance.html
+          grep -q 'href="header.css"' insurance.html
