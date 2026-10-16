@@ -3824,8 +3824,7 @@ function openLiveObligation(id){
  document.getElementById('detailSource').textContent=
   item.source_name||'—';
 
- document.getElementById('detailReference').textContent=
-  item.source_reference||'—';
+ renderImsSourceReference(document.getElementById('detailReference'),item.source_reference);
 
  document.getElementById('detailApplicability').textContent=
   app.type
@@ -4088,8 +4087,7 @@ async function openLiveObligation(id){
   document.getElementById('detailSource').textContent=
    o.source_name||'—';
 
-  document.getElementById('detailReference').textContent=
-   o.source_reference||'—';
+  renderImsSourceReference(document.getElementById('detailReference'),o.source_reference);
 
   document.getElementById('detailApplicability').textContent=
    apps.length
@@ -4336,6 +4334,13 @@ async function openComplianceRequestFromAction(requestId){
    if(strong)strong.textContent=item.proposed_title||'—';
    if(para)para.textContent=item.proposed_description||'No description provided.';
    renderControllerComplianceRisk(item,sections[0]);
+  }
+
+  if(sections[0] && item.proposed_source_reference){
+   const sourceLink=document.createElement('p');sourceLink.className='ims-source-reference';
+   sections[0].querySelectorAll('.ims-source-reference').forEach(node=>node.remove());
+   renderImsSourceReference(sourceLink,item.proposed_source_reference);sections[0].append(sourceLink);
+   const quote=sections[0].querySelector('p');if(quote)quote.style.whiteSpace='pre-wrap';
   }
 
   if(sections[1]){
@@ -8211,3 +8216,5 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 
 <script src="compliance-assessment-risk.js"></script>
+
+<script src="ims-requirements-import.js?v=20261016-clauses"></script>
