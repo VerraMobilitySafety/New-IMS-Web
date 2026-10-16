@@ -1,5 +1,5 @@
 /* Contract-specific clauses remain attached to one central requirement. */
-(()=>{
+function installCustomerContractLinks(){
  const original=window.openLiveObligation;
  if(typeof original!=='function')return;
  const escape=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -22,5 +22,7 @@
  };
  const id=new URLSearchParams(location.search).get('obligation_id');
  if(id&&/^\d+$/.test(id))window.openLiveObligation(Number(id));
-})();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installCustomerContractLinks,{once:true});
+else installCustomerContractLinks();
 
