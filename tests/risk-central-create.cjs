@@ -17,7 +17,7 @@ let uuidCounter=0;const context={document:doc,crypto:{randomUUID:()=> '86b28cfa-
 vm.createContext(context);vm.runInContext(fs.readFileSync(root+'/risk-assessment-criteria.js','utf8'),context);vm.runInContext(fs.readFileSync(root+'/risk-review-policy.js','utf8'),context);vm.runInContext(fs.readFileSync(root+'/risk-assessment-form.js','utf8'),context);vm.runInContext(fs.readFileSync(root+'/risk-central-create.js','utf8'),context);
 const get=id=>doc.getElementById('central-'+id),cells=()=>host.querySelectorAll('.cell'),buttons=()=>host.querySelectorAll('button');
 function fill(){get('risk-title').value='Vehicle collision';get('risk-description').value='Vehicle strikes a worker';get('risk-owner').value='owner@';get('risk-owner').fire('input');host.querySelector('.owner-option').click();for(const [i,id] of ['tier-4-risk-domain','tier-3-risk-stream','tier-2-risk-category','tier-1-risk-event'].entries()){get(id).value=String(4-i);get(id).fire('change');}get('next-review-date').value='2027-01-01';get('assessment-notes-and-justification').value='Current exposure';host.querySelectorAll('.stage').forEach(b=>{b.click();cells()[24].click();});}
-return{doc,host,launch,overlay,calls,get,cells,buttons,fill,reloads:()=>reloads,save:()=>buttons().find(b=>b.textContent==='Save Risk · Make live')};}
+return{doc,host,launch,overlay,calls,get,cells,buttons,fill,reloads:()=>reloads,mount:config=>context.window.VeroRiskAssessmentForm.mount(host,{options,...config}),save:()=>buttons().find(b=>b.textContent==='Save Risk · Make live')};}
 test('unauthorised users never see Add Risk',async()=>{const a=app({denied:true});await tick();assert.equal(a.launch.hidden,true);assert.equal(a.calls.length,1);});
 test('missing migration disables creation',async()=>{const a=app({ready:false});await tick();assert.equal(a.launch.hidden,false);assert.equal(a.launch.disabled,true);});
 test('authorised form has square selectable matrix and visible likelihood words',async()=>{const a=app();await tick();assert.equal(a.launch.hidden,false);assert.equal(a.cells().length,25);assert.match(a.host.textContent,/Almost Certain/);assert.match(fs.readFileSync(root+'/risk-central-create.css','utf8'),/width:84px;height:84px;aspect-ratio:1/);});
@@ -37,3 +37,17 @@ test('owner and control result lists sit in floating anchors, not the form flow'
 
 test('a risk can be submitted at Tier 4 without a lower-tier choice',async()=>{const a=app();await tick();a.fill();a.get('tier-4-risk-domain').value='44';a.get('tier-4-risk-domain').fire('change');await a.save().click();const p=JSON.parse(a.calls.at(-1).init.body);assert.deepEqual(p.classification_path,[44]);});
 test('form labels and section headings use Title Case without rewriting selected control titles',async()=>{const a=app();await tick();const labels=a.host.querySelectorAll('label').map(x=>x.textContent);assert.ok(labels.includes('Risk Title'));assert.ok(labels.includes('Risk Description'));assert.ok(labels.includes('Assessment Notes And Justification'));assert.match(a.host.textContent,/Assessment Summary/);assert.match(a.host.textContent,/Rating Definitions/);});
+
+for (const context of ['Master','Project','Compliance']) {
+ test(`restoring ${context} assessment retains an earlier review through stage changes`,async()=>{
+  const a=app();await tick();
+  const form=a.mount({options:{users:[],controls:[],documents:[],treatment_owners:[],classification_categories:[],classification_relationships:[],review_policy:{reference_date:'2026-10-16',context}},initial:{residual:{likelihood:1,impact:1},next_review_date:'2026-10-20'}});
+  assert.equal(form.getValue().next_review_date,'2026-10-20');
+  a.host.querySelectorAll('.stage')[2].click();
+  assert.equal(form.getValue().next_review_date,'2026-10-20');
+  form.setValue({residual:{likelihood:5,impact:5},next_review_date:'2028-01-01'});
+  assert.equal(form.getValue().next_review_date,'2026-11-16','later saved date must not extend policy');
+  form.setValue({residual:{likelihood:1,impact:1}});
+  assert.notEqual(form.getValue().next_review_date,'2026-10-20','new assessment clears retained constraint');
+ });
+}
