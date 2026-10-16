@@ -7,3 +7,5 @@
 .tier-matrix-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:13px;margin-bottom:14px}
 .tier-matrix-controls select{padding:8px}.tier-matrix-help{font-size:12px;color:#716864}
 @media(max-width:600px){.tier-assessment-stats{grid-template-columns:1fr}}
+
+.tier-matrix-controls[hidden]{display:none}

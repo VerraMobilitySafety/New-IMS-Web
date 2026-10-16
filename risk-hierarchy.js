@@ -45,12 +45,15 @@
    if(!response.ok)throw Error('Hierarchy unavailable: '+response.status);
    const data=await response.json();
    if(ticket!==serial)return;
-   let exposureByCategory=new Map();
-   const exposureResponse=await fetch(API+'/risk/tier-assessment-summary?'+new URLSearchParams(context()),{
-     headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store'});
-   if(!exposureResponse.ok)throw Error('Tier exposure summary unavailable');
-   const exposure=await exposureResponse.json();if(ticket!==serial)return;
-   exposureByCategory=new Map((exposure.summaries||[]).map(item=>[Number(item.category_id),item]));
+   let exposureByCategory=new Map(),exposureReady=false;
+   try{
+    const exposureResponse=await fetch(API+'/risk/tier-assessment-summary?'+new URLSearchParams(context()),{
+      headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store'});
+    if(!exposureResponse.ok)throw Error('Tier exposure summary unavailable');
+    const exposure=await exposureResponse.json();if(ticket!==serial)return;
+    if(!Array.isArray(exposure.summaries))throw Error('Invalid tier assessment summary');
+    exposureByCategory=new Map(exposure.summaries.map(item=>[Number(item.category_id),item]));exposureReady=true;
+   }catch(error){if(ticket!==serial)return;console.warn('Tier assessment summary unavailable',error);}
    const rows=(data.rows||[]).filter(r=>!search.value.trim()||
     String(r.name||'').toLowerCase().includes(search.value.trim().toLowerCase()));
    const fragment=document.createDocumentFragment();
@@ -86,7 +89,7 @@
    if(!rows.length){const tr=make('tr','');const td=make('td','No classifications or terminal risks at this level.');td.colSpan=7;tr.appendChild(td);fragment.appendChild(tr);}
    body.replaceChildren(fragment);
    status.textContent=String(rows.length);
-   window.VeroTierMatrix?.render(rows,exposureByCategory,context());
+   if(exposureReady)window.VeroTierMatrix?.render(rows,exposureByCategory,context());else window.VeroTierMatrix?.unavailable();
   }catch(error){
    if(ticket===serial){
     body.replaceChildren(...fallback);

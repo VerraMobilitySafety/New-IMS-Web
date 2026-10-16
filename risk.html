@@ -3595,10 +3595,10 @@ table {
    if(window.VeroTierAssessment?.destroy()===false)return;
    content.replaceChildren(nav);
    [...nav.children].forEach(btn=>btn.setAttribute('aria-current',String(btn.textContent===page)));
-   if(page==='Manual Assessment'){const c=card('Manual Risk Assessment');await window.VeroTierAssessment.mount(c,r);return;}
+   if(page==='Manual Assessment'){const c=card('Manual Risk Assessment');if(window.VeroTierAssessment)await window.VeroTierAssessment.mount(c,r);else c.append(make('p','Assessment editor unavailable. Refresh and try again.'));return;}
    if(page==='Overview'){
     const c=card('Classification overview');
-    const riskSummary=make('div','');c.append(riskSummary);window.VeroTierAssessment.overview(riskSummary,r);
+    const riskSummary=make('div','');c.append(riskSummary);if(window.VeroTierAssessment)window.VeroTierAssessment.overview(riskSummary,r);else riskSummary.textContent='Tier assessment summary unavailable.';
     field(c,'Classification',r.name);field(c,'Tier',r.tier);
     field(c,'Underlying Master Risks',r.master_risks);
     field(c,'Applicable records',r.applicable_contexts);
