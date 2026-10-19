@@ -1,0 +1,163 @@
+{
+  "slug": "working-near-traffic",
+  "title": "Working Near Traffic",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.23.PRO.01",
+  "version": "2.1",
+  "issued": "15/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 6,
+  "training": {
+    "title": "Working Near Traffic",
+    "codes": "IMS.03.23.TRN.01",
+    "audience": "Employees; additional requirements for traffic controllers",
+    "timing": "Employees annual; traffic controllers need relevant accreditation where required and site-specific induction / training",
+    "evidence": "IMS.03.23.PRO.01 §4.2.1–4.2.2, p.3",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1",
+      "4.2.2"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Assess traffic hazards",
+      "keywords": "assess traffic hazard",
+      "refs": [
+        "7.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Prepare a traffic management plan",
+      "keywords": "plan tmp traffic",
+      "refs": [
+        "5.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Choose traffic controls",
+      "keywords": "control barrier exclusion",
+      "refs": [
+        "7.1.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Check traffic equipment",
+      "keywords": "equipment inspect",
+      "refs": [
+        "6.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-5",
+      "title": "Review traffic arrangements",
+      "keywords": "review change",
+      "refs": [
+        "7.2"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "4.2.2": {
+      "section": "4.2.2",
+      "title": "Controllers of Traffic",
+      "page": 3,
+      "endPage": 3,
+      "text": "Controllers of Traffic are required to:\n\n• Hold current, relevant traffic control accreditation where required\n• Complete site-specific induction and training, and\n• Comply with Traffic Management Plans and directions."
+    },
+    "5.1": {
+      "section": "5.1",
+      "title": "Traffic Interaction Areas",
+      "page": 3,
+      "endPage": 3,
+      "text": "Traffic risks must be managed in all areas where there is potential interaction between:\n\n• People (including pedestrians, cyclists, and visitors) and vehicles\n• Vehicles and structures, and\n• Vehicles and other vehicles or mobile plant.\n\nA Traffic Management Plan (TMP) must be developed where traffic risks cannot be\nadequately managed through standard controls alone.\n\nA TMP must document and communicate how traffic-related risks are controlled and\ntypically include:\n\n• Pedestrian and vehicle movement flows\n• Frequency and nature of interactions\n• Layout of barriers, walkways, signage, and controls\n• Management of short-term, mobile, or complex traffic situations, and\n• Traffic control arrangements during emergencies.\n\nFor fixed workplaces, TMPs must be displayed at exit points or traffic access areas.\nFor field activities, TMPs must be available in the relevant project or activity file."
+    },
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Verra Mobility Employees and Contractors",
+      "page": 2,
+      "endPage": 2,
+      "text": "Verra Mobility Employees and Contractors are required to:\n\n• Follow traffic controls, signage, and directions, and\n• Operate vehicles or mobile plant only if authorised, trained, and competent."
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 3,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are required to:\n\n• Complete the Working Near Traffic Training Module (IMS.03.23.TRN.01) annually."
+    },
+    "6.1": {
+      "section": "6.1",
+      "title": "Traffic Management Equipment",
+      "page": 3,
+      "endPage": 4,
+      "text": "Equipment used for traffic management must:\n\n• Be fit for purpose and appropriate to the traffic environment\n• Be inspected and maintained in a serviceable condition\n• Be installed and used in accordance with manufacturer instructions, and\n• Be visible, stable, and positioned to effectively control traffic movements."
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 2,
+      "endPage": 3,
+      "text": "4.1.1. Leaders\nAll Leaders are responsible for:\n\n• Identifying traffic hazards within their area of responsibility\n• Ensuring traffic risks are assessed and controlled prior to work commencing\n• Ensuring Traffic Management Plans are developed where required\n• Ensuring Traffic Management Plans are communicated and accessible, and\n• Ensuring only trained and authorised persons operate vehicles or mobile plant.\n4.1.2. Verra Mobility Employees and Contractors\nVerra Mobility Employees and Contractors are required to:\n\n• Follow traffic controls, signage, and directions, and\n• Operate vehicles or mobile plant only if authorised, trained, and competent.\n4.1.3. Controllers of Traffic\nControllers of traffic are responsible for:\n\n• Implementing Traffic Management Plans in accordance with this Procedure\n• Directing traffic safely and in accordance with training and authorisation\n• Using traffic control equipment correctly\n• Ceasing traffic control activities where conditions become unsafe, and\n• Reporting hazards, incidents, or changes in conditions."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Complete the Working Near Traffic Training Module (IMS.03.23.TRN.01) annually.\n4.2.2. Controllers of Traffic\nControllers of Traffic are required to:\n\n• Hold current, relevant traffic control accreditation where required\n• Complete site-specific induction and training, and\n• Comply with Traffic Management Plans and directions."
+    },
+    "7.1.1": {
+      "section": "7.1.1",
+      "title": "Traffic Management Controls",
+      "page": 4,
+      "endPage": 5,
+      "text": "Examples of controls that may be implemented, in order of preference, include:\n\n• Elimination\no Separating pedestrian and vehicle activities, and\no Scheduling work to avoid interaction between people and vehicles.\n\n• Substitution\no Using alternative equipment to reduce vehicle movement (e.g. pallet jacks instead of\nforklifts).\n\n• Isolation\no Designating delivery or loading areas away from pedestrian traffic.\n\n• Engineering Controls\no Physical barriers and guardrails\no Speed limiters and traffic calming devices, and\no Presence sensing or interlocked systems.\n\n• Administrative Controls\no Signage and line marking\no Traffic rules and procedures, and\no Scheduled delivery times.\n\n• Personal Protective Equipment\no High-visibility clothing, and\no Safety footwear."
+    },
+    "7.2": {
+      "section": "7.2",
+      "title": "Monitoring and Review of Controls Procedure",
+      "page": 5,
+      "endPage": 5,
+      "text": "Traffic management controls and Traffic Management Plans must be reviewed:\n\n• Workplace inspections\n• Audits\n• Incident investigations\n• Toolbox meetings\n• WHS Committee consultation, and\n• Hazard reporting.\n\nControls must be reviewed:\n\n• Following an incident\n• Prior to changes that may alter risk\n• Upon request by a WHS Representative, and\n• When controls are deemed ineffective."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 2,
+      "endPage": 2,
+      "text": "All Leaders are responsible for:\n\n• Identifying traffic hazards within their area of responsibility\n• Ensuring traffic risks are assessed and controlled prior to work commencing\n• Ensuring Traffic Management Plans are developed where required\n• Ensuring Traffic Management Plans are communicated and accessible, and\n• Ensuring only trained and authorised persons operate vehicles or mobile plant."
+    },
+    "7.1": {
+      "section": "7.1",
+      "title": "Hazard Identification, Risk Assessment and Control Procedure",
+      "page": 4,
+      "endPage": 5,
+      "text": "Traffic-related hazards must be identified, assessed, and controlled in accordance with the\nRisk Management Procedure (IMS.03.00.PRO.01).\n\nHazard identification must consider:\n\n• Areas of interaction between people and vehicles\n• Vehicle routes, speeds, and visibility\n• Delivery, loading, and unloading activities\n• Temporary or changing work environments.\n\nControls must be selected using the Hierarchy of Control, with a preference for elimination.\n7.1.1. Traffic Management Controls\nExamples of controls that may be implemented, in order of preference, include:\n\n• Elimination\no Separating pedestrian and vehicle activities, and\no Scheduling work to avoid interaction between people and vehicles.\n\n• Substitution\no Using alternative equipment to reduce vehicle movement (e.g. pallet jacks instead of\nforklifts).\n\n• Isolation\no Designating delivery or loading areas away from pedestrian traffic.\n\n• Engineering Controls\no Physical barriers and guardrails\no Speed limiters and traffic calming devices, and\no Presence sensing or interlocked systems.\n\n• Administrative Controls\no Signage and line marking\no Traffic rules and procedures, and\no Scheduled delivery times.\n\n• Personal Protective Equipment\no High-visibility clothing, and\no Safety footwear."
+    }
+  },
+  "resources": [],
+  "notes": [
+    "Traffic Management Plans are required in defined circumstances (§5.1, p.3); no standalone TMP template / completed plan was found."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

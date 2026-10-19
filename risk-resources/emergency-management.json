@@ -1,0 +1,201 @@
+{
+  "slug": "emergency-management",
+  "title": "Emergency Management",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.08.PRO.01",
+  "version": "1.0",
+  "issued": "20/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 7,
+  "training": {
+    "title": "Emergency Risk Management / ECO / First Aid",
+    "codes": "No module identifier specified",
+    "audience": "Employees / ECO members / First Aiders",
+    "timing": "Employees annual under local plan; ECO per local plan; First Aid certification per applicable requirements",
+    "evidence": "IMS.03.08.PRO.01 §4.2.1–4.2.3, p.3–4",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1",
+      "4.2.2",
+      "4.2.3"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Prepare a site emergency plan",
+      "keywords": "plan site emergency evacuation peep",
+      "refs": [
+        "7.1",
+        "5"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Understand the emergency response",
+      "keywords": "respond emergency escalation",
+      "refs": [
+        "7.2",
+        "7.3"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Test emergency arrangements",
+      "keywords": "test exercise drill",
+      "refs": [
+        "7.6"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Restore arrangements after an emergency",
+      "keywords": "after restore followup",
+      "refs": [
+        "7.4"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "4.2.2": {
+      "section": "4.2.2",
+      "title": "Physical Injury First Aiders",
+      "page": 4,
+      "endPage": 4,
+      "text": "First Aiders are required to:\n• Be trained and certified in First Aid in accordance with applicable local legislation and\nstandards"
+    },
+    "7.6": {
+      "section": "7.6",
+      "title": "Testing of Emergency Management Plans Procedure",
+      "page": 6,
+      "endPage": 7,
+      "text": "Verra Mobility shall establish and maintain a documented testing schedule for all identified\npotential emergency situations. The purpose of the schedule is to ensure that emergency\npreparedness and response arrangements are periodically tested, evaluated, and improved\nto verify their effectiveness and readiness.\n\nThe testing schedule shall:\n\n• Identify all applicable emergency scenarios, including but not limited to fire, medical\nemergencies, hazardous material spills, environmental incidents, security threats, severe\nweather events, and business continuity disruptions.\n• Define the required testing frequency for each emergency scenario based on risk,\nlegislative requirements, operational complexity, and previous performance outcomes.\n• Include planned emergency exercises, drills, simulations, tabletop exercises, and\nresponse capability tests, as applicable.\n• Assign responsibility for planning, coordinating, conducting, and reviewing each test.\n• Record the scheduled date, completion date, outcomes, corrective actions, and any\nlessons learned arising from the test.\n• Be reviewed and updated following emergency events, significant operational changes,\nidentified deficiencies, or management review outcomes.\n\nAll emergency preparedness testing activities shall be incorporated into the Audit,\nInspection, Monitoring and Testing Register (IMS.07.01.REG.01).\n\nFollowing each test or exercise, the effectiveness of the emergency response shall be\nevaluated and documented using Emergency Test Report Form (IMS.03.08.FRM.04). Where\ndeficiencies or opportunities for improvement are identified, corrective actions shall be\nraised and tracked through the Performance and Continuous Improvement Management\nProcedure (IMS.08.01.PRO.01)."
+    },
+    "7.4": {
+      "section": "7.4",
+      "title": "Actions Following an Emergency",
+      "page": 5,
+      "endPage": 6,
+      "text": "Once immediate risks are controlled:\n\n• The site must be made safe\n• Injured persons must receive appropriate First Aid and medical care\n• Emergency equipment must be restored to operational condition , and\n\n• Work must not resume until authorised.\n• Incidents must be reported and investigated in accordance with applicable legal and\norganisational requirements.\n• Lessons learned must be identified and communicated where appropriate .\n\nEmergency response effectiveness must be reviewed, and emergency plans updated where\nrequired."
+    },
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Verra Mobility Employees",
+      "page": 3,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are responsible for:\n\n• Complying with emergency response instructions and directions\n• Informing their Leader if they require a Personal Emergency Evacuation Plan (PEEP) due\nto individual requirements\n• Seeking or providing First Aid assistance where trained and safe to do so\n• Following the directions of the Emergency Control Organisation during an emergency,\nand\n• Not interfering with emergency response activities"
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 3,
+      "endPage": 4,
+      "text": "All Verra Mobility Employees are required to:\n\n• Complete the Emergency Risk Management Training Module as per the local Emergency\nPlan annually. This should include:\n\no Evacuation routes and assembly areas\no Alarm tones and emergency communications\no Roles and authority of the Emergency Control Organisation, and\no Reporting and escalation requirements."
+    },
+    "5": {
+      "section": "5",
+      "title": "Working Environment Requirements",
+      "page": 4,
+      "endPage": 4,
+      "text": "All Verra Mobility controlled sites must have:\n\n• Must have a documented Emergency Response Plan based on identified risks and legal\nrequirements and the Site-Specific Emergency Management Procedure Template\n(IMS.03.08.FRM.01)\n• A list of First Aiders displayed, using First Aider Template (IMS.03.08.FRM.02)\n• Where present, the Emergency Control Organisation displayed, using Emergency Control\nOrganisation Template (IMS.03.08.FRM.03), and\n• Emergency Evacuation Maps posted as per local site specific plans, posted in entrance\nareas.\n• Emergency arrangements must consider foreseeable emergency scenarios, including\nfire, medical emergencies, environmental incidents, and security threats"
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.1.1. Leaders\nLeaders are responsible for:\n• Ensuring Employees are aware of emergency response arrangements applicable to their\nworkplace\n• Identifying Employees who may require assistance during an emergency and ensuring\nappropriate Personal Emergency Evacuation Plans (PEEP) are developed, implemented,\nand reviewed\n• Ensuring appropriate First Aid arrangements are in place and accessible for their\nworkplace\n• Ensuring Employees complete required emergency training and inductions\n• Supporting emergency response activities when required, and\n• Ensuring incidents and emergencies are reported in accordance with incident reporting\nrequirements.\n• Ensuring, so far as reasonably practicable, that Employees are consulted on emergency\narrangements affecting their health and safety\n4.1.2. Verra Mobility Employees\nVerra Mobility Employees are responsible for:\n\n• Complying with emergency response instructions and directions\n• Informing their Leader if they require a Personal Emergency Evacuation Plan (PEEP) due\nto individual requirements\n• Seeking or providing First Aid assistance where trained and safe to do so\n• Following the directions of the Emergency Control Organisation during an emergency,\nand\n• Not interfering with emergency response activities\n4.1.3. Emergency Control Organisation (ECO)\nThe ECO is responsible for:\n\n• Managing emergency response activities in accordance with the ERP\n• Coordinating First Aid response in conjunction with trained First Aid personnel until\nemergency services arrive\n• Coordinating evacuation or shelter-in-place actions\n• Liaising with emergency services, and\n• Accounting for personnel as required."
+    },
+    "7.3": {
+      "section": "7.3",
+      "title": "Escalation and Crisis Management",
+      "page": 5,
+      "endPage": 5,
+      "text": "Where an emergency has the potential to cause significant harm, disruption, or reputational\nimpact, escalation to senior management must occur. Escalation to organisational crisis\nmanagement arrangements must be considered based on the severity and potential\nconsequences of the event. Consideration must be given to legal reporting requirements\n(e.g. regulatory notifications) where applicable."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 3,
+      "endPage": 4,
+      "text": "4.2.1. Verra Mobility Employees\nAll Verra Mobility Employees are required to:\n\n• Complete the Emergency Risk Management Training Module as per the local Emergency\nPlan annually. This should include:\n\no Evacuation routes and assembly areas\no Alarm tones and emergency communications\no Roles and authority of the Emergency Control Organisation, and\no Reporting and escalation requirements.\n4.2.2. Physical Injury First Aiders\nFirst Aiders are required to:\n• Be trained and certified in First Aid in accordance with applicable local legislation and\nstandards\n4.2.3. Emergency Control Organisation (ECO)\nThe ECO is required to:\n• Complete the ECO Training Module as per the local Emergency Plan."
+    },
+    "4.2.3": {
+      "section": "4.2.3",
+      "title": "Emergency Control Organisation (ECO)",
+      "page": 4,
+      "endPage": 4,
+      "text": "The ECO is required to:\n• Complete the ECO Training Module as per the local Emergency Plan."
+    },
+    "7.2": {
+      "section": "7.2",
+      "title": "Responding to an Emergency",
+      "page": 5,
+      "endPage": 5,
+      "text": "In the event of an emergency:\n\n• Personal safety must be the priority\n• First Aid must be provided where required and safe to do so\n• Emergency services must be contacted where required\n• The Emergency Control Organisation must assume control in accordance with the ERP,\nand\n• Employees must follow emergency instructions and directions.\n• Only trained and competent persons should undertake emergency response actions\nbeyond basic evacuation and first aid\n• Work activities must cease where there is a risk to life or safety"
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 3,
+      "endPage": 3,
+      "text": "Leaders are responsible for:\n• Ensuring Employees are aware of emergency response arrangements applicable to their\nworkplace\n• Identifying Employees who may require assistance during an emergency and ensuring\nappropriate Personal Emergency Evacuation Plans (PEEP) are developed, implemented,\nand reviewed\n• Ensuring appropriate First Aid arrangements are in place and accessible for their\nworkplace\n• Ensuring Employees complete required emergency training and inductions\n• Supporting emergency response activities when required, and\n• Ensuring incidents and emergencies are reported in accordance with incident reporting\nrequirements.\n• Ensuring, so far as reasonably practicable, that Employees are consulted on emergency\narrangements affecting their health and safety"
+    },
+    "7.1": {
+      "section": "7.1",
+      "title": "Emergency Planning Procedure",
+      "page": 4,
+      "endPage": 5,
+      "text": "Emergency preparedness must be based on the identification of foreseeable emergency\nscenarios relevant to the workplace in accordance with the Risk Management Procedure\n(IMS.03.00.PRO.01)\n\nEmergency planning shall be based on a suitable and sufficient assessment of risks.\n\nPeople in control of the workplace must ensure Emergency Planning:\n\n• Is documented by using the Site-Specific Emergency Management Procedure Template\n(IMS.03.08.FRM.01).\n• Aligns with site or base building Emergency Response Plan\n• Defines clear roles, responsibilities, and communication methods during an emergency\n• Considers people, property, operational, and environmental risks\n• Considers the needs of individuals who may require assistance during an emergency,\nincluding the development and implementation of Personal Emergency Evacuation Plans\n(PEEP) where required\n• Is reviewed where changes to the workplace or operations occur, and the following is\nconsidered:\no Nature and complexity of the work\no Potential severity of harm (people, environment, operations)\no Use of contractors or multiple parties\no Non-routine or new activities\no Operating environment and location, and\no Client-specific emergency or response requirements."
+    }
+  },
+  "resources": [
+    {
+      "code": "IMS.03.08.FRM.01",
+      "title": "Site-Specific Emergency Management Procedure Template",
+      "status": "Available reference / template",
+      "note": "Content checked. PDF availability does not confirm an editable form, operational record or live service.",
+      "usable": true
+    },
+    {
+      "code": "IMS.03.08.FRM.02",
+      "title": "First Aider Template",
+      "status": "Available reference / template",
+      "note": "Content checked. PDF availability does not confirm an editable form, operational record or live service.",
+      "usable": true
+    },
+    {
+      "code": "IMS.03.08.FRM.03",
+      "title": "Emergency Control Organisation Template",
+      "status": "Available reference / template",
+      "note": "Content checked. PDF availability does not confirm an editable form, operational record or live service.",
+      "usable": true
+    },
+    {
+      "code": "IMS.03.08.FRM.04",
+      "title": "Emergency Preparedness Test Report",
+      "status": "Available reference / template",
+      "note": "Content checked. PDF availability does not confirm an editable form, operational record or live service.",
+      "usable": true
+    }
+  ],
+  "notes": [
+    "Templates are available; completed site-specific plans, maps, PEEPs, training packages and certification records were not found as standalone files.",
+    "No coded TRN identifier is provided for the emergency or ECO modules."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

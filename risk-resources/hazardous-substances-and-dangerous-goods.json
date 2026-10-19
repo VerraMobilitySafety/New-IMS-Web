@@ -1,0 +1,180 @@
+{
+  "slug": "hazardous-substances-and-dangerous-goods",
+  "title": "Hazardous Substances and Dangerous Goods",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.13.PRO.01",
+  "version": "2.1",
+  "issued": "14/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 6,
+  "training": {
+    "title": "Hazardous Substances / Dangerous Goods",
+    "codes": "IMS.03.13.TRN.01",
+    "audience": "Employees",
+    "timing": "Annual",
+    "evidence": "IMS.03.13.PRO.01 §4.2.1, p.3",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Introduce a substance",
+      "keywords": "introduce substance assess new approval",
+      "refs": [
+        "7.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Find SDS requirements",
+      "keywords": "sds safety data sheet",
+      "refs": [
+        "6.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Handle and store substances",
+      "keywords": "handle store storage segregation",
+      "refs": [
+        "7.2",
+        "7.3"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Check monitoring requirements",
+      "keywords": "monitor exposure health atmosphere",
+      "refs": [
+        "7.4",
+        "7.5"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-5",
+      "title": "Plan for a spill or exposure",
+      "keywords": "spill emergency exposure",
+      "refs": [
+        "7.6"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "7.6": {
+      "section": "7.6",
+      "title": "Emergency Procedures",
+      "page": 5,
+      "endPage": 5,
+      "text": "Emergency procedures must consider:\n\n• The hazardous substances and dangerous goods present at the workplace\n• Quantities stored and used, and\n• Potential spill, fire, explosion, or exposure scenarios.\n\nEmergency arrangements must align with site the Emergency Risk Management Procedure\n(IMS.03.08.PRO.01)."
+    },
+    "7.4": {
+      "section": "7.4",
+      "title": "Atmospheric Monitoring Procedure",
+      "page": 4,
+      "endPage": 5,
+      "text": "Atmospheric monitoring must be undertaken as per Audit, Inspection, Monitoring and\nTesting Management Procedure (IMS.07.01.PRO.01), where:\n\n• There is uncertainty about airborne exposure levels\n• Serious health effects could occur if controls fail, and\n• The potential for exposure is high.\n\nMonitoring results must be:\n\n• Communicated to affected employees\n• Retained in accordance with regulatory requirements."
+    },
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are required to:\n\n• Comply with this Procedure and related instructions\n• Use hazardous substances and dangerous goods in accordance with the SDS\n\n• Report hazards, incidents, spills, or control failures, and\n• Not introduce new substances or goods without assessment and approval."
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 3,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are required to:\n\n• Complete the Hazardous Substances / Dangerous Goods Training Module\n(IMS.03.13.TRN.01) annually."
+    },
+    "6.1": {
+      "section": "6.1",
+      "title": "Safety Data Sheets (SDS) Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "Safety Data Sheets must:\n\n• Be available for each hazardous substance and dangerous good\n• Be accessible in work areas and vehicles where substances are used or transported\n• Be reviewed at least annually, and\n• Be current (not more than five years old)."
+    },
+    "7.5": {
+      "section": "7.5",
+      "title": "Health Monitoring Procedure",
+      "page": 5,
+      "endPage": 5,
+      "text": "Health monitoring must be provided, as per Audit, Inspection, Monitoring and Testing\nManagement Procedure (IMS.07.01.PRO.01), where employees are exposed to hazardous\nsubstances and there is a significant risk to health.\n\nHealth monitoring must:\n\n• Be conducted by a registered medical practitioner\n• Consider the type, frequency, duration, and level of exposure, and\n• Be retained for 30 years (40 years for asbestos-related exposure)."
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 2,
+      "endPage": 3,
+      "text": "4.1.1. Leaders\nAll Leaders are responsible for:\n\n• Ensuring hazardous substances and dangerous goods under their control are identified,\nassessed, and approved prior to use\n• Ensuring appropriate risk controls are implemented and maintained\n• Ensuring employees receive information, instruction, and supervision on safe use\n• Maintaining accurate and current registers for their area of responsibility, and\n• Ensuring Safety Data Sheets are accessible and current.\n4.1.2. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Comply with this Procedure and related instructions\n• Use hazardous substances and dangerous goods in accordance with the SDS\n\n• Report hazards, incidents, spills, or control failures, and\n• Not introduce new substances or goods without assessment and approval."
+    },
+    "7.3": {
+      "section": "7.3",
+      "title": "Storage Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "Hazardous substances and dangerous goods must be stored to eliminate or minimise risk,\nincluding:\n\n• Segregation of incompatible substances\n• Secure storage of pressure vessels to prevent tipping\n• Storage away from ignition sources, and\n• Use of flame-proof cabinets for flammable dangerous goods where required."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Complete the Hazardous Substances / Dangerous Goods Training Module\n(IMS.03.13.TRN.01) annually."
+    },
+    "7.2": {
+      "section": "7.2",
+      "title": "Handling and Use Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "Hazardous substances and dangerous goods must:\n\n• Be handled and used strictly in accordance with the SDS\n• Only be used by persons who have received appropriate instruction, and\n• Be used in a manner that minimises exposure and risk."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 2,
+      "endPage": 2,
+      "text": "All Leaders are responsible for:\n\n• Ensuring hazardous substances and dangerous goods under their control are identified,\nassessed, and approved prior to use\n• Ensuring appropriate risk controls are implemented and maintained\n• Ensuring employees receive information, instruction, and supervision on safe use\n• Maintaining accurate and current registers for their area of responsibility, and\n• Ensuring Safety Data Sheets are accessible and current."
+    },
+    "7.1": {
+      "section": "7.1",
+      "title": "Introduction of New Hazardous Substances or Dangerous Goods Procedure",
+      "page": 3,
+      "endPage": 4,
+      "text": "Hazardous substances or dangerous goods must not be introduced unless:\n\n• A risk assessment has been completed in accordance with the Risk Management\nProcedure (IMS.03.00.PRO.01)\n• Employees who may be exposed have been consulted, and\n• Required controls are implemented prior to use.\n\nThis applies to both trial and permanent introductions.\n7.1.1. Hazard Identification, Risk Assessment and Control Procedure\nAll hazardous substances and dangerous goods must be identified and assessed using the\nIMS Risk Assessment Form (IMS.03.00.FRM.01) and in accordance with the Risk\nManagement Procedure (IMS.03.00.PRO.01).\n\nRisk assessments must consider:\n\n• Health hazards and physico-chemical hazards\n• Routes of exposure\n• Quantity and concentration\n• Frequency and duration of exposure\n• Storage and handling conditions, and\n• Potential for fire, explosion, or environmental release.\n\nControls must be selected using the Hierarchy of Control and reviewed through inspections,\naudits, incident investigations, and Employee feedback"
+    }
+  },
+  "resources": [
+    {
+      "code": "IMS.03.13.FRM.01",
+      "title": "Hazardous Substances Dangerous Goods Risk Assessment Form",
+      "status": "Content mismatch",
+      "note": "Content mismatch: SWMS, IMS.03.01.FRM.02; not a hazardous-substance assessment.",
+      "usable": false
+    }
+  ],
+  "notes": [
+    "The filename for IMS.03.13.FRM.01 contains a SWMS document, IMS.03.01.FRM.02. Do not treat it as the substance assessment.",
+    "Procedure §7.1.1, p.4 explicitly uses IMS.03.00.FRM.01. It also requires a substance register and SDS; standalone local records were not found."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

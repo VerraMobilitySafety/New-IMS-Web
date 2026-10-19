@@ -1,0 +1,147 @@
+{
+  "slug": "extreme-temperatures",
+  "title": "Extreme Temperatures",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.10.PRO.01",
+  "version": "3.1",
+  "issued": "09/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 5,
+  "training": {
+    "title": "Extreme Temperatures",
+    "codes": "IMS.03.10.TRN.01",
+    "audience": "Employees",
+    "timing": "Annual",
+    "evidence": "IMS.03.10.PRO.01 §4.2.1, p.3",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Identify temperature hazards",
+      "keywords": "identify heat cold temperature",
+      "refs": [
+        "5.1.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Assess the exposure",
+      "keywords": "assess exposure weather",
+      "refs": [
+        "5.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Choose temperature controls",
+      "keywords": "control heat cold protect",
+      "refs": [
+        "5.2.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Review the arrangements",
+      "keywords": "review change",
+      "refs": [
+        "5.2.2"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "5.2": {
+      "section": "5.2",
+      "title": "Assessment of Extreme Temperature Risk",
+      "page": 3,
+      "endPage": 4,
+      "text": "Extreme temperature risks must be assessed in accordance with the Risk Management\nProcedure (IMS.03.00.PRO.01) and may include consideration of:\n\n• Forecast and actual temperature and humidity\n• Duration of exposure\n• Type and intensity of work\n• Availability of shade, ventilation, or cooling\n• Individual susceptibility where relevant, and\n• Cumulative effects of heat and fatigue.\n\n5.2.1. Control of Extreme Temperature Risk\nExtreme temperature related risks must be controlled in accordance with the hierarchy of\ncontrols.\n\nControls may include, but are not limited to:\n\n• Rescheduling work to cooler times of the day\n• Modifying work pace or task sequencing\n• Relocating work to cooler or shaded areas\n• Providing ventilation, fans, or cooling systems where practicable\n• Ensuring access to cool drinking water\n• Providing appropriate sun protection, cold weather PPE, and temperature-suitable\nclothing\n• Limiting or restricting hot work or fire-generating activities\n• Adjusting travel plans to reduce exposure, and\n• Increasing supervision and monitoring during hot conditions.\n5.2.2. Review of Extreme Temperature Risk\nTemperature-related risks and controls must be monitored and reviewed throughout periods\nof hot, cold, or extreme temperature conditions.\n\nWhere conditions change or controls are found to be ineffective, controls must be\nreassessed and adjusted.\n\nWhere heat presents an unacceptable risk, Leaders must take action, which may include:\n\n• Modifying duties\n• Increasing rest or hydration breaks, or\n• Stopping work until conditions improve or additional controls are implemented."
+    },
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 3,
+      "text": "All Verra Mobility Employees are responsible for:\n\n• Presenting fit for work and not impaired by temperature-related illness\n• Following heat risk controls implemented for their work\n• Taking adequate rest and hydration breaks\n• Wearing appropriate PPE and sun protection where required\n• Monitoring themselves and others for signs of temperature-related illness, and\n• Ceasing work and notifying their Leader where heat presents a safety risk."
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 3,
+      "endPage": 3,
+      "text": "All Verra Mobility Employees are required to:\n\n• Complete the Extreme Temperatures Training Module (IMS.03.10.TRN.01) annually."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nAll Verra Mobility Employees are required to:\n\n• Complete the Extreme Temperatures Training Module (IMS.03.10.TRN.01) annually."
+    },
+    "5.2.2": {
+      "section": "5.2.2",
+      "title": "Review of Extreme Temperature Risk",
+      "page": 4,
+      "endPage": 4,
+      "text": "Temperature-related risks and controls must be monitored and reviewed throughout periods\nof hot, cold, or extreme temperature conditions.\n\nWhere conditions change or controls are found to be ineffective, controls must be\nreassessed and adjusted.\n\nWhere heat presents an unacceptable risk, Leaders must take action, which may include:\n\n• Modifying duties\n• Increasing rest or hydration breaks, or\n• Stopping work until conditions improve or additional controls are implemented."
+    },
+    "5.1.1": {
+      "section": "5.1.1",
+      "title": "Identification of Extreme Temperature Hazards",
+      "page": 3,
+      "endPage": 3,
+      "text": "Leaders must ensure temperature-related hazards are identified when hot, cold, or extreme\ntemperature conditions are forecast or encountered.\n\nTemperature-related hazards may include, but are not limited to:\n\n• Reduced grip or dexterity due to sweating\n• Physical or mental fatigue leading to errors, trips, or falls\n• Reduced use of PPE due to discomfort\n• Interaction of heat with chemicals, fumes, or volatile substances\n• Contact with hot surfaces or substances\n• Increased fire risk, including restrictions on hot work\n• Confined or poorly ventilated spaces, and\n• Environmental factors such as radiant heat or lack of airflow.\n\nConsultation with Employees and relevant representatives must occur during hazard\nidentification as per the Consultation and Communication Management Procedure\n(IMS.05.01.PRO.01)."
+    },
+    "5.2.1": {
+      "section": "5.2.1",
+      "title": "Control of Extreme Temperature Risk",
+      "page": 4,
+      "endPage": 4,
+      "text": "Extreme temperature related risks must be controlled in accordance with the hierarchy of\ncontrols.\n\nControls may include, but are not limited to:\n\n• Rescheduling work to cooler times of the day\n• Modifying work pace or task sequencing\n• Relocating work to cooler or shaded areas\n• Providing ventilation, fans, or cooling systems where practicable\n• Ensuring access to cool drinking water\n• Providing appropriate sun protection, cold weather PPE, and temperature-suitable\nclothing\n• Limiting or restricting hot work or fire-generating activities\n• Adjusting travel plans to reduce exposure, and\n• Increasing supervision and monitoring during hot conditions."
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 2,
+      "endPage": 3,
+      "text": "4.1.1. Leaders\nLeaders are responsible for:\n• Monitoring weather conditions relevant to work under their control\n• Identifying temperature-related hazards associated with planned work\n• Assessing temperature-related risks prior to and during hot weather conditions\n• Implementing and adjusting controls as conditions change\n• Monitoring Employees for signs of temperature-related illness or fatigue, and\n• Modifying duties or stopping work where heat presents an unacceptable risk.\n4.1.2. Verra Mobility Employees\nAll Verra Mobility Employees are responsible for:\n\n• Presenting fit for work and not impaired by temperature-related illness\n• Following heat risk controls implemented for their work\n• Taking adequate rest and hydration breaks\n• Wearing appropriate PPE and sun protection where required\n• Monitoring themselves and others for signs of temperature-related illness, and\n• Ceasing work and notifying their Leader where heat presents a safety risk."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 2,
+      "endPage": 2,
+      "text": "Leaders are responsible for:\n• Monitoring weather conditions relevant to work under their control\n• Identifying temperature-related hazards associated with planned work\n• Assessing temperature-related risks prior to and during hot weather conditions\n• Implementing and adjusting controls as conditions change\n• Monitoring Employees for signs of temperature-related illness or fatigue, and\n• Modifying duties or stopping work where heat presents an unacceptable risk."
+    }
+  },
+  "resources": [
+    {
+      "code": null,
+      "title": "Managing Heat Stress noticeboard PDF",
+      "status": "Supplementary; approval not verified",
+      "note": "Located in the project noticeboard references. Not an approved training module or connected library tool.",
+      "usable": false
+    }
+  ],
+  "notes": [
+    "Managing Heat Stress.pdf is available as supplementary noticeboard material; approval, version and training status were not verified."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

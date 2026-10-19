@@ -1,0 +1,163 @@
+{
+  "slug": "visitors",
+  "title": "Visitors",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.20.PRO.01",
+  "version": "2.1",
+  "issued": "15/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 4,
+  "training": {
+    "title": "Visitor",
+    "codes": "IMS.03.20.TRN.01",
+    "audience": "Employees",
+    "timing": "Annual; visitors receive site-specific safety information at each visit",
+    "evidence": "IMS.03.20.PRO.01 §4.2.1–4.2.2, p.3",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1",
+      "4.2.2"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Prepare for and register a visitor",
+      "keywords": "register sign arrival visitor host",
+      "refs": [
+        "5.1",
+        "6.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Set visitor access restrictions",
+      "keywords": "escort unescorted access restriction",
+      "refs": [
+        "6.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Complete visitor exit",
+      "keywords": "exit depart signout",
+      "refs": [
+        "6.3"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Report a visitor incident",
+      "keywords": "incident report",
+      "refs": [
+        "6.4"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "4.2.2": {
+      "section": "4.2.2",
+      "title": "Visitors",
+      "page": 3,
+      "endPage": 3,
+      "text": "Visitors are required to:\n\n• Be informed of site-specific safety rules relevant to their visit at the start of each visit."
+    },
+    "5.1": {
+      "section": "5.1",
+      "title": "Verra Mobility Sites",
+      "page": 3,
+      "endPage": 3,
+      "text": "All Verra Mobility sites must have:\n• A Visitor Register Form (IMS.03.20.FRM.01) for Visitors to sign in\n• Emergency evacuation maps available where visitors sign in, and\n• Visitor identification labels for Visitors to wear."
+    },
+    "6.3": {
+      "section": "6.3",
+      "title": "Visitor Exit Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "• All visitors must exit the workplace under the direction of their Host and sign out using\nthe designated visitor register or system, and\n• The Host must ensure visitor passes, access cards, and temporary credentials are\nreturned and that the visitor has left all controlled areas."
+    },
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Visitors",
+      "page": 2,
+      "endPage": 3,
+      "text": "Visitors are responsible for:\n• Complying with Verra Mobility instructions and site rules\n• Following safety directions and signage\n• Wearing required PPE\n• Not entering restricted areas unless authorized, and\n\n• Reporting hazards, incidents, or injuries immediately to their Host"
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 3,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are required to:\n\n• Complete the Visitor Training Module (IMS.03.20.TRN.01) annually."
+    },
+    "6.1": {
+      "section": "6.1",
+      "title": "Visitor Registration Procedure",
+      "page": 3,
+      "endPage": 3,
+      "text": "i. The host shall meet the visitor in the sign in area\nii. All visitors must sign in on arrival using the designated visitor sign-in system or\nregister\niii. The host shall inform the relevant site safety rules including emergency evacuation\nrequirements, and\niv. The host shall determine if a Visitor shall be escorted or unescorted during their time\non site and inform the visitor of movement restrictions."
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 2,
+      "endPage": 3,
+      "text": "4.1.1. Hosts\nHosts are responsible for:\n• Complying with this Procedure\n• Ensuring Visitors sign in and out as required\n• Determining whether Visitors are escorted or unescorted\n• Providing relevant safety information and instructions\n• Ensuring Visitors comply with site rules and PPE requirements, and\n• Remaining responsible for visitors for the duration of their visit.\n4.1.2. Visitors\nVisitors are responsible for:\n• Complying with Verra Mobility instructions and site rules\n• Following safety directions and signage\n• Wearing required PPE\n• Not entering restricted areas unless authorized, and\n\n• Reporting hazards, incidents, or injuries immediately to their Host"
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Complete the Visitor Training Module (IMS.03.20.TRN.01) annually.\n4.2.2. Visitors\nVisitors are required to:\n\n• Be informed of site-specific safety rules relevant to their visit at the start of each visit."
+    },
+    "6.2": {
+      "section": "6.2",
+      "title": "Visitor Restrictions Management Procedure",
+      "page": 3,
+      "endPage": 4,
+      "text": "6.2.1. Escorted Visitors\nEscorted Visitors:\n• Visitors cannot conduct any high risk works under any circumstances\n• Must sign in and out on arrival and departure, and\n• Must always remain under the direct supervision of their Host.\n6.2.2. Unescorted Visitors\nUnescorted Visitors may be permitted where:\n• Visitors cannot conduct any high risk works under any circumstances\n• The visitor attends for prolonged periods, or\n\n• The visitor is required to work independently"
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Hosts",
+      "page": 2,
+      "endPage": 2,
+      "text": "Hosts are responsible for:\n• Complying with this Procedure\n• Ensuring Visitors sign in and out as required\n• Determining whether Visitors are escorted or unescorted\n• Providing relevant safety information and instructions\n• Ensuring Visitors comply with site rules and PPE requirements, and\n• Remaining responsible for visitors for the duration of their visit."
+    },
+    "6.4": {
+      "section": "6.4",
+      "title": "Visitor Incident, Near Miss and Hazard Management Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "All Incidents, near misses and hazards must be reported as per the Incident, Near Miss and\nHazard Management Procedure (IMS.06.01.PRO.01)."
+    }
+  },
+  "resources": [
+    {
+      "code": "IMS.03.20.FRM.01",
+      "title": "Visitor Register Form",
+      "status": "Available reference / template",
+      "note": "Content checked. PDF availability does not confirm an editable form, operational record or live service.",
+      "usable": true
+    }
+  ],
+  "notes": [
+    "Visitor Register is a blank template. Site-specific induction, maps and completed sign-in records were not found as standalone files."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

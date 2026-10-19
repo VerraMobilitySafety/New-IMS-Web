@@ -1,0 +1,147 @@
+{
+  "slug": "electrical-works",
+  "title": "Electrical Works",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.07.PRO.01",
+  "version": "2.1",
+  "issued": "13/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 5,
+  "training": {
+    "title": "Electrical Works",
+    "codes": "IMS.03.07.TRN.01",
+    "audience": "Employees",
+    "timing": "Annual; electrical work requires appropriate qualification / authorisation",
+    "evidence": "IMS.03.07.PRO.01 §4.2.1, p.3",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Arrange electrical work",
+      "keywords": "contractor qualified authorisation electrical work",
+      "refs": [
+        "6.1",
+        "6.1.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Inspect equipment before use",
+      "keywords": "inspect preuse equipment defect",
+      "refs": [
+        "6.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Check isolation requirements",
+      "keywords": "isolate isolation equipment",
+      "refs": [
+        "6.3"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Work near underground services",
+      "keywords": "underground service excavation",
+      "refs": [
+        "6.4"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 2,
+      "text": "Verra Mobility Employees are required to:\n\n• Conduct pre-use inspections of electrical equipment\n• Use electrical equipment only for its intended purpose\n• Not perform electrical work unless authorised and competent."
+    },
+    "6.3": {
+      "section": "6.3",
+      "title": "Working on Electrical Equipment Isolation Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "Where work may involve contact with electrical energy:\n\n• Electrical supply must be isolated by a competent person, and\n• Isolation must be verified before work commences.\n\nWork involving potential contact with live electricity must not proceed unless:\n\n• A risk assessment has been completed\n• A Safe Work Procedure has been developed\n• Approval has been granted by the relevant Leader, and\n• Records of approval are retained."
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are required to:\n\n• Be qualified to work on electrical equipment. No Verra Mobility Employee or Contractor\nshall conduct works on any electrical equipment if not qualified to do so, and\n• Complete the Electrical Works Training Module (IMS.03.07.TRN.01) annually."
+    },
+    "6.1.1": {
+      "section": "6.1.1",
+      "title": "Use of Electrical Contractors Procedure",
+      "page": 3,
+      "endPage": 3,
+      "text": "All work requiring an electrical license, or where there is uncertainty about safe execution,\nmust be performed by a suitably qualified electrical contractor.\n\nElectrical contractors must be managed in accordance with the Contractor Risk Management\nProcedure (IMS.03.03.PRO.01)."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 2,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Be qualified to work on electrical equipment. No Verra Mobility Employee or Contractor\nshall conduct works on any electrical equipment if not qualified to do so, and\n• Complete the Electrical Works Training Module (IMS.03.07.TRN.01) annually."
+    },
+    "6.4": {
+      "section": "6.4",
+      "title": "Underground Electrical Services Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "Before excavation:\n\n• Information on the location of underground services must be obtained\n• Hand digging must be undertaken to confirm service locations, and\n• Where services cannot be confirmed, they must be isolated before mechanical\nexcavation."
+    },
+    "6.1": {
+      "section": "6.1",
+      "title": "Hazard Identification, Risk Assessment and Control Procedure",
+      "page": 3,
+      "endPage": 3,
+      "text": "Electrical hazards must be identified, assessed, and controlled in accordance with the Risk\nManagement Procedure (IMS.03.00.PRO.01).\n\nEmployees must be consulted when identifying electrical hazards and determining controls.\n6.1.1. Use of Electrical Contractors Procedure\nAll work requiring an electrical license, or where there is uncertainty about safe execution,\nmust be performed by a suitably qualified electrical contractor.\n\nElectrical contractors must be managed in accordance with the Contractor Risk Management\nProcedure (IMS.03.03.PRO.01)."
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 2,
+      "endPage": 2,
+      "text": "4.1.1. Leaders\nAll Leaders are responsible for:\n\n• Identifying electrical hazards within their area of responsibility\n• Ensuring electrical risks are assessed and controlled\n• Ensuring only competent and suitably qualified persons perform electrical work , and\n• Ensuring damaged or unsafe electrical equipment is removed from service\n4.1.2. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Conduct pre-use inspections of electrical equipment\n• Use electrical equipment only for its intended purpose\n• Not perform electrical work unless authorised and competent."
+    },
+    "6.2": {
+      "section": "6.2",
+      "title": "Pre-use Inspection of Electrical Equipment Procedure",
+      "page": 3,
+      "endPage": 4,
+      "text": "Before using electrical equipment, Employees must check for:\n\n• Visible damage to cords, plugs, or equipment\n• Signs of exposure to water\n• A current test and tag\n• Protection of cords from traffic, sharp edges, or pinch points, and\n• Clear walkways free of trip hazards.\n\nUnsafe equipment must not be used."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 2,
+      "endPage": 2,
+      "text": "All Leaders are responsible for:\n\n• Identifying electrical hazards within their area of responsibility\n• Ensuring electrical risks are assessed and controlled\n• Ensuring only competent and suitably qualified persons perform electrical work , and\n• Ensuring damaged or unsafe electrical equipment is removed from service"
+    }
+  },
+  "resources": [],
+  "notes": [
+    "No dedicated electrical inspection, isolation or permit template found in the local reference set."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

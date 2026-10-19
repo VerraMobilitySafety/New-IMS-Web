@@ -1,0 +1,139 @@
+{
+  "slug": "driving",
+  "title": "Driving",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.06.PRO.01",
+  "version": "2.1",
+  "issued": "13/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 5,
+  "training": {
+    "title": "Driving",
+    "codes": "IMS.03.06.TRN.01",
+    "audience": "Drivers",
+    "timing": "Annual; appropriate current driving licence also required",
+    "evidence": "IMS.03.06.PRO.01 §4.2.1, p.3",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Check before driving",
+      "keywords": "prestart vehicle check fit drive",
+      "refs": [
+        "4.3",
+        "6.1.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Plan a journey",
+      "keywords": "journey plan travel",
+      "refs": [
+        "6.1.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Report a driving incident",
+      "keywords": "incident hazard near miss",
+      "refs": [
+        "6.2"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "6.1.2": {
+      "section": "6.1.2",
+      "title": "Journey Planning Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "Journey plans are required where travel presents an elevated risk due to distance, duration,\nroad conditions, fatigue, remoteness, or environmental factors. The following conditions are\nindicators of elevated risk and must be considered as part of journey risk assessment:\n\n• Greater than 200kms on sealed roads\n• 50km on unsealed roads), or\n• 2 hours in length.\n\nThese indicators do not replace risk assessment and must not be used in isolation to\ndetermine journey risk.\n\nJourney Plans should include the following information:\n\n• Departure and arrival times\n• Estimated travel time\n• Any expected delays or extension to trip duration due to personal diversions whilst in\ntransit\n• Fatigue issues that may be associated with the reason for travel, and\n• Potential weather conditions and wildlife exposure risks.\n\nDrivers will not exceed a total of 10 hours a day driving while conducting Verra Mobility\nbusiness.\n\nIf either a notification of arrival or delays in transit are not notified to the Leader within 1\nhour of the estimated arrival time the Leader should attempt to contact the driver."
+    },
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Drivers",
+      "page": 2,
+      "endPage": 3,
+      "text": "Drivers are required to:\n\n• Comply with this Procedure and all road rules\n• Report vehicle defects, incidents, and hazards, and\n• Cease driving where they are not fit to drive."
+    },
+    "4.3": {
+      "section": "4.3",
+      "title": "Fitness for Work Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.3.1. Drivers\nDrivers must:\n\n• Be fit for work, including not driving while impaired by fatigue, alcohol (BAC of 0.00),\ndrugs, medication, or medical conditions,\n• Refrain from road rage and aggressive driving."
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Drivers",
+      "page": 3,
+      "endPage": 3,
+      "text": "Drivers are required to:\n\n• Hold a current and valid license appropriate to the vehicle being driven, and\n• Complete the Driving Training Module (IMS.03.06.TRN.01) annually."
+    },
+    "6.1.1": {
+      "section": "6.1.1",
+      "title": "Prestart Check Procedure",
+      "page": 3,
+      "endPage": 4,
+      "text": "A documented pre-start check shall be carried out daily prior to driving a vehicle using the\nVehicle Prestart Form (IMS.03.06.FRM.01).\n\nShould any vehicle faults be identified during the pre-start check, the vehicle is to remain\nstationary and identified as being out of service until a qualified mechanic diagnoses and  /\nor repairs the problem and clears the vehicle for normal use.\n\nDocumented pre-start checks should include:\n\n• A walk round visual check, looking for loose fittings, loose wheel nuts, broken lights and\npanel damage\n• Activate and check all lights work on the vehicle\n• Record the pre-trip mileage\n• Check the operation of the horn, brakes, steering and radio (if applicable)\n• Check the fire extinguisher and first aid kit (where present)\n\n• Note if the vehicle is dirty\n• Note any defects which have occurred since the vehicle was last utilized, and\n• Report to the Leader if the vehicle is unsafe to use and arrange to have the problem\nrectified."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.2.1. Drivers\nDrivers are required to:\n\n• Hold a current and valid license appropriate to the vehicle being driven, and\n• Complete the Driving Training Module (IMS.03.06.TRN.01) annually."
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 2,
+      "endPage": 3,
+      "text": "4.1.1. Leaders\nAll Leaders are responsible for:\n\n• Ensuring only authorised and licensed personnel undertake work-related driving\n• Ensuring vehicles used for work are fit for purpose\n• Managing work schedules to reduce fatigue-related risks\n• Monitoring driving incidents and infringements, and\n• Taking action where unsafe driving behaviour or elevated risk is identified.\n4.1.2. Drivers\nDrivers are required to:\n\n• Comply with this Procedure and all road rules\n• Report vehicle defects, incidents, and hazards, and\n• Cease driving where they are not fit to drive."
+    },
+    "6.2": {
+      "section": "6.2",
+      "title": "Incident Hazards, Near Miss Reporting Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "All Incidents, Near Misses and Hazards including those associated with environmental\noccurrences with flora / flora shall be reported as per Incident, Near Miss and Hazard\nManagement Procedure (IMS.06.01.PRO.01)."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 2,
+      "endPage": 2,
+      "text": "All Leaders are responsible for:\n\n• Ensuring only authorised and licensed personnel undertake work-related driving\n• Ensuring vehicles used for work are fit for purpose\n• Managing work schedules to reduce fatigue-related risks\n• Monitoring driving incidents and infringements, and\n• Taking action where unsafe driving behaviour or elevated risk is identified."
+    }
+  },
+  "resources": [
+    {
+      "code": "IMS.03.06.FRM.01",
+      "title": "Vehicle Prestart Form",
+      "status": "Content mismatch",
+      "note": "Content mismatch: SWMS heading / identifier; no usable prestart checklist verified.",
+      "usable": false
+    }
+  ],
+  "notes": [
+    "Vehicle Prestart file is one page headed Safe Work Method Statement Form, IMS.03.01.FRM.02. A usable vehicle checklist was not verified."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

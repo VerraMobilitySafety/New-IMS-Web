@@ -1,0 +1,147 @@
+{
+  "slug": "ergonomics-and-sedentary-work",
+  "title": "Ergonomics and Sedentary Work",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.09.PRO.01",
+  "version": "2.1",
+  "issued": "09/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 6,
+  "training": {
+    "title": "Ergonomics",
+    "codes": "IMS.03.09.TRN.01",
+    "audience": "Employees",
+    "timing": "Annual; accredited assessor requirements also described",
+    "evidence": "IMS.03.09.PRO.01 §4.2.1, p.3",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Assess my workstation",
+      "keywords": "workstation assess desk chair",
+      "refs": [
+        "6.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Report pain or discomfort",
+      "keywords": "pain discomfort symptoms",
+      "refs": [
+        "6.3"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Arrange suitable equipment",
+      "keywords": "equipment purchase procurement",
+      "refs": [
+        "6.4"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Consider individual needs",
+      "keywords": "individual diverse needs",
+      "refs": [
+        "6.2"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Leaders",
+      "page": 3,
+      "endPage": 3,
+      "text": "Leaders are responsible for:\n• Arranging further assessments by accredited Ergonomic Assessors for their employees, if\nrequested by the employee or pain is reported\n• Reviewing assessment, approving recommendations, supporting procurement process\nand refer onto HSEQ team where pain or symptoms are not rectified, or injury has\nincurred, and\n• Enabling Employees to plan for regular micro breaks, task variety and time to plan\nbetween tasks which require high concentration-levels."
+    },
+    "6.3": {
+      "section": "6.3",
+      "title": "Pain / Discomfort Management Procedure",
+      "page": 5,
+      "endPage": 5,
+      "text": "If at any time a Employee feels any pain or ongoing discomfort at a workstation, they shall\nfollow the following procedure:\n• The Employee shall immediately inform their Leader\n• The pain / discomfort shall be reported as per Incident, Near Miss and Hazard\nManagement Procedure (IMS.06.01.PRO.01)\n• An assessor shall assess the individual within 2 working days of request\n• The assessor shall provide remediation advice to the leader within 2 working days\n• The Leader of the employee shall action the remediation advice within 2 working days,\nand\n• The Employee is responsible for confirmation to leader and HSEQ team that all\nrequirements have reasonably been met and risks mitigated once all actions have been\ncompleted.\n• Where pain or discomfort persists, recurs, or is not adequately resolved following\nimplementation of ergonomic remediation actions, the Injury Management Procedure\n(IMS.06.02.PRO.01) shall be followed."
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 3,
+      "endPage": 3,
+      "text": "All Verra Mobility Employees are required to:\n\n• Complete the Ergonomics Training Module (IMS.03.09.TRN.01) annually."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nAll Verra Mobility Employees are required to:\n\n• Complete the Ergonomics Training Module (IMS.03.09.TRN.01) annually."
+    },
+    "6.4": {
+      "section": "6.4",
+      "title": "Procurement of Equipment Relating to Ergonomics Procedure",
+      "page": 5,
+      "endPage": 5,
+      "text": "The purchase of any equipment related to ergonomics shall only occur at the request of an\nexternal assessor or appropriate Health Professional and shall adhere to the equipment\nrequirements outlined in this Procedure.\nAll non-standard ergonomic equipment purchases must be approved by a member of the\nHSEQ team. After receiving approval, these items can be ordered directly by the Leader of\nthe Employee requesting the equipment."
+    },
+    "6.1": {
+      "section": "6.1",
+      "title": "Ergonomic Self-Assessment Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "• The Ergonomics Self-Assessment Form (IMS.03.09.FRM.01) should be completed by all\nnew employees and may reviewed at least annually by every employee\n• All employees moving to new workstations should review their workstation, and\n• Employees working from any other location (including from home) must ensure the\nworkstation set up is safe and Ergonomically sound. If a formal flexible working\nagreement is in place, the Working from Home Risk Management Procedure\n(IMS.03.22.PRO.01) shall be adhered to."
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.1.1. Health, Safety, Environment and Quality (HSEQ) Team\nThe HSEQ Team is responsible for:\n• Keeping abreast of improved ergonomic solutions and introducing these to Verra Mobility\nwhere appropriate\n• In conjunction with Leaders, arranging trials of high-price ergonomic equipment prior to\npurchase where practicable\n• Maintaining the list of accredited ergonomic assessors\n• Arranging for appropriately qualified external training providers to train accredited\nassessors, and\n• Assist leaders in recommendation of providers external assessment for employees who\nare experiencing pain and/or discomfort.\n4.1.2. Leaders\nLeaders are responsible for:\n• Arranging further assessments by accredited Ergonomic Assessors for their employees, if\nrequested by the employee or pain is reported\n• Reviewing assessment, approving recommendations, supporting procurement process\nand refer onto HSEQ team where pain or symptoms are not rectified, or injury has\nincurred, and\n• Enabling Employees to plan for regular micro breaks, task variety and time to plan\nbetween tasks which require high concentration-levels.\n4.1.3. Verra Mobility Employees\nAll Verra Mobility Employees are required to:\n\n• Report pain / discomfort to their Leader. and\n• Comply with the requirements of this Procedure."
+    },
+    "6.2": {
+      "section": "6.2",
+      "title": "Diverse Persons Management Procedure",
+      "page": 4,
+      "endPage": 5,
+      "text": "Where a new hire may require special support and assessment for safe ergonomic set up,\nthe individual may request support for assessment. It is the responsibility of the Leader to\nensure this opportunity is offered to any employee with special needs.\nThe new Employee is responsible for organising and attending the assessments, as follows:\n• The Ergonomics Self-Assessment Form (IMS.03.09.FRM.01) must be completed and\nfurther request for assistance requested within 6 weeks of commencing a role with Verra\nMobility\n• The HSEQ team shall support the Leader in organising a suitably qualified assessor\n• The Leader shall review and act on all corrective actions within 5 working days, and\n\n• The Employee is responsible for confirmation to leader and HSEQ team that all\nrequirements have reasonably been met and risks mitigated once all actions have been\ncompleted."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Health, Safety, Environment and Quality (HSEQ) Team",
+      "page": 3,
+      "endPage": 3,
+      "text": "The HSEQ Team is responsible for:\n• Keeping abreast of improved ergonomic solutions and introducing these to Verra Mobility\nwhere appropriate\n• In conjunction with Leaders, arranging trials of high-price ergonomic equipment prior to\npurchase where practicable\n• Maintaining the list of accredited ergonomic assessors\n• Arranging for appropriately qualified external training providers to train accredited\nassessors, and\n• Assist leaders in recommendation of providers external assessment for employees who\nare experiencing pain and/or discomfort."
+    }
+  },
+  "resources": [
+    {
+      "code": "IMS.03.09.FRM.01",
+      "title": "Ergonomics Self-Assessment Form",
+      "status": "Referenced; file not found",
+      "note": "Referenced in §6.1, p.4. The actual form was not found in the project.",
+      "usable": false
+    }
+  ],
+  "notes": [
+    "Ergonomics Self-Assessment Form IMS.03.09.FRM.01 is referenced in §6.1, p.4, but no file was found."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

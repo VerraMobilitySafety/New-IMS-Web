@@ -132,20 +132,30 @@
     <div class="nav-section">
       <div class="nav-label">Management Systems</div>
 
-      <details class="vero-risk-navigation" ${isActive('working-at-heights.html') ? 'open' : ''}>
-        <summary><span class="ico" data-lucide="shield-alert"></span><span>Safety Risks</span></summary>
-        <a class="${isActive('working-at-heights.html') ? 'active' : ''}" href="working-at-heights.html">Working at Heights</a>
-      </details>
+      <details class="vero-risk-navigation" ${["alcohol-and-other-drugs.html","driving.html","electrical-works.html","emergency-management.html","ergonomics-and-sedentary-work.html","extreme-temperatures.html","fatigue.html","hazardous-substances-and-dangerous-goods.html","manual-handling.html","personal-protective-equipment.html","plant-and-equipment.html","psychosocial-risk.html","public-interaction.html","visitors.html","working-at-heights.html","working-from-home.html","working-near-traffic.html"].includes(path) ? 'open' : ''}><summary><span class="ico" data-lucide="shield-alert"></span><span>Safety Risks</span></summary><a class="${isActive('alcohol-and-other-drugs.html') ? 'active' : ''}" href="alcohol-and-other-drugs.html">Alcohol and Other Drugs</a>
+<a class="${isActive('driving.html') ? 'active' : ''}" href="driving.html">Driving</a>
+<a class="${isActive('electrical-works.html') ? 'active' : ''}" href="electrical-works.html">Electrical Works</a>
+<a class="${isActive('emergency-management.html') ? 'active' : ''}" href="emergency-management.html">Emergency Management</a>
+<a class="${isActive('ergonomics-and-sedentary-work.html') ? 'active' : ''}" href="ergonomics-and-sedentary-work.html">Ergonomics and Sedentary Work</a>
+<a class="${isActive('extreme-temperatures.html') ? 'active' : ''}" href="extreme-temperatures.html">Extreme Temperatures</a>
+<a class="${isActive('fatigue.html') ? 'active' : ''}" href="fatigue.html">Fatigue</a>
+<a class="${isActive('hazardous-substances-and-dangerous-goods.html') ? 'active' : ''}" href="hazardous-substances-and-dangerous-goods.html">Hazardous Substances and Dangerous Goods</a>
+<a class="${isActive('manual-handling.html') ? 'active' : ''}" href="manual-handling.html">Manual Handling</a>
+<a class="${isActive('personal-protective-equipment.html') ? 'active' : ''}" href="personal-protective-equipment.html">Personal Protective Equipment</a>
+<a class="${isActive('plant-and-equipment.html') ? 'active' : ''}" href="plant-and-equipment.html">Plant and Equipment</a>
+<a class="${isActive('psychosocial-risk.html') ? 'active' : ''}" href="psychosocial-risk.html">Psychosocial Risk</a>
+<a class="${isActive('public-interaction.html') ? 'active' : ''}" href="public-interaction.html">Public Interaction</a>
+<a class="${isActive('visitors.html') ? 'active' : ''}" href="visitors.html">Visitors</a>
+<a class="${isActive('working-at-heights.html') ? 'active' : ''}" href="working-at-heights.html">Working at Heights</a>
+<a class="${isActive('working-from-home.html') ? 'active' : ''}" href="working-from-home.html">Working from Home</a>
+<a class="${isActive('working-near-traffic.html') ? 'active' : ''}" href="working-near-traffic.html">Working Near Traffic</a></details>
 
       <a class="placeholder" href="#" onclick="return false">
         <span class="ico" data-lucide="badge-check"></span>
         <span>Quality Risks</span>
       </a>
 
-      <a class="placeholder" href="#" onclick="return false">
-        <span class="ico" data-lucide="leaf"></span>
-        <span>Environment Risks</span>
-      </a>
+      <details class="vero-risk-navigation" ${["waste-management.html"].includes(path) ? 'open' : ''}><summary><span class="ico" data-lucide="leaf"></span><span>Environment Risks</span></summary><a class="${isActive('waste-management.html') ? 'active' : ''}" href="waste-management.html">Waste Management</a></details>
     </div>
 
     <div class="nav-section">
@@ -320,4 +330,5 @@
     label.style.whiteSpace = 'nowrap';
   });
 })();
+
 

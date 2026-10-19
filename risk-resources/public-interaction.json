@@ -1,0 +1,156 @@
+{
+  "slug": "public-interaction",
+  "title": "Public Interaction",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.19.PRO.01",
+  "version": "5.1",
+  "issued": "15/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 5,
+  "training": {
+    "title": "Public Interaction",
+    "codes": "IMS.03.19.TRN.01",
+    "audience": "Employees",
+    "timing": "Annual",
+    "evidence": "IMS.03.19.PRO.01 §4.2.1, p.2",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Assess public interaction risks",
+      "keywords": "assess public interaction",
+      "refs": [
+        "5.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Respond to aggression or threats",
+      "keywords": "aggression threats violence assault abuse intimidation",
+      "refs": [
+        "5.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Decide whether work can continue",
+      "keywords": "continue return work",
+      "refs": [
+        "5.3"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Arrange welfare support",
+      "keywords": "welfare support",
+      "refs": [
+        "5.4"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-5",
+      "title": "Report an event",
+      "keywords": "report event incident",
+      "refs": [
+        "5.5"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "5.2": {
+      "section": "5.2",
+      "title": "Response to Violence and Aggression Procedure",
+      "page": 3,
+      "endPage": 4,
+      "text": "5.2.1. Verbal Abuse\nWhere verbal abuse occurs:\n\n• Employees should attempt to de-escalate the situation where it is safe to do so\n• The individual may be referred to the relevant client where appropriate, and\n• Where behaviour continues or escalates, Employees must assess whether it is safe to\ncontinue work.\n\nWhere verbal abuse persists or escalates, work must cease and the situation escalated to a\nLeader.\n5.2.2. Property Damage\nWhere property damage occurs, including damage to vehicles, equipment, or signage:\n\n• Employees must avoid confrontation and prioritise personal safety\n• Police must be contacted where there is a threat to safety, and\n• Leaders must determine whether work can safely continue.\n5.2.3. Intimidation Involving Vehicles or Objects\nWhere intimidation occurs, including swerving, attempted impact, or objects being thrown:\n\n• Employees must remain in the vehicle where safe to do so\n• Police must be contacted immediately, and\n• The incident must be escalated and work activities reassessed.\n5.2.4. Physical Assault or Threats\nWhere a physical assault or credible threat occurs, including the presence of a weapon:\n\n• Police must be contacted immediately\n• Work activities must cease, and\n\n• Employees must withdraw to a safe location.\n\nWork must not resume until it has been determined that it is safe to do so.\n5.2.5. Non-Verbal Intimidation\nNon-verbal intimidation, including threatening gestures or behaviour intended to instill fear,\nmust be treated as a potential escalation risk. Where behaviour suggests an imminent\nthreat:\n\n• Police must be contacted, and\n• Work activities must cease."
+    },
+    "5.1": {
+      "section": "5.1",
+      "title": "Public Interaction Risk Management Procedure",
+      "page": 3,
+      "endPage": 3,
+      "text": "Violence and aggression risks must be managed using a risk-based approach, consistent\nwith Verra Mobility’s Risk Management Procedure.\n\nThis includes:\n\n• Identifying situations where interaction with the public may present a risk\n• Assessing the likelihood and potential severity of harm\n• Implementing controls to eliminate or minimise risk, and\n• Consulting with Employees when identifying risks and controls.\n\nPrior to work commencing onsite, risks must be documented, assessed and mitigated using\nTake 5 Form (IMS.03.00.FRM.02)."
+    },
+    "5.4": {
+      "section": "5.4",
+      "title": "Welfare Support Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "Where a Employee is involved in a violent or aggressive incident, Leaders must ensure\nappropriate welfare support is provided. This may include:\n\n• Medical assessment\n• Access to the Employee Assistance Program (EAP)\n• Temporary modification of duties, and / or\n• Arranging safe transport home where required."
+    },
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 2,
+      "text": "Verra Mobility Employees are required to:\n\n• Remove themselves from situations where there is an immediate threat to safety."
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are required to:\n\n• Complete the Public Interaction Training Module (IMS.03.19.TRN.01) annually."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 2,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Complete the Public Interaction Training Module (IMS.03.19.TRN.01) annually."
+    },
+    "5.5": {
+      "section": "5.5",
+      "title": "Incident Hazards, Near Miss Reporting Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "All Incidents, Near Misses and Hazards shall be reported as per Incident, Near Miss and\nHazard Management Procedure (IMS.06.01.PRO.01)."
+    },
+    "5.3": {
+      "section": "5.3",
+      "title": "Decision to Continue Work Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "Following any incident involving violence or aggression, a decision to continue work must\nconsider:\n\n• Whether it is safe to continue\n• Whether there is an ongoing risk to personal safety\n• Whether property damage affects safe operation, and\n• The physical and psychological condition of the Employee involved.\n\nThe welfare of the Employee must be the primary consideration"
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 2,
+      "endPage": 2,
+      "text": "4.1.1. Leaders\nAll Leaders are responsible for:\n\n• Ensuring violence and aggression risks associated with their activities or contracts are\nassessed and controlled\n• Supporting Employees to remove themselves from unsafe situations\n• Determining whether work activities can safely continue following an incident, and\n• Ensuring incidents are reported and appropriate welfare support is provided.\n4.1.2. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Remove themselves from situations where there is an immediate threat to safety."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 2,
+      "endPage": 2,
+      "text": "All Leaders are responsible for:\n\n• Ensuring violence and aggression risks associated with their activities or contracts are\nassessed and controlled\n• Supporting Employees to remove themselves from unsafe situations\n• Determining whether work activities can safely continue following an incident, and\n• Ensuring incidents are reported and appropriate welfare support is provided."
+    }
+  },
+  "resources": [],
+  "notes": [
+    "§5.1, p.3 calls the tool Take 5 but cites IMS.03.00.FRM.02 (the SWMS identifier). Confirm intended reference.",
+    "The file named Take 5 is itself mismatched."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

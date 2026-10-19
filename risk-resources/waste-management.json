@@ -1,0 +1,140 @@
+{
+  "slug": "waste-management",
+  "title": "Waste Management",
+  "domain": "Environment Risks",
+  "procedure": "IMS.03.24.PRO.01",
+  "version": "2.1",
+  "issued": "15/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 5,
+  "training": {
+    "title": "Waste (source calls it a Procedure but gives a TRN code)",
+    "codes": "IMS.03.24.TRN.01",
+    "audience": "Employees",
+    "timing": "Annual",
+    "evidence": "IMS.03.24.PRO.01 §4.2.1, p.3",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Identify and classify waste",
+      "keywords": "identify classify waste",
+      "refs": [
+        "7.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Segregate and store waste",
+      "keywords": "segregate store handle",
+      "refs": [
+        "7.3"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Arrange waste disposal",
+      "keywords": "dispose contractor transport",
+      "refs": [
+        "7.4"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Recycle and recover resources",
+      "keywords": "recycle reuse recover",
+      "refs": [
+        "7.5"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "7.4": {
+      "section": "7.4",
+      "title": "Waste Disposal and Contractor Management Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "Waste disposal must:\n\n• Be undertaken by licensed and approved waste contractors\n• Comply with applicable legal and regulatory requirements, and\n• Include appropriate documentation or tracking where required\n\nContractors must be managed in accordance with Contractor Risk Management Procedure\n(IMS.03.03.PRO.01)."
+    },
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are required to:\n\n• Segregate waste in accordance with provided instructions and signage, and\n\n• Use designated waste storage and disposal."
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 3,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are required to:\n\n• Complete the Waste Risk Management Procedure (IMS.03.24.TRN.01) annually."
+    },
+    "7.5": {
+      "section": "7.5",
+      "title": "Recycling and Resource Recovery Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "Where practicable, recycling and reuse must be implemented to reduce waste sent to\nlandfill, including:\n\n• Recycling of paper, cardboard, plastics, and metals\n• Recycling of electronic waste through approved providers, and\n• Reuse of packaging materials where safe and appropriate."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Complete the Waste Risk Management Procedure (IMS.03.24.TRN.01) annually."
+    },
+    "7.3": {
+      "section": "7.3",
+      "title": "Waste Segregation, Storage and Handling Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "Waste must be:\n\n• Segregated at the source using designated containers\n• Stored securely to prevent environmental release or exposure, and\n• Handled in a manner that minimises risk to people and the environment\n\nIncompatible waste must not be mixed."
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 2,
+      "endPage": 3,
+      "text": "4.1.1. Leaders\nAll Leaders are responsible for:\n\n• Identifying waste-related risks within their area of responsibility\n• Ensuring waste risks are assessed and controlled prior to work commencing\n• Ensuring appropriate waste segregation, storage, and disposal arrangements are\nimplemented, and\n• Ensuring only approved and licensed waste contractors are engaged.\n4.1.2. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Segregate waste in accordance with provided instructions and signage, and\n\n• Use designated waste storage and disposal."
+    },
+    "7.2": {
+      "section": "7.2",
+      "title": "Waste Identification and Classification Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "Waste must be identified and classified to ensure appropriate handling and disposal.\nCommon waste categories include:\n\n• General waste (non-recyclable)\n• Recyclable waste\n• Organic waste (where applicable)\n• Electronic waste\n• Hazardous waste, and\n• Confidential waste."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 2,
+      "endPage": 2,
+      "text": "All Leaders are responsible for:\n\n• Identifying waste-related risks within their area of responsibility\n• Ensuring waste risks are assessed and controlled prior to work commencing\n• Ensuring appropriate waste segregation, storage, and disposal arrangements are\nimplemented, and\n• Ensuring only approved and licensed waste contractors are engaged."
+    }
+  },
+  "resources": [],
+  "notes": [
+    "Training entry names a Procedure but uses IMS.03.24.TRN.01; confirm module title.",
+    "Header issued 15/01/26 differs from history approval 14/01/26."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

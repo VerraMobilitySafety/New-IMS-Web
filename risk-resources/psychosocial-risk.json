@@ -1,0 +1,161 @@
+{
+  "slug": "psychosocial-risk",
+  "title": "Psychosocial Risk",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.18.PRO.01",
+  "version": "2.1",
+  "issued": "14/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 5,
+  "training": {
+    "title": "Psychosocial Risk",
+    "codes": "IMS.03.18.TRN.01",
+    "audience": "Employees",
+    "timing": "Annual",
+    "evidence": "IMS.03.18.PRO.01 §4.2.1, p.3",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Identify psychosocial hazards",
+      "keywords": "identify hazard stress workload",
+      "refs": [
+        "6.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Assess and control the risk",
+      "keywords": "assess workplace task feedback control",
+      "refs": [
+        "6.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Manage a change",
+      "keywords": "change",
+      "refs": [
+        "6.3"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Find support arrangements",
+      "keywords": "support eap assistance",
+      "refs": [
+        "5.1"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are required to:\n\n• Comply with this Procedure\n• Participate in consultation and risk management activities\n• Report psychosocial hazards, incidents, or concerns, and\n• Treat others with dignity and respect."
+    },
+    "5.1": {
+      "section": "5.1",
+      "title": "Employee Assistance Program",
+      "page": 3,
+      "endPage": 3,
+      "text": "Verra Mobility shall have an established Employee Assistance Program (EAP). The EAP must\nprovide access to professional support for matters including, but not limited to:\n\n• Work-related stress, anxiety, or psychological distress\n• Exposure to traumatic events, violence, or aggression\n• Workplace conflict, bullying, or harassment concerns\n• Fatigue, burnout, or workload-related stress\n• Personal or family issues affecting wellbeing\n• Critical incidents or crisis situations, and\n• Advice and support for Leaders managing employees experiencing distress.\n\nThe details for the EAP shall be displayed on HSEQ Notice Boards at all Verra Mobility\ncontrolled sites."
+    },
+    "6.3": {
+      "section": "6.3",
+      "title": "Managing Change Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "The psychological impact of organisational or operational change must be considered and\nmanaged in accordance with the Change Risk Management Procedure (IMS.03.01.PRO.01).\n\nAffected Employees must be consulted and reasonably supported during change."
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 3,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are required to:\n\n• Complete the Psychosocial Risk Training Module (IMS.03.18.TRN.01) annually."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Complete the Psychosocial Risk Training Module (IMS.03.18.TRN.01) annually."
+    },
+    "6.1": {
+      "section": "6.1",
+      "title": "Identification of Psychosocial and Mental Health Risks Procedure",
+      "page": 3,
+      "endPage": 4,
+      "text": "Psychosocial and mental health risks must be identified through systemic and task-specific\nmechanisms, including:\n\n• Consultation with employees\n• Surveys, assessments, and observations\n• Incident and hazard reporting, and\n• Review of workload, work design, and organisational change.\n\nCommon contributing factors may include:\n\n• Excessive or unreasonable job demands\n• Low job control or role clarity\n• Poor support, recognition, or communication\n• Exposure to violence, aggression, traumatic events, and\n• Inadequate management of change or shift work."
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 2,
+      "endPage": 3,
+      "text": "4.1.1. Leaders\nAll Leaders are responsible for:\n\n• Identifying psychosocial hazards within their area of responsibility\n• Implementing and maintaining controls to manage psychosocial risks\n• Consulting with Employees on psychosocial hazards and controls\n• Responding appropriately to reports of psychosocial risk or mental health concerns, and\n• Escalating matters where risks cannot be adequately controlled.\n4.1.2. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Comply with this Procedure\n• Participate in consultation and risk management activities\n• Report psychosocial hazards, incidents, or concerns, and\n• Treat others with dignity and respect."
+    },
+    "6.2": {
+      "section": "6.2",
+      "title": "Risk Assessment and Control Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "Identified psychosocial risks must be assessed every two years, in accordance with the Risk\nManagement Procedure (IMS.03.00.PRO.01), using the following forms:\n\n• Workplaces shall use the Workplace Psychosocial Risk Assessment Form\n(IMS.03.18.FRM.01) and,\n• Tasks shall use the Task Psychosocial Risk Assessment Form (IMS.03.18.FRM.02).\n\nControls must be selected using the Hierarchy of Control and may include:\n\n• Redesigning work or workloads\n• Improving role clarity and decision-making authority\n• Enhancing leadership capability and support\n• Implementing flexible work arrangements where practicable, and\n• Providing access to support services.\n\nControl effectiveness can be verified by using the Psychosocial Feedback Form\n(IMS.03.18.FRM.03)."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 2,
+      "endPage": 2,
+      "text": "All Leaders are responsible for:\n\n• Identifying psychosocial hazards within their area of responsibility\n• Implementing and maintaining controls to manage psychosocial risks\n• Consulting with Employees on psychosocial hazards and controls\n• Responding appropriately to reports of psychosocial risk or mental health concerns, and\n• Escalating matters where risks cannot be adequately controlled."
+    }
+  },
+  "resources": [
+    {
+      "code": "IMS.03.18.FRM.01",
+      "title": "Workplace Psychosocial Risk Assessment Form",
+      "status": "Available reference / template",
+      "note": "Content checked. PDF availability does not confirm an editable form, operational record or live service.",
+      "usable": true
+    },
+    {
+      "code": "IMS.03.18.FRM.02",
+      "title": "Task Psychosocial Risk Assessment Form",
+      "status": "Available reference / template",
+      "note": "Content checked. PDF availability does not confirm an editable form, operational record or live service.",
+      "usable": true
+    },
+    {
+      "code": "IMS.03.18.FRM.03",
+      "title": "Psychosocial Feedback Form",
+      "status": "Available reference / template",
+      "note": "Content checked. PDF availability does not confirm an editable form, operational record or live service.",
+      "usable": true
+    }
+  ],
+  "notes": [
+    "Three topic-specific forms are available. EAP is described in the procedure; it is not a training package or assessment form."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

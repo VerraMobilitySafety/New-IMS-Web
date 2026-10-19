@@ -1,0 +1,139 @@
+{
+  "slug": "personal-protective-equipment",
+  "title": "Personal Protective Equipment",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.16.PRO.01",
+  "version": "2.1",
+  "issued": "14/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 4,
+  "training": {
+    "title": "Personal Protective Equipment",
+    "codes": "IMS.03.16.TRN.01",
+    "audience": "Employees",
+    "timing": "Annual plus selection, fit, limitations and use instructions",
+    "evidence": "IMS.03.16.PRO.01 §4.2.1, p.3",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Select suitable PPE",
+      "keywords": "select fit ppe",
+      "refs": [
+        "5.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Check standard PPE requirements",
+      "keywords": "standard minimum requirement",
+      "refs": [
+        "5.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Check client PPE requirements",
+      "keywords": "client site requirement",
+      "refs": [
+        "5.3"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Use and care for PPE",
+      "keywords": "use care inspect replace",
+      "refs": [
+        "5.4"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "5.2": {
+      "section": "5.2",
+      "title": "Standard PPE Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "Where a Verra Mobility Employee is undertaking work activities in environments where PPE\nis required, the following minimum PPE requirements apply:\n\n• Long sleeved shirts and long pants\n• High visibility clothing\n• Hard hats\n• Safety glasses\n• Sun protection (hat and sunscreen), and\n• Protective footwear.\n\nAdditional PPE may be required depending on the nature of the work and identified risks."
+    },
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 2,
+      "text": "Verra Mobility Employees are responsible for:\n\n• Using PPE as required\n• Taking reasonable care of PPE provided\n• Inspecting PPE prior to use\n• Reporting damaged, defective, or unsuitable PPE, and\n• Ceasing work where required PPE is not available or fit for use."
+    },
+    "5.1": {
+      "section": "5.1",
+      "title": "Selection and Use of PPE Procedure",
+      "page": 3,
+      "endPage": 3,
+      "text": "PPE must only be relied upon where higher order controls are not reasonably practicable or\nwhere PPE is required as supplementary control.\n\nDecisions regarding PPE requirements must:\n\n• Be based on hazard identification and risk assessment\n• Consider the effectiveness of PPE in reducing the original risk, and\n• Ensure that the use of PPE does not introduce new or greater risks (for example,\nreduced dexterity or visibility).\n\nPPE provided by Verra Mobility must:\n\n• Be fit for purpose for the activity and environment\n• Comply with relevant Australian or New Zealand Standards, and\n• Be suitable for the individual user.\n\nEmployees must be consulted in accordance with Consultation and Communication\nManagement Procedure (IMS.05.01.PRO.01) where appropriate regarding PPE selection."
+    },
+    "5.4": {
+      "section": "5.4",
+      "title": "PPE Use and Care Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "PPE must be:\n\n• Worn as required\n• Maintained in a clean and serviceable condition\n• Stored to prevent damage or loss, and\n• Withdrawn from use if damaged or no longer fit for purpose.\n\nPPE will be replaced on a fair wear and tear basis."
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are required to:\n\n• Complete the Personal Protective Equipment Training Module (IMS.03.16.TRN.01)\nannually, and\n• Be provided with appropriate information and instructions, including:\no Correct selection and fit\no Limitations of PPE, and\no Care and maintenance requirements."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 2,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Complete the Personal Protective Equipment Training Module (IMS.03.16.TRN.01)\nannually, and\n• Be provided with appropriate information and instructions, including:\no Correct selection and fit\no Limitations of PPE, and\no Care and maintenance requirements."
+    },
+    "5.3": {
+      "section": "5.3",
+      "title": "Client PPE Requirements",
+      "page": 3,
+      "endPage": 4,
+      "text": "Where Client PPE requirements apply, these must be followed unless doing so would result\nin a lower level of protection. All PPE requirements shall be documented following\nrequirements outlined in Project Risk Management Procedure (IMS.03.04.PRO.01).\n\nWhere conflicts arise, the Leader must consult with the client or Client to agree on\nappropriate PPE requirements."
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 2,
+      "endPage": 2,
+      "text": "4.1.1. Leaders\nAll Leaders are responsible for:\n\n• Determining minimum PPE requirements for activities under their control\n• Ensuring PPE provided is fit for purpose and complies with applicable standards\n• Consulting with employees regarding PPE selection where required\n• Ensuring PPE requirements are communicated and understood, and\n• Addressing non-compliance with PPE requirements.\n4.1.2. Verra Mobility Employees\nVerra Mobility Employees are responsible for:\n\n• Using PPE as required\n• Taking reasonable care of PPE provided\n• Inspecting PPE prior to use\n• Reporting damaged, defective, or unsuitable PPE, and\n• Ceasing work where required PPE is not available or fit for use."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 2,
+      "endPage": 2,
+      "text": "All Leaders are responsible for:\n\n• Determining minimum PPE requirements for activities under their control\n• Ensuring PPE provided is fit for purpose and complies with applicable standards\n• Consulting with employees regarding PPE selection where required\n• Ensuring PPE requirements are communicated and understood, and\n• Addressing non-compliance with PPE requirements."
+    }
+  },
+  "resources": [],
+  "notes": [
+    "No dedicated PPE selection / issue / fit-check form file found."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

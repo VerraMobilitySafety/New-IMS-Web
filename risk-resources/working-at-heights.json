@@ -1,0 +1,173 @@
+{
+  "slug": "working-at-heights",
+  "title": "Working at Heights",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.21.PRO.01",
+  "version": "2.1",
+  "issued": "15/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 5,
+  "training": {
+    "title": "Working At Heights",
+    "codes": "IMS.03.21.TRN.01",
+    "audience": "Employees",
+    "timing": "Annual; competence and authorisation also required",
+    "evidence": "IMS.03.21.PRO.01 §4.2.1, p.3",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Plan a job at height",
+      "keywords": "plan height fall control",
+      "refs": [
+        "6.1",
+        "6.1.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Check equipment before use",
+      "keywords": "inspect equipment ladder preuse",
+      "refs": [
+        "5.1",
+        "4.1.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Prevent falling objects",
+      "keywords": "falling object storage racking",
+      "refs": [
+        "6.1.2",
+        "5.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Work near an opening",
+      "keywords": "opening excavation edge",
+      "refs": [
+        "6.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-5",
+      "title": "Train or brief my team",
+      "keywords": "train brief competency",
+      "refs": [
+        "4.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-6",
+      "title": "Find rescue requirements",
+      "keywords": "rescue recover emergency",
+      "refs": [],
+      "gap": "The reviewed procedure does not specify a rescue method, responder requirements or rescue equipment list. Ask your leader or HSEQ for the applicable task-specific arrangements."
+    }
+  ],
+  "refs": {
+    "5.2": {
+      "section": "5.2",
+      "title": "Racking and Storage Systems",
+      "page": 3,
+      "endPage": 3,
+      "text": "Racking and storage systems must be:\n\n• Labelled with safe working load (SWL)\n• Secured to the ground\n• Effectively maintained, and\n• Used in a manner that prevents items falling, sliding, or collapsing."
+    },
+    "6.1.2": {
+      "section": "6.1.2",
+      "title": "Prevention of Falling Objects Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "Controls to eliminate or minimise falling object risks may include:\n\n• Fall prevention controls:\no Toe boards, infill panels, or physical barriers\no Netting, restraint bars, or load securing systems\no Tethering tools and materials\no Safe pallet packing, strapping, or shrink wrapping, and\no Keeping heavy or large items at ground level.\n\n• Fall arrest / impact controls:\no Covered walkways\no Overhead protection on mobile plant, and\no Tool lanyards.\n\n• Administrative and PPE controls (lower order):\no Exclusion zones\no Signage\no Training and supervision, and\no PPE."
+    },
+    "5.1": {
+      "section": "5.1",
+      "title": "Work at Height Equipment",
+      "page": 3,
+      "endPage": 3,
+      "text": "Equipment used for work at height must:\n\n• Be fit for purpose\n• Be inspected and maintained in a safe condition, and\n• Be used in accordance with manufacturer instructions.\n\nThis includes ladders, EWPs, harness systems, platforms, guardrails, and anchorage points."
+    },
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are required to:\n\n• Use provided controls and equipment correctly\n• Conduct pre-use inspections of equipment, and\n• Not undertake work at height unless authorised and competent."
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 3,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are required to:\n\n• Complete the Working At Heights Training Module (IMS.03.21.TRN.01) annually."
+    },
+    "6.1": {
+      "section": "6.1",
+      "title": "Hazard Identification, Risk Assessment and Control Procedure",
+      "page": 3,
+      "endPage": 4,
+      "text": "Hazards associated with working at heights and falling objects must be identified, assessed,\nand controlled in accordance with the Risk Management Procedure (IMS.03.00.PRO.01).\n\nEmployees must be consulted when identifying hazards and determining controls.\n\nControls must be selected using the Hierarchy of Control, with a preference for elimination.\n6.1.1. Working at Heights Procedure\nWhere working at height cannot be eliminated, controls may include:\n\n• Engineering redesign to enable work at ground level\n• Physical barriers such as guardrails or edge protection\n• Use of EWPs in preference to ladders\n• Fall restraint or fall arrest systems\n• Maintaining three points of contact when using ladders\n• Securing ladders and selecting the correct ladder type and height\n• Establishing exclusion or “no go” zones\n• Safe Work Method Statements (SWMS)\n• Consideration of environmental conditions (e.g. wind, rain, uneven surfaces), and\n• Adequate training, supervision, and PPE.\n\n6.1.2. Prevention of Falling Objects Procedure\nControls to eliminate or minimise falling object risks may include:\n\n• Fall prevention controls:\no Toe boards, infill panels, or physical barriers\no Netting, restraint bars, or load securing systems\no Tethering tools and materials\no Safe pallet packing, strapping, or shrink wrapping, and\no Keeping heavy or large items at ground level.\n\n• Fall arrest / impact controls:\no Covered walkways\no Overhead protection on mobile plant, and\no Tool lanyards.\n\n• Administrative and PPE controls (lower order):\no Exclusion zones\no Signage\no Training and supervision, and\no PPE."
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 2,
+      "endPage": 3,
+      "text": "4.1.1. Leaders\nAll Leaders are responsible for:\n\n• Identifying working at height and falling object hazards within their area of responsibility\n• Ensuring risks are assessed and controlled prior to work commencing\n• Ensuring only competent and authorised persons perform work at height, and\n• Ensuring appropriate equipment and controls are provided and maintained\n4.1.2. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Use provided controls and equipment correctly\n• Conduct pre-use inspections of equipment, and\n• Not undertake work at height unless authorised and competent."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Complete the Working At Heights Training Module (IMS.03.21.TRN.01) annually."
+    },
+    "6.2": {
+      "section": "6.2",
+      "title": "Working near Excavations and Opening Procedure",
+      "page": 4,
+      "endPage": 4,
+      "text": "Where work occurs near excavations, pits, or openings:\n\n• Exclusion zones must be established\n• Spotters must be used where required\n• Barriers or covers must be installed, and / or\n• Fall risks must be reassessed when conditions change."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 2,
+      "endPage": 2,
+      "text": "All Leaders are responsible for:\n\n• Identifying working at height and falling object hazards within their area of responsibility\n• Ensuring risks are assessed and controlled prior to work commencing\n• Ensuring only competent and authorised persons perform work at height, and\n• Ensuring appropriate equipment and controls are provided and maintained"
+    },
+    "6.1.1": {
+      "section": "6.1.1",
+      "title": "Working at Heights Procedure",
+      "page": 3,
+      "endPage": 4,
+      "text": "Where working at height cannot be eliminated, controls may include:\n\n• Engineering redesign to enable work at ground level\n• Physical barriers such as guardrails or edge protection\n• Use of EWPs in preference to ladders\n• Fall restraint or fall arrest systems\n• Maintaining three points of contact when using ladders\n• Securing ladders and selecting the correct ladder type and height\n• Establishing exclusion or “no go” zones\n• Safe Work Method Statements (SWMS)\n• Consideration of environmental conditions (e.g. wind, rain, uneven surfaces), and\n• Adequate training, supervision, and PPE."
+    }
+  },
+  "resources": [],
+  "notes": [
+    "No dedicated heights assessment, equipment checklist or rescue plan file found. The current Vero page worksheets are proposed resources.",
+    "This procedure does not specify a rescue method or rescue equipment list."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

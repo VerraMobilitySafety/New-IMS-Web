@@ -1,0 +1,134 @@
+{
+  "slug": "working-from-home",
+  "title": "Working from Home",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.22.PRO.01",
+  "version": "1.1",
+  "issued": "23/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 4,
+  "training": {
+    "title": "Working from Home",
+    "codes": "IMS.03.22.TRN.01",
+    "audience": "Employees",
+    "timing": "Annual; leaders ensure required training before remote work",
+    "evidence": "IMS.03.22.PRO.01 §4.2.1; 4.1.1, p.2",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Arrange a home-working assessment",
+      "keywords": "assess approve home alternate location",
+      "refs": [
+        "7.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Check home-working requirements",
+      "keywords": "work home requirement",
+      "refs": [
+        "7.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Check equipment responsibilities",
+      "keywords": "equipment",
+      "refs": [
+        "6"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Review leader responsibilities",
+      "keywords": "leader responsibility",
+      "refs": [
+        "4.1.1"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "6": {
+      "section": "6",
+      "title": "Equipment Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "It is the responsibility of the Employee to ensure equipment is safe and suitable. Where\nworking from an alternate location is planned or ongoing:\n\n• Responsibility for purchasing equipment must be agreed between the Leader and\nEmployee, and\n• Equipment must be appropriately maintained by the employee."
+    },
+    "7.2": {
+      "section": "7.2",
+      "title": "Working From Home Procedure",
+      "page": 3,
+      "endPage": 3,
+      "text": "Where the Employee is working from home:\n\n• They must take regular breaks, including brief stretch breaks at least hourly\n• They must not exceed three (3) hours of continuous work without a break, and\n• They must report all incidents, near misses and hazards as per Incident, Near Miss and\nHazard Management Procedure (IMS.06.01.PRO.01)"
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 3,
+      "text": "All Verra Mobility Employees are required to:\n\n• Complete the Working from Home Training Module (IMS.03.22.TRN.01) annually."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 2,
+      "endPage": 2,
+      "text": "Leaders are responsible for:\n• Understanding this Procedure and related flexible working arrangements\n• Ensuring Employees are aware of their obligations under this Procedure\n• Assessing and approving requests to work from alternate locations in accordance with\nthis Procedure\n• Ensuring required training is completed prior to remote work commencing\n• Supporting Employees to report incidents in accordance with the Incident Reporting\nProcedure, and\n• Conducting periodic reviews of approved alternate work arrangements and retaining\nrequired records."
+    },
+    "7.1": {
+      "section": "7.1",
+      "title": "Working From Home Assessment Procedure",
+      "page": 3,
+      "endPage": 3,
+      "text": "Prior to commencing work from an alternate location:\n\ni. The Employee should complete the Working from Home Assessment Form\n(IMS.03.22.FRM.01)\nii. The completed form must be submitted to the Leader for review and retention,\niii. The form shall be recorded as per Document and Records Management Procedure\n(IMS.02.01.PRO.01)."
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 2,
+      "endPage": 2,
+      "text": "4.1.1. Leaders\nLeaders are responsible for:\n• Understanding this Procedure and related flexible working arrangements\n• Ensuring Employees are aware of their obligations under this Procedure\n• Assessing and approving requests to work from alternate locations in accordance with\nthis Procedure\n• Ensuring required training is completed prior to remote work commencing\n• Supporting Employees to report incidents in accordance with the Incident Reporting\nProcedure, and\n• Conducting periodic reviews of approved alternate work arrangements and retaining\nrequired records."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 2,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nAll Verra Mobility Employees are required to:\n\n• Complete the Working from Home Training Module (IMS.03.22.TRN.01) annually."
+    }
+  },
+  "resources": [
+    {
+      "code": "IMS.03.22.FRM.01",
+      "title": "Working from Home Assessment Form",
+      "status": "Referenced; file not found",
+      "note": "Referenced in §7.1, p.3. The actual form was not found in the project.",
+      "usable": false
+    }
+  ],
+  "notes": [
+    "Working from Home Assessment Form IMS.03.22.FRM.01 is referenced in §7.1, p.3, but no file was found.",
+    "Header v1.1 issued 23/01/26 conflicts with the last history entry v1.0 dated 25/01/26."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

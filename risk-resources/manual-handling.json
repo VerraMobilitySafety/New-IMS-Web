@@ -1,0 +1,131 @@
+{
+  "slug": "manual-handling",
+  "title": "Manual Handling",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.15.PRO.01",
+  "version": "2.1",
+  "issued": "14/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 4,
+  "training": {
+    "title": "Manual Handling",
+    "codes": "IMS.03.15.TRN.01",
+    "audience": "Employees",
+    "timing": "Annual",
+    "evidence": "IMS.03.15.PRO.01 §4.2.1, p.2",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Assess a manual task",
+      "keywords": "assess lift carry push pull",
+      "refs": [
+        "6.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Choose controls and aids",
+      "keywords": "control aid lift equipment",
+      "refs": [
+        "6.2",
+        "5.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Review manual-task controls",
+      "keywords": "review inspect change",
+      "refs": [
+        "6.3"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 2,
+      "text": "All Verra Mobility Employees are required to:\n\n• Comply with this Procedure and related instructions\n• Use provided controls and equipment\n• Report hazardous manual tasks, incidents, or control failures, and\n• Not attempting to lift or move items that are known or suspected to be too heavy or\nawkward."
+    },
+    "5.1": {
+      "section": "5.1",
+      "title": "Manual Handling Aids",
+      "page": 3,
+      "endPage": 3,
+      "text": "Where practicable, equipment must be provided to reduce manual handling risks, including:\n\n• Trolleys or mechanical lifting aids\n• Adjustable workstations, and\n• Storage systems, designed to minimise bending, reaching, or twisting."
+    },
+    "6.3": {
+      "section": "6.3",
+      "title": "Monitoring and Reviewing Controls Procedure",
+      "page": 3,
+      "endPage": 3,
+      "text": "The effectiveness of controls must be monitored and reviewed through:\n\n• Workplace inspections\n• Incident and hazard reports\n• Incident investigations, and\n• Employee feedback, and audits."
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 3,
+      "text": "All Verra Mobility Employees are required to:\n\n• Complete the Manual Handling Training Module (IMS.03.15.TRN.01) annually."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 2,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nAll Verra Mobility Employees are required to:\n\n• Complete the Manual Handling Training Module (IMS.03.15.TRN.01) annually."
+    },
+    "6.1": {
+      "section": "6.1",
+      "title": "Hazard Identification, Risk Assessment and Control Procedure",
+      "page": 3,
+      "endPage": 3,
+      "text": "Hazardous manual tasks must be identified and managed in consultation with employees\nand in accordance with the Risk Management Procedure (IMS.03.00.PRO.01).\n\nWhere required, a risk assessment must be completed to:\n\n• Better understand the nature and level of risk, and\n• Identify appropriate controls to eliminate or minimise the risk."
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 2,
+      "endPage": 2,
+      "text": "4.1.1. Leaders\nLeaders are responsible for:\n• Identifying hazardous manual tasks within their area of responsibility\n• Ensuring hazardous manual tasks are assessed and controlled\n• Consulting with employees when identifying hazards and determining controls as per\nConsultation and Communication Management Procedure (IMS.05.01.PRO.01), and\n• Ensuring controls are implemented and maintained\n4.1.2. Verra Mobility Employees\nAll Verra Mobility Employees are required to:\n\n• Comply with this Procedure and related instructions\n• Use provided controls and equipment\n• Report hazardous manual tasks, incidents, or control failures, and\n• Not attempting to lift or move items that are known or suspected to be too heavy or\nawkward."
+    },
+    "6.2": {
+      "section": "6.2",
+      "title": "Implementing Controls Procedure",
+      "page": 3,
+      "endPage": 3,
+      "text": "Controls must be selected using the Hierarchy of Control, with a preference for elimination.\nWhere elimination is not reasonably practicable, controls may include:\n\n• Redesigning tasks to avoid manual handling\n• Using mechanical aids or lifting equipment\n• Reducing load size or weight\n• Storing items at waist height\n• Limiting duration or frequency of hazardous manual tasks, and\n• Rotating tasks where appropriate.\n\nEmployees must not attempt to lift or move items that are known or suspected to be too\nheavy or awkward and must report such hazards to their Leader."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 2,
+      "endPage": 2,
+      "text": "Leaders are responsible for:\n• Identifying hazardous manual tasks within their area of responsibility\n• Ensuring hazardous manual tasks are assessed and controlled\n• Consulting with employees when identifying hazards and determining controls as per\nConsultation and Communication Management Procedure (IMS.05.01.PRO.01), and\n• Ensuring controls are implemented and maintained"
+    }
+  },
+  "resources": [],
+  "notes": [
+    "No dedicated manual-task assessment form file found."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

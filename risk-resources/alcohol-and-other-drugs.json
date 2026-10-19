@@ -1,0 +1,179 @@
+{
+  "slug": "alcohol-and-other-drugs",
+  "title": "Alcohol and Other Drugs",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.05.PRO.01",
+  "version": "3.1",
+  "issued": "09/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 8,
+  "training": {
+    "title": "Alcohol and Other Drugs",
+    "codes": "IMS.03.05.TRN.01",
+    "audience": "Employees",
+    "timing": "Annual",
+    "evidence": "IMS.03.05.PRO.01 §4.2.1, p.3",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Check fitness for work",
+      "keywords": "fit fitness impairment work",
+      "refs": [
+        "4.3"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Report medication concerns",
+      "keywords": "medication medicine report",
+      "refs": [
+        "6.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Respond to suspected impairment",
+      "keywords": "suspect unfit impairment",
+      "refs": [
+        "6.3"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Understand testing requirements",
+      "keywords": "test testing random incident refusal breach",
+      "refs": [
+        "6.4",
+        "6.5",
+        "6.6",
+        "6.7"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-5",
+      "title": "Plan a work-related event",
+      "keywords": "event alcohol function",
+      "refs": [
+        "6.8"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "6.7": {
+      "section": "6.7",
+      "title": "Breach Management Procedure",
+      "page": 6,
+      "endPage": 7,
+      "text": "A breach of this Procedure, including a failed drug test, will be subject to review regarding\nthe circumstances of the breach, the outcome of this review may include:\n\n• Workplace counselling\n• Referral to counselling and/ or rehabilitation programs, or\n• Disciplinary action up to and including termination of employment.\n\nIn addition to disciplinary action, if an employee’s conduct might constitute a criminal\noffence, the Company may notify the police.\n\nVerra Mobility’s Purpose is to enrich lives by making transportation safer and easier. Where\nan employee is subject to a suspension or loss of their driver’s license and they can no\nlonger meet the inherent requirements of their role, the decision to provide alternate duties\nwill be at the sole discretion of the Company."
+    },
+    "4.3": {
+      "section": "4.3",
+      "title": "Fitness For Work Requirements",
+      "page": 3,
+      "endPage": 4,
+      "text": "4.3.1. Verra Mobility Employees and Contractors\nAll Verra Mobility Employees and Contractors:\n\n• Are required to be fit and ready for safe and productive work (during work hours\nincluding on-call). This means an employee will need to:\n\no Not consume drugs or alcohol that affect their ability to perform work tasks safely\no Always maintain a blood alcohol content (BAC) of 0.00 when at work, and at all times\nwhere they are or may be required to operate a company vehicle, other than if\nattending a permitted work function where the legal limit for BAC for the type of\nvehicle must not be exceeded (including on call), and\no Not be affected and/or impaired by any substance while at work (including on call).\n\n• Must not use, be under the effects of, or possess illegal drugs at the workplace, and\n• Must not consume alcohol or be affected by alcohol while performing duties (except\npermitted events)."
+    },
+    "6.3": {
+      "section": "6.3",
+      "title": "Suspicion Employee is Unfit for Work Procedure",
+      "page": 5,
+      "endPage": 5,
+      "text": "i. If there is suspicion by a Leader that an employee is not fit for work because of a\nsubstance that is prohibited by law, the leader should safely remove the employee\nfrom the work area. Observable indicators may be:\n\no Odour of alcohol or drugs\no Slurred speech\no Unsteady movement or poor coordination\no Erratic, aggressive, or impaired behaviour\no Admission of substance use, and / or\no Credible reports from others\n\nii. As soon as possible for a confidential discussion. The discussion should include:\n\no The Leaders observations that indicate that the employee might not be fit for\nwork\no A reminder of the contents of this Procedure\no An opportunity for the employee to explain the behaviour observed by the\nLeader, and\no If the employee has taken prescription or non-prescription medication, an\nopportunity to provide evidence of the medication (for example, showing a\ncurrent prescription).\n\niii. If, following the discussion, the Leader has reasonable grounds for believing that the\nemployee is not fit for work, the employee will be removed from their duties\niv. Verra Mobility may require that an employee take a drug and/or alcohol test. Testing\nis to be carried out by an independent third party, and test results will be confidential\nto the fullest extent possible\nv. All drug and alcohol testing and the review of results will follow applicable laws.\nvi. Alternately, Verra Mobility may direct an employee obtain evidence of their fitness to\nwork from a medical practitioner. Should the employee be not fit for work due to the\nimpact of prescription or non-prescription medication and the employee is fit to\nperform alternative duties, the employee may be given short term alternative work if\nit is available. If there is no suitable alternative work available, an employee who is\nnot fit for work will not be permitted to remain at the workplace.\nvii. Where necessary, the Company will arrange for safe transport home at the\nemployee’s expense."
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 3,
+      "endPage": 3,
+      "text": "All Verra Mobility Employees are required to:\n\n• Complete the Alcohol and Other Drugs Training Module (IMS.03.05.TRN.01) annually."
+    },
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Verra Mobility Employees",
+      "page": 3,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are required to:\n\n• Report suspected unfitness for work to a leader\n• Take care that they do not risk their own or others’ health and safety\n• Be fit for work while at the workplace, and\n• Be fit for work when on call"
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.1.1. Leaders\nAll Leaders are responsible for:\n\n• Encouraging a culture that promotes a safe and healthy work environment\n• Ensuring suitable communication of this policy within their area of control\n• Providing appropriate guidance and supervision to help all employees within their area of\ncontrol understand their responsibilities under this policy\n• Monitoring the work performance and ability of all employees to carry out their jobs\nsafely\n• Encouraging affected employees to seek assistance for problems related to the use of\nalcohol or drugs or addiction to prescription or non-prescription medication, and\n• Ensuring that this policy is applied on a consistent and reasonable basis.\n4.1.2. Verra Mobility Employees\nVerra Mobility Employees are required to:\n\n• Report suspected unfitness for work to a leader\n• Take care that they do not risk their own or others’ health and safety\n• Be fit for work while at the workplace, and\n• Be fit for work when on call"
+    },
+    "6.5": {
+      "section": "6.5",
+      "title": "Post Incident Testing Procedure",
+      "page": 6,
+      "endPage": 6,
+      "text": "Testing may be required following a work-related incident where alcohol or other drugs may\nreasonably have contributed, including:\n\n• Injury to a person\n• Damage to plant, equipment, vehicles, or property\n• A near miss with potential for serious harm, and / or\n• A serious breach of safety procedures.\n\nAfter immediate medical needs have been prioritised:\n\ni. Once safe, the affected Employee(s) are directed to undergo testing\nii. The Employee is stood down from duties pending results\niii. Testing is conducted as soon as practicable following the incident."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nAll Verra Mobility Employees are required to:\n\n• Complete the Alcohol and Other Drugs Training Module (IMS.03.05.TRN.01) annually."
+    },
+    "6.2": {
+      "section": "6.2",
+      "title": "Self-Reporting Medication Procedure",
+      "page": 4,
+      "endPage": 5,
+      "text": "An employee must inform their supervisor or manager as soon as possible if they are, or\nmight be, unfit for work because of a prescription medication or non-prescription\nmedication."
+    },
+    "6.8": {
+      "section": "6.8",
+      "title": "Work Related Events Management Procedure",
+      "page": 7,
+      "endPage": 7,
+      "text": "Where there is a sanctioned Company Event the following shall apply:\n\n• An employee may consume alcohol while attending an authorised social function at\nwhich Verra Mobility is providing alcohol, including licensed venues\n• The service of alcohol will be supervised, and Verra Mobility or the venue may stop\nservice of alcohol to any employee if there are concerns that alcohol is contributing to\ninappropriate behaviour or creates a risk to health or safety to themselves or others\n• It is each employee’s responsibility to ensure that they continue to comply with Verra\nMobility’s other policies, including the Code of Conduct and Discrimination, and the\nHarassment and Bullying Policy at any function where alcohol is permitted, and\n• An employee who consumes alcohol at a permitted function must ensure that they are\nable to safety travel after the function. Employees should not drive after consuming\nalcohol. Employees are advised to arrange alternative transport in advance if they intend\nto consume alcohol at a function.\n\nAn employee may consume alcohol if, in the course of their duties, the employee attends a\nclient, supplier, industry, customer or like function in which there is safe service of and\nconsumption of alcohol, provided that the consumption of alcohol does not impair the\nemployee’s ability represent the interests of Verra Mobility."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 3,
+      "endPage": 3,
+      "text": "All Leaders are responsible for:\n\n• Encouraging a culture that promotes a safe and healthy work environment\n• Ensuring suitable communication of this policy within their area of control\n• Providing appropriate guidance and supervision to help all employees within their area of\ncontrol understand their responsibilities under this policy\n• Monitoring the work performance and ability of all employees to carry out their jobs\nsafely\n• Encouraging affected employees to seek assistance for problems related to the use of\nalcohol or drugs or addiction to prescription or non-prescription medication, and\n• Ensuring that this policy is applied on a consistent and reasonable basis."
+    },
+    "6.4": {
+      "section": "6.4",
+      "title": "Random Drug Testing Procedure",
+      "page": 5,
+      "endPage": 6,
+      "text": "Verra Mobility may conduct random drug testing which will be carried out by an independent\nthird party. This shall be done by:\n\n• Verra Mobility shall engage a testing provider\n• The testing provider shall randomly select Employees\n• Selected Employees must present for testing immediately. If unavailable, the Leader\nmust verify the reason for absence.\n• Testing may include breath alcohol testing and/or oral fluid testing, and\n• Employees may be accompanied by a support person where immediately available and\nwhere this does not delay testing."
+    },
+    "6.6": {
+      "section": "6.6",
+      "title": "Refusal To Test Management Procedure",
+      "page": 6,
+      "endPage": 6,
+      "text": "If a Employee refuses to participate in required testing:\n\n• The Employee will be removed from the workplace\n• Safe transport home or to a medical facility will be arranged where required\n• The refusal will be treated as a breach of this Procedure, and\n• Disciplinary action may occur, up to and including termination of employment.\n\nIf a Contractor refuses to participate in required testing:\n\n• The contracting company will be notified immediately\n• The contractor may be stood down from site, and\n• Ongoing access to work will be subject to the contracting company’s management\naction."
+    }
+  },
+  "resources": [],
+  "notes": [
+    "No dedicated assessment / testing / consent form file found."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}

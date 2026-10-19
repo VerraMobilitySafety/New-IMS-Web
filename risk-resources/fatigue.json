@@ -1,0 +1,139 @@
+{
+  "slug": "fatigue",
+  "title": "Fatigue",
+  "domain": "Safety Risks",
+  "procedure": "IMS.03.11.PRO.01",
+  "version": "2.1",
+  "issued": "14/01/26",
+  "owner": "Kurt Black",
+  "sourcePageCount": 5,
+  "training": {
+    "title": "Fatigue",
+    "codes": "IMS.03.11.TRN.01",
+    "audience": "Employees",
+    "timing": "Annual",
+    "evidence": "IMS.03.11.PRO.01 §4.2.1, p.3",
+    "status": "Referenced only; module file not found",
+    "refs": [
+      "4.2",
+      "4.2.1"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Identify fatigue hazards",
+      "keywords": "identify tired fatigue hours",
+      "refs": [
+        "5.1.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-2",
+      "title": "Assess fatigue risk",
+      "keywords": "assess roster work rest",
+      "refs": [
+        "5.2"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-3",
+      "title": "Choose fatigue controls",
+      "keywords": "control manage fatigue rest",
+      "refs": [
+        "5.2.1"
+      ],
+      "gap": null
+    },
+    {
+      "id": "task-4",
+      "title": "Review the arrangements",
+      "keywords": "review change",
+      "refs": [
+        "5.2.2"
+      ],
+      "gap": null
+    }
+  ],
+  "refs": {
+    "5.2": {
+      "section": "5.2",
+      "title": "Assessment of Fatigue Risk",
+      "page": 3,
+      "endPage": 4,
+      "text": "Fatigue risks must be assessed in accordance with the Risk Management Procedure\n(IMS.03.00.PRO.01) and may include consideration of:\n\n• The number of Employees exposed to fatigue risk\n• Hours planned versus hours worked\n• Work undertaken outside normal hours\n• Work-related travel time\n• Incident and near miss data where fatigue may be a contributing factor, and\n• Feedback from Employees regarding fatigue.\n\n5.2.1. Control of Fatigue Risk\nFatigue-related risks must be controlled in accordance with the hierarchy of controls.\nControls may include, but are not limited to:\n\n• Designing work to avoid excessive hours or sustained mental or physical effort\n• Providing adequate rest breaks between work periods\n• Adjusting work schedules, start times, or travel arrangements\n• Limiting driving duration and total hours of work, and\n• Providing information and education on fatigue awareness and management.\n\nAs a general principle, a minimum ten (10) hour break should be provided between the end\nof one work period and the commencement of the next, unless otherwise justified through\nrisk assessment.\n5.2.2. Review of Fatigue Risk\nFatigue risks and controls must be reviewed:\n\n• Where work arrangements change\n• Following incidents or near misses where fatigue may be a contributing factor, or\n• Where there is an indication that fatigue is not being adequately controlled.\n\nWhere fatigue presents an unacceptable risk, Leaders must act, which may include:\n\n• Modifying duties\n• Adjusting work schedules, or\n• Stopping work until fatigue risks are adequately controlled."
+    },
+    "4.1.2": {
+      "section": "4.1.2",
+      "title": "Verra Mobility Employees",
+      "page": 2,
+      "endPage": 3,
+      "text": "Verra Mobility Employees are responsible for:\n\n• Presenting fit for work and not impaired by fatigue\n• Managing non-work-related factors that may contribute to fatigue\n• Taking adequate meal and rest breaks\n• Complying with work and rest requirements\n• Raising fatigue-related concerns with their Leader, and\n• Ceasing work and notifying their Leader where fatigue presents a safety risk."
+    },
+    "4.2.1": {
+      "section": "4.2.1",
+      "title": "Verra Mobility Employees",
+      "page": 3,
+      "endPage": 3,
+      "text": "All Verra Mobility Employees are required to:\n\n• Complete the Fatigue Training Module (IMS.03.11.TRN.01) annually."
+    },
+    "4.2": {
+      "section": "4.2",
+      "title": "Competency Requirements",
+      "page": 3,
+      "endPage": 3,
+      "text": "4.2.1. Verra Mobility Employees\nAll Verra Mobility Employees are required to:\n\n• Complete the Fatigue Training Module (IMS.03.11.TRN.01) annually."
+    },
+    "5.2.2": {
+      "section": "5.2.2",
+      "title": "Review of Fatigue Risk",
+      "page": 4,
+      "endPage": 4,
+      "text": "Fatigue risks and controls must be reviewed:\n\n• Where work arrangements change\n• Following incidents or near misses where fatigue may be a contributing factor, or\n• Where there is an indication that fatigue is not being adequately controlled.\n\nWhere fatigue presents an unacceptable risk, Leaders must act, which may include:\n\n• Modifying duties\n• Adjusting work schedules, or\n• Stopping work until fatigue risks are adequately controlled."
+    },
+    "5.1.1": {
+      "section": "5.1.1",
+      "title": "Identification of Fatigue Hazards",
+      "page": 3,
+      "endPage": 3,
+      "text": "Leaders must ensure fatigue hazards associated with work activities are identified. When\nidentifying fatigue-related hazards, consideration must be given to:\n\n• Mental and physical work demands\n• Work scheduling, shift patterns, and hours of work\n• Work-related travel requirements\n• Environmental conditions such as heat, noise, and vibration\n• Disruption to normal sleep patterns or circadian rhythms, and\n• Individual factors where they may impact a person’s capacity to work safely.\n\nConsultation with Employees and relevant representatives must occur during hazard\nidentification as per the Consultation and Communication Management Procedure\n(IMS.05.01.PRO.01)."
+    },
+    "5.2.1": {
+      "section": "5.2.1",
+      "title": "Control of Fatigue Risk",
+      "page": 4,
+      "endPage": 4,
+      "text": "Fatigue-related risks must be controlled in accordance with the hierarchy of controls.\nControls may include, but are not limited to:\n\n• Designing work to avoid excessive hours or sustained mental or physical effort\n• Providing adequate rest breaks between work periods\n• Adjusting work schedules, start times, or travel arrangements\n• Limiting driving duration and total hours of work, and\n• Providing information and education on fatigue awareness and management.\n\nAs a general principle, a minimum ten (10) hour break should be provided between the end\nof one work period and the commencement of the next, unless otherwise justified through\nrisk assessment."
+    },
+    "4.1": {
+      "section": "4.1",
+      "title": "Specific Roles and Responsibilities Related to this Procedure",
+      "page": 2,
+      "endPage": 3,
+      "text": "4.1.1. Leaders\nLeaders are responsible for:\n• Identifying fatigue related hazards within their area of responsibility\n• Planning work to minimise fatigue related risks, including work hours, scheduling, and\ntravel\n• Monitoring Employees for signs of fatigue and where found:\no May modify duties, or\no May stop work.\n• Responding to reported fatigue concerns and implementing appropriate controls, and\n• Escalating fatigue risks where they cannot be adequately controlled.\n4.1.2. Verra Mobility Employees\nVerra Mobility Employees are responsible for:\n\n• Presenting fit for work and not impaired by fatigue\n• Managing non-work-related factors that may contribute to fatigue\n• Taking adequate meal and rest breaks\n• Complying with work and rest requirements\n• Raising fatigue-related concerns with their Leader, and\n• Ceasing work and notifying their Leader where fatigue presents a safety risk."
+    },
+    "4.1.1": {
+      "section": "4.1.1",
+      "title": "Leaders",
+      "page": 2,
+      "endPage": 2,
+      "text": "Leaders are responsible for:\n• Identifying fatigue related hazards within their area of responsibility\n• Planning work to minimise fatigue related risks, including work hours, scheduling, and\ntravel\n• Monitoring Employees for signs of fatigue and where found:\no May modify duties, or\no May stop work.\n• Responding to reported fatigue concerns and implementing appropriate controls, and\n• Escalating fatigue risks where they cannot be adequately controlled."
+    }
+  },
+  "resources": [],
+  "notes": [
+    "No dedicated fatigue assessment / roster review template found."
+  ],
+  "sharedResources": [
+    {
+      "code": "IMS.03.00.FRM.01",
+      "title": "IMS Risk Assessment Form",
+      "status": "Available reference",
+      "note": "Shared assessment reference. Use the source procedure to determine applicability.",
+      "usable": true
+    }
+  ],
+  "reviewDate": "2026-10-20"
+}
