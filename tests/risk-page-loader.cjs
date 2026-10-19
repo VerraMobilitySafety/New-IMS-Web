@@ -5,7 +5,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const code=fs.readFileSync(path.join(root,'risk-page-loader.js'),'utf8');
-test('all 15 VERO shell screens use one NK9 loader and explicitly settle initial tasks',()=>{
+test('all 16 VERO shell screens use one NK9 loader and explicitly settle initial tasks',()=>{
  let count=0;
  for(const file of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
   const html=fs.readFileSync(path.join(root,file),'utf8');
@@ -20,7 +20,7 @@ test('all 15 VERO shell screens use one NK9 loader and explicitly settle initial
   for(const task of tasks)assert.ok(html.includes("?.ready('"+task+"')"),file+': '+task);
   for(const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(match[1],{filename:file});
  }
- assert.equal(count,15);
+ assert.equal(count,16);
  const css=fs.readFileSync(path.join(root,'risk-page-loader.css'),'utf8');
  assert.match(css,/prefers-reduced-motion:reduce/);
  assert.match(fs.readFileSync(path.join(root,'risk-nk9-animation.css'),'utf8'),/nk9-flash,\.vero-page-loader::after\{display:none\}/);
