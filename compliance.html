@@ -3103,8 +3103,11 @@ function filterRegister(){
 
  });
 
- document.getElementById('registerCount').textContent=
-  count+' obligation'+(count===1?'':'s');
+ const registerCount=document.getElementById('registerCount');
+ if(registerCount){
+  registerCount.textContent=
+   count+' obligation'+(count===1?'':'s');
+ }
 }
 
 
