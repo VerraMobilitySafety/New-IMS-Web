@@ -77,6 +77,10 @@
     if(projectId&&[...(contexts.projects||[])].some(item=>String(item.id)===projectId)){
       type.value='Project';populate();record.value=projectId;
     }
+    const contractId=new URLSearchParams(location.search).get('contract_id');
+    if(contractId&&(contexts.contracts||[]).some(item=>String(item.id)===contractId)){
+      type.value='Maintenance Contract';populate();record.value=contractId;
+    }
     form.append(typeLabel,recordLabel,actionLabel,rationaleLabel,save,message);
     form.addEventListener('submit',async event=>{
      event.preventDefault();
@@ -371,5 +375,6 @@
   }catch(error){if(seq===sequence&&!overlay.hidden)content.textContent=error.message;}
  });
 })();
+
 
 

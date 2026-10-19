@@ -2,8 +2,16 @@ name: VERO Risk frontend validation
 on:
   pull_request:
     paths:
+      - 'maintenance-*.html'
+      - 'maintenance-*.js'
+      - 'maintenance-*.css'
+      - 'customer-contracts.*'
+      - 'tests/maintenance-*.cjs'
       - 'risk.html'
       - 'project-workspace.html'
+      - 'project-management.html'
+      - 'project-workflow.js'
+      - 'tests/project-first-fixes.cjs'
       - 'my-actions.html'
       - 'project-risk-*.js'
       - 'project-risk-*.css'
@@ -59,4 +67,18 @@ jobs:
           }
           new vm.Script(fs.readFileSync('project-risk-submission.js','utf8'),{filename:'project-risk-submission.js'});
           JS
-          node --test tests/project-risk-*.cjs
+          node --test tests/project-risk-*.cjs tests/project-first-fixes.cjs
+
+  maintenance-browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test dependencies
+        run: |
+          npm install --no-save playwright@1.62.1
+          npx playwright install --with-deps chromium
+      - name: Validate direct maintenance risk creation and correction
+        run: node --test tests/maintenance-risk-create.cjs
