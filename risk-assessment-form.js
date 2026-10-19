@@ -26,7 +26,7 @@ const tierBox=node('div',null,'tiers'),tierFields=[];
 for(let i=0;i<4;i++){const f=field('Tier '+(4-i)+' '+['Risk Domain','Risk Stream','Risk Category','Risk Event'][i],'select');tierFields.push(f.el);tierBox.append(f.wrap);if(config.projectMode&&i<2)f.wrap.hidden=true;f.el.onchange=()=>renderTiers(i+1);}
 if(config.fixedCategory){tierBox.hidden=true;title.el.readOnly=true;}
 if(config.assessmentOnly){tierBox.hidden=true;title.wrap.hidden=true;description.wrap.hidden=true;}
-const tierHelp=node('p',config.projectMode?'Project Execution · Choose Tier 2 and Tier 1 for this project risk.':'Choose Tier 4, then stop at that tier or continue down to a more specific classification.','muted full');tierBox.append(tierHelp);
+const tierHelp=node('p',config.classificationHelp||(config.projectMode?'Project Execution · Choose Tier 2 and Tier 1 for this project risk.':'Choose Tier 4, then stop at that tier or continue down to a more specific classification.'),'muted full');tierBox.append(tierHelp);
 const tabs=node('div',null,'stages');tabs.setAttribute('aria-label','Assessment stages');
 for(let i=0;i<3;i++){const b=button('','stage');b.append(node('b',(i+1)+' '+stages[i]),node('span',['Before controls','With existing controls','After further controls'][i]));b.onclick=()=>{stage=i;renderAssessment();};tabs.append(b);}
 const columns=node('div',null,'columns'),panel=node('section',null,'panel'),summary=node('aside',null,'panel summary');
@@ -73,14 +73,14 @@ if(config.projectMode){const detail=field('Treatment Description '+action.key,'t
 row.append(remove);actionList.append(row);}}
 let actionKey=0;addAction.onclick=()=>{actionRows.push({key:++actionKey,title:'',owner_user_id:null,due_date:''});renderActions();};
 function renderControls(){enterprisePicker.render();}
-function renderTiers(from=0){if(config.projectMode){tierFields[0].value='';const fixed=node('option','Project Execution');fixed.value=String(config.fixedTier3Id);tierFields[1].replaceChildren(fixed);tierFields[1].value=String(config.fixedTier3Id);from=Math.max(2,from);}for(let index=from;index<4;index++){const select=tierFields[index];select.replaceChildren();select.value='';const placeholder=node('option',config.projectMode?'Select Tier '+(4-index):(index?'Stop at Tier '+(5-index)+' or select Tier '+(4-index):'Select Tier 4'));placeholder.value='';select.append(placeholder);
+function renderTiers(from=0){if(config.projectMode){tierFields[0].value='';const fixed=node('option','Project Execution');fixed.value=config.classificationMode==='category-event'?'':String(config.fixedTier3Id);tierFields[1].replaceChildren(fixed);tierFields[1].value=fixed.value;from=Math.max(2,from);}for(let index=from;index<4;index++){const select=tierFields[index];select.replaceChildren();select.value='';const placeholder=node('option',config.projectMode?'Select Tier '+(4-index):(index?'Stop at Tier '+(5-index)+' or select Tier '+(4-index):'Select Tier 4'));placeholder.value='';select.append(placeholder);
  let unique;
  if(Array.isArray(options.classification_categories)&&Array.isArray(options.classification_relationships)){
   const parent=index?Number(tierFields[index-1].value):null;
   const children=new Set(options.classification_relationships.filter(r=>r.parent_id===parent).map(r=>r.child_id));
-  unique=new Map(options.classification_categories.filter(c=>c.tier===4-index&&(!index||children.has(c.id))).map(c=>[c.id,c.name]));
+  unique=new Map(options.classification_categories.filter(c=>c.tier===4-index&&(!index||(config.classificationMode==='category-event'&&index===2)||children.has(c.id))).map(c=>[c.id,c.name]));
  }else{const paths=options.classifications.filter(p=>p.path_ids.slice(0,index).every((id,j)=>String(id)===tierFields[j].value));unique=new Map(paths.map(p=>[p.path_ids[index],p.path_names[index]]));}
- for(const [id,name] of unique){const opt=node('option',name);opt.value=String(id);select.append(opt);}select.disabled=(index>0&&!tierFields[index-1].value)||busy;
+ for(const [id,name] of unique){const opt=node('option',name);opt.value=String(id);select.append(opt);}select.disabled=(index>0&&!tierFields[index-1].value&&!(config.classificationMode==='category-event'&&index===2))||busy;
  if(index>0&&tierFields[index-1].value&&!unique.size)placeholder.textContent='No active Tier '+(4-index)+' entries under this selection';
 }}
 function chooseOwner(user){owner=user.id;ownerField.el.value=user.name+' · '+user.email;ownerNote.textContent='Selected: '+user.name;ownerList.hidden=true;ownerField.el.setAttribute('aria-expanded','false');ownerField.el.removeAttribute('aria-activedescendant');}
@@ -97,7 +97,7 @@ for(let l=5;l>=1;l--){const b=button(names[l-1],'axis-label like');b.onmouseente
 summaries.replaceChildren();ratings.forEach((r,i)=>{const group=node('div');group.append(node('small',stages[i]));const badge=node('span',r?r.likelihood*5*r.impact+' · '+bands[r.likelihood-1][r.impact-1]:'Not assessed','badge');if(r)colour(badge,bands[r.likelihood-1][r.impact-1]);group.append(badge);summaries.append(group);});const r=ratings[stage];selection.textContent=r?names[r.likelihood-1]+' × '+impacts[r.impact-1]+' = '+r.likelihood*5*r.impact:'Select a cell';showExplanation(r);}
 
 function closePickers(){enterprisePicker.hide();documentPicker.hide();ownerList.hidden=true;ownerField.el.setAttribute('aria-expanded','false');}
-function setBusy(value){busy=value;host.querySelectorAll('input,textarea,select,button').forEach(el=>el.disabled=value);if(!value)tierFields.forEach((el,i)=>el.disabled=config.projectMode&&i<2?true:i>0&&!tierFields[i-1].value);config.onBusy?.(value);}
+function setBusy(value){busy=value;host.querySelectorAll('input,textarea,select,button').forEach(el=>el.disabled=value);if(!value)tierFields.forEach((el,i)=>el.disabled=config.projectMode&&i<2?true:i>0&&!tierFields[i-1].value&&!(config.classificationMode==='category-event'&&i===2));config.onBusy?.(value);}
 function value(){return {risk_title:title.el.value.trim(),risk_description:description.el.value.trim(),
  classification_path:config.fixedCategory?[config.fixedCategory.id]:tierFields.filter(s=>s.value).map(s=>Number(s.value)),risk_owner_user_id:owner,
  inherent:ratings[0],residual:ratings[1],target:ratings[2],controls_summary:existing.el.value,
@@ -140,3 +140,4 @@ return {getValue:value,setValue,setBusy,isBusy:()=>busy,closePickers,focus:()=>t
 }
 return {mount};
 })();
+
