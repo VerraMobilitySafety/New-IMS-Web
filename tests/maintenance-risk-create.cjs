@@ -1,85 +1,39 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 let chromium;try{({chromium}=require('playwright'));}catch(e){if(process.platform!=='win32')throw e;({chromium}=require('C:/Users/dbleasel/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));}
 const root=path.join(__dirname,'..');
-
-test('maintenance risk is created in place, retains failed submissions and refreshes the contract register',async()=>{
+const optionsBase={can_submit:true,schema_ready:true,project_execution_id:7,classification_categories:[{id:7,tier:3,name:'Project Execution'},{id:8,tier:2,name:'Delivery'},{id:9,tier:1,name:'Traffic Interaction'}],classification_relationships:[{parent_id:7,child_id:8},{parent_id:8,child_id:9}],users:[{id:11,name:'Example Owner',email:'owner@example.test'}],documents:[{id:4,code:'DOC-4',title:'Traffic Procedure',version:'2'}],controls:[{id:17,code:'CTRL-17',title:'Separation'}],treatment_owners:[{id:11,name:'Example Owner',email:'owner@example.test'}]};
+test('maintenance matches Project assessment fields, matrix layout, retention and complete submission',async()=>{
  const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
- try{
-  const page=await browser.newPage();let fail=true,submitted=null,previousRequest=null,approvalState='Submitted';
-  const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.addInitScript(()=>localStorage.setItem('vero_session_token','test'));
-  await page.route('https://vero.test/**',route=>{
-   const file=path.join(root,new URL(route.request().url()).pathname);
-   return fs.existsSync(file)?route.fulfill({path:file}):route.fulfill({status:404,body:''});
-  });
-  await page.route('**/api/**',async route=>{
-   const url=route.request().url();let data={},status=200;
-   if(url.endsWith('/auth/me'))data={user:{first_name:'Test',vero_role:'Administrator'}};
-   else if(url.endsWith('/maintenance-contracts'))data={contracts:[{id:42,contract_name:'Maintenance A',contract_code:'MC-42'}]};
-   else if(url.endsWith('/details'))data={sources:[],requirements:[]};
-   else if(url.endsWith('/risk-submission-capabilities'))data={can_submit:true};
-   else if(url.endsWith('/risk-classifications'))data={categories:[{id:2,tier:2,category_name:'Equipment',status:'Active'},{id:7,tier:1,category_name:'Equipment failure',status:'Active'}],relationships:[{parent_category_id:2,child_category_id:7}]};
-   else if(url.endsWith('/users/active')||url.endsWith('/risk-treatment-owners'))data={users:[{id:10,name:'Risk Owner',first_name:'Risk',last_name:'Owner'}]};
-   else if(url.endsWith('/risk-control-documents'))data={documents:[{id:9,document_number:'DOC-9',document_title:'Maintenance Procedure',version_number:'2',document_type:'Procedure'}]};
-   else if(url.endsWith('/contract-submission'))data={available:true,is_live:false,approval_state:approvalState,capabilities:{can_request_changes:approvalState==='Submitted',can_approve:false,can_resubmit:approvalState==='Changes Requested'},submission:{risk_id:50,contract_id:42,status:approvalState,version:1,package_hash:'test-hash',risk:{id:50,risk_code:'MR-50',risk_title:submitted.risk_title,risk_description:submitted.risk_description},proposed_assessment:submitted.proposed_assessment,documents:[{id:9,document_number:'DOC-9',document_title:'Maintenance Procedure',version_number:'2'}],treatment_actions:submitted.treatment_actions,classification_category_id:7,reason:submitted.reason}};
-   else if(url.endsWith('/contract-submission/decision')){assert.equal(route.request().postDataJSON().decision,'Return');approvalState='Changes Requested';data={approval_state:approvalState};}
-   else if(url.endsWith('/risks'))data={risks:[]};
-   else if(url.endsWith('/risk-drafts')){
-    if(route.request().method()==='POST'){
-     const payload=route.request().postDataJSON();
-     assert.equal(payload.contract_id,42);assert.equal(payload.project_id,undefined);
-     assert.equal(payload.classification_category_id,7);assert.deepEqual(payload.proposed_document_ids,[9]);
-     assert.equal(payload.proposed_assessment.inherent_likelihood,4);assert.equal(payload.proposed_assessment.residual_impact,2);
-     assert.equal(payload.treatment_actions.length,2);assert.equal(payload.treatment_actions[0].owner_user_id,10);
-     if(fail){previousRequest=payload.request_id;status=503;data={message:'Temporary failure'};}
-     else{assert.equal(payload.request_id,previousRequest);submitted=payload;data={risk_id:50,contract_id:42,approval_state:'Submitted'};}
-    }else data={drafts:submitted?[{id:50,risk_code:'MR-50',risk_title:submitted.risk_title,status:'Draft',approval_state:approvalState}]:[]};
-   }
-   return route.fulfill({status,json:data,headers:{'Access-Control-Allow-Origin':'*'}});
-  });
-  await page.goto('https://vero.test/maintenance-workspace.html?id=42');
-  await page.getByRole('button',{name:'Risks',exact:true}).click();
-  await page.getByRole('button',{name:'+ Add Risk',exact:true}).click();
-  await page.locator('#projectRiskCreateSave').waitFor({state:'visible'});
-  await page.locator('#projectRiskCreateCategory').selectOption('7');
-  await page.locator('#projectRiskCreateTitle').fill('Equipment failure');
-  await page.locator('#projectRiskCreateDescription').fill('Failure could interrupt the maintenance service.');
-  for(const [id,value] of Object.entries({praIL:'4',praIC:'4',praRL:'2',praRC:'2',praOwner:'10',praTreatmentOwner:'10'}))await page.locator('#'+id).selectOption(value);
-  await page.locator('#praDocuments input[data-document-id]').check();
-  await page.locator('#praActionTitle').fill('Check equipment');await page.locator('#praDue').fill('2026-12-01');
-  await page.locator('#praAddAction').click();
-  await page.locator('[data-action-field="title"]').fill('Arrange backup equipment');
-  await page.locator('[data-action-field="owner_user_id"]').selectOption('10');
-  await page.locator('[data-action-field="due_date"]').fill('2026-12-02');
-  await page.locator('#projectRiskCreateReason').fill('Required for this maintenance contract.');
-  await page.locator('#projectRiskCreateSave').click();await page.getByText(/Temporary failure/).waitFor();
-  assert.equal(await page.locator('#projectRiskCreateTitle').inputValue(),'Equipment failure');
-  fail=false;await page.locator('#projectRiskCreateSave').click();
-  await page.getByRole('button',{name:'Open submitted risk',exact:true}).waitFor();
-  assert.match(await page.locator('#contractRiskList').innerText(),/Submitted · Pending approval/);
-  assert.equal(page.url(),'https://vero.test/maintenance-workspace.html?id=42');
-  await page.getByRole('button',{name:'Open submitted risk',exact:true}).click();
-  await page.getByText('Maintenance Procedure',{exact:false}).last().waitFor();
-  page.once('dialog',dialog=>dialog.accept('Please explain the treatment controls.'));
-  await page.getByRole('button',{name:'Return for changes',exact:true}).click();
-  await page.getByRole('button',{name:'Revise returned submission',exact:true}).waitFor();
-  await page.getByRole('button',{name:'Revise returned submission',exact:true}).click();
-  await page.waitForFunction(()=>document.getElementById('projectRiskCreateTitle').value==='Equipment failure');
-  await page.getByRole('button',{name:'Resubmit corrected risk',exact:true}).waitFor();
-  await page.locator('#projectRiskCreateCancel').click();
-  await page.getByRole('button',{name:'Open submitted risk',exact:true}).click();
-  await page.getByRole('button',{name:'Close risk review',exact:true}).click();
-  await page.getByRole('button',{name:'+ Add Risk',exact:true}).click();
-  await page.locator('#projectRiskCreateCategory').selectOption('7');
-  await page.locator('#projectRiskCreateTitle').fill('Keep this draft');
-  await page.locator('#projectRiskCreateCancel').click();
-  await page.getByRole('button',{name:'+ Add Risk',exact:true}).click();
-  assert.equal(await page.locator('#projectRiskCreateTitle').inputValue(),'Keep this draft');
-  await page.setViewportSize({width:390,height:844});
-  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
-  assert.equal(await page.locator('#projectRiskCreateOverlay .drawer').evaluate(el=>el.scrollWidth<=el.clientWidth),true);
-  await page.locator('#projectRiskCreateOverlay .drawer').evaluate(el=>el.scrollTop=0);
-  await page.screenshot({path:path.join(root,'../artifacts/maintenance-add-risk-mobile.png')});
-  assert.deepEqual(errors,[]);
+ try{for(const width of [1500,390]){const styles={};for(const mode of ['project','maintenance']){
+ const page=await browser.newPage({viewport:{width,height:1100}}),posts=[],errors=[];let fail=true;page.on('pageerror',e=>errors.push(e.message));
+ const options={...optionsBase,review_policy:{reference_date:'2026-10-16',context:mode==='project'?'Project':'Maintenance Contract',project_start:'2026-01-01',project_end:'2028-01-01'}};
+ await page.route('**/*',async route=>{const req=route.request(),u=new URL(req.url());
+ if(u.pathname.endsWith('/risk-submission-options'))return route.fulfill({json:options});
+ if(u.pathname.endsWith('/risk-drafts')||u.pathname.endsWith('/risks/master-drafts')||u.pathname.endsWith('/resubmit')){posts.push(req.postDataJSON());return route.fulfill({status:fail?503:200,json:fail?{message:'Temporary save failure'}:{risk_id:201,[mode==='project'?'project_id':'contract_id']:123,is_live:false}});}
+ if(u.hostname!=='vero.test')return route.abort();const file=path.resolve(root,'.'+u.pathname);if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});let body=fs.readFileSync(file);
+ if(file.endsWith('-workspace.html'))body=body.toString().replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace('</body>','<script src="risk-assessment-criteria.js"></script><script src="risk-review-policy.js"></script><script src="risk-assessment-form.js"></script><script src="'+mode+'-risk-create.js"></script></body>');
+ return route.fulfill({contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css','.png':'image/png'})[path.extname(file)]||'application/octet-stream',body});});
+ await page.goto('https://vero.test/'+mode+'-workspace.html');
+ await page.evaluate(mode=>{window.testRiskConfig={apiBase:'https://vero.test/api',apiFetch:(u,o)=>fetch(u,o),[mode==='project'?'project':'contract']:{id:123,[mode==='project'?'project_code':'contract_code']:'EX-123'},onSaved:r=>window.savedRisk=r};return window[mode==='project'?'VeroProjectRiskCreator':'VeroMaintenanceRiskCreator'].open(window.testRiskConfig);},mode);
+ const form=page.locator('#projectRiskCreateOverlay');assert.equal(await form.getByLabel('Tier 4 Risk Domain',{exact:true}).isVisible(),false);assert.equal(await form.getByLabel('Tier 3 Risk Stream',{exact:true}).isVisible(),false);assert.equal(await form.locator('.stage').count(),3);
+ await form.getByLabel('Tier 2 Risk Category',{exact:true}).selectOption('8');await form.getByLabel('Tier 1 Risk Event',{exact:true}).selectOption('9');
+ await form.getByLabel('Risk Title',{exact:true}).fill('Service delivery risk');await form.getByLabel('Risk Description',{exact:true}).fill('Vehicle interaction during contracted service delivery.');await form.getByLabel('Risk Owner',{exact:true}).fill('owner@');await form.locator('.owner-option').first().click();
+ await form.locator('.cell').nth(4).click();await form.locator('.stage').nth(1).click();await form.locator('.cell').nth(17).click();assert.equal(await form.getByLabel('Next Review Date',{exact:true}).inputValue(),mode==='project'?'2027-01-16':'2027-10-16');
+ await form.getByLabel('Find Document Library Controls',{exact:true}).fill('Traffic');await form.locator('.add-option').filter({hasText:'DOC-4'}).click();
+ await form.locator('.stage').nth(2).click();await form.locator('.cell').nth(21).click();await form.getByLabel('Further Controls And Treatments',{exact:true}).fill('Install physical separation.');
+ await form.getByRole('button',{name:'+ Add treatment action',exact:true}).click();await form.locator('[id*="treatment-title"]').fill('Install barriers');await form.locator('[id*="treatment-owner"]').selectOption('11');await form.locator('[id*="treatment-due-date"]').fill('2026-12-01');
+ await form.getByLabel('Assessment Notes And Justification',{exact:true}).fill('Reviewed exposure, existing controls and the intended target.');
+ styles[mode]=await form.evaluate(el=>['.drawer','.drawer-head','.drawer-body','.vero-central','.vero-central .fields','.vero-central .stage','.vero-central .panel','.vero-central .cell','.vero-central textarea','.vero-central .button','.vero-central .footer','.vero-central .footer .button'].map(s=>{const c=getComputedStyle(el.querySelector(s));return {selector:s,padding:c.padding,fontFamily:c.fontFamily,fontSize:c.fontSize,lineHeight:c.lineHeight,borderRadius:c.borderRadius,background:c.backgroundColor,fontWeight:c.fontWeight,borderTop:c.borderTop,display:c.display,alignItems:c.alignItems,justifyContent:c.justifyContent,gap:c.gap,overflow:c.overflow,boxShadow:c.boxShadow,...(s==='.vero-central .cell'?{width:c.width,height:c.height}:{})};}));
+ await form.getByRole('button',{name:'Submit For Risk Officer Review',exact:true}).click();await form.getByText(/Temporary save failure/).waitFor();
+ const p=posts[0];assert.equal(p.assessment_format,'shared-v1');assert.equal(p.classification_parent_id,8);assert.equal(p.classification_category_id,9);assert.deepEqual(p.proposed_document_ids,[4]);assert.equal(p.proposed_assessment.target_likelihood,1);assert.equal(p.proposed_assessment.target_impact,2);assert.equal(p.treatment_actions[0].owner_user_id,11);
+ await form.getByRole('button',{name:'Cancel',exact:true}).click();await page.evaluate(mode=>window[mode==='project'?'VeroProjectRiskCreator':'VeroMaintenanceRiskCreator'].open(window.testRiskConfig),mode);assert.equal(await form.getByLabel('Risk Title',{exact:true}).inputValue(),'Service delivery risk');assert.equal(await form.locator('.added-item').count(),1);
+ fail=false;await form.getByRole('button',{name:'Submit For Risk Officer Review',exact:true}).evaluate(b=>{b.click();b.click();});await page.waitForFunction(()=>!!window.savedRisk);assert.equal(posts.length,2);assert.equal(posts[1].request_id,p.request_id);assert.equal(posts[1][mode==='project'?'project_id':'contract_id'],123);assert.equal(posts[1][mode==='project'?'contract_id':'project_id'],undefined);
+ await page.evaluate(({mode,p})=>{window.savedRisk=null;window.testRiskConfig.submission={risk_id:201,version:2,package_hash:'reviewed-hash',risk:{risk_title:p.risk_title,risk_description:p.risk_description},proposed_assessment:p.proposed_assessment,classification_parent_id:8,classification_category_id:9,documents:[{id:4}],proposed_controls:[],treatment_actions:p.treatment_actions,reason:p.reason};return window[mode==='project'?'VeroProjectRiskCreator':'VeroMaintenanceRiskCreator'].open(window.testRiskConfig);},{mode,p:posts[1]});
+ assert.equal(await form.getByLabel('Risk Title',{exact:true}).inputValue(),'Service delivery risk');
+ await form.locator('.stage').nth(2).click();await page.screenshot({path:path.join(root,'../artifacts/maintenance-parity/'+mode+'-'+width+'.png')});
+ await form.getByRole('button',{name:'Resubmit For Risk Officer Review',exact:true}).click();await page.waitForFunction(()=>!!window.savedRisk);
+ assert.equal(posts.length,3);assert.equal(posts[2].version,2);assert.equal(posts[2].package_hash,'reviewed-hash');assert.equal(posts[2].request_id,undefined);assert.equal(posts[2].proposed_assessment.target_likelihood,1);assert.equal(posts[2].proposed_assessment.target_impact,2);
+ assert.deepEqual(errors,[]);await page.close();
+ }assert.deepEqual(styles.maintenance,styles.project,'Assessment styling must match Project Management at '+width+'px');}
  }finally{await browser.close();}
 });
