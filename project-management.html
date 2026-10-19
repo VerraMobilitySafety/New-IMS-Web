@@ -3,7 +3,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<title>VERRA | VERO — Implementation</title><style>
+<title>VERRA | VERO — Projects</title><style>
 :root{
  --charcoal:#3D3935; --green:#A9C23F; --grey:#857874; --teal:#1D8296;
  --purple:#464E7E; --bg:#F7F8F7; --white:#fff; --line:#E5E1DE;
@@ -358,7 +358,8 @@
 <link rel="stylesheet" href="risk-page-loader.css?v=20261016-rollout">
 <link rel="stylesheet" href="risk-nk9-animation.css?v=20261016-rollout">
 <script src="risk-nk9-animation.js?v=20261016-rollout"></script>
-<script src="risk-page-loader.js?v=20261016-rollout" data-tasks="account projects"></script></head>
+<script src="risk-page-loader.js?v=20261016-rollout" data-tasks="account projects"></script><script src="project-workflow.js?v=20261020-first-fixes"></script>
+</head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
@@ -390,14 +391,14 @@
 
  <section class="grid">
   <div class="panel project-list">
-   <div class="panel-head"><div><h2>Implementation Register</h2><span id="projectCount">Loading projects…</span></div><span>Click a project to open</span></div>
+   <div class="panel-head"><div><h2>Projects Register</h2><span id="projectCount">Loading projects…</span></div><span>Click a project to open</span></div>
    <table class="table project-table">
     <thead><tr><th>Project</th><th>Customer</th><th>Action Required By</th><th>Status</th><th>Stage</th><th>Next Step</th></tr></thead>
     <tbody id="projectTableBody"><tr><td colspan="6" class="empty">Loading live projects from VERO…</td></tr></tbody>
    </table>
   </div>
  </section>
- <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Implementation • v1.54</span></footer>
+ <footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Projects • v1.54</span></footer>
 </div></main></div>
 
 
@@ -523,10 +524,11 @@ function money(v){if(v===null||v===undefined||v==='')return '—';const n=Number
 function normalise(p){
  const status=p.status||'Not Set';
  const s=status.toLowerCase();
- const life=s.includes('complete')?'completion':s.includes('progress')?'execution':'initiation';
- const workflowStage=p.current_stage||p.workflow_stage||(s==='draft'?'New Project Request':s==='submitted'?'Project Setup':s==='planning'?'New Project Request':'Project Delivery');
- const nextStep=p.next_step||(workflowStage==='New Project Request'?'Complete New Project Request':workflowStage==='Project Setup'?'Complete Project Setup':'Open Project Workspace');
- const actionRequiredBy=p.action_required_by||(s==='draft'?p.project_initiator:null)||'—';
+ const workflow=VeroProjectWorkflow.resolve(p);
+ const life=workflow.lifecycle;
+ const workflowStage=workflow.stage;
+ const nextStep=workflow.nextStep;
+ const actionRequiredBy=workflow.responsible;
  const actionRequiredByUserId=p.action_required_by_user_id??null;
   return {raw:p,actionRequiredByUserId,name:p.project_name||'Untitled Project',code:p.project_type||'',owner:p.project_owner||'Unassigned',actionRequiredBy,customer:p.customer||'',status,stage:workflowStage,nextStep,stageKey:life,due:p.target_end_date||'',description:p.description||''};
 }
@@ -561,12 +563,20 @@ async function openProjectAction(i){
  if(p.stage==='Project Execution'||p.stage==='Project Execution Checklist'){await openProjectExecution(p);return}
  await openProject(i);
 }
+let requestedWorkflowOpened=false;
+async function openRequestedWorkflow(){
+ const query=new URLSearchParams(location.search);
+ if(requestedWorkflowOpened||query.get('action')!=='workflow')return;
+ requestedWorkflowOpened=true;
+ const index=projects.findIndex(p=>String(p.raw.id)===query.get('project_id'));
+ if(index>=0&&ownsProjectAction(projects[index]))await openProjectAction(index);
+}
 async function loadProjects(){
  try{
   const r=await apiFetch(PROJECTS_API,{headers:{Accept:'application/json'},cache:'no-store'});
   if(!r.ok)throw Error('API returned '+r.status);
   const d=await r.json(),rows=Array.isArray(d)?d:(d.projects||[]);
-  projects=rows.map(normalise);render();kpis();
+  projects=rows.map(normalise);render();kpis();await openRequestedWorkflow();
  }catch(e){
   console.error(e);
   document.getElementById('projectTableBody').innerHTML='<tr><td colspan="6" class="empty"><b>Unable to load live projects.</b><br>Check the browser console and Azure Function CORS settings.</td></tr>';
@@ -580,7 +590,7 @@ function render(){
   const restrictedApproval=p.stage==='Finance Approval'||p.stage==='Leadership Approval';
   const canOpenRow=restrictedApproval?ownsProjectAction(p):(!(String(p.status).toLowerCase()==='draft'||p.stage==='New Project Request')||ownsProjectAction(p));
   return `<tr class="data project-row" data-stage="${esc(p.stageKey)}" data-search="${esc(search)}" ${canOpenRow?`onclick="openProject(${i})"`:''}>
-   <td><div class="project-name">${esc(p.name)}</div><div class="meta">${esc(p.description||'')}</div></td>
+   <td><div class="project-name">${esc(p.name)}</div><div class="meta">${esc(p.description||'')}</div>${canOpenRow?`<a class="meta" href="project-workspace.html?id=${encodeURIComponent(p.raw.id)}" onclick="event.stopPropagation()">Open Workspace</a>`:''}</td>
    <td>${esc(p.customer||'—')}</td><td><b>${esc(p.actionRequiredBy)}</b></td>
    <td><span class="status ${String(p.status).toLowerCase()==='draft'?'draft':'current'}">${esc(p.status)}</span></td>
    <td><span class="stage ${stageClass(p.stageKey)}">${esc(p.stage)}</span></td>
