@@ -185,9 +185,9 @@
            id="incidentNavGroup">
 
         <div class="vero-nav-parent">
-          <a class="${incidentActive ? 'active' : 'placeholder'}"
-             href="${incidentActive ? 'incident-management.html' : '#'}"
-             ${incidentActive ? '' : 'onclick="return false"'}>
+          <a class="${incidentActive ? 'active' : ''}"
+             href="incident-management.html"
+             >
             <span class="ico" data-lucide="siren"></span>
             <span>Incident Management</span>
           </a>

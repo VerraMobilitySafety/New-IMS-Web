@@ -1179,6 +1179,8 @@ document.getElementById('assignRecordReviewerBtn')
 
 function openActionDetail(index){
  const action=allActions[index]; if(!action)return;
+ if(action.source==='Incidents' && /^[0-9a-f-]{36}$/i.test(String(action.source_id||''))){location.href='incident-management.html?'+(action.action_type==='Investigation'?'event=':'action=')+encodeURIComponent(action.source_id);return;}
+
  currentAction=action; resetDecisionUI();
 
  const isRecordAssignment=

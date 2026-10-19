@@ -1,0 +1,14 @@
+name: Event workflow UI validation
+on:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  event-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --package-lock=false jsdom@26.1.0
+      - run: node tests/event-workflow.cjs
