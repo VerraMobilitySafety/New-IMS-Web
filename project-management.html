@@ -590,7 +590,7 @@ function render(){
   const restrictedApproval=p.stage==='Finance Approval'||p.stage==='Leadership Approval';
   const canOpenRow=restrictedApproval?ownsProjectAction(p):(!(String(p.status).toLowerCase()==='draft'||p.stage==='New Project Request')||ownsProjectAction(p));
   return `<tr class="data project-row" data-stage="${esc(p.stageKey)}" data-search="${esc(search)}" ${canOpenRow?`onclick="openProject(${i})"`:''}>
-   <td><div class="project-name">${esc(p.name)}</div><div class="meta">${esc(p.description||'')}</div></td>
+   <td><div class="project-name">${esc(p.name)}</div><div class="meta">${esc(p.description||'')}</div>${canOpenRow?`<a class="meta" href="project-workspace.html?id=${encodeURIComponent(p.raw.id)}" onclick="event.stopPropagation()">Open Workspace</a>`:''}</td>
    <td>${esc(p.customer||'—')}</td><td><b>${esc(p.actionRequiredBy)}</b></td>
    <td><span class="status ${String(p.status).toLowerCase()==='draft'?'draft':'current'}">${esc(p.status)}</span></td>
    <td><span class="stage ${stageClass(p.stageKey)}">${esc(p.stage)}</span></td>
