@@ -12,3 +12,25 @@
 #contractRequirementRegister .contract-requirement-open:hover{text-decoration:underline;color:#3d5818}
 #contractRequirementRegister .contract-requirement-open:focus-visible{outline:2px solid #6b8325;outline-offset:4px}
 #contractRequirementRows tr[data-requirement]{cursor:pointer}
+
+/* Consistent typography and spacing in the requirement detail drawer. */
+#obligationModal .drawer-body{font-size:14px;line-height:1.55;color:#3d3935}
+#obligationModal .drawer-head h2{font-size:22px;line-height:1.3;font-weight:700;margin:5px 0 8px}
+#obligationModal .drawer-head p,#obligationModal .drawer-head small{font-size:11px;line-height:1.5}
+#obligationModal .drawer-body h3{font-size:14px;line-height:1.4;font-weight:700;margin:0}
+#obligationModal .drawer-body p{font-size:14px;line-height:1.55}
+#obligationModal .compliance-section-head small{display:block;font-size:12px;line-height:1.5;margin-top:4px}
+#obligationModal .detail>span,#obligationModal .compliance-position span{font-size:11px;line-height:1.4;letter-spacing:.06em}
+#obligationModal .detail>strong,#obligationModal .compliance-position-meta strong{font-size:14px;line-height:1.55;font-weight:500}
+#obligationModal #detailStatus{font-size:18px;line-height:1.4}
+#obligationModal .btn{font-size:12px;line-height:1.4}
+#obligationModal #customerContractRequirements{padding:18px}
+#customerContractRequirements>p{color:#726b64;margin:6px 0 16px}
+#customerContractRequirements details{border:1px solid #e2dfda;border-radius:8px;margin-top:10px;overflow:hidden}
+#customerContractRequirements summary{padding:12px 14px;font-size:13px;line-height:1.5;cursor:pointer;background:#f8f8f6}
+#customerContractRequirements summary b{font-weight:600}
+#customerContractRequirements details>p{padding:0 14px}
+#customerContractRequirements article{padding:14px;border-top:1px solid #e9e6e1}
+#customerContractRequirements article p{margin:0 0 8px;font-size:14px}
+#customerContractRequirements article p:last-child{margin-bottom:0;color:#726b64;font-size:12px}
+#obligationModal #complianceRiskClassifications{font-size:14px;line-height:1.55}
