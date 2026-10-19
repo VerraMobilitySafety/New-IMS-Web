@@ -3,6 +3,10 @@
 (() => {
  'use strict';
  const types = Object.freeze({
+  'Maintenance Risk Review': {mode:'review', label:'Review Maintenance Risk'},
+  'Maintenance Risk Correction': {mode:'correct', label:'Update Maintenance Risk'},
+  'Maintenance Risk Treatment': {mode:'treatment', label:'Open Maintenance Treatment'},
+  'Maintenance Risk Treatment Verification': {mode:'verify', label:'Verify Maintenance Treatment'},
   'Project Risk Review': {mode:'review', label:'Review Project Risk'},
   'Project Risk Correction': {mode:'correct', label:'Update Project Risk Submission'},
   'Project Risk Assessment Review': {mode:'assessment_review', label:'Review Project Risk Assessment'},
@@ -42,7 +46,8 @@
    if (!riskId || !treatmentId) return null;
    return {href:'risk.html?' + new URLSearchParams({risk_id:riskId,central_treatment_id:treatmentId}).toString(),label:'Open Risk Treatment'};
   }
-  const projectId = positiveId(action.project_id);
+  const maintenance = String(action.action_type||'').startsWith('Maintenance Risk ');
+  const projectId = positiveId(maintenance ? action.contract_id : action.project_id);
   const riskId = positiveId(action.risk_id);
   if (!type || !projectId || !riskId) return null;
   const params = new URLSearchParams({id:projectId, risk_id:riskId, risk_action:type.mode});
@@ -61,8 +66,9 @@
    if (!treatmentId) return null;
    params.set('treatment_action_id', treatmentId);
   }
-  return {href:'project-workspace.html?' + params.toString(), label:type.label};
+  return {href:(maintenance?'maintenance-workspace.html?':'project-workspace.html?') + params.toString(), label:type.label};
  }
  window.VeroRiskActions = Object.freeze({isRiskAction, normaliseActions, destination});
 })();
+
 

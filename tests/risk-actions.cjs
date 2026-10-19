@@ -203,3 +203,13 @@ test('central treatments use validated risk/action identifiers without a project
  assert.equal(api.destination(action).href,'risk.html?risk_id=21&central_treatment_id=9');
  for(const value of [null,0,-1,'../bad',true])assert.equal(api.destination({...action,treatment_action_id:value}),null);
 });
+
+
+test('maintenance work uses contract identifiers and the maintenance workspace',()=>{
+ const {context}=setup();
+ const action={source:'Risks',action_type:'Maintenance Risk Review',contract_id:42,risk_id:7,submission_id:7};
+ const result=context.window.VeroRiskActions.destination(action);
+ assert.equal(result.href,'maintenance-workspace.html?id=42&risk_id=7&risk_action=review&submission_id=7');
+ assert.equal(context.window.VeroRiskActions.destination({...action,contract_id:null,project_id:42}),null);
+ assert.equal(context.window.VeroRiskActions.destination({...action,contract_id:'javascript:bad'}),null);
+});

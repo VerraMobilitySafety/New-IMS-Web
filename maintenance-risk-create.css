@@ -1,0 +1,36 @@
+/* Project Risk creation — match VERO governed drawer styling */
+#projectRiskCreateOverlay .drawer{width:min(760px,96vw);font-family:Montserrat,Verdana,Arial,sans-serif}
+#projectRiskCreateOverlay .drawer-head{padding:24px 28px}
+#projectRiskCreateOverlay .drawer-head h2{font-size:23px;letter-spacing:-.35px}
+#projectRiskCreateOverlay .drawer-body{padding:26px 28px}
+#projectRiskCreateOverlay #projectRiskCreateForm>label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--grey);font-weight:800;margin:18px 0 7px}
+#projectRiskCreateOverlay #projectRiskCreateForm>input,
+#projectRiskCreateOverlay #projectRiskCreateForm>select,
+#projectRiskCreateOverlay #projectRiskCreateForm>textarea{display:block;width:100%;box-sizing:border-box;border:1px solid #d7d3d0;border-radius:8px;padding:12px;font:500 12px Montserrat,Verdana,Arial,sans-serif;margin:0 0 15px;background:#fff}
+#projectRiskCreateOverlay #projectRiskCreateForm>textarea{resize:vertical;min-height:95px}
+#projectRiskCreateOverlay #projectRiskCreateForm .drawer-actions{border-top:1px solid var(--line);padding-top:18px;margin-top:20px}
+#projectRiskCreateOverlay #projectRiskCreateStatus{font-size:12px;line-height:1.5;color:var(--charcoal)}
+#projectRiskCreateOverlay .meta{font-size:11px;line-height:1.5;color:var(--grey)}
+#projectRiskCreateOverlay .project-risk-section{font-size:13px;font-weight:800;margin:24px 0 12px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+#projectRiskCreateOverlay #praControls,#projectRiskCreateOverlay #praActionPriority{width:100%;border:1px solid #d7d3d0;border-radius:8px;padding:10px;font:500 12px Montserrat,Verdana,Arial,sans-serif}
+#projectRiskCreateOverlay #projectRiskCreateForm>label:has(#praActionTitle),
+#projectRiskCreateOverlay #projectRiskCreateForm>label:has(#praActionDescription),
+#projectRiskCreateOverlay #projectRiskCreateForm>label:has(#praActionPriority),
+#projectRiskCreateOverlay #projectRiskCreateForm>label:has(#praDue){display:block;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--grey);font-weight:800;margin:18px 0 7px}
+#projectRiskCreateOverlay #praActionTitle,
+#projectRiskCreateOverlay #praActionDescription,
+#projectRiskCreateOverlay #praActionPriority,
+#projectRiskCreateOverlay #praDue{display:block;width:100%;box-sizing:border-box;border:1px solid #d7d3d0;border-radius:8px;padding:12px;margin:8px 0 15px;background:#fff;color:var(--charcoal);font:500 12px Montserrat,Verdana,Arial,sans-serif}
+#projectRiskCreateOverlay #praActionDescription{min-height:95px;resize:vertical}
+#projectRiskCreateOverlay .project-risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#projectRiskCreateOverlay .project-risk-grid label{font-size:10px;font-weight:800;color:var(--grey);text-transform:uppercase}
+#projectRiskCreateOverlay .project-risk-grid select,#projectRiskCreateOverlay #praOwner,#projectRiskCreateOverlay #praTreatmentOwner{display:block;width:100%;margin:7px 0 10px;border:1px solid #d7d3d0;border-radius:8px;padding:11px;font:500 12px Montserrat,Verdana,Arial,sans-serif}
+#projectRiskCreateOverlay #praScores{font-size:12px;font-weight:800;padding:8px 0}
+
+
+
+
+
+.modal-back{position:fixed;inset:0;background:#0007;display:none;z-index:220;justify-content:flex-end}.modal-back.show{display:flex}.modal-back .drawer{width:min(800px,96vw)}.modal-back label{display:block}.drawer-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+@media(max-width:560px){#projectRiskCreateOverlay .project-risk-grid{grid-template-columns:1fr}#projectRiskCreateOverlay .drawer-body{padding:20px 18px}.modal-back .drawer{max-width:100vw}}
