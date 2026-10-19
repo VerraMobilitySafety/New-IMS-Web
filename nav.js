@@ -132,10 +132,10 @@
     <div class="nav-section">
       <div class="nav-label">Management Systems</div>
 
-      <a class="placeholder" href="#" onclick="return false">
-        <span class="ico" data-lucide="shield-alert"></span>
-        <span>Safety Risks</span>
-      </a>
+      <details class="vero-risk-navigation" ${isActive('working-at-heights.html') ? 'open' : ''}>
+        <summary><span class="ico" data-lucide="shield-alert"></span><span>Safety Risks</span></summary>
+        <a class="${isActive('working-at-heights.html') ? 'active' : ''}" href="working-at-heights.html">Working at Heights</a>
+      </details>
 
       <a class="placeholder" href="#" onclick="return false">
         <span class="ico" data-lucide="badge-check"></span>
@@ -242,6 +242,11 @@
     style.id = styleId;
 
     style.textContent = `
+      #vero-nav .vero-risk-navigation summary { display:flex; align-items:center; gap:11px; padding:9px 12px; font-size:12px; border-left:3px solid transparent; border-radius:7px; cursor:pointer; color:#f7f7f6; }
+      #vero-nav .vero-risk-navigation summary::after {content:'›';margin-left:auto}
+      #vero-nav .vero-risk-navigation[open] summary::after {transform:rotate(90deg)}
+      #vero-nav .vero-risk-navigation[open] summary {background:rgba(255,255,255,.08);border-left-color:#A9C23F}
+      #vero-nav .vero-risk-navigation > a {margin-left:34px!important;font-size:11px!important}
       #vero-nav .ico { width:20px;min-width:20px;display:inline-flex;align-items:center;justify-content:center; }
       #vero-nav .ico svg { width:17px;height:17px;display:block;stroke:currentColor; }
       #vero-nav .vero-nav-parent {
@@ -315,3 +320,4 @@
     label.style.whiteSpace = 'nowrap';
   });
 })();
+
