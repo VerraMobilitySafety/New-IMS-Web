@@ -11,6 +11,8 @@ on:
       - 'project-workspace.html'
       - 'project-management.html'
       - 'project-workflow.js'
+      - 'project-document-viewer.js'
+      - 'tests/project-document-viewer.cjs'
       - 'tests/project-first-fixes.cjs'
       - 'my-actions.html'
       - 'project-risk-*.js'
@@ -67,7 +69,7 @@ jobs:
           }
           new vm.Script(fs.readFileSync('project-risk-submission.js','utf8'),{filename:'project-risk-submission.js'});
           JS
-          node --test tests/project-risk-*.cjs tests/project-first-fixes.cjs
+          node --test tests/project-risk-*.cjs tests/project-first-fixes.cjs tests/project-document-viewer.cjs
 
   maintenance-browser:
     runs-on: ubuntu-latest

@@ -358,6 +358,7 @@
 <script src="risk-assessment-form.js"></script>
 <script src="project-risk-create.js"></script>
 <script src="project-workflow.js?v=20261020-first-fixes"></script>
+<script src="project-document-viewer.js?v=20261020-viewer"></script>
 </head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -591,12 +592,8 @@ async function uploadProjectContract(event){
  finally{projectContractUploadPending=false;button.disabled=false;input.disabled=false;}
 }
 async function viewProjectDocument(documentId){
- if(!currentProject?.id||!documentId)return;
- try{
-  const res=await apiFetch(`${PROJECT_DOCUMENTS_API(currentProject.id)}/${documentId}/content`,{cache:'no-store'});
-  if(!res.ok){const d=await res.json().catch(()=>({}));throw new Error(d.message||('Document API returned '+res.status))}
-  const blob=await res.blob();const url=URL.createObjectURL(blob);window.open(url,'_blank','noopener');setTimeout(()=>URL.revokeObjectURL(url),60000);
- }catch(e){console.error(e);alert('VERO could not open this document. '+e.message)}
+ if(!currentProject?.id||!Number.isInteger(Number(documentId))||Number(documentId)<=0)return;
+ return VeroProjectDocumentViewer.open({fetch:apiFetch,contentUrl:`${API_BASE}/projects/${encodeURIComponent(currentProject.id)}/documents/${encodeURIComponent(documentId)}/content`});
 }
 function openDeleteProjectModal(){if(signedInUser?.vero_role!=='Administrator'||!currentProject)return;setText('deleteProjectCodeLabel',currentProject.project_code||String(currentProject.id));const input=document.getElementById('deleteProjectCodeInput');if(input)input.value='';const er=document.getElementById('deleteProjectError');if(er)er.style.display='none';validateDeleteProjectCode();document.getElementById('deleteProjectModal')?.classList.add('show');setTimeout(()=>input?.focus(),50)}
 function closeDeleteProjectModal(){document.getElementById('deleteProjectModal')?.classList.remove('show')}

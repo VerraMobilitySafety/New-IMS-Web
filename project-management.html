@@ -359,6 +359,7 @@
 <link rel="stylesheet" href="risk-nk9-animation.css?v=20261016-rollout">
 <script src="risk-nk9-animation.js?v=20261016-rollout"></script>
 <script src="risk-page-loader.js?v=20261016-rollout" data-tasks="account projects"></script><script src="project-workflow.js?v=20261020-first-fixes"></script>
+<script src="project-document-viewer.js?v=20261020-viewer"></script>
 </head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -1062,12 +1063,8 @@ async function uploadMasterContract(){
  }catch(e){if(card)card.textContent='Upload failed.';alert(e.message)}
 }
 async function viewProjectDocument(documentId){
- if(!currentProject?.id)return;
- try{
-  const r=await apiFetch(`${API_BASE}/projects/${currentProject.id}/documents/${documentId}/content`);
-  if(!r.ok)throw new Error(`Unable to open document (${r.status})`);
-  const blob=await r.blob();const url=URL.createObjectURL(blob);window.open(url,'_blank','noopener');setTimeout(()=>URL.revokeObjectURL(url),60000);
- }catch(e){alert(e.message)}
+ if(!currentProject?.id||!Number.isInteger(Number(documentId))||Number(documentId)<=0)return;
+ return VeroProjectDocumentViewer.open({fetch:apiFetch,contentUrl:`${API_BASE}/projects/${encodeURIComponent(currentProject.id)}/documents/${encodeURIComponent(documentId)}/content`});
 }
 
 async function saveRequest(e){
