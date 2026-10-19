@@ -2,7 +2,7 @@
 const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
 let contracts=[],selected=null,tab='Overview',maintenanceFilter='all',contractDetails=null,importOptions=null;
 const workspace=!!document.getElementById('contractWorkspace');
-const names=['Overview','Risks','Compliance','Records'];
+const names=['Overview','Sites','Events','Risks','Compliance','Records'];
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=x=>x?new Date(x).toLocaleDateString('en-AU'):'—';
 async function request(path,options={}){
@@ -45,6 +45,8 @@ function drawTab(){
  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;drawTab();});
  const el=document.getElementById('tabContent'),c=selected;if(!c)return;
  if(tab==='Risks'){void drawContractRisks(c);return;}
+ if(tab==='Sites'){void window.VeroContractActivity.sites(c,el,request);return;}
+ if(tab==='Events'){void window.VeroContractActivity.events(c,el,request);return;}
  if(tab==='Overview'){
   el.innerHTML='<div class="fields">'+[['Contract reference',c.contract_code],['Customer',c.customer_name],['Contract type','Customer'],['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Compliance','Not assessed'],['Source files',c.source_count],['Linked requirements',c.requirement_count],['Scope',c.scope],['Notes',c.notes]].map(([label,value])=>'<div class="field"><label>'+esc(label)+'</label><p>'+esc(value||'—')+'</p></div>').join('')+'</div>';return;
  }
