@@ -7,3 +7,8 @@
 #contractRequirementRegister .table th:nth-child(5),#contractRequirementRegister .table td:nth-child(5){width:8%!important}
 #contractRequirementRegister .table td{white-space:normal!important;overflow:visible;text-overflow:clip}
 
+
+#contractRequirementRegister .contract-requirement-open{display:block;width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:left;font:inherit;font-weight:700;line-height:inherit;cursor:pointer}
+#contractRequirementRegister .contract-requirement-open:hover{text-decoration:underline;color:#3d5818}
+#contractRequirementRegister .contract-requirement-open:focus-visible{outline:2px solid #6b8325;outline-offset:4px}
+#contractRequirementRows tr[data-requirement]{cursor:pointer}
