@@ -19,4 +19,5 @@ jobs:
       - run: node --test tests/compliance-parent-routing.cjs tests/compliance-assessment-risk.cjs tests/risk-central-create.cjs tests/project-risk-creator.cjs tests/risk-review-policy.cjs
       - run: npm install --no-save playwright@1.56.1
       - run: npx playwright install --with-deps chromium
+      - run: node --test tests/compliance-search.cjs
       - run: node tests/compliance-shared-browser.cjs
