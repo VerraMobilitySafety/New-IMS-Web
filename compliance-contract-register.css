@@ -34,3 +34,25 @@
 #customerContractRequirements article p{margin:0 0 8px;font-size:14px}
 #customerContractRequirements article p:last-child{margin-bottom:0;color:#726b64;font-size:12px}
 #obligationModal #complianceRiskClassifications{font-size:14px;line-height:1.55}
+
+/* Consistent typography and spacing in the requirement detail drawer. */
+#obligationModal .drawer-body{font-size:14px!important;line-height:1.55!important;color:#3d3935}
+#obligationModal .drawer-head h2{font-size:22px!important;line-height:1.3!important;font-weight:700!important;margin:5px 0 8px!important}
+#obligationModal .drawer-head p,#obligationModal .drawer-head small{font-size:11px!important;line-height:1.5!important}
+#obligationModal .drawer-body h3{font-size:14px!important;line-height:1.4!important;font-weight:700!important;margin:0!important}
+#obligationModal .drawer-body p{font-size:14px!important;line-height:1.55!important}
+#obligationModal .compliance-section-head small{display:block;font-size:12px!important;line-height:1.5!important;margin-top:4px}
+#obligationModal .detail>span,#obligationModal .compliance-position span{font-size:11px!important;line-height:1.4!important;letter-spacing:.06em}
+#obligationModal .detail>strong,#obligationModal .compliance-position-meta strong{font-size:14px!important;line-height:1.55!important;font-weight:500!important}
+#obligationModal #detailStatus{font-size:18px!important;line-height:1.4!important}
+#obligationModal .btn{font-size:12px!important;line-height:1.4!important}
+#obligationModal #customerContractRequirements{padding:18px!important}
+#customerContractRequirements>p{color:#726b64;margin:6px 0 16px!important}
+#customerContractRequirements details{border:1px solid #e2dfda;border-radius:8px;margin-top:10px;overflow:hidden}
+#customerContractRequirements summary{padding:12px 14px!important;font-size:13px!important;line-height:1.5!important;cursor:pointer;background:#f8f8f6}
+#customerContractRequirements summary b{font-weight:600!important}
+#customerContractRequirements details>p{padding:0 14px!important}
+#customerContractRequirements article{padding:14px!important;border-top:1px solid #e9e6e1}
+#customerContractRequirements article p{margin:0 0 8px!important;font-size:14px!important}
+#customerContractRequirements article p:last-child{margin-bottom:0;color:#726b64;font-size:12px!important}
+#obligationModal #complianceRiskClassifications{font-size:14px!important;line-height:1.55!important}
