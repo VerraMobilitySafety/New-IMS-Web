@@ -11,4 +11,6 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-save --package-lock=false jsdom@26.1.0
-      - run: node tests/event-workflow.cjs
+      - run: |
+          node tests/event-workflow.cjs
+          node tests/event-reopening.cjs
