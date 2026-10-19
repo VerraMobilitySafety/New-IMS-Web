@@ -1,0 +1,10 @@
+#complianceRiskLinksModal .drawer { width:min(640px,94vw) !important; }
+#complianceRiskLinksModal .drawer-body { padding:16px; font-size:12px; line-height:1.5; }
+#complianceRiskLinksModal h3 { font-size:14px; margin:12px 0; }
+#complianceRiskLinksModal fieldset { border:1px solid #ded9d5; border-radius:8px; padding:10px 12px; margin:12px 0; }
+#complianceRiskLinksModal fieldset label { display:flex; align-items:center; gap:8px; padding:6px 0; font-size:12px; }
+#complianceRiskLinksModal fieldset input { width:16px; height:16px; flex:0 0 16px; }
+#complianceRiskLinksModal textarea { box-sizing:border-box; width:100%; min-height:76px; }
+#complianceRiskLinksModal .drawer-actions { padding:14px 16px; display:flex; flex-wrap:wrap; gap:8px; }
+#complianceRiskLinksModal details { margin:10px 0; overflow-wrap:anywhere; }
+#complianceRiskLinksModal button:disabled { opacity:.55; cursor:default; }

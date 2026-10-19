@@ -1,10 +1,10 @@
 name: Shared Compliance assessment browser validation
 on:
   pull_request:
-    paths: ['compliance.html', 'compliance-parent-routing.js', 'compliance-assessment-risk.js', 'compliance-shared-assessment.*', 'risk-assessment-form.js', 'risk-review-policy.js', 'tests/compliance*.cjs', '.github/workflows/compliance-shared-assessment-validation.yml']
+    paths: ['compliance.html', 'compliance-parent-routing.js', 'compliance-risk-links.*', 'compliance-assessment-risk.js', 'compliance-shared-assessment.*', 'risk-assessment-form.js', 'risk-review-policy.js', 'tests/compliance*.cjs', '.github/workflows/compliance-shared-assessment-validation.yml']
   push:
     branches: [main, 'vero/compliance-shared-assessment-20261016']
-    paths: ['compliance.html', 'compliance-parent-routing.js', 'compliance-assessment-risk.js', 'compliance-shared-assessment.*', 'risk-assessment-form.js', 'risk-review-policy.js', 'tests/compliance*.cjs', '.github/workflows/compliance-shared-assessment-validation.yml']
+    paths: ['compliance.html', 'compliance-parent-routing.js', 'compliance-risk-links.*', 'compliance-assessment-risk.js', 'compliance-shared-assessment.*', 'risk-assessment-form.js', 'risk-review-policy.js', 'tests/compliance*.cjs', '.github/workflows/compliance-shared-assessment-validation.yml']
 permissions:
   contents: read
 jobs:
@@ -20,4 +20,5 @@ jobs:
       - run: npm install --no-save playwright@1.56.1
       - run: npx playwright install --with-deps chromium
       - run: node --test tests/compliance-search.cjs
+      - run: node --test tests/compliance-risk-links.cjs
       - run: node tests/compliance-shared-browser.cjs

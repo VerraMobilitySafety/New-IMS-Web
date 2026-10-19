@@ -7,8 +7,8 @@
   host.replaceChildren();host.append(node('h3','Compliance — Tier 2'));
   if(!options.available){host.append(node('p',options.reason||'Parent selection is unavailable. Existing mappings will be preserved.'));return {read:()=>undefined,retain:()=>null};}
   const current=options.current||{revision:0,parent_paths:[]};
-  const enabled=node('input');enabled.type='checkbox';enabled.checked=retained?retained.enabled:prefix==='single';
-  const label=node('label');label.append(enabled,node('span',prefix==='single'?'Select the parent areas for this requirement':'Update this requirement’s selected parent areas'));host.append(label);
+  const enabled=node('input');enabled.type='checkbox';enabled.checked=prefix==='links'||(retained?retained.enabled:prefix==='single');
+  const label=node('label');label.append(enabled,node('span',prefix==='single'?'Select the parent areas for this requirement':"Update this requirement's selected parent areas"));if(prefix!=='links')host.append(label);
   host.append(node('p','Only selected paths receive this requirement’s Current Residual assessment. Existing risk classifications are retained.'));
   if(!options.aggregation_enabled)host.append(node('p','Parent selections can be reviewed and saved. Aggregation is not enabled.'));
   const selected=new Set((retained?.paths||current.parent_paths).map(key)),checks=[];
@@ -23,6 +23,7 @@
   const read=()=>{if(!enabled.checked)return undefined;const chosen=paths();if(!chosen.length)throw Error('Select at least one parent area for Compliance, or leave the existing mapping unchanged.');return {register_id:options.register_id,compliance_category_id:480,expected_revision:revision,parent_paths:chosen};};
   if(current.parent_paths.length)host.append(node('p','Saved parent paths: '+current.parent_paths.map(p=>(options.paths||[]).find(x=>key(x.ids)===key(p))?.label||p.join(' → ')).join('; ')));
   if(current.history?.length){const details=node('details');details.append(node('summary','Parent selection history'));for(const h of current.history){details.append(node('p','Revision '+h.revision+' · User #'+h.actor_user_id+' · '+h.created_at+' · '+(h.selected_routing.parent_path_labels||h.selected_routing.parent_paths.map(p=>p.join(' → '))).join('; ')));}host.append(details);}
+  if(prefix==='links'&&current.history?.length){const audit=node('details');audit.append(node('summary','Risk Links change reasons'));for(const h of current.history){if(h.change_reason)audit.append(node('p','Revision '+h.revision+' — '+h.change_reason));}host.append(audit);}
   return {read,retain};
  }
  window.VeroComplianceParentRouting={mount};
