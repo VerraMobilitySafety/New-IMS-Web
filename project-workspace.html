@@ -359,6 +359,9 @@
 <script src="project-risk-create.js"></script>
 <script src="project-workflow.js?v=20261020-first-fixes"></script>
 <script src="project-document-viewer.js?v=20261020-viewer2"></script>
+<link rel="stylesheet" href="project-reporting.css?v=20261020-monthly">
+<script src="project-reporting.js?v=20261020-monthly"></script>
+<script src="project-delivery.js?v=20261020-delivery"></script>
 </head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -396,6 +399,7 @@
   <button class="ws-tab" onclick="showTab('documents',this)">Documents</button>
   <button class="ws-tab" onclick="showTab('assurance',this)">Assurance</button>
   <button class="ws-tab" onclick="showTab('updates',this)">Updates</button>
+  <button class="ws-tab" onclick="showTab('delivery',this)">Sites &amp; Events</button>
  </div>
 
  <section id="overview" class="ws-view active">
@@ -416,16 +420,7 @@
   </div>
  </section>
 
- <section id="commercial" class="ws-view"><div class="commercial-grid">
-  <div class="metric"><label>Baseline Revenue</label><strong>—</strong><small>New Project Request</small></div>
-  <div class="metric"><label>Current Revenue</label><strong>—</strong><small>Not connected yet</small></div>
-  <div class="metric"><label>Baseline Cost</label><strong>—</strong><small>New Project Request</small></div>
-  <div class="metric"><label>Current Planned Cost</label><strong>—</strong><small>Not connected yet</small></div>
-  <div class="metric"><label>Original Margin</label><strong id="baselineMargin">—</strong><small>Calculated from baseline</small></div>
-  <div class="metric"><label>Current Planned Margin</label><strong>—</strong><small>Not connected yet</small></div>
-  <div class="metric"><label>Planned Cost This Month</label><strong>—</strong><small>Not connected yet</small></div>
-  <div class="metric"><label>ETC</label><strong>—</strong><small>Not connected yet</small></div>
- </div></section>
+ <section id="commercial" class="ws-view"><div id="projectMonthlyFinance"><div class="reporting-panel">Monthly finance will load with this project.</div></div></section>
 
  <section id="actions" class="ws-view"><div class="empty-state"><b>No live project actions yet.</b><br><br>Workflow actions assigned to this project will appear here.</div></section>
 
@@ -444,7 +439,8 @@
  </form>
  <div class="panel"><div class="panel-head"><h2>Project Documents</h2><span id="projectDocumentCount">Loading…</span></div><div id="projectDocumentsList" class="project-docs"><div class="empty-state"><b>Loading project documents…</b></div></div></div></section>
  <section id="assurance" class="ws-view"><div class="empty-state"><b>Project Assurance</b><br><br>Audits, inspections, project gates and assurance activities linked to this project will appear here.</div></section>
- <section id="updates" class="ws-view"><div class="empty-state"><b>No live project updates yet.</b><br><br>Workflow and project history will appear here.</div></section>
+ <section id="delivery" class="ws-view"><div id="projectDelivery"></div></section>
+ <section id="updates" class="ws-view"><div id="projectMonthlyUpdates"></div></section>
 
  <section class="danger-zone" id="projectDangerZone"><div class="danger-head"><h2>Danger Zone</h2><p>Permanent administrative actions for this project. Deleting a project removes its VERO project data and project documents.</p></div><div class="danger-body"><button type="button" class="btn danger" onclick="openDeleteProjectModal()">Delete Project</button></div></section>
 
@@ -543,7 +539,7 @@ function renderProjectWorkflow(){
  if(upload)upload.hidden=!signedInUser||workflow.terminal;
 }
 function totalCost(r){return ['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(r?.[k])||0),0)}
-function renderRequest(r){currentRequest=r;renderProjectWorkflow();if(r.contract_start_date)setText('contractStart',fmtDate(r.contract_start_date));if(r.contract_expiry_date)setText('contractEnd',fmtDate(r.contract_expiry_date));const metrics=document.querySelectorAll('#commercial .metric strong');const rev=Number(r.revenue)||0,cost=totalCost(r);if(metrics[0])metrics[0].textContent=money(rev||null);if(metrics[2])metrics[2].textContent=money(cost||null);const margin=document.getElementById('baselineMargin');if(margin)margin.textContent=rev>0?(((rev-cost)/rev)*100).toFixed(1)+'%':'—';renderMilestoneOverview();}
+function renderRequest(r){currentRequest=r;renderProjectWorkflow();if(r.contract_start_date)setText('contractStart',fmtDate(r.contract_start_date));if(r.contract_expiry_date)setText('contractEnd',fmtDate(r.contract_expiry_date));renderMilestoneOverview();}
 async function refreshProjectWorkflow(){
  const id=currentProject?.id;if(!id)return;
  const response=await apiFetch(PROJECTS_API,{cache:'no-store'});
@@ -920,7 +916,7 @@ async function loadProjectGovernance(id){
 }
 
 const initialWorkspaceLoads=[];
-async function loadProject(){const id=new URLSearchParams(location.search).get('id')||new URLSearchParams(location.search).get('project'),err=document.getElementById('loadError');if(!id){err.style.display='block';err.textContent='No project ID was supplied in the URL.';return}try{const res=await apiFetch(PROJECTS_API,{cache:'no-store'});if(!res.ok)throw new Error('Projects API returned '+res.status);const data=await res.json(),rows=Array.isArray(data)?data:(data.projects||[]),p=rows.find(x=>String(x.id)===String(id));if(!p)throw new Error('Project '+id+' was not found in the VERO Projects Register.');renderProject(p);initialWorkspaceLoads.push(Promise.allSettled([loadProjectGovernance(p.id),openProjectRiskDeepLink()]));await loadProjectDocuments(p.id);const [rr,mr]=await Promise.all([apiFetch(PROJECT_REQUEST_API(p.id),{cache:'no-store'}),apiFetch(PROJECT_MILESTONES_API(p.id),{cache:'no-store'})]);if(mr.ok)currentMilestones=(await mr.json()).milestones||[];if(rr.status===404){renderNoRequest();renderMilestoneOverview();return}if(!rr.ok)throw new Error('New Project Request API returned '+rr.status);renderRequest((await rr.json()).request);}catch(e){err.style.display='block';err.textContent='Unable to load this project from VERO. '+e.message}}
+async function loadProject(){const id=new URLSearchParams(location.search).get('id')||new URLSearchParams(location.search).get('project'),err=document.getElementById('loadError');if(!id){err.style.display='block';err.textContent='No project ID was supplied in the URL.';return}try{const res=await apiFetch(PROJECTS_API,{cache:'no-store'});if(!res.ok)throw new Error('Projects API returned '+res.status);const data=await res.json(),rows=Array.isArray(data)?data:(data.projects||[]),p=rows.find(x=>String(x.id)===String(id));if(!p)throw new Error('Project '+id+' was not found in the VERO Projects Register.');renderProject(p);initialWorkspaceLoads.push(Promise.allSettled([loadProjectGovernance(p.id),openProjectRiskDeepLink()]));await loadProjectDocuments(p.id);void VeroProjectReporting.mountProject({project:p,fetch:apiFetch,baseUrl:API_BASE});void VeroProjectDelivery.mount({project:p,fetch:apiFetch,baseUrl:API_BASE});const [rr,mr]=await Promise.all([apiFetch(PROJECT_REQUEST_API(p.id),{cache:'no-store'}),apiFetch(PROJECT_MILESTONES_API(p.id),{cache:'no-store'})]);if(mr.ok)currentMilestones=(await mr.json()).milestones||[];if(rr.status===404){renderNoRequest();renderMilestoneOverview();return}if(!rr.ok)throw new Error('New Project Request API returned '+rr.status);renderRequest((await rr.json()).request);}catch(e){err.style.display='block';err.textContent='Unable to load this project from VERO. '+e.message}}
 function field(l,v){return `<div class="detail"><label>${esc(l)}</label><strong>${esc(text(v))}</strong></div>`}
 function openRequest(){editRequest();document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';}
 function val(name,def=''){const v=currentRequest?.[name];return v===null||v===undefined?def:v}
