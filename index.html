@@ -384,6 +384,8 @@ function resetDecisionUI(){
 }
 function openActionDetail(index){
  const action=(window.myActions||[])[index]; if(!action)return;
+ if(action.source==='Incidents' && /^[0-9a-f-]{36}$/i.test(String(action.source_id||''))){location.href='incident-management.html?'+(action.action_type==='Investigation'?'event=':'action=')+encodeURIComponent(action.source_id);return;}
+
  window.currentAction=action; resetDecisionUI();
  const isDocumentRequest=action.source==='Documents'&&action.action_type==='Document Request';
  const isProject=action.source==='Projects';

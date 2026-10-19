@@ -83,4 +83,4 @@ jobs:
           npm install --no-save playwright@1.62.1
           npx playwright install --with-deps chromium
       - name: Validate direct maintenance risk creation and correction
-        run: node --test tests/maintenance-risk-create.cjs
+        run: node --test tests/maintenance-risk-create.cjs tests/maintenance-contract-activity.cjs
