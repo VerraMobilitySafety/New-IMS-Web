@@ -2,6 +2,8 @@
 #projectRiskCreateOverlay .drawer{width:min(730px,96vw);max-width:96vw}
 #projectRiskCreateOverlay .drawer-head{flex-shrink:0;z-index:40}
 #projectRiskCreateOverlay .matrix-scroll{isolation:isolate}
+#projectRiskCreateOverlay .vero-central .stage{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:6px;min-width:0}
+#projectRiskCreateOverlay .vero-central .stage b,#projectRiskCreateOverlay .vero-central .stage span{display:block;width:100%;white-space:normal;line-height:1.35}
 #projectRiskCreateOverlay .matrix>.like-number:nth-child(9){font-size:14px}
 #projectRiskCreateOverlay .vero-central input,#projectRiskCreateOverlay .vero-central select,#projectRiskCreateOverlay .vero-central textarea{font-size:13px}
 @media(max-width:500px){#projectRiskCreateOverlay .vero-central input,#projectRiskCreateOverlay .vero-central select,#projectRiskCreateOverlay .vero-central textarea{font-size:14px}}
