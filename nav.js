@@ -120,7 +120,7 @@
       <a class="${maintenanceActive ? 'active' : ''}"
          href="maintenance-management.html">
         <span class="ico" data-lucide="file-signature"></span>
-        <span>Contracts Management</span>
+        <span>Client Services Management</span>
       </a>
 
       <a class="${isActive('contractor-management.html') ? 'active' : ''}" href="contractor-management.html">
