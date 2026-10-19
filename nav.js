@@ -90,15 +90,17 @@
         <span class="ico" data-lucide="house"></span>
         <span>Home</span>
       </a>
-    </div>
-
-    <div class="nav-section">
-      <div class="nav-label">My Work</div>
 
       <a class="${isActive('my-actions.html') ? 'active' : ''}"
          href="my-actions.html">
         <span class="ico" data-lucide="list-checks"></span>
         <span>My Actions</span>
+      </a>
+
+      <a class="placeholder" href="#" onclick="return false"
+         aria-label="My Reports — coming soon">
+        <span class="ico" data-lucide="chart-no-axes-column"></span>
+        <span>My Reports</span>
       </a>
     </div>
 
@@ -130,7 +132,7 @@
     </div>
 
     <div class="nav-section">
-      <div class="nav-label">Management Systems</div>
+      <div class="nav-label">Specific Risk Management Systems</div>
 
       <details class="vero-risk-navigation" ${["alcohol-and-other-drugs.html","driving.html","electrical-works.html","emergency-management.html","ergonomics-and-sedentary-work.html","extreme-temperatures.html","fatigue.html","hazardous-substances-and-dangerous-goods.html","manual-handling.html","personal-protective-equipment.html","plant-and-equipment.html","psychosocial-risk.html","public-interaction.html","visitors.html","working-at-heights.html","working-from-home.html","working-near-traffic.html"].includes(path) ? 'open' : ''}><summary><span class="ico" data-lucide="shield-alert"></span><span>Safety Risks</span></summary><a class="${isActive('alcohol-and-other-drugs.html') ? 'active' : ''}" href="alcohol-and-other-drugs.html">Alcohol and Other Drugs</a>
 <a class="${isActive('driving.html') ? 'active' : ''}" href="driving.html">Driving</a>
