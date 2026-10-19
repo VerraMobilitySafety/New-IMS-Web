@@ -1,0 +1,27 @@
+name: Project reporting and delivery validation
+on:
+  pull_request:
+    paths: ['project-reporting.*', 'project-delivery.js', 'project-workspace.html', 'project-management.html', 'tests/project-reporting-browser.cjs', '.github/workflows/project-reporting-validation.yml']
+  push:
+    branches: [main, feature/project-monthly-reporting]
+    paths: ['project-reporting.*', 'project-delivery.js', 'project-workspace.html', 'project-management.html', 'tests/project-reporting-browser.cjs', '.github/workflows/project-reporting-validation.yml']
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/project-first-fixes.cjs
+      - run: node tests/project-document-viewer.cjs
+      - run: node tests/project-reporting-browser.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: project-delivery-previews
+          path: tests/project-delivery-*.png
