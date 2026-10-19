@@ -160,7 +160,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;font-size:12px}.main{margin
  </div>
 </section>
 <div class="project-content" id="contractWorkspace"><section class="kpis" id="contractSummary" aria-label="Contract summary"></section><section class="panel"><div class="panel-body drawer-body"><nav class="tabs" id="tabs" aria-label="Contract sections"></nav><div id="tabContent" aria-live="polite">Loading contract…</div></div></section><footer class="footer"><span>© Verra Mobility 2026</span><span>VERO • Maintenance Workspace</span></footer></div></main>
-<script src="maintenance-risk-submission.js"></script><script src="maintenance-risks.js"></script><script src="customer-contracts.js"></script><script src="maintenance-risk-create.js"></script><script>loadContractWorkspace();</script><script>
+<script src="maintenance-risk-submission.js"></script><script src="maintenance-risks.js"></script><script src="customer-contracts.js"></script><script src="maintenance-risk-create.js"></script><script>loadContractWorkspace().finally(()=>window.VeroPageLoader?.ready('maintenance'));</script><script>
 /* VERO GLOBAL ACCOUNT MENU */
 (()=>{
  const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';

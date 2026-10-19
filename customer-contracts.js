@@ -87,7 +87,6 @@ async function loadContractWorkspace(){
   const riskId=Number(new URLSearchParams(location.search).get('risk_id'));
   if(Number.isSafeInteger(riskId)&&riskId>0){tab='Risks';drawTab();await openMaintenanceSubmission(riskId);}
  }catch(e){document.getElementById('tabContent').textContent=e.message;addContractRetry(loadContractWorkspace);}
- finally{window.VeroPageLoader?.ready('maintenance');}
 }
 const initialContract=new URLSearchParams(location.search).get('contract_id');
 if(initialContract&&!workspace)location.replace('maintenance-workspace.html?id='+encodeURIComponent(initialContract));
