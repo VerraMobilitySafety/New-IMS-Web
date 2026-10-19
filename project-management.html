@@ -359,7 +359,7 @@
 <link rel="stylesheet" href="risk-nk9-animation.css?v=20261016-rollout">
 <script src="risk-nk9-animation.js?v=20261016-rollout"></script>
 <script src="risk-page-loader.js?v=20261016-rollout" data-tasks="account projects"></script><script src="project-workflow.js?v=20261020-first-fixes"></script>
-<script src="project-document-viewer.js?v=20261020-viewer"></script>
+<script src="project-document-viewer.js?v=20261020-viewer2"></script>
 </head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -1046,7 +1046,7 @@ async function loadMasterContract(){
   const docs=(d.documents||[]).filter(x=>x.document_type==='Master Contract'&&x.status==='Current');
   if(!docs.length){card.innerHTML='No Master Contract uploaded yet.';return}
   const x=docs[0];
-  card.innerHTML=`<strong>📄 ${esc(x.document_title||x.file_name)}</strong><br><span>${esc(x.file_name)} · Version ${esc(x.version_number||1)} · ${esc(x.uploaded_by||'VERO user')}</span><br><button type="button" class="btn outline" style="margin-top:8px" onclick="viewProjectDocument(${Number(x.id)})">View Document</button>`;
+  card.innerHTML=`<strong>📄 ${esc(x.document_title||x.file_name)}</strong><br><span>${esc(x.file_name)} · Version ${esc(x.version_number||1)} · ${esc(x.uploaded_by||'VERO user')}</span><br><button type="button" class="btn outline" style="margin-top:8px" data-project-document-id="${Number(x.id)}" data-file-name="${esc(x.file_name||'Project document')}" onclick="viewProjectDocument(${Number(x.id)})">View Document</button>`;
  }catch(e){console.error(e);card.textContent='Unable to load Master Contract.'}
 }
 async function uploadMasterContract(){
@@ -1064,7 +1064,8 @@ async function uploadMasterContract(){
 }
 async function viewProjectDocument(documentId){
  if(!currentProject?.id||!Number.isInteger(Number(documentId))||Number(documentId)<=0)return;
- return VeroProjectDocumentViewer.open({fetch:apiFetch,contentUrl:`${API_BASE}/projects/${encodeURIComponent(currentProject.id)}/documents/${encodeURIComponent(documentId)}/content`});
+ const fileName=document.querySelector('[data-project-document-id="'+Number(documentId)+'" ]')?.dataset.fileName;
+ return VeroProjectDocumentViewer.open({fetch:apiFetch,fileName,contentUrl:`${API_BASE}/projects/${encodeURIComponent(currentProject.id)}/documents/${encodeURIComponent(documentId)}/content`});
 }
 
 async function saveRequest(e){
@@ -1142,7 +1143,7 @@ function approvalMasterContractItem(doc){
  const title=esc(doc.document_title||doc.file_name||'Master Contract');
  const file=esc(doc.file_name||'');
  const version=esc(doc.version_number||1);
- return `<div class="approval-item wide"><label>Master Contract</label><strong>📄 ${title}</strong><div style="margin-top:6px;font-size:12px;color:#746f6c">${file}${file?' · ':''}Version ${version}</div><button type="button" class="btn outline" style="margin-top:9px" onclick="viewProjectDocument(${Number(doc.id)})">View Document</button></div>`;
+ return `<div class="approval-item wide"><label>Master Contract</label><strong>📄 ${title}</strong><div style="margin-top:6px;font-size:12px;color:#746f6c">${file}${file?' · ':''}Version ${version}</div><button type="button" class="btn outline" style="margin-top:9px" data-project-document-id="${Number(doc.id)}" data-file-name="${esc(doc.file_name||'Project document')}" onclick="viewProjectDocument(${Number(doc.id)})">View Document</button></div>`;
 }
 function approvalReviewHtml(r,milestones,masterContract=null){
  const cost=['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(r[k])||0),0);

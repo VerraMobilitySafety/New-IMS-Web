@@ -1,7 +1,9 @@
 (function(root){
  'use strict';
- let dialog,body,title,status,download,ticket=0,objectUrl=null,controller=null;
- function clear(){controller?.abort();controller=null;if(objectUrl){URL.revokeObjectURL(objectUrl);objectUrl=null;}}
+ let dialog,body,title,status,download,ticket=0,objectUrl=null,controller=null,pdfDocument=null;
+ const assetBase=new URL('.',document.currentScript?.src||document.baseURI);
+ async function loadPdf(){const library=await import(new URL('vendor/pdfjs/pdf.mjs',assetBase).href);library.GlobalWorkerOptions.workerSrc=new URL('vendor/pdfjs/pdf.worker.mjs',assetBase).href;return library;}
+ function clear(){controller?.abort();controller=null;if(pdfDocument){pdfDocument.destroy().catch(()=>{});pdfDocument=null;}if(objectUrl){URL.revokeObjectURL(objectUrl);objectUrl=null;}}
  function ensure(){
   if(dialog)return;
   const style=document.createElement('style');
@@ -36,7 +38,25 @@
    const pdf=prefix==='%PDF-';
    // Active formats, including HTML and SVG, never execute in the VERO origin.
    objectUrl=URL.createObjectURL(pdf?new Blob([blob],{type:'application/pdf'}):blob);download.href=objectUrl;download.download=name;download.hidden=false;
-   if(pdf){const frame=document.createElement('iframe');frame.title=name;frame.setAttribute('sandbox','allow-same-origin');frame.src=objectUrl;body.appendChild(frame);status.textContent='PDF preview. Use Download if your browser cannot display it.';}
+   if(pdf){
+    status.textContent='Rendering PDF…';
+    const library=await (options.loadPdf||loadPdf)();if(current!==ticket||!dialog.open)return;
+    const task=library.getDocument({data:new Uint8Array(await blob.arrayBuffer()),isEvalSupported:false,enableXfa:false,cMapUrl:new URL('vendor/pdfjs/cmaps/',assetBase).href,cMapPacked:true,standardFontDataUrl:new URL('vendor/pdfjs/standard_fonts/',assetBase).href,wasmUrl:new URL('vendor/pdfjs/wasm/',assetBase).href});
+    const pdf=await task.promise;if(current!==ticket||!dialog.open){await pdf.destroy();return;}pdfDocument=pdf;
+    const controls=document.createElement('div'),previous=document.createElement('button'),next=document.createElement('button'),counter=document.createElement('span'),canvas=document.createElement('canvas'),text=document.createElement('p');
+    previous.type=next.type='button';previous.textContent='Previous page';next.textContent='Next page';controls.style.cssText='display:flex;align-items:center;gap:14px;margin:0 0 14px';canvas.style.cssText='display:block;max-width:100%;height:auto;margin:auto';canvas.setAttribute('role','img');text.style.cssText='position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)';controls.append(previous,counter,next);body.append(controls,canvas,text);
+    let pageNumber=1;
+    async function renderPage(){
+     previous.disabled=next.disabled=true;
+     try{
+      const page=await pdf.getPage(pageNumber);if(current!==ticket||!dialog.open)return;
+      const natural=page.getViewport({scale:1}),viewport=page.getViewport({scale:Math.min(2,Math.max(1,(body.clientWidth||900)/natural.width))});canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
+      await page.render({canvasContext:canvas.getContext('2d'),viewport}).promise;if(current!==ticket||!dialog.open)return;
+      const content=await page.getTextContent();if(current!==ticket||!dialog.open)return;text.textContent=content.items.map(item=>item.str||'').join(' ');canvas.setAttribute('aria-label',name+' page '+pageNumber);counter.textContent='Page '+pageNumber+' of '+pdf.numPages;status.textContent='Document loaded.';previous.disabled=pageNumber===1;next.disabled=pageNumber===pdf.numPages;
+     }catch(error){if(current===ticket)status.textContent='PDF preview unavailable: '+error.message+'. Use Download to open the file.';}
+    }
+    previous.addEventListener('click',()=>{if(pageNumber>1){pageNumber--;renderPage();}});next.addEventListener('click',()=>{if(pageNumber<pdf.numPages){pageNumber++;renderPage();}});await renderPage();
+   }
    else if(['image/png','image/jpeg','image/gif','image/webp'].includes(type)){const img=document.createElement('img');img.alt=name;img.src=objectUrl;img.addEventListener('error',()=>{if(current===ticket)status.textContent='Image preview unavailable. Use Download to open the file.';});body.appendChild(img);status.textContent='Document loaded.';}
    else if((type.startsWith('text/')||['application/json','application/xml'].includes(type)||/\.(txt|csv|json|xml|log)$/i.test(name))&&blob.size<=2*1024*1024){const content=await blob.text();if(current!==ticket||!dialog.open)return;const pre=document.createElement('pre');pre.textContent=content;body.appendChild(pre);status.textContent='Document loaded.';}
    else{status.textContent='This file needs a separate application. Use Download to open it.';}

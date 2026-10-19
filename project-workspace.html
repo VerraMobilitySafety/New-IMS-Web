@@ -358,7 +358,7 @@
 <script src="risk-assessment-form.js"></script>
 <script src="project-risk-create.js"></script>
 <script src="project-workflow.js?v=20261020-first-fixes"></script>
-<script src="project-document-viewer.js?v=20261020-viewer"></script>
+<script src="project-document-viewer.js?v=20261020-viewer2"></script>
 </head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -565,7 +565,7 @@ async function loadProjectDocuments(projectId){
   const docs=(data.documents||[]).filter(d=>String(d.status||'Current').toLowerCase()!=='deleted');
   if(count)count.textContent=docs.length+' document'+(docs.length===1?'':'s');
   if(!docs.length){list.innerHTML='<div class="empty-state"><b>No project documents yet.</b><br><br>Documents uploaded through VERO for this project will appear here.</div>';return true;}
-  list.innerHTML=docs.map(d=>`<div class="project-doc-row"><div class="project-doc-name"><b>📄 ${esc(d.document_title||d.file_name||'Project Document')}</b><small>${esc(d.file_name||'')} · Version ${esc(d.version_number||1)}</small></div><div class="project-doc-meta"><b>${esc(d.document_type||'Project Document')}</b><span>${esc(d.uploaded_by||'VERO user')}</span></div><div><span class="status current">${esc(d.status||'Current')}</span></div><div class="project-doc-action"><button type="button" class="btn outline" onclick="viewProjectDocument(${Number(d.id)})">View Document</button></div></div>`).join('');
+  list.innerHTML=docs.map(d=>`<div class="project-doc-row"><div class="project-doc-name"><b>📄 ${esc(d.document_title||d.file_name||'Project Document')}</b><small>${esc(d.file_name||'')} · Version ${esc(d.version_number||1)}</small></div><div class="project-doc-meta"><b>${esc(d.document_type||'Project Document')}</b><span>${esc(d.uploaded_by||'VERO user')}</span></div><div><span class="status current">${esc(d.status||'Current')}</span></div><div class="project-doc-action"><button type="button" class="btn outline" data-project-document-id="${Number(d.id)}" data-file-name="${esc(d.file_name||'Project document')}" onclick="viewProjectDocument(${Number(d.id)})">View Document</button></div></div>`).join('');
  return true;
  }catch(e){console.error(e);if(count)count.textContent='Unable to load';list.innerHTML='<div class="empty-state"><b>Unable to load project documents.</b><br><br>'+esc(e.message)+'</div>';return false;}
 }
@@ -593,7 +593,8 @@ async function uploadProjectContract(event){
 }
 async function viewProjectDocument(documentId){
  if(!currentProject?.id||!Number.isInteger(Number(documentId))||Number(documentId)<=0)return;
- return VeroProjectDocumentViewer.open({fetch:apiFetch,contentUrl:`${API_BASE}/projects/${encodeURIComponent(currentProject.id)}/documents/${encodeURIComponent(documentId)}/content`});
+ const fileName=document.querySelector('[data-project-document-id="'+Number(documentId)+'" ]')?.dataset.fileName;
+ return VeroProjectDocumentViewer.open({fetch:apiFetch,fileName,contentUrl:`${API_BASE}/projects/${encodeURIComponent(currentProject.id)}/documents/${encodeURIComponent(documentId)}/content`});
 }
 function openDeleteProjectModal(){if(signedInUser?.vero_role!=='Administrator'||!currentProject)return;setText('deleteProjectCodeLabel',currentProject.project_code||String(currentProject.id));const input=document.getElementById('deleteProjectCodeInput');if(input)input.value='';const er=document.getElementById('deleteProjectError');if(er)er.style.display='none';validateDeleteProjectCode();document.getElementById('deleteProjectModal')?.classList.add('show');setTimeout(()=>input?.focus(),50)}
 function closeDeleteProjectModal(){document.getElementById('deleteProjectModal')?.classList.remove('show')}
