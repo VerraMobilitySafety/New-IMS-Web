@@ -32,10 +32,12 @@
   await originalPrepare(prefix,reset);if(generation!==s.generation)return;
   const oid=prefix==='review'?complianceRiskForms.review.obligationId:null;
   let host=document.getElementById(prefix+'ComplianceParentRouting');if(!host){host=node('section');host.id=prefix+'ComplianceParentRouting';complianceRiskElement(prefix,'Fields').append(host);}host.textContent='Loading Compliance parent areas…';
-  try{const options=await complianceRiskRequest('/compliance/parent-routing-options'+(oid?'?obligation_id='+encodeURIComponent(oid):''),{cache:'no-store'});if(generation!==s.generation||prefix==='review'&&Number(currentLiveObligationId)!==Number(oid))return;s.view=mount(host,options,{prefix,retained});}
-  catch(error){if(generation!==s.generation)return;host.textContent='Unable to load parent areas: '+error.message+'. Retry the risk options before changing parent selections.';}
+  try{const options=await complianceRiskRequest('/compliance/parent-routing-options'+(oid?'?obligation_id='+encodeURIComponent(oid):''),{cache:'no-store'});if(generation!==s.generation||prefix==='review'&&Number(currentLiveObligationId)!==Number(oid))return;s.view=mount(host,options,{prefix,retained});if(prefix==='review')updateRoutingExemption();}
+  catch(error){if(generation!==s.generation)return;host.textContent='Unable to load parent areas: '+error.message+'. Retry the risk options before changing parent selections.';complianceRiskElement(prefix,'Retry').hidden=false;}
  };
  readComplianceRiskPosition=function(prefix='review',status){const result=originalRead(prefix,status);if(!result)return result;const s=states[prefix];if(!s.view)throw Error('Wait for Compliance parent areas, or retry the risk options.');const routing=s.view.read();if(routing!==undefined)result.parent_routing=routing;return result;};
  complianceRiskSummary=function(position){const html=originalSummary(position),routing=position?.parent_routing;if(!routing)return html;const labels=routing.parent_path_labels||routing.parent_paths.map(p=>p.join(' → '));return html+'<p><strong>Compliance — Tier 2; selected parent areas:</strong> '+labels.map(escapeComplianceText).join('; ')+'</p><p>On approval these selections apply to a new requirement. Linking an existing requirement retains its existing mapping.</p>';};
  complianceRiskHandleClose=function(id){originalClose(id);for(const prefix of id==='submitModal'?['single']:id==='reviewAssessmentModal'||id==='obligationModal'?['review']:[]){states[prefix].generation++;states[prefix].view=null;}};
+ function updateRoutingExemption(){const host=document.getElementById('reviewComplianceParentRouting');if(host)host.hidden=document.getElementById('reviewAssessmentStatus')?.value==='Not Applicable';}
+ document.getElementById('reviewAssessmentStatus')?.addEventListener('change',updateRoutingExemption);
 })();
