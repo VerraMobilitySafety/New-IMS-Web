@@ -8,7 +8,7 @@
   if(!options.available){host.append(node('p',options.reason||'Parent selection is unavailable. Existing mappings will be preserved.'));return {read:()=>undefined,retain:()=>null};}
   const current=options.current||{revision:0,parent_paths:[]};
   const enabled=node('input');enabled.type='checkbox';enabled.checked=prefix==='links'||(retained?retained.enabled:prefix==='single');
-  const label=node('label');label.append(enabled,node('span',prefix==='single'?'Select the parent areas for this requirement':"Update this requirement's selected parent areas"));if(prefix!=='links')host.append(label);
+  const label=node('label');label.append(enabled,node('span',prefix==='single'?'Select the parent areas for this requirement':"Update this requirement’s selected parent areas"));if(prefix!=='links')host.append(label);
   host.append(node('p','Only selected paths receive this requirement’s Current Residual assessment. Existing risk classifications are retained.'));
   if(!options.aggregation_enabled)host.append(node('p','Parent selections can be reviewed and saved. Aggregation is not enabled.'));
   const selected=new Set((retained?.paths||current.parent_paths).map(key)),checks=[];
