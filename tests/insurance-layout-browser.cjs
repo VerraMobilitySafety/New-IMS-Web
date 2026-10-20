@@ -27,7 +27,9 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
    await page.getByRole('button',{name:'Menu',exact:true}).click();
    assert.equal(await page.locator('#insuranceSidebar').isVisible(),false);
   }
-  await page.getByRole('button',{name:'Policies',exact:true}).click();
+  assert.equal(await page.getByLabel('Insurance view',{exact:true}).inputValue(),'Overview');
+  assert.equal(await page.locator('.insurance-sections').count(),0);
+  await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies');
   const add=async(number,status,expiry)=>{
    await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
    await page.getByLabel('Policy Name',{exact:true}).fill('Synthetic '+number);
@@ -53,7 +55,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   await page.getByRole('button',{name:'Due within 90 days'}).click();
   assert.equal(await page.locator('#content tbody tr').count(),1);
   await page.getByRole('button',{name:'All Policies',exact:true}).click();
-  await page.screenshot({path:path.join(out,`insurance-${width}.png`),fullPage:true});
+  await page.screenshot({path:path.join(out,`insurance-toolbar-${width}.png`),fullPage:true});
   const fits=await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth);
   assert.ok(fits,'page does not overflow horizontally');
   await page.locator('#insuranceMore summary').click();
@@ -62,7 +64,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   await page.getByLabel('Claim Reference').fill('CLAIM-TEST');
   await page.getByLabel('Policy Number',{exact:true}).fill('TEST-001');
   await page.getByRole('button',{name:'Add to Prototype'}).click();
-  await page.getByRole('button',{name:'Claims',exact:true}).click();
+  await page.getByLabel('Insurance view',{exact:true}).selectOption('Claims');
   assert.equal(await page.locator('#content tbody tr').count(),1);
   assert.equal(await page.locator('#insuranceViews').isVisible(),false);
   await page.locator('#insuranceMore summary').click();
@@ -70,15 +72,17 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   await page.getByLabel('Policy Number',{exact:true}).fill('TEST-001');
   await page.getByLabel('Stage',{exact:true}).fill('Quotation');
   await page.getByRole('button',{name:'Add to Prototype'}).click();
-  await page.getByRole('button',{name:'Renewals',exact:true}).click();
+  await page.getByLabel('Insurance view',{exact:true}).selectOption('Renewals');
   await page.getByLabel('Filter by stage').selectOption('Quotation');
   assert.equal(await page.locator('#content tbody tr').count(),1);
   for(const section of ['Overview','Documents','Analytics']){
-   await page.getByRole('button',{name:section,exact:true}).click();
-   assert.equal(await page.locator('#insuranceToolbar').isVisible(),false);
+   await page.getByLabel('Insurance view',{exact:true}).selectOption(section);
+   assert.equal(await page.locator('#insuranceToolbar').isVisible(),true);
+   assert.equal(await page.locator('#search').isVisible(),false);
+   assert.equal(await page.locator('#insuranceStatus').isVisible(),false);
    assert.ok((await page.locator('#content').innerText()).length>20);
   }
-  await page.getByRole('button',{name:'Overview',exact:true}).click();
+  await page.getByLabel('Insurance view',{exact:true}).selectOption('Overview');
   assert.equal(await page.locator('.kpi').count(),4);
   assert.ok((await page.locator('main').innerText()).includes('Prototype only'));
   assert.deepEqual(errors,[]);
