@@ -14,7 +14,22 @@ function installContractRequirementRegister(){
  }
  const status=r=>r.parent?.current_assessment?.status||(r.parent?'Not Assessed':'Assessment unavailable');
  function updateCounts(){
-  const all=entries();document.querySelectorAll('.compliance-view').forEach(button=>{
+  const all=entries(),ready=commonLoaded&&!loading;
+  // Use the same complete authorised requirement entries as the tab badges, before filtering or paging.
+  const summary=document.querySelector('body[data-register-layout="compliance"] main>.vr-summary');
+  if(summary){
+   summary.setAttribute('aria-label','Requirement counts');
+   summary.setAttribute('aria-busy',String(!ready));
+   const types=['Regulatory','Internal','Client',''];
+   [...summary.children].forEach((card,index)=>{
+    const type=types[index];if(type===undefined)return;
+    card.classList.remove('vr-context');
+    card.querySelector('b').textContent=ready?all.filter(r=>!type||r.type===type).length:'—';
+    card.querySelector('span').textContent=type||'Total Requirements';
+    card.title=ready?'All loaded requirements, before search and filters':'Requirement totals are unavailable until all requirements load';
+   });
+  }
+  document.querySelectorAll('.compliance-view').forEach(button=>{
    const t=button.dataset.type,badge=button.querySelector('span');if(badge)badge.textContent=(!commonLoaded||loading)?'—':all.filter(r=>!t||r.type===t).length;
   });
  }
@@ -51,7 +66,7 @@ function installContractRequirementRegister(){
  for(const id of ['contractRequirementFilter','contractRequirementSearch','requirementStatusFilter','requirementApplicabilityFilter'])$(id).addEventListener('input',()=>{page=0;render();});
  $('contractRequirementPrevious').onclick=()=>{page--;render();};$('contractRequirementNext').onclick=()=>{page++;render();};
  async function load(){
-  const number=++loadNumber;loading=true;$('contractRequirementRetry').hidden=true;render();
+  const number=++loadNumber;loading=true;$('contractRequirementRetry').hidden=true;updateCounts();render();
   try{
    const response=await fetch(COMPLIANCE_API+'/compliance/contract-requirements',{headers:complianceAuthHeaders(),cache:'no-store'});
    if(response.status===401){location.replace('login.html?return=compliance.html');return;}
