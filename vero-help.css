@@ -5,4 +5,10 @@
 .vero-help-card h4{font-size:13px;margin:0 0 7px}.vero-help-card a{color:#296575;text-decoration:underline;text-underline-offset:3px}
 .vero-help-card p{font-size:12px!important;margin:0!important;color:var(--ink)!important}.vero-help-card ol{padding-left:20px;margin:10px 0 0}.vero-help-card li{margin:5px 0;font-size:12px}
 .home-ai-box input:focus-visible,.home-ai-box button:focus-visible,.vero-help-card a:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+.home-ai,.home-ai input,.home-ai button,.vero-help-result{font-family:Montserrat,Verdana,Arial,sans-serif!important}
+.home-ai .home-ai-box input{font-size:13px;font-weight:500;line-height:1.5;padding:12px}
+.home-ai .home-ai-box button{font-size:16px}.home-ai .quick-q button{font-size:11px;font-weight:500;line-height:1.5}
+.home-ai>p,.home-ai .ai-note{font-size:12px;line-height:1.6;font-weight:500;color:#68625e}
+.vero-help-result{font-size:13px;line-height:1.65;font-weight:500}.home-ai .vero-help-answer{font-size:13px!important;line-height:1.7;color:var(--ink);white-space:pre-line}
+.vero-help-card h4{font-weight:700}.vero-help-card blockquote{font-size:12px;line-height:1.65;margin:12px 0 0;padding:0 0 0 12px;border-left:3px solid var(--green);color:#494540}
 

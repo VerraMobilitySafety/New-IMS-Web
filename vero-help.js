@@ -7,7 +7,7 @@
  const pages=new Set(['incident-management.html','project-management.html','documents.html','my-actions.html','maintenance-management.html','compliance.html','risk.html','sites.html']);
  function text(tag,value,parent){const el=document.createElement(tag);el.textContent=value;parent.appendChild(el);return el;}
  function safeLink(href){
-  if(typeof href!=='string'||!/^[-a-z]+\.html(?:\?document=[1-9]\d*)?$/.test(href))return false;
+  if(typeof href!=='string'||!/^[-a-z]+\.html(?:\?(?:document=[1-9]\d*|document_id=[1-9]\d*&page=[1-9]\d*))?$/.test(href))return false;
   const [page,query]=href.split('?');return pages.has(page)&&(!query||page==='documents.html');
  }
  function message(value){result.hidden=false;result.replaceChildren();text('p',value,result);}
@@ -26,12 +26,24 @@
    if(!response.ok)throw Error(data.message||'Ask Vero is unavailable right now. Please try again.');
    if(!Array.isArray(data.sources)||typeof data.message!=='string')throw Error('Vero could not read this answer. Please try again.');
    message(data.message);
+   if(typeof data.answer==='string'&&data.answer.trim())text('p',data.answer,result).className='vero-help-answer';
    if(data.mode==='search')text('small','Matched Vero guidance · AI routing is currently unavailable.',result);
+   const coverage=data.document_search;
+   if(coverage){
+    const notes=[];
+    if(coverage.state==='Preparing'||coverage.pending>0)notes.push('Some document contents are still being indexed.');
+    if(coverage.unreadable>0)notes.push('Some documents have unreadable pages or need text recognition.');
+    if(coverage.state==='Ready'&&coverage.eligible===0)notes.push('No current documents are enabled for AI search.');
+    if(notes.length)text('small',notes.join(' '),result);
+   }
    for(const source of data.sources.slice(0,3)){
     if(!safeLink(source.href)||typeof source.title!=='string'||typeof source.summary!=='string')continue;
     const card=document.createElement('article');card.className='vero-help-card';result.appendChild(card);
     const heading=text('h4','',card),link=text('a',source.title,heading);link.href=source.href;
     text('p',source.summary,card);
+    const quotes=Array.isArray(data.quotes)?data.quotes.filter(q=>q.id===source.id&&typeof q.text==='string'):[];
+    if(quotes.length){for(const quote of quotes)text('blockquote',quote.text,card);}
+    else if(typeof source.excerpt==='string')text('blockquote',source.excerpt,card);
     if(Array.isArray(source.steps)&&source.steps.length){const list=document.createElement('ol');card.appendChild(list);source.steps.slice(0,6).forEach(step=>{if(typeof step==='string')text('li',step,list);});}
    }
   }catch(error){message(error.name==='AbortError'?'That took too long. Your question is still here—please try again.':error.message||'Ask Vero is unavailable right now. Please try again.');}

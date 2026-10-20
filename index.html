@@ -239,9 +239,9 @@
  <div class="panel"><div class="panel-head"><h3>My Actions</h3><span id="myActionsCount">Loading…</span></div><div class="home-actions" id="myActionsList">
   <div class="empty">Loading your actions…</div>
  </div></div>
- <div class="panel"><div class="home-ai"><div class="ai-title"><h3>Ask Vero</h3><span class="beta">BETA</span></div><p>Find what you need and learn how to do things in Vero.</p>
+ <div class="panel"><div class="home-ai"><div class="ai-title"><h3>Ask Vero</h3><span class="beta">BETA</span></div><p>Find what you need, learn how to use Vero, and ask about controlled documents.</p>
   <form id="veroHelpForm" class="home-ai-box"><input id="homeAI" aria-label="Ask Vero a question" maxlength="1000" required placeholder="Where can I find a procedure?"><button id="veroHelpSubmit" type="submit" aria-label="Ask Vero">➤</button></form>
-  <div class="ai-note">Short guidance with links to Vero pages and matching controlled documents.</div>
+  <div class="ai-note">Answers from current documents, with quoted passages and source links.</div>
   <div class="quick-q"><button type="button" onclick="setQ(this)">How do I report an incident?</button><button type="button" onclick="setQ(this)">How do I add a project risk?</button><button type="button" onclick="setQ(this)">Where is the working at heights procedure?</button></div>
   <section id="veroHelpResult" class="vero-help-result" aria-label="Ask Vero answer" aria-live="polite" aria-atomic="true" hidden></section>
  </div></div>
@@ -653,8 +653,9 @@ function setQ(b){document.getElementById('homeAI').value=b.textContent;document.
 </script>
 
 <script src="nav.js"></script>
-<link rel="stylesheet" href="vero-help.css?v=20261020">
-<script src="vero-help.js?v=20261020"></script>
+<link rel="stylesheet" href="vero-help.css?v=20261020-content">
+<script src="vero-help.js?v=20261020-content"></script>
 </body></html>
+
 
 
