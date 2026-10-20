@@ -10,8 +10,19 @@ function installContractRequirementRegister(){
  const $=id=>document.getElementById(id);let data=[],contracts=new Map(),page=0,loading=true,loadNumber=0;
  const size=50;
  function view(specific){commonPanel.hidden=specific;panel.hidden=!specific;$('contractRequirementView').setAttribute('aria-pressed',String(specific));$('commonRequirementView').setAttribute('aria-pressed',String(!specific));}
+ window.showComplianceTypeView=type=>{
+  switcher.hidden=!!type&&type!=='Client';
+  view(false);
+ };
  $('contractRequirementView').onclick=()=>view(true);$('commonRequirementView').onclick=()=>view(false);
- view(!new URLSearchParams(location.search).has('obligation_id'));
+ const params=new URLSearchParams(location.search);
+ view(params.has('contract_id')&&!params.has('obligation_id'));
+ if(params.has('contract_id')&&!params.has('obligation_id')){
+  const clientButton=document.querySelector('.compliance-view[data-type="Client"]');
+  if(clientButton&&typeof window.setComplianceType==='function'){
+   window.setComplianceType(clientButton,'Client');view(true);
+  }
+ }
  function render(){
   const id=$('contractRequirementFilter').value,q=$('contractRequirementSearch').value.toLowerCase().trim();
   const rows=data.filter(r=>(!id||String(r.contract_id)===id)&&(!q||[r.activity.verra_action,r.activity.timing_or_trigger,r.activity.conditions_and_exceptions,r.activity.clause_reference,r.activity.instance_id,r.common_requirement,r.obligation_code,contracts.get(String(r.contract_id))?.code,contracts.get(String(r.contract_id))?.name].join(' ').toLowerCase().includes(q)));

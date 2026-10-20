@@ -867,7 +867,7 @@ button,input,select,textarea{font-family:inherit}
 <link rel="stylesheet" href="risk-page-loader.css?v=20261016-rollout">
 <link rel="stylesheet" href="risk-nk9-animation.css?v=20261016-rollout">
 <script src="risk-nk9-animation.js?v=20261016-rollout"></script>
-<script src="risk-page-loader.js?v=20261016-rollout" data-tasks="account compliance"></script><link rel="stylesheet" href="compliance-contract-register.css"></head>
+<script src="risk-page-loader.js?v=20261016-rollout" data-tasks="account compliance"></script><link rel="stylesheet" href="compliance-contract-register.css?v=20261020-types"></head>
 
 <body>
 <div class="app">
@@ -962,9 +962,50 @@ button,input,select,textarea{font-family:inherit}
 
 </div>
 
-<section class="panel">
+<section class="panel compliance-type-panel" aria-label="Filter requirements by type">
+ <h2>Requirement type</h2>
+   <div class="compliance-view-toggle" role="group" aria-label="Requirement type">
 
- 
+    <button type="button" aria-pressed="true"
+     class="compliance-view active"
+     data-type=""
+     onclick="setComplianceType(this,'')"
+    >
+     All
+     <span>0</span>
+    </button>
+
+    <button type="button" aria-pressed="false"
+     class="compliance-view"
+     data-type="Regulatory"
+     onclick="setComplianceType(this,'Regulatory')"
+    >
+     Regulatory
+     <span>0</span>
+    </button>
+
+    <button type="button" aria-pressed="false"
+     class="compliance-view"
+     data-type="Internal"
+     onclick="setComplianceType(this,'Internal')"
+    >
+     Internal
+     <span>0</span>
+    </button>
+
+    <button type="button" aria-pressed="false"
+     class="compliance-view"
+     data-type="Client"
+     onclick="setComplianceType(this,'Client')"
+    >
+     Client
+     <span>0</span>
+    </button>
+
+   </div>
+</section>
+
+<section class="panel">
 
  <div class="compliance-toolbar">
 
@@ -980,45 +1021,7 @@ button,input,select,textarea{font-family:inherit}
 
   <div class="compliance-toolbar-right">
 
-   <div class="compliance-view-toggle">
 
-    <button
-     class="compliance-view active"
-     data-type=""
-     onclick="setComplianceType(this,'')"
-    >
-     All Obligations
-     <span>5</span>
-    </button>
-
-    <button
-     class="compliance-view"
-     data-type="Client"
-     onclick="setComplianceType(this,'Client')"
-    >
-     Client
-     <span>3</span>
-    </button>
-
-    <button
-     class="compliance-view"
-     data-type="Regulatory"
-     onclick="setComplianceType(this,'Regulatory')"
-    >
-     Regulatory
-     <span>1</span>
-    </button>
-
-    <button
-     class="compliance-view"
-     data-type="Internal"
-     onclick="setComplianceType(this,'Internal')"
-    >
-     Internal
-     <span>1</span>
-    </button>
-
-   </div>
 
    <select
     id="applicabilityFilter"
@@ -1047,6 +1050,7 @@ button,input,select,textarea{font-family:inherit}
  </div>
 
  <input id="typeFilter" type="hidden" value="">
+ <p id="registerCount" role="status" aria-live="polite">Loading requirements…</p>
 
  <div class="table-wrap">
 
@@ -3056,7 +3060,7 @@ function filterRegister(){
 
  const search=
   document.getElementById('complianceSearch')
-  .value.toLowerCase();
+  .value.trim().toLowerCase();
 
  const type=
   document.getElementById('typeFilter').value;
@@ -3068,7 +3072,7 @@ function filterRegister(){
   document.getElementById('statusFilter').value;
 
  const rows=[
-  ...document.querySelectorAll('#registerBody tr')
+  ...document.querySelectorAll('#registerBody tr[data-type]')
  ];
 
  let count=0;
@@ -3077,7 +3081,7 @@ function filterRegister(){
 
   const matchesSearch=
    !search ||
-   row.innerText.toLowerCase().includes(search);
+   row.textContent.toLowerCase().includes(search);
 
   const matchesType=
    !type ||
@@ -3103,6 +3107,11 @@ function filterRegister(){
 
  });
 
+ let empty=document.getElementById('complianceFilterEmpty');
+ if(!count&&rows.length){
+  if(!empty){empty=document.createElement('tr');empty.id='complianceFilterEmpty';empty.innerHTML='<td colspan="7" style="padding:28px;text-align:center">No requirements match these filters.</td>';document.getElementById('registerBody').append(empty);}
+ }else{empty?.remove();}
+
  const registerCount=document.getElementById('registerCount');
  if(registerCount){
   registerCount.textContent=
@@ -3113,10 +3122,11 @@ function filterRegister(){
 
 function setType(type){
 
- document.getElementById('typeFilter').value=type;
- filterRegister();
+ const button=document.querySelector('.compliance-view[data-type="'+type+'"]');
+ if(button)setComplianceType(button,type);
+ else{document.getElementById('typeFilter').value=type;filterRegister();}
 
- document.querySelector('.panel')
+ document.querySelector('.compliance-type-panel')
   .scrollIntoView({behavior:'smooth'});
 }
 
@@ -3546,7 +3556,8 @@ function setComplianceType(button,type){
   .forEach(b=>b.classList.remove('active'));
 
  button.classList.add('active');
-
+ document.querySelectorAll('.compliance-view').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+ window.showComplianceTypeView?.(type);
  filterRegister();
 }
 </script>
@@ -3769,6 +3780,7 @@ function renderComplianceRegister(items){
  }
 
  updateComplianceCounts(items);
+ filterRegister();
 }
 
 function updateComplianceCounts(items){
@@ -8237,5 +8249,5 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 
 
-<script src="compliance-contract-register.js"></script>
+<script src="compliance-contract-register.js?v=20261020-types"></script>
 
