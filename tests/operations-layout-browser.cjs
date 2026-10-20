@@ -1,7 +1,7 @@
 const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..'),out=path.resolve(root,'../preview');
 (async()=>{const browser=await chromium.launch({headless:true,...(process.env.INSURANCE_BROWSER?{executablePath:process.env.INSURANCE_BROWSER}:{})});try{
-for(const width of [1440,390])for(const file of ['maintenance-management.html','sites.html','users.html','my-actions.html','client-services-sites.html']){
+for(const width of [1440,1024,768,390])for(const file of ['maintenance-management.html','sites.html','users.html','my-actions.html','client-services-sites.html']){
  const context=await browser.newContext({viewport:{width,height:1100}}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  let admin=true;
  await page.addInitScript(()=>localStorage.setItem('vero_session_token','synthetic'));
