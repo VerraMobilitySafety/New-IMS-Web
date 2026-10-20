@@ -21,3 +21,5 @@ jobs:
           node tests/event-dashboard.cjs
           node tests/event-actions-dashboard.cjs
           node tests/event-period.cjs
+          node tests/event-account.cjs
+          node tests/event-people.cjs

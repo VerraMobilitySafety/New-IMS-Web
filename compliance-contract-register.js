@@ -10,7 +10,7 @@ function installContractRequirementRegister(){
  let common=Object.values(typeof obligationsLive==='undefined'?{}:obligationsLive),commonLoaded=!document.getElementById('complianceLoadingRow');
  function entries(){
   const parents=new Map(common.map(o=>[String(o.id),o])),expanded=new Set(data.map(r=>String(r.obligation_id)));
-  return data.map(r=>({...r,type:'Client',parent:parents.get(String(r.obligation_id)),applicability:'Maintenance'})).concat(common.filter(o=>!expanded.has(String(o.id))&&!/^COM-CLIENT-CONTRACT/i.test(o.obligation_code||'')&&(o.compliance_type!=='Client'||!loading)).map(o=>({obligation_id:o.id,type:o.compliance_type||'',parent:o,applicability:o.applicability?.type||'',activity:{verra_action:o.obligation_title,timing_or_trigger:o.obligation_frequency,clause_reference:o.source_reference},standalone:true})));
+  return data.map(r=>({...r,type:'Client',parent:parents.get(String(r.obligation_id)),applicability:'Maintenance'})).concat(common.filter(o=>!expanded.has(String(o.id))&&!/^COM-CLIENT-CONTRACT/i.test(o.obligation_code||'')&&(o.compliance_type!=='Client'||!loading)).map(o=>({obligation_id:o.id,type:o.compliance_type||'',parent:o,applicability:o.applicability?.type||(o.compliance_type==='Regulatory'&&o.jurisdiction?'Jurisdiction':''),activity:{verra_action:o.obligation_title,timing_or_trigger:o.obligation_frequency,clause_reference:o.source_reference},standalone:true})));
  }
  const status=r=>r.parent?.current_assessment?.status||(r.parent?'Not Assessed':'Assessment unavailable');
  function updateCounts(){
