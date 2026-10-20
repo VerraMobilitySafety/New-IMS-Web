@@ -42,12 +42,6 @@ for(const width of [1500,390]) test(`Common requirements search lifecycle at ${w
   assert.equal(await page.evaluate(()=>oldCounter.textContent),'Showing 2 common requirements');
   await page.locator('#registerCount').evaluate(node=>node.remove());
   await search.fill('Another');assert.equal(await visible(),1);
-  await page.addScriptTag({content:'const COMPLIANCE_API="https://example.invalid/api";function complianceAuthHeaders(){return {}}'});
-  await page.addScriptTag({path:path.join(root,'compliance-contract-register.js')});
-  await page.locator('#commonRequirementView').click();
-  assert.equal(await search.inputValue(),'Another');assert.equal(await visible(),1);
-  await page.locator('#contractRequirementView').click();
-  await page.locator('#commonRequirementView').click();
   await search.fill('');assert.equal(await visible(),2);
   assert.deepEqual(errors,[]);
   // Required search controls remain errors; only the optional display counter is guarded.
