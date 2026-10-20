@@ -1,0 +1,81 @@
+/* Load in <head> before page styles: geometry must not depend on nav.js. */
+:root { --vero-sidebar-width: 300px; }
+.sidebar {
+  box-sizing: border-box;
+  width: var(--vero-sidebar-width) !important;
+  position: fixed !important;
+  inset: 0 auto 0 0 !important;
+  display: flex !important;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  padding: 22px 24px !important;
+  overflow: hidden !important;
+  z-index: 10;
+}
+.sidebar .brand { flex: 0 0 82px !important; height: 82px !important; margin: 0 0 12px !important; }
+.sidebar .nav {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.35) transparent;
+}
+.sidebar .side-foot {
+  position: relative !important;
+  left: auto !important;
+  bottom: auto !important;
+  flex-shrink: 0 !important;
+  padding-top: 12px !important;
+}
+.main { margin-left: var(--vero-sidebar-width) !important; width: calc(100% - var(--vero-sidebar-width)) !important; min-width: 0; }
+#vero-nav a, #vero-nav summary { box-sizing: border-box; min-height: 38px; line-height: 20px; }
+#vero-nav .ico {
+  box-sizing: border-box;
+  width: 20px !important;
+  min-width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  stroke: currentColor;
+}
+#vero-nav .ico svg { width: 20px; height: 20px; display: block; }
+#vero-nav a > .ico + span, #vero-nav summary > .ico + span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#vero-nav .vero-actions-slot { flex: 0 0 32px; width: 32px; height: 22px; margin-left: auto; }
+#vero-nav .vero-actions-count {
+  box-sizing: border-box;
+  width: 32px;
+  height: 22px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #A9C23F;
+  color: #252321;
+  font: 800 11px Montserrat,Verdana,Arial,sans-serif;
+  line-height: 1;
+  white-space: nowrap;
+}
+#vero-nav .vero-actions-count[hidden] { display: none; }
+/* These controls exist before icons or authenticated data arrive. */
+#vero-nav .vero-nav-parent { display: flex; align-items: center; }
+#vero-nav .vero-nav-parent > a { flex: 1; min-width: 0; }
+/* Role lookup reveals only the control, without resizing its parent link. */
+#clientServicesNavGroup .vero-nav-parent { position: relative; padding-right: 30px; }
+#clientServicesSiteExpand { position: absolute; right: 0; top: 0; }
+#clientServicesNavGroup.open .vero-nav-children { min-height: 40px; }
+#vero-nav .vero-nav-expand { background: transparent; border: 0; color: #f7f7f6; padding: 9px 10px; cursor: pointer; font-size: 17px; flex: 0 0 30px; }
+#vero-nav .vero-nav-expand span { display: inline-block; transition: transform .2s ease; }
+#vero-nav .vero-nav-group.open .vero-nav-expand span { transform: rotate(90deg); }
+#vero-nav .vero-nav-children { display: none; padding-left: 34px; margin: 2px 0 6px; }
+#vero-nav .vero-nav-group.open .vero-nav-children { display: block; }
+#vero-nav .vero-nav-children a { display: block; padding: 8px 10px; font-size: 10px; line-height: 1.5; white-space: normal; }
+#vero-nav .vero-risk-navigation summary { display: flex; align-items: center; gap: 11px; padding: 9px 12px; font-size: 12px; border-left: 3px solid transparent; border-radius: 7px; cursor: pointer; color: #f7f7f6; }
+#vero-nav .vero-risk-navigation summary::after { content: '›'; margin-left: auto; }
+#vero-nav .vero-risk-navigation[open] summary::after { transform: rotate(90deg); }
+#vero-nav .vero-risk-navigation[open] summary { background: rgba(255,255,255,.08); border-left-color: #A9C23F; }
+#vero-nav .vero-risk-navigation > a { margin-left: 34px !important; font-size: 11px !important; }
