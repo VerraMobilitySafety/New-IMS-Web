@@ -44,7 +44,12 @@
    const sources=data.sources.slice(0,3);
    const guide=sources.find(source=>safeLink(source.href)&&Array.isArray(source.steps)&&source.steps.length);
    const hasAnswer=typeof data.answer==='string'&&data.answer.trim();
-   if(hasAnswer)text('p',data.answer,reply).className='vero-help-answer';
+   const findingDocument=/\b(?:where|find|locate|open|show|send)\b/i.test(question)||(/\b(?:procedure|policy|form|document)\??$/i.test(question.trim())&&!/\b(?:what|how|when|why|explain|summari[sz]e|requirements|required|must|should)\b/i.test(question));
+   const documentLink=findingDocument&&(sources.find(source=>safeLink(source.href)&&/^documents\.html\?document_id=/.test(source.href))||sources.find(source=>safeLink(source.href)&&/^documents\.html\?document=/.test(source.href)));
+   if(documentLink){
+    text('p','Here it is:',reply);
+    const link=text('a',documentLink.title,reply);link.href=documentLink.href;link.className='vero-chat-action';
+   }else if(hasAnswer)text('p',data.answer,reply).className='vero-help-answer';
    else if(guide){
     text('p',guide.summary,reply);
     const steps=text('ol','',reply);steps.className='vero-chat-steps';
@@ -55,12 +60,12 @@
    }else text('p',data.message,reply);
    const documentSources=sources.filter(source=>typeof source.excerpt==='string');
    const coverage=data.document_search;
-   if(coverage&&documentSources.length){
+   if(coverage&&documentSources.length&&!documentLink){
     const notes=[];
     if(coverage.state==='Preparing'||coverage.pending>0)notes.push('Some document contents are still being indexed.');
     if(notes.length)text('small',notes.join(' '),reply);
    }
-   const sourceBox=sources.length&&!guide?text('details','',reply):null;
+   const sourceBox=sources.length&&!guide&&!documentLink?text('details','',reply):null;
    if(sourceBox){sourceBox.className='vero-chat-sources';sourceBox.open=!hasAnswer;text('summary','Sources',sourceBox);}
    for(const source of sources){
     if(!sourceBox)continue;
