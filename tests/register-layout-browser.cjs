@@ -49,7 +49,8 @@ const contractor={contractors:[{id:1,contractor_code:'CTR-TEST',company_name:'Ex
    await page.locator('.compliance-view[data-type=""]').click();assert.equal(await page.locator('#contractRequirementRows tr[data-requirement]').count(),3);
    await page.locator('#contractRequirementRows .contract-requirement-open').first().click();assert.equal(await page.evaluate(()=>window.opened),1);
    await page.locator('#obligationModal').evaluate(e=>e.classList.remove('show'));
-   assert.match(await page.locator('.vr-summary').innerText(),/Not enabled/);
+   assert.deepEqual(await page.locator('.vr-summary>.vr-card b').allTextContents(),['1','1','1','3']);
+   assert.deepEqual(await page.locator('.vr-summary>.vr-card span').allTextContents(),['Regulatory','Internal','Client','Total Requirements']);
   }else{
    await page.locator('.contractor-row').waitFor();
    await page.locator('#search').fill('missing');assert.equal(await page.locator('.contractor-row').count(),0);
