@@ -2,6 +2,41 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 let chromium;try{({chromium}=require('playwright'));}catch(e){({chromium}=require('C:/Users/dbleasel/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));}
 const root=path.join(__dirname,'..');
 
+
+test('contract compliance lists individual requirements with search paging and central assessment links',async()=>{
+ const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
+ try{for(const width of [1500,390]){
+  const page=await browser.newPage({viewport:{width,height:950}});page.setDefaultTimeout(12000);
+  await page.addInitScript(()=>localStorage.setItem('vero_session_token','mock-only'));
+  const activity=i=>({instance_id:'REQ-'+i,verra_action:'Requirement '+i,timing_or_trigger:'Every month',conditions_and_exceptions:i===0?'<Site-specific condition>':'Condition '+i,clause_reference:'Clause '+i,pdf_pages:[i+1]});
+  await page.route('**/*',async route=>{
+   const u=new URL(route.request().url());
+   if(u.pathname.endsWith('/maintenance-contracts'))return route.fulfill({json:{contracts:[{id:4,contract_code:'TEST-M',contract_name:'Test agreement',status:'Draft',requirement_count:2},{id:5,contract_code:'EMPTY',contract_name:'Empty contract',status:'Draft',requirement_count:0}],can_edit_owner:false}});
+   if(u.pathname.endsWith('/details'))return route.fulfill({json:{sources:[],requirements:u.pathname.includes('/4/')?[{id:42,code:'COM-42',title:'Shared requirement',activities:Array.from({length:52},(_,i)=>activity(i))}]:[]}});
+   if(u.hostname!=='vero.test')return route.abort();
+   const file=path.resolve(root,'.'+u.pathname);if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});
+   let body=fs.readFileSync(file);if(file.endsWith('.html'))body=body.toString().replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace('</body>','<script src="customer-contracts.js"></script><script>loadContractWorkspace()</script></body>');
+   return route.fulfill({contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css'})[path.extname(file)]||'application/octet-stream',body});
+  });
+  await page.goto('https://vero.test/maintenance-workspace.html?id=4');
+  await page.getByRole('button',{name:'Compliance',exact:true}).click();
+  const rows=page.locator('#contractComplianceRows');await rows.getByRole('link',{name:'Requirement 0',exact:true}).waitFor();
+  assert.equal(await rows.locator('tr').count(),50);
+  assert.equal(await rows.getByRole('link',{name:'Requirement 0',exact:true}).getAttribute('href'),'compliance.html?obligation_id=42');
+  assert.equal(await rows.getByRole('link',{name:'Open assessment',exact:true}).first().getAttribute('href'),'compliance.html?obligation_id=42');
+  await rows.locator('summary').first().click();await rows.getByText('<Site-specific condition>',{exact:false}).waitFor();
+  await page.locator('#contractComplianceNext').click();await rows.getByRole('link',{name:'Requirement 50',exact:true}).waitFor();
+  assert.equal(await rows.locator('tr').count(),2);
+  await page.locator('#contractComplianceSearch').fill('Clause 51');await rows.getByRole('link',{name:'Requirement 51',exact:true}).waitFor();
+  assert.equal(await rows.locator('tr').count(),1);
+  assert.equal(await page.locator('#contractCompliancePrevious').isDisabled(),true);
+  await page.locator('#contractComplianceSearch').fill('unmatched');await rows.getByText('No requirements match your search.',{exact:true}).waitFor();
+  await page.goto('https://vero.test/maintenance-workspace.html?id=5');
+  await page.getByRole('button',{name:'Compliance',exact:true}).click();await page.getByText('No requirements linked to this contract.',{exact:true}).waitFor();
+  await page.close();
+ }}finally{await browser.close();}
+});
+
 test('administrators edit contract owners only in the workspace with retained failed saves',async()=>{
  const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
  try{for(const width of [1500,390]){

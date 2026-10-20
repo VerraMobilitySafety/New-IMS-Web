@@ -101,8 +101,27 @@ function drawTab(){
   el.innerHTML='<h3>Contract source files</h3>'+contractDetails.sources.map(s=>'<article class="message"><b>'+esc(s.title)+'</b><p>'+esc(s.record_code)+(s.metadata.supporting_only?' · Supporting tender':'')+'</p><button class="btn" data-source="'+s.id+'">Open PDF</button></article>').join('');
   document.querySelectorAll('[data-source]').forEach(b=>b.onclick=async()=>{const destination=window.open('about:blank','_blank');try{const blob=await request('/maintenance-contracts/'+c.id+'/sources/'+b.dataset.source);const url=URL.createObjectURL(blob);destination.location=url;setTimeout(()=>URL.revokeObjectURL(url),600000);}catch(e){destination?.close();alert(e.message);}});return;
  }
- el.innerHTML='<h3>Compliance requirements</h3><p>Common requirements with this contract’s activities, timing and source clauses. Compliance has not been assessed.</p>'+contractDetails.requirements.map(r=>'<details class="message"><summary><b>'+esc(r.title)+'</b> · '+r.activities.length+' details</summary><p><a href="compliance.html?obligation_id='+r.id+'">'+esc(r.code)+' · Open central requirement</a></p>'+r.activities.map(a=>'<article><p><b>'+esc(a.verra_action)+'</b></p><p><strong>When:</strong> '+esc(a.timing_or_trigger)+'</p><p><strong>Conditions:</strong> '+esc(a.conditions_and_exceptions)+'</p><p>'+esc(a.clause_reference)+' · PDF pages '+esc(a.pdf_pages.join(', '))+'</p></article>').join('')+'</details>').join('')||'<p>No requirements linked yet.</p>';
+ drawContractCompliance(c,el);
 }
+
+function drawContractCompliance(c,el){
+ const items=(contractDetails.requirements||[]).flatMap(r=>(r.activities||[]).map(a=>({r,a})));
+ el.innerHTML='<section class="contract-compliance-list"><div class="contract-compliance-tools"><label>Search requirements<input type="search" id="contractComplianceSearch" placeholder="Search requirements, timing or clauses"></label></div><p id="contractComplianceCount" role="status" aria-live="polite"></p><div class="table-wrap"><table><thead><tr><th>Requirement</th><th>Type / applicability</th><th>Timing / trigger</th><th>Source</th><th>Assessment</th></tr></thead><tbody id="contractComplianceRows"></tbody></table></div><div class="contract-compliance-pages"><button type="button" id="contractCompliancePrevious">Previous</button><span id="contractCompliancePage"></span><button type="button" id="contractComplianceNext">Next</button></div></section>';
+ const search=el.querySelector('#contractComplianceSearch'),rows=el.querySelector('#contractComplianceRows'),count=el.querySelector('#contractComplianceCount'),previous=el.querySelector('#contractCompliancePrevious'),next=el.querySelector('#contractComplianceNext'),pageLabel=el.querySelector('#contractCompliancePage');
+ let page=0;const size=50;
+ function renderRequirements(){
+  const query=search.value.trim().toLowerCase(),filtered=items.filter(({r,a})=>[a.verra_action,a.instance_id,r.title,r.code,a.timing_or_trigger,a.conditions_and_exceptions,a.clause_reference].join(' ').toLowerCase().includes(query));
+  page=Math.min(page,Math.max(0,Math.ceil(filtered.length/size)-1));const start=page*size,shown=filtered.slice(start,start+size);
+  count.textContent=filtered.length+' requirement'+(filtered.length===1?'':'s')+(filtered.length?' · showing '+(start+1)+'–'+(start+shown.length):'');
+  rows.innerHTML=shown.map(({r,a})=>{
+   const href='compliance.html?obligation_id='+encodeURIComponent(r.id);
+   return '<tr><td><a class="contract-compliance-open" href="'+href+'">'+esc(a.verra_action||r.title||'Untitled requirement')+'</a><div class="contract-compliance-reference">'+esc(a.instance_id||r.code||'')+'</div><details><summary>Conditions and shared requirement</summary><p><strong>Common requirement:</strong> '+esc(r.title)+'</p><p><strong>Conditions:</strong> '+esc(a.conditions_and_exceptions||'No additional conditions recorded.')+'</p></details></td><td>Client<br>Maintenance</td><td>'+esc(a.timing_or_trigger||'Ongoing')+'</td><td>'+esc(a.clause_reference||'—')+((a.pdf_pages||[]).length?'<div>PDF pages '+esc(a.pdf_pages.join(', '))+'</div>':'')+'</td><td><a href="'+href+'">Open assessment</a></td></tr>';
+  }).join('')||'<tr><td colspan="5">'+(items.length?'No requirements match your search.':'No requirements linked to this contract.')+'</td></tr>';
+  previous.disabled=page===0;next.disabled=start+size>=filtered.length;pageLabel.textContent=filtered.length?'Page '+(page+1)+' of '+Math.ceil(filtered.length/size):'';
+ }
+ search.oninput=()=>{page=0;renderRequirements();};previous.onclick=()=>{page--;renderRequirements();};next.onclick=()=>{page++;renderRequirements();};renderRequirements();
+}
+
 async function openImport(){
  try{
   importOptions=importOptions||await request('/maintenance-contracts/import-options');
