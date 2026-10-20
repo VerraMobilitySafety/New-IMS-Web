@@ -2,7 +2,7 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 let chromium;try{({chromium}=require('playwright'));}catch(e){({chromium}=require('C:/Users/dbleasel/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));}
 const root=path.join(__dirname,'..');
 
-test('administrators edit contract owners from the register and workspace with retained failed saves',async()=>{
+test('administrators edit contract owners only in the workspace with retained failed saves',async()=>{
  const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
  try{for(const width of [1500,390]){
   const page=await browser.newPage({viewport:{width,height:950}}),posts=[];let fail=true,admin=true;
@@ -27,7 +27,10 @@ test('administrators edit contract owners from the register and workspace with r
    return route.fulfill({contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css'})[path.extname(file)]||'application/octet-stream',body});
   });
   await page.goto('https://vero.test/maintenance-management.html');
-  await page.getByRole('button',{name:'Edit owner for TEST-M',exact:true}).click();
+  await page.getByRole('link',{name:'Test agreement',exact:true}).waitFor();
+  assert.equal(await page.locator('[data-owner-edit]').count(),0);
+  await page.getByRole('link',{name:'Test agreement',exact:true}).click();
+  await page.getByRole('button',{name:'Edit owner',exact:true}).click();
   const dialog=page.locator('#contractOwnerDialog');
   await dialog.getByLabel('Contract owner',{exact:true}).selectOption('2');
   assert.equal(await dialog.evaluate(el=>el.getBoundingClientRect().width<=innerWidth),true);
@@ -35,21 +38,24 @@ test('administrators edit contract owners from the register and workspace with r
   await dialog.getByRole('alert').filter({hasText:'Temporary save failure'}).waitFor();
   assert.equal(await dialog.getByLabel('Contract owner',{exact:true}).inputValue(),'2');
   fail=false;await dialog.getByRole('button',{name:'Save owner',exact:true}).click();
-  await page.getByRole('cell',{name:'Selected Owner Edit owner',exact:false}).waitFor();
+  await page.locator('#contractSummary').getByText('Selected Owner',{exact:true}).waitFor();
   assert.equal(posts[1].owner_version,0);
-  await page.reload();await page.getByRole('button',{name:'Edit owner for TEST-M',exact:true}).click();
+  await page.reload();await page.getByRole('button',{name:'Edit owner',exact:true}).click();
   await dialog.getByLabel('Contract owner',{exact:true}).locator('option:checked').filter({hasText:'Selected Owner'}).waitFor({state:'attached'});
   assert.equal(await dialog.getByLabel('Contract owner',{exact:true}).inputValue(),'2');
   await dialog.getByLabel('Contract owner',{exact:true}).selectOption('');
   await dialog.getByRole('button',{name:'Save owner',exact:true}).click();
-  await page.getByRole('cell',{name:'Unassigned Edit owner',exact:false}).waitFor();
+  await page.locator('#contractSummary').getByText('Unassigned',{exact:true}).waitFor();
   await page.goto('https://vero.test/maintenance-workspace.html?id=4');
   await page.getByRole('button',{name:'Edit owner',exact:true}).click();
   await dialog.getByLabel('Contract owner',{exact:true}).selectOption('2');
   await dialog.getByRole('button',{name:'Save owner',exact:true}).click();
   await page.locator('#contractSummary').getByText('Selected Owner',{exact:true}).waitFor();
-  admin=false;await page.goto('https://vero.test/maintenance-management.html');await page.getByRole('link',{name:'Test agreement',exact:true}).waitFor();
-  assert.equal(await page.getByRole('button',{name:'Edit owner for TEST-M',exact:true}).count(),0);
+  await page.goto('https://vero.test/maintenance-management.html');await page.getByRole('link',{name:'Test agreement',exact:true}).waitFor();
+  await page.getByRole('cell',{name:'Selected Owner',exact:true}).waitFor();
+  assert.equal(await page.locator('[data-owner-edit]').count(),0);
+  admin=false;await page.goto('https://vero.test/maintenance-workspace.html?id=4');await page.locator('#contractSummary').getByText('Selected Owner',{exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Edit owner',exact:true}).count(),0);
   await page.close();
  }}finally{await browser.close();}
 });
