@@ -10,16 +10,9 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   const context=await browser.newContext({viewport:{width,height:1100}});
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
-  await page.addInitScript(()=>localStorage.setItem('vero_session_token','synthetic'));
-  await page.route('**/*',route=>{
-   const u=new URL(route.request().url());
-   if(u.pathname.endsWith('/auth/me'))return route.fulfill({json:{user:{first_name:'Preview',last_name:'User',vero_role:'User'}}});
-   if(u.hostname!=='vero.test')return route.abort();
-   const file=path.resolve(root,'.'+decodeURIComponent(u.pathname));
-   if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});
-   return route.fulfill({body:fs.readFileSync(file),contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css','.png':'image/png'})[path.extname(file)]||'application/octet-stream'});
-  });
+  const server=await require('./insurance-mock.cjs').mockInsurance(page);
   await page.goto('https://vero.test/insurance.html');
+  await page.locator('#insuranceApiStatus').filter({hasText:'policies loaded.'}).waitFor();
   await page.evaluate(()=>window.VeroPageLoader?.ready('account'));
   if(width<750){
    await page.getByRole('button',{name:'Menu',exact:true}).click();
@@ -33,17 +26,24 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   const add=async(number,status,expiry)=>{
    await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
    assert.equal(await page.locator('main').evaluate(e=>e.inert),true);
-   await page.keyboard.press('Shift+Tab');assert.equal(await page.getByRole('button',{name:'Add to Prototype'}).evaluate(e=>e===document.activeElement),true);
+   await page.keyboard.press('Shift+Tab');assert.equal(await page.getByRole('button',{name:'Save Draft'}).evaluate(e=>e===document.activeElement),true);
    await page.keyboard.press('Tab');assert.equal(await page.getByLabel('Policy Name',{exact:true}).evaluate(e=>e===document.activeElement),true);
    await page.getByLabel('Policy Name',{exact:true}).fill('Synthetic '+number);
    await page.getByLabel('Policy Number',{exact:true}).fill(number);
-   await page.getByLabel('Status',{exact:true}).fill(status);
+   assert.equal(await page.getByLabel('Status',{exact:true}).inputValue(),'Draft');
+   await page.getByLabel('Insurance Class',{exact:true}).fill('Liability');
+   await page.getByLabel('Inception Date',{exact:true}).fill('2019-01-01');
    await page.getByLabel('Insurer',{exact:true}).fill('Example insurer');
    await page.getByLabel('Broker',{exact:true}).fill('Hidden broker '+number);
    await page.getByLabel('Expiry Date',{exact:true}).fill(expiry);
-   await page.getByRole('button',{name:'Add to Prototype'}).click();
-   assert.equal(await page.getByRole('button',{name:'+ Register Policy',exact:true}).evaluate(e=>e===document.activeElement),true);
-   assert.equal(await page.locator('main').evaluate(e=>e.inert),false);
+   await page.getByRole('button',{name:'Save Draft'}).click();
+   await page.locator('#modal.open').waitFor({state:'hidden'});
+   await page.locator('#insuranceApiStatus').filter({hasText:'policies loaded.'}).waitFor();
+    assert.equal(await page.getByRole('button',{name:'+ Register Policy',exact:true}).evaluate(e=>e===document.activeElement),true);
+    assert.equal(await page.locator('main').evaluate(e=>e.inert),false);
+   server.policies.find(p=>p.policy_number===number).status=status;
+   await page.getByRole('button',{name:'Refresh policies',exact:true}).click();
+   await page.locator('#insuranceApiStatus').filter({hasText:'policies loaded.'}).waitFor();
   };
   const due=new Date();due.setDate(due.getDate()+30);
   await add('TEST-001','Active',due.toISOString().slice(0,10));
@@ -60,11 +60,11 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   assert.equal(await page.locator('main').evaluate(e=>e.inert),true);
   await page.getByRole('button',{name:'Close',exact:true}).click();
   await page.getByLabel('Search insurance register').fill('');
-  await page.locator('#content tbody tr').first().focus();
+  await page.locator('#content tbody tr').filter({hasText:'TEST-001'}).focus();
   await page.keyboard.press('Enter');
   assert.match(await page.locator('#policyDetails').innerText(),/TEST-001/);
   await page.keyboard.press('Escape');
-  assert.equal(await page.locator('#content tbody tr').first().evaluate(e=>e===document.activeElement),true);
+  assert.equal(await page.locator('#content tbody tr').filter({hasText:'TEST-001'}).evaluate(e=>e===document.activeElement),true);
   await page.keyboard.press('Space');
   assert.equal(await page.locator('#policyDetails').isVisible(),true);
   await page.getByRole('button',{name:'Close',exact:true}).click();
@@ -113,7 +113,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   }
   await page.getByLabel('Insurance view',{exact:true}).selectOption('Overview');
   assert.equal(await page.locator('.kpi').count(),4);
-  assert.ok((await page.locator('main').innerText()).includes('Prototype only'));
+  assert.ok((await page.locator('main').innerText()).includes('prototype only'));
   assert.deepEqual(errors,[]);
   console.log(`PASS ${width}px: policy create/search/combined filters, claims/renewals, sections, disclaimer, no page overflow or script errors`);
   await context.close();

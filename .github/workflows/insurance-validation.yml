@@ -1,0 +1,28 @@
+name: Insurance persistence validation
+on:
+  push:
+    branches: ['review/insurance-persistence-20261020']
+  pull_request:
+    paths:
+      - 'insurance.html'
+      - 'insurance-live.js'
+      - 'insurance-register.css'
+      - 'tests/insurance-*.cjs'
+      - '.github/workflows/insurance-validation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check insurance-live.js
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/insurance-persistence-browser.cjs
+      - run: node tests/insurance-layout-browser.cjs
+      - run: node tests/insurance-boundaries-browser.cjs

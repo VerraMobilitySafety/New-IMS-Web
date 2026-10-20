@@ -11,9 +11,9 @@ const cases=[
 (async()=>{const browser=await chromium.launch({headless:true,...(process.env.INSURANCE_BROWSER?{executablePath:process.env.INSURANCE_BROWSER}:{})});try{
 for(const [timezoneId,instant,today] of cases){
  const context=await browser.newContext({timezoneId}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.clock.install({time:new Date(instant)});await page.addInitScript(()=>localStorage.setItem('vero_session_token','synthetic'));
- await page.route('**/*',route=>{const u=new URL(route.request().url());if(u.pathname.endsWith('/auth/me'))return route.fulfill({json:{user:{first_name:'Preview',last_name:'User',vero_role:'User'}}});if(u.hostname!=='vero.test')return route.abort();const file=path.resolve(root,'.'+decodeURIComponent(u.pathname));if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});return route.fulfill({body:fs.readFileSync(file),contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css','.png':'image/png'})[path.extname(file)]||'application/octet-stream'})});
+ await page.clock.install({time:new Date(instant)});await require('./insurance-mock.cjs').mockInsurance(page);
  await page.goto('https://vero.test/insurance.html');
+ await page.locator('#insuranceApiStatus').filter({hasText:'policies loaded.'}).waitFor();
  const dateAt=days=>new Date(Date.parse(today+'T00:00:00Z')+days*86400000).toISOString().slice(0,10);
  const rows=[['Expired',dateAt(-1)],['Today',today],['Within',dateAt(30)],['Day 90',dateAt(90)],['Day 91',dateAt(91)],['Invalid','not-a-date'],['Rolled date','2026-02-30'],['Empty',''],['Timestamp',today+'T00:00:00-07:00']].map(([name,expiry])=>({name,expiry,status:'Active',number:name}));
  await page.evaluate(rows=>{data.policies.splice(0,data.policies.length,...rows);tab='Policies';insuranceView='due';render()},rows);
