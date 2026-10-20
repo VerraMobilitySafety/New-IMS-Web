@@ -3912,6 +3912,12 @@ body[data-records-manager="false"]
   // Track the record currently being displayed.
   modal.dataset.activeRecordId = String(recordId);
 
+  // Keep the previous record's details and controls out of the loading view.
+  modal.querySelector('.record-drawer-body').style.display = 'none';
+  document.getElementById('restrictedRecordView').style.display = 'none';
+  document.getElementById('drawerRecordSubtitle').textContent = '';
+  closeControlledPreview();
+
   if(holdActions){
    holdActions.style.display = 'none';
   }
