@@ -18,6 +18,7 @@ jobs:
       - run: npm install --no-save playwright
       - run: npx playwright install --with-deps chromium
       - run: node tests/project-first-fixes.cjs
+      - run: node tests/project-execution-initialization.cjs
       - run: node tests/project-document-viewer.cjs
       - run: node tests/project-reporting-browser.cjs
       - uses: actions/upload-artifact@v4
