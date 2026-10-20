@@ -13,7 +13,7 @@
  color:#3d3935;
 }
 .vr-page[data-register-layout="records"] .records-kpis {
- grid-template-columns:repeat(6,minmax(0,1fr));
+ grid-template-columns:repeat(5,minmax(0,1fr));
 }
 @media(max-width:900px) {
  .vr-page[data-register-layout="records"] .records-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -21,3 +21,5 @@
 @media(max-width:500px) {
  .vr-page[data-register-layout="records"] .records-kpis { grid-template-columns:1fr; }
 }
+
+.vr-page[data-register-layout="records"] .records-kpi small { font-family:Montserrat,Verdana,Arial,sans-serif; }
