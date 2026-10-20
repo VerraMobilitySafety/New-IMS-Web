@@ -1,7 +1,7 @@
 name: Register layout draft validation
 on:
   pull_request:
-    paths: ['register-layout.*', 'register-project-layout.*', 'project-management.html', 'register-governance-layout.*', 'records.html', 'risk.html', 'incident-management.*', 'register-operations-layout.*', 'maintenance-management.html', 'sites.html', 'users.html', 'my-actions.html', 'client-services-sites.html', 'insurance*', 'documents.html', 'compliance.html', 'contractor-management.html', 'tests/*layout-browser.cjs', 'tests/insurance-boundaries-browser.cjs', '.github/workflows/register-layout-validation.yml']
+    paths: ['register-layout.*', 'register-project-layout.*', 'project-management.html', 'register-governance-layout.*', 'records.html', 'risk.html', 'incident-management.*', 'register-operations-layout.*', 'maintenance-management.html', 'sites.html', 'users.html', 'my-actions.html', 'client-services-sites.html', 'insurance*', 'documents.html', 'documents-summary.*', 'documents-table.js', 'tests/documents-summary-browser.cjs', 'compliance.html', 'contractor-management.html', 'tests/*layout-browser.cjs', 'tests/insurance-boundaries-browser.cjs', '.github/workflows/register-layout-validation.yml']
 permissions:
   contents: read
 jobs:
@@ -21,6 +21,7 @@ jobs:
       - run: node tests/insurance-layout-browser.cjs
       - run: node tests/insurance-boundaries-browser.cjs
       - run: node tests/register-layout-browser.cjs
+      - run: node tests/documents-summary-browser.cjs
       - run: node tests/operations-layout-browser.cjs
       - run: node tests/governance-layout-browser.cjs
       - run: node tests/project-layout-browser.cjs
