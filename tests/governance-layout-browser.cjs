@@ -19,6 +19,7 @@ for(const width of [1440,1024,768,390])for(const file of ['records.html','risk.h
  if(p==='/incidents/options')data={users:[],unverified:{},administrator:false,injury_register:false};
  if(p==='/incidents')data={events:[{id:'test-event',status:'Under investigation',report:{description:'Synthetic road event',classification:{summary:'Safety',due_date:'2099-01-01'}}},{id:'closed-event',status:'Complete',report:{description:'Synthetic completed event',classification:{summary:'Quality',due_date:'2099-01-01'}}}]};
  if(p==='/incidents/dashboard')data={metrics:{events:2,under_investigation:1,completed:1,awaiting_assignment:0,active_investigations:1,overdue:0}};
+ if(p==='/incidents/analytics')data={as_of:'2026-10-21',total:0,months:[],types:{},domains:{},notice:''};
  return route.fulfill({json:data});}
  const local=path.resolve(root,'.'+decodeURIComponent(u.pathname));if(!local.startsWith(root+path.sep)||!fs.existsSync(local))return route.fulfill({status:404,body:''});return route.fulfill({body:fs.readFileSync(local),contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css','.png':'image/png'})[path.extname(local)]||'application/octet-stream'});
  });
@@ -36,7 +37,17 @@ for(const width of [1440,1024,768,390])for(const file of ['records.html','risk.h
  }else{
   await page.locator('#event-rows a').first().waitFor();await page.getByLabel('Search events',{exact:true}).fill('road');assert.equal(await page.locator('#event-rows a').count(),1);await page.locator('#event-filter').selectOption('complete');assert.equal(await page.locator('#event-rows a').count(),0);await page.getByLabel('Search events',{exact:true}).fill('');assert.equal(await page.locator('#event-rows a').count(),1);await page.locator('#event-filter').selectOption('all');
   assert.equal(await page.getByLabel('View',{exact:true}).locator('option[value="injury-register-button"]').count(),0);
-  await page.getByLabel('View',{exact:true}).selectOption('dashboard');await page.locator('#incident-dashboard .vr-summary').waitFor();await page.getByLabel('View',{exact:true}).selectOption('register');await page.locator('#event-rows a').first().waitFor();
+  await page.getByLabel('View',{exact:true}).selectOption('dashboard');await page.locator('#incident-dashboard .vr-summary').waitFor();
+  for(const tab of ['monthly','Safety','Quality','Environment','overview']){
+   const layout=await page.locator('#content').evaluate(el=>{
+    const cards=el.querySelector('.vr-summary'),bar=el.querySelector('.vr-view-toolbar');
+    return {cardsFirst:!!(cards.compareDocumentPosition(bar)&Node.DOCUMENT_POSITION_FOLLOWING),segments:bar.querySelectorAll('.vr-segments [data-report-tab]').length,period:!!bar.querySelector('#event-period')};
+   });assert.deepEqual(layout,{cardsFirst:true,segments:5,period:true});
+   await page.locator('[data-report-tab="'+tab+'"]').click();
+   await page.locator(tab==='overview'?'#incident-dashboard .vr-view-toolbar':'#monthly-event-dashboard .vr-view-toolbar').waitFor();
+  }
+  assert.equal(await page.locator('#new-report').evaluate(el=>getComputedStyle(el).height),'43px');
+  await page.getByLabel('View',{exact:true}).selectOption('register');await page.locator('#event-rows a').first().waitFor();
  }
  await page.locator('#veroPageLoader').waitFor({state:'hidden'});// Risk deliberately restores its pre-layout mobile behavior.
  if(file!=='risk.html'||width>=768)assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no overflow '+file);

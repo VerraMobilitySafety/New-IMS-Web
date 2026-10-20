@@ -74,7 +74,20 @@
     add(register.querySelector('h2'),'vr-sr-only');
     for(const note of [...register.children].filter(n=>n.tagName==='P')){add(note,'vr-register-note');register.append(note)}
    }
-   if(kpis){kpis.after(bar)}
+   if(kpis){
+    const dashboard=kpis.parentElement;
+    dashboard.prepend(kpis);kpis.after(bar);
+    const tabs=dashboard.querySelector('.report-tabs');
+    if(tabs){add(tabs,'vr-segments');filters.prepend(tabs)}
+    const period=dashboard.querySelector('.event-period');
+    if(period){
+     const note=period.querySelector('p');
+     if(note){add(note,'vr-register-note');bar.after(note)}
+     filters.append(period);
+    }
+    const monthly=dashboard.querySelector('.monthly-filters');
+    if(monthly){filters.append(...monthly.children);monthly.remove()}
+   }
   }
   new MutationObserver(render).observe(content,{childList:true});render();
  }
