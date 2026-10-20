@@ -1,6 +1,6 @@
 /* Vero customer contract register. Source data is loaded only through authenticated APIs. */
 const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
-let contracts=[],selected=null,tab='Overview',maintenanceFilter='all',contractDetails=null,importOptions=null;
+let contracts=[],selected=null,tab='Overview',maintenanceFilter='all',contractDetails=null,importOptions=null,canEditContractOwner=false;
 const workspace=!!document.getElementById('contractWorkspace');
 const names=['Overview','Sites','Events','Risks','Compliance','Records'];
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -19,7 +19,7 @@ async function request(path,options={}){
 }
 async function load(){
  try{
-  const data=await request('/maintenance-contracts');contracts=data.contracts||[];render();
+  const data=await request('/maintenance-contracts');contracts=data.contracts||[];canEditContractOwner=data.can_edit_owner===true;render();
   document.getElementById('count').textContent=contracts.length+' customer contracts';
  }catch(e){document.getElementById('count').textContent=e.message;document.getElementById('rows').innerHTML='<tr><td colspan="8">'+esc(e.message)+'</td></tr>';}
 }
@@ -30,8 +30,9 @@ function render(){
  const list=contracts.filter(c=>[c.contract_name,c.contract_code,c.customer_name,c.scope].some(x=>String(x||'').toLowerCase().includes(query)))
   .filter(c=>maintenanceFilter==='all'||maintenanceFilter==='active'&&c.status==='Active'||maintenanceFilter==='attention'&&c.compliance_status==='Attention'||maintenanceFilter==='renew'&&days(c)>=0&&days(c)<=90);
  for(const [id,n] of Object.entries({all:contracts.length,active:contracts.filter(c=>c.status==='Active').length,renew:contracts.filter(c=>days(c)>=0&&days(c)<=90).length,attention:contracts.filter(c=>c.compliance_status==='Attention').length}))document.getElementById(id).textContent=n;
- document.getElementById('rows').innerHTML=list.map(c=>'<tr data-id="'+c.id+'"><td><b><a href="maintenance-workspace.html?id='+encodeURIComponent(c.id)+'">'+esc(c.contract_name)+'</a></b><div>'+esc(c.contract_code)+'</div></td><td>'+esc(c.customer_name||'—')+'</td><td>'+esc(c.owner_name||'Unassigned')+'</td><td>'+esc(c.scope||'—')+'</td><td><span class="pill">'+esc(c.status)+'</span></td><td>'+c.requirement_count+' linked · Not assessed</td><td>Not assessed</td><td>'+date(c.expiry_date)+'</td></tr>').join('')||'<tr><td colspan="8">No customer contracts found.</td></tr>';
+ document.getElementById('rows').innerHTML=list.map(c=>'<tr data-id="'+c.id+'"><td><b><a href="maintenance-workspace.html?id='+encodeURIComponent(c.id)+'">'+esc(c.contract_name)+'</a></b><div>'+esc(c.contract_code)+'</div></td><td>'+esc(c.customer_name||'—')+'</td><td>'+esc(c.owner_name||'Unassigned')+(canEditContractOwner?'<br><button type="button" class="btn contract-owner-edit" data-owner-edit="'+c.id+'" aria-label="Edit owner for '+esc(c.contract_code)+'">Edit owner</button>':'')+'</td><td>'+esc(c.scope||'—')+'</td><td><span class="pill">'+esc(c.status)+'</span></td><td>'+c.requirement_count+' linked · Not assessed</td><td>Not assessed</td><td>'+date(c.expiry_date)+'</td></tr>').join('')||'<tr><td colspan="8">No customer contracts found.</td></tr>';
  document.querySelectorAll('#rows tr[data-id]').forEach(el=>el.onclick=()=>openContract(contracts.find(c=>String(c.id)===el.dataset.id)));
+ document.querySelectorAll('[data-owner-edit]').forEach(button=>button.onclick=event=>{event.stopPropagation();void editContractOwner(contracts.find(c=>String(c.id)===button.dataset.ownerEdit));});
 }
 async function openContract(c){
  if(!c)return openImport();
@@ -40,6 +41,29 @@ async function openContract(c){
  try{const details=await request('/maintenance-contracts/'+c.id+'/details');if(selected?.id===c.id){contractDetails=details;drawTab();}}catch(e){if(selected?.id===c.id){document.getElementById('tabContent').textContent=e.message;addContractRetry(()=>openContract(c));}}
 }
 function closeContract(){}
+async function editContractOwner(c){
+ if(!c||!canEditContractOwner)return;
+ let dialog=document.getElementById('contractOwnerDialog');if(dialog)dialog.remove();
+ dialog=document.createElement('dialog');dialog.id='contractOwnerDialog';dialog.className='contract-owner-dialog';dialog.setAttribute('aria-labelledby','contractOwnerTitle');
+ dialog.innerHTML='<form><h2 id="contractOwnerTitle">Edit contract owner</h2><p>'+esc(c.contract_code)+' · '+esc(c.contract_name)+'</p><label>Owner<select name="owner_user_id" aria-label="Contract owner" disabled><option value="">Loading users…</option></select></label><p role="alert" id="contractOwnerError"></p><div class="contract-owner-actions"><button type="button" id="contractOwnerCancel">Cancel</button><button type="submit" class="primary" disabled>Save owner</button></div></form>';
+ document.body.append(dialog);dialog.querySelector('#contractOwnerCancel').onclick=()=>dialog.close();dialog.showModal();
+ const form=dialog.querySelector('form'),select=form.elements.owner_user_id,save=form.querySelector('[type=submit]'),error=dialog.querySelector('#contractOwnerError');
+ try{
+  const options=await request('/maintenance-contracts/'+c.id+'/owner');
+  select.innerHTML='<option value="">Unassigned</option>'+options.users.map(u=>'<option value="'+u.id+'">'+esc(u.name+(u.email?' · '+u.email:''))+'</option>').join('');
+  if(options.owner_user_id&&!options.users.some(u=>u.id===options.owner_user_id))select.insertAdjacentHTML('beforeend','<option value="'+Number(options.owner_user_id)+'" disabled>'+esc(options.owner_name||'Saved owner')+' (inactive)</option>');
+  select.value=options.owner_user_id??'';select.disabled=false;save.disabled=false;
+  form.onsubmit=async event=>{
+   event.preventDefault();save.disabled=true;select.disabled=true;error.textContent='';
+   try{
+    const result=await request('/maintenance-contracts/'+c.id+'/owner',{method:'POST',body:JSON.stringify({owner_user_id:select.value?Number(select.value):null,owner_version:options.owner_version})});
+    Object.assign(c,result);dialog.close();
+    if(workspace)await openContract(c);else render();
+   }catch(e){error.textContent=e.message;}
+   finally{save.disabled=false;select.disabled=false;}
+  };
+ }catch(e){error.textContent=e.message;}
+}
 function drawTab(){
  document.getElementById('tabs').innerHTML=names.map(n=>'<button data-tab="'+n+'" class="'+(tab===n?'active':'')+'">'+n+'</button>').join('');
  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;drawTab();});
@@ -48,7 +72,7 @@ function drawTab(){
  if(tab==='Sites'){void window.VeroContractActivity.sites(c,el,request);return;}
  if(tab==='Events'){void window.VeroContractActivity.events(c,el,request);return;}
  if(tab==='Overview'){
-  el.innerHTML='<div class="fields">'+[['Contract reference',c.contract_code],['Customer',c.customer_name],['Contract type','Customer'],['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Compliance','Not assessed'],['Source files',c.source_count],['Linked requirements',c.requirement_count],['Scope',c.scope],['Notes',c.notes]].map(([label,value])=>'<div class="field"><label>'+esc(label)+'</label><p>'+esc(value||'—')+'</p></div>').join('')+'</div>';return;
+  el.innerHTML='<div class="fields">'+[['Contract reference',c.contract_code],['Customer',c.customer_name],['Contract type','Customer'],['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Compliance','Not assessed'],['Source files',c.source_count],['Linked requirements',c.requirement_count],['Scope',c.scope],['Notes',c.notes]].map(([label,value])=>'<div class="field"><label>'+esc(label)+'</label><p>'+esc(value||'—')+'</p>'+(label==='Owner'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractOwnerEdit">Edit owner</button>':'')+'</div>').join('')+'</div>';document.getElementById('contractOwnerEdit')?.addEventListener('click',()=>editContractOwner(c));return;
  }
  if(!contractDetails){el.textContent='Loading linked records…';return;}
  if(tab==='Records'){
@@ -83,7 +107,7 @@ async function loadContractWorkspace(){
  try{
   const id=new URLSearchParams(location.search).get('id');
   if(!id)throw Error('No contract was selected. Return to the register to choose a contract.');
-  const data=await request('/maintenance-contracts');
+  const data=await request('/maintenance-contracts');canEditContractOwner=data.can_edit_owner===true;
   const c=(data.contracts||[]).find(c=>String(c.id)===id);
   if(!c)throw Error('This contract could not be found in the contract register.');
   await openContract(c);
@@ -93,3 +117,5 @@ async function loadContractWorkspace(){
 }
 const initialContract=new URLSearchParams(location.search).get('contract_id');
 if(initialContract&&!workspace)location.replace('maintenance-workspace.html?id='+encodeURIComponent(initialContract));
+
+
