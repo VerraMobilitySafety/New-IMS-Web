@@ -13,6 +13,17 @@
 #contractRequirementRegister .contract-requirement-open:focus-visible{outline:2px solid #6b8325;outline-offset:4px}
 #contractRequirementRows tr[data-requirement]{cursor:pointer}
 
+/* Type selection stays visible above both requirement views. */
+.compliance-type-panel{padding:20px 22px;margin-top:18px}
+.compliance-type-panel h2{font-size:14px;margin:0 0 12px}
+.compliance-type-panel .compliance-view-toggle{display:flex;flex-wrap:wrap;gap:8px;width:100%;padding:0;background:transparent;border:0}
+.compliance-type-panel .compliance-view{display:flex;flex:1;align-items:center;justify-content:center;gap:8px;min-width:140px;padding:12px 16px;border:1px solid #c8c4bd;border-radius:8px;font:700 12px Montserrat,Verdana,Arial,sans-serif;white-space:normal}
+.compliance-type-panel .compliance-view:last-child{border:1px solid #c8c4bd}
+.compliance-type-panel .compliance-view span{margin:0;font-size:11px}
+.compliance-type-panel .compliance-view:focus-visible{outline:2px solid #6b8325;outline-offset:3px}
+.contract-register-views[hidden]{display:none!important}
+@media(max-width:600px){.compliance-type-panel .compliance-view-toggle{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.compliance-type-panel .compliance-view{min-width:0;width:100%;margin:0}.compliance-type-panel{padding:16px}}
+
 /* Consistent typography and spacing in the requirement detail drawer. */
 #obligationModal .drawer-body{font-size:14px;line-height:1.55;color:#3d3935}
 #obligationModal .drawer-head h2{font-size:22px;line-height:1.3;font-weight:700;margin:5px 0 8px}

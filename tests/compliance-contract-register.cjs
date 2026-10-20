@@ -10,6 +10,8 @@ test('contract-specific view supports pagination, filtering, empty contracts, se
   await page.route('**/api/compliance/contract-requirements',route=>route.fulfill({status:fail?503:200,headers:{'Access-Control-Allow-Origin':'*'},json:fail?{message:'Unavailable'}:{contracts,requirements}}));
   await page.setContent('<section class="panel" id="commonPanel"><input id="complianceSearch" value="preserved common filter"></section><script>const COMPLIANCE_API="https://example.invalid/api";function complianceAuthHeaders(){return {}}window.openLiveObligation=id=>window.openedRequirement=id;</script>');
   await page.addStyleTag({path:path.join(root,'compliance-contract-register.css')});await page.addScriptTag({path:path.join(root,'compliance-contract-register.js')});
+  assert.equal(await page.locator('#commonPanel').isVisible(),true);
+  await page.getByRole('button',{name:'Contract-specific requirements',exact:true}).click();
   await page.getByRole('button',{name:'Retry loading'}).waitFor({state:'visible'});
   assert.ok((await page.locator('#contractRequirementCount').innerText()).includes('Unable to load'));
   fail=false;await page.getByRole('button',{name:'Retry loading'}).click();
