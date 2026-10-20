@@ -1,0 +1,301 @@
+{
+  "version": 2,
+  "factors": {
+    "People": [
+      "Did not follow procedures",
+      "Did not use equipment correctly",
+      "Were fatigued",
+      "Were not wearing required safety protection",
+      "Were behaving unprofessionally",
+      "Were unauthorised to perform task",
+      "Uncategorised cause"
+    ],
+    "Environmental": [
+      "Caused fatigue",
+      "Design was unsuitable",
+      "Had unsuitable flooring",
+      "Was exposed to adverse weather conditions",
+      "Design was not appropriate",
+      "Was poorly maintained",
+      "Was stressful",
+      "Uncategorised cause"
+    ],
+    "Equipment": [
+      "Had no safety guarding",
+      "Malfunctioned",
+      "Was not appropriate",
+      "Was poorly maintained",
+      "Uncategorised cause"
+    ],
+    "Procedural": [
+      "Did not identify risks",
+      "Was not adequate",
+      "Was not available",
+      "Uncategorised cause"
+    ],
+    "Organisational": [
+      "Did not identify risks",
+      "Was not adequate",
+      "Was not available",
+      "Uncategorised cause"
+    ]
+  },
+  "body": {
+    "key": "AreaOfBody",
+    "label": "What part(s) of the body were injured?",
+    "choices": [
+      "Head",
+      "Neck",
+      "Trunk",
+      "Upper Limbs",
+      "Lower Limbs",
+      "Systemic Locations",
+      "Non Physical Locations",
+      "Unspecified"
+    ],
+    "groups": [
+      {
+        "key": "HeadInjuries",
+        "label": "Head Injuries",
+        "parent": "Head",
+        "choices": [
+          "Brain",
+          "Eyes",
+          "Ears",
+          "Mouth",
+          "Teeth",
+          "Nose",
+          "Face - Unspecified"
+        ]
+      },
+      {
+        "key": "NeckInjuries",
+        "label": "Neck Injuries",
+        "parent": "Neck",
+        "choices": [
+          "Neck - bones, muscles and tendons",
+          "Neck - internal organs and glands",
+          "Neck - Unspecified"
+        ]
+      },
+      {
+        "key": "TrunkInjuries",
+        "label": "Trunk Injuries",
+        "parent": "Trunk",
+        "choices": [
+          "Upper Back",
+          "Lower Back",
+          "Ribs",
+          "Chest Muscles",
+          "Heart",
+          "Lungs",
+          "Abdominal Muscles",
+          "Stomach",
+          "Small Intestine",
+          "Genitals",
+          "Bladder",
+          "Spleen",
+          "Pelvic Bones",
+          "Trunk - Unspecified"
+        ]
+      },
+      {
+        "key": "UpperLimbs",
+        "label": "Upper Limbs",
+        "parent": "Upper Limbs",
+        "choices": [
+          "Shoulder",
+          "Upper Arm",
+          "Elbow",
+          "Forearm",
+          "Wrist",
+          "Hand",
+          "Fingers, Thumbs",
+          "Upper Limbs - Unspecified"
+        ]
+      },
+      {
+        "key": "LowerLimbs",
+        "label": "Lower Limbs",
+        "parent": "Lower Limbs",
+        "choices": [
+          "Hip",
+          "Upper Leg",
+          "Knee",
+          "Lower Leg",
+          "Ankle",
+          "Foot",
+          "Toes",
+          "Lower Limbs - Unspecified"
+        ]
+      },
+      {
+        "key": "SystemicLocations",
+        "label": "Systemic Locations",
+        "parent": "Systemic Locations",
+        "choices": [
+          "Circulatory Systems",
+          "Respiratory Systems",
+          "Digestive Systems",
+          "Nervous Systems",
+          "Systemic Locations - Unspecified"
+        ]
+      },
+      {
+        "key": "NonPhysicalLocations",
+        "label": "Non Physical Locations",
+        "parent": "Non Physical Locations",
+        "choices": [
+          "Psychological"
+        ]
+      }
+    ]
+  },
+  "pathway": {
+    "key": "HowWasThePersonInjured",
+    "label": "How was the person injured?",
+    "choices": [
+      "Slips, Trips, Falls",
+      "Hit an Object With the Body",
+      "Hit By a Moving Object",
+      "Sounds and Pressure",
+      "Stress to Body",
+      "Exposure to Chemicals",
+      "Biological Factors",
+      "Mental Stress",
+      "Exposure to Heat or Cold",
+      "Contact with Electricity / Radiation",
+      "Contact with Animals / Insects",
+      "Unspecified"
+    ],
+    "groups": [
+      {
+        "key": "SlipsTripsFalls",
+        "label": "Slips, Trips, Falls",
+        "parent": "Slips, Trips, Falls",
+        "choices": [
+          "Falls From Height",
+          "Falls on the Same Level",
+          "Stepping, Kneeling or Sitting on Objects",
+          "Slips, Trips, Falls - Unspecified"
+        ]
+      },
+      {
+        "key": "HitAndObjectWithTheBody",
+        "label": "Hit an Object With the Body",
+        "parent": "Hit an Object With the Body",
+        "choices": [
+          "Hitting stationary objects",
+          "Rubbing and chafing",
+          "Hit an Object With the Body - Unspecified"
+        ]
+      },
+      {
+        "key": "HitByAMovingObject",
+        "label": "Hit By a Moving Object",
+        "parent": "Hit By a Moving Object",
+        "choices": [
+          "Being hit by falling objects",
+          "Being hit by a person accidentally",
+          "Being Trapped by Moving Machinery or Equipment",
+          "Being hit by moving objects",
+          "Being assaulted by a person or persons",
+          "Being trapped between stationary and moving objects",
+          "Hit By a Moving Object - Unspecified"
+        ]
+      },
+      {
+        "key": "SoundsAndPressure",
+        "label": "Sounds and Pressure",
+        "parent": "Sounds and Pressure",
+        "choices": [
+          "Exposure to single, sudden sound",
+          "Long term exposure to sounds",
+          "Sounds and Pressure - Unspecified"
+        ]
+      },
+      {
+        "key": "StressToBody",
+        "label": "Stress to Body",
+        "parent": "Stress to Body",
+        "choices": [
+          "Muscular stress while lifting, carrying, or putting down objects",
+          "Muscular stress while handling objects other than lifting, carrying or putting down",
+          "Muscular stress with no objects being handled",
+          "Repetitive movement, low muscle loading",
+          "Stress to Body - Unspecified"
+        ]
+      },
+      {
+        "key": "ExposureToChemicals",
+        "label": "Exposure to Chemicals",
+        "parent": "Exposure to Chemicals",
+        "choices": [
+          "Single contact with chemical or substance",
+          "Long term contact with chemicals or substances",
+          "Exposure to Chemicals - Unspecified"
+        ]
+      },
+      {
+        "key": "ContactWithAnimalsInsects",
+        "label": "Contact with Animals / Insects",
+        "parent": "Contact with Animals / Insects",
+        "choices": [
+          "Being hit by an animal",
+          "Contact with poisonous parts of plant or marine life",
+          "Insect and spider bites and stings",
+          "Contact with Animals / Insects - Unspecified"
+        ]
+      },
+      {
+        "key": "BiologicalFactors",
+        "label": "Biological Factors",
+        "parent": "Biological Factors",
+        "choices": [
+          "Contact with, or exposure to, biological factors of non-human origin",
+          "Contact with, or exposure to, biological factors of human origin",
+          "Contact with, or exposure to, biological factors of unknown origin",
+          "Biological Factors - Unspecified"
+        ]
+      },
+      {
+        "key": "MentalStress",
+        "label": "Mental Stress",
+        "parent": "Mental Stress",
+        "choices": [
+          "Bullying",
+          "Sexual harassment",
+          "Fatigue",
+          "High job demands",
+          "Exposure to a traumatic event",
+          "Exposure to aggression or violence",
+          "Suicide or attempted suicide",
+          "Mental Stress - Unspecified"
+        ]
+      },
+      {
+        "key": "ExposureToHeatOrCold",
+        "label": "Exposure to Heat or Cold",
+        "parent": "Exposure to Heat or Cold",
+        "choices": [
+          "Contact with hot objects",
+          "Contact with cold objects",
+          "Exposure to environmental heat",
+          "Exposure to environmental cold",
+          "Exposure to Heat or Cold - Unspecified"
+        ]
+      },
+      {
+        "key": "ContactWithElectricityRadiation",
+        "label": "Contact with Electricity / Radiation",
+        "parent": "Contact with Electricity / Radiation",
+        "choices": [
+          "Exposure to non-ionising radiation",
+          "Exposure to ionising radiation",
+          "Contact with electricity",
+          "Contact with Electricity / Radiation - Unspecified"
+        ]
+      }
+    ]
+  }
+}
