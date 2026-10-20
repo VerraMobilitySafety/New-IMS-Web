@@ -65,7 +65,9 @@
    if(register)add(register,'vr-register');
    const {bar,filters}=toolbar(panel,$('#event-register-search'));add(bar,'vr-view-toolbar');
    const available=buttons.filter(b=>!b.hidden).map(b=>[b.id,b.textContent]);
-   const view=viewControl(available,value=>$('#'+value).click());filters.append(view.label);
+   action.querySelector('.incident-admin-view')?.remove();
+   const view=viewControl(available,value=>$('#'+value).click());add(view.label,'incident-admin-view');
+   view.label.hidden=document.body.dataset.incidentAdministrator!=='true';action.append(view.label);
    const route=new URLSearchParams(location.search).get('view');
    view.select.value=route==='register'?'register':route==='actions'?'incident-actions':route==='injuries'?'injury-register-button':route==='deleted'?'deleted-records':'dashboard';
    if(register){
