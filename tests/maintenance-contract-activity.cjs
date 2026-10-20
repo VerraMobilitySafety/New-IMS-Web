@@ -94,3 +94,52 @@ test('administrator adds and edits shared sites with contract linking and retain
  }}finally{await browser.close();}
 });
 
+
+
+test('site event history distinguishes missing coverage, counts and impact and supports sorting and combined filters',async()=>{
+ const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
+ try{for(const width of [1500,390]){
+  const page=await browser.newPage({viewport:{width,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  const base={site_name:'Shared site',address:'Example road',status:'Active',source_groups:[],contracts:[{id:3,code:'CON',name:'Contract'}],notes:'',version:1};
+  const sites=[
+   {...base,id:1,site_code:'A',event_summary:{total:0,open:0,recent:0,highest_score:null,last_date:null,unclassified:0}},
+   {...base,id:2,site_code:'B',event_summary:{total:3,open:2,recent:1,highest_score:4,last_date:'2026-10-18',unclassified:1}},
+   {...base,id:3,site_code:'C',event_summary:null},
+   {...base,id:4,site_code:'D',event_summary:{total:1,open:0,recent:1,highest_score:5,last_date:'2026-10-19',unclassified:0}}
+  ];
+  await page.addInitScript(()=>localStorage.setItem('vero_session_token','mock-only'));
+  await page.route('**/*',async route=>{
+   const u=new URL(route.request().url());
+   if(u.pathname.endsWith('/client-services-sites'))return route.fulfill({json:{sites,contracts:base.contracts,users:[],can_manage:true,events_available:true}});
+   if(u.hostname!=='vero.test')return route.abort();
+   const file=path.resolve(root,'.'+u.pathname);if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});
+   let body=fs.readFileSync(file);
+   if(file.endsWith('.html'))body=body.toString().replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace('</body>','<script src="client-services-sites.js"></script><script>loadSites()</script></body>');
+   return route.fulfill({contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css','.png':'image/png'})[path.extname(file)]||'application/octet-stream',body});
+  });
+  await page.goto('https://vero.test/client-services-sites.html');
+  await page.getByRole('cell',{name:'Major',exact:false}).waitFor();
+  const rows=page.locator('#siteRows tr');
+  assert.equal(await rows.count(),4);
+  assert.equal(await page.locator('.table-wrap').evaluate(el=>getComputedStyle(el).overflowX),'auto');
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
+  assert.match(await rows.nth(0).innerText(),/No linked events/);
+  assert.match(await rows.nth(1).innerText(),/3[\s\S]*1 in last 12 months[\s\S]*2[\s\S]*Major[\s\S]*1 unclassified[\s\S]*2026-10-18/);
+  assert.match(await rows.nth(2).innerText(),/Unavailable/);
+  await page.getByLabel('Sort by',{exact:true}).selectOption('events');
+  assert.equal(await rows.first().locator('td').first().innerText(),'B');
+  await page.getByLabel('Sort by',{exact:true}).selectOption('impact');
+  assert.equal(await rows.first().locator('td').first().innerText(),'D');
+  await page.getByLabel('Event history',{exact:true}).selectOption('open');
+  assert.equal(await rows.count(),1);assert.equal(await rows.first().locator('td').first().innerText(),'B');
+  await page.getByLabel('Search sites',{exact:true}).fill('No such site');
+  await page.getByRole('cell',{name:'No sites match these filters.',exact:true}).waitFor();
+  await page.getByLabel('Search sites',{exact:true}).fill('');
+  await page.getByLabel('Event history',{exact:true}).selectOption('none');
+  assert.equal(await rows.count(),1);assert.equal(await rows.first().locator('td').first().innerText(),'A');
+  assert.equal(await page.getByRole('link',{name:'Report Event',exact:true}).count(),0);
+  assert.deepEqual(errors,[]);
+  await page.close();
+ }}finally{await browser.close();}
+});
+

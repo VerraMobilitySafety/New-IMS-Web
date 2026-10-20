@@ -2,11 +2,19 @@
 const siteEl=id=>document.getElementById(id);
 let allSites=[],sitePage=0,siteOptions={contracts:[],users:[]};
 const siteEscape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function siteImpact(summary){
+ if(!summary)return '<span class="site-muted">Unavailable</span>';
+ if(!summary.total)return '<span class="site-muted">No linked events</span>';
+ const labels=['No impact','Insignificant','Minor','Moderate','Major','Significant'],score=summary.highest_score;
+ return (Number.isInteger(score)&&score>=0&&score<=5?'<span class="site-impact site-impact-'+score+'">'+labels[score]+'</span>':'<span class="site-muted">Unclassified</span>')+(summary.unclassified?'<small class="site-event-detail">'+summary.unclassified+' unclassified</small>':'');
+}
 function drawSites(){
  const query=siteEl('siteSearch').value.trim().toLowerCase(),contract=siteEl('siteContract').value,status=siteEl('siteStatus').value;
- const sites=allSites.filter(s=>(!status||s.status===status)&&(!contract||(contract==='unlinked'?!s.contracts.length:s.contracts.some(c=>String(c.id)===contract)))&&(!query||[s.site_code,s.site_name,s.address,s.owner_name,...s.source_groups,...s.contracts.flatMap(c=>[c.code,c.name])].some(v=>String(v||'').toLowerCase().includes(query))));
+ const history=siteEl('siteEventFilter').value,sort=siteEl('siteSort').value;
+ const sites=allSites.filter(s=>(!status||s.status===status)&&(!contract||(contract==='unlinked'?!s.contracts.length:s.contracts.some(c=>String(c.id)===contract)))&&(!history||(history==='reported'?s.event_summary?.total>0:history==='open'?s.event_summary?.open>0:s.event_summary?.total===0))&&(!query||[s.site_code,s.site_name,s.address,s.owner_name,...s.source_groups,...s.contracts.flatMap(c=>[c.code,c.name])].some(v=>String(v||'').toLowerCase().includes(query))));
+ sites.sort((a,b)=>(sort==='events'?(b.event_summary?.total??-1)-(a.event_summary?.total??-1):sort==='open'?(b.event_summary?.open??-1)-(a.event_summary?.open??-1):sort==='impact'?(b.event_summary?.highest_score??-1)-(a.event_summary?.highest_score??-1):0)||a.site_code.localeCompare(b.site_code));
  const pages=Math.max(1,Math.ceil(sites.length/50));sitePage=Math.min(sitePage,pages-1);
- siteEl('siteRows').innerHTML=sites.slice(sitePage*50,sitePage*50+50).map(s=>'<tr><td><strong>'+siteEscape(s.site_code)+'</strong></td><td>'+siteEscape(s.site_name)+'</td><td>'+siteEscape(s.address||'—')+'</td><td>'+(s.contracts.length?s.contracts.map(c=>'<a href="maintenance-workspace.html?id='+encodeURIComponent(c.id)+'">'+siteEscape(c.code)+' · '+siteEscape(c.name)+'</a>').join('<br>'):'<span class="site-unlinked">Awaiting contract link</span>')+'</td><td>'+siteEscape(s.source_groups.join(', ')||'—')+'</td><td><span class="pill">'+siteEscape(s.status)+'</span></td><td><button class="btn" data-site-edit="'+s.id+'" aria-label="Edit site '+siteEscape(s.site_code)+'">Edit</button></td></tr>').join('')||'<tr><td colspan="7">No sites match these filters.</td></tr>';
+ siteEl('siteRows').innerHTML=sites.slice(sitePage*50,sitePage*50+50).map(s=>'<tr><td><strong>'+siteEscape(s.site_code)+'</strong></td><td>'+siteEscape(s.site_name)+'</td><td class="site-event-count">'+(s.event_summary?'<strong>'+s.event_summary.total+'</strong><small class="site-event-detail">'+s.event_summary.recent+' in last 12 months</small>':'Unavailable')+'</td><td>'+(s.event_summary?s.event_summary.open:'�')+'</td><td>'+siteImpact(s.event_summary)+'</td><td class="site-event-date">'+siteEscape(s.event_summary?.last_date||'�')+'</td><td>'+siteEscape(s.address||'—')+'</td><td>'+(s.contracts.length?s.contracts.map(c=>'<a href="maintenance-workspace.html?id='+encodeURIComponent(c.id)+'">'+siteEscape(c.code)+' · '+siteEscape(c.name)+'</a>').join('<br>'):'<span class="site-unlinked">Awaiting contract link</span>')+'</td><td>'+siteEscape(s.source_groups.join(', ')||'—')+'</td><td><span class="pill">'+siteEscape(s.status)+'</span></td><td><button class="btn" data-site-edit="'+s.id+'" aria-label="Edit site '+siteEscape(s.site_code)+'">Edit</button></td></tr>').join('')||'<tr><td colspan="11">No sites match these filters.</td></tr>';
  siteEl('siteRows').querySelectorAll('[data-site-edit]').forEach(button=>button.onclick=()=>openSiteEditor(allSites.find(s=>String(s.id)===button.dataset.siteEdit)));
  siteEl('sitePrevious').disabled=sitePage===0;siteEl('siteNext').disabled=sitePage+1>=pages;
 }
@@ -27,7 +35,7 @@ async function loadSites(){
   siteEl('siteRegister').hidden=false;siteEl('siteMessage').textContent='';drawSites();return true;
  }catch(e){siteEl('siteMessage').textContent=e.message;siteEl('siteRetry').hidden=false;}
 }
-for(const id of ['siteSearch','siteContract','siteStatus'])siteEl(id).addEventListener(id==='siteSearch'?'input':'change',()=>{sitePage=0;drawSites();});
+for(const id of ['siteSearch','siteContract','siteStatus','siteEventFilter','siteSort'])siteEl(id).addEventListener(id==='siteSearch'?'input':'change',()=>{sitePage=0;drawSites();});
 siteEl('sitePrevious').onclick=()=>{sitePage--;drawSites();};siteEl('siteNext').onclick=()=>{sitePage++;drawSites();};siteEl('siteRetry').onclick=()=>{siteEl('siteRetry').hidden=true;void loadSites();};
 siteEl('siteAdd').onclick=()=>openSiteEditor(null);
 
@@ -49,7 +57,7 @@ function openSiteEditor(site){
    const token=localStorage.getItem('vero_session_token');if(!token)throw Error('Please sign in again before saving.');
    const response=await fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/client-services-sites'+(site?'/'+site.id:''),{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(data)});
    const result=await response.json();if(!response.ok)throw Error(result.message||'Unable to save this site. Please retry.');
-   dialog.close();sitePage=0;siteEl('siteSearch').value=result.site.site_code;siteEl('siteContract').value='';siteEl('siteStatus').value='';
+   dialog.close();sitePage=0;siteEl('siteSearch').value=result.site.site_code;siteEl('siteContract').value='';siteEl('siteStatus').value='';siteEl('siteEventFilter').value='';
    if(await loadSites())siteEl('siteMessage').textContent=(site?'Site updated.':'Site created.')+(data.contract_id?' Contract linked.':'');
    else siteEl('siteMessage').textContent='Site saved. Retry loading sites to refresh the list.';
   }catch(error){dialog.querySelector('#globalSiteError').textContent=error.message;}
@@ -57,3 +65,5 @@ function openSiteEditor(site){
  };
  dialog.showModal();
 }
+
+
