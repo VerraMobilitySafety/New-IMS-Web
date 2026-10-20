@@ -54,7 +54,11 @@
    if(ticket!==sequence)return;
    data=result;section.hidden=!result.can_edit;edit.hidden=false;
    inputs.owner_user_id.replaceChildren();
-   for(const owner of result.owners||[]){const option=node('option',owner.name);option.value=String(owner.id);inputs.owner_user_id.append(option);}
+   for(const owner of result.owners||[]){
+    const identity=owner.email?.trim()||'ID '+owner.id;
+    const option=node('option',(owner.name||'Owner')+' ('+identity+')');
+    option.value=String(owner.id);inputs.owner_user_id.append(option);
+   }
    if(!(result.owners||[]).some(o=>o.id===result.metadata.owner_user_id)){
     const option=node('option','Current owner (inactive or unavailable)');option.value=result.metadata.owner_user_id==null?'':String(result.metadata.owner_user_id);inputs.owner_user_id.append(option);
    }
