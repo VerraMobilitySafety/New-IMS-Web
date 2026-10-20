@@ -121,6 +121,8 @@ test('site event history distinguishes missing coverage, counts and impact and s
   await page.getByRole('cell',{name:'Major',exact:false}).waitFor();
   const rows=page.locator('#siteRows tr');
   assert.equal(await rows.count(),4);
+  assert.equal(await page.locator('.table-wrap').evaluate(el=>getComputedStyle(el).overflowX),'auto');
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
   assert.match(await rows.nth(0).innerText(),/No linked events/);
   assert.match(await rows.nth(1).innerText(),/3[\s\S]*1 in last 12 months[\s\S]*2[\s\S]*Major[\s\S]*1 unclassified[\s\S]*2026-10-18/);
   assert.match(await rows.nth(2).innerText(),/Unavailable/);
