@@ -1,0 +1,5 @@
+.vr-page[data-register-layout="documents"] #documentsSummary { grid-template-columns:repeat(3,minmax(0,1fr)); }
+#documentsSummary small { display:block; margin-top:8px; font:11px/1.5 Arial,sans-serif; color:#68615b; }
+@media(max-width:750px) {
+ .vr-page[data-register-layout="documents"] #documentsSummary { grid-template-columns:1fr; }
+}

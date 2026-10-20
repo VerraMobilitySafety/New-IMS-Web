@@ -11,7 +11,7 @@
   if(sortKey)rows=[...rows].sort((a,b)=>{
    const av=valueFor(a,sortKey),bv=valueFor(b,sortKey);
    if(missing(av)!==missing(bv))return missing(av)?1:-1;
-   return (collator.compare(text(av),text(bv))*direction)||collator.compare(text(a.documentNumber),text(b.documentNumber))||collator.compare(text(a.id),text(b.id));
+   return collator.compare(text(av),text(bv))*direction;
   });
   byId('documentTableCount').textContent=`${rows.length} of ${currentDocuments().length} documents`;
   for(const th of document.querySelectorAll('[data-doc-sort]')){

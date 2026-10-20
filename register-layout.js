@@ -29,7 +29,6 @@
   const page=document.body.dataset.registerLayout;if(!page)return;document.body.classList.add('vr-page');mobile();
   const actions=$('main>.actions');add(actions,'vr-actions');
   if(page==='documents'){
-   summary(actions,[['Current versions','Controlled document scope'],['Document owners','Ownership recorded in the register'],['Review dates','Due for Review uses the next 60 days'],['Controlled records','View published documents and history']]);
    add($('.document-library'),'vr-register');add($('.document-toolbar'),'vr-toolbar');add($('.document-search-wrap'),'vr-search');add($('.document-filters'),'vr-filters');add($('.document-view-toggle'),'vr-segments');
    $('.document-search-icon')?.remove();$('#documentSearch')?.setAttribute('aria-label','Search controlled documents');scrollTable($('#controlledDocumentsTable'));
   }

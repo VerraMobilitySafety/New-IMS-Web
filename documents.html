@@ -422,6 +422,7 @@ const API_BASE='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsi
 const DOCUMENTS_API=API_BASE+'/documents?entity_type=Governance';
 const TOKEN_KEY='vero_session_token';
 let liveDocuments=[];
+let documentLoadState="loading",documentIdentity=null;
 let selectedDocument=null;
 let currentViewerBlobUrl=null;
 
@@ -613,22 +614,11 @@ function documentOwnerNameKey(value){
 }
 
 function documentIsMine(doc){
- const user=currentUserForRequest();
+ const user=documentIdentity;if(!user)return false;
  const ownerId=Number(doc.documentOwnerUserId),userId=Number(user.id);
- if(Number.isInteger(ownerId)&&ownerId>0){
-  return Number.isInteger(userId)&&userId>0&&ownerId===userId;
- }
- const ownerEmail=String(doc.documentOwnerEmail||'').trim().toLowerCase();
- const userEmail=String(user.email||'').trim().toLowerCase();
- if(ownerEmail)return !!userEmail&&ownerEmail===userEmail;
- const ownerName=documentOwnerNameKey(doc.documentOwner);
- if(!ownerName||ownerName==='—')return false;
- const userNames=[
-  [user.first_name,user.last_name].filter(Boolean).join(' '),
-  user.name,
-  user.display_name
- ].map(documentOwnerNameKey).filter(Boolean);
- return userNames.includes(ownerName);
+ if(Number.isInteger(ownerId)&&ownerId>0)return Number.isInteger(userId)&&userId>0&&ownerId===userId;
+ const ownerEmail=String(doc.documentOwnerEmail||"").trim().toLowerCase(),userEmail=String(user.email||"").trim().toLowerCase();
+ return !!ownerEmail&&!!userEmail&&ownerEmail===userEmail;
 }
 
 function documentIsDueForReview(doc){
@@ -648,6 +638,7 @@ function documentIsDueForReview(doc){
 }
 
 function applyDocumentFilters(){
+ window.dispatchEvent(new Event("documents-summary-change"));
  const search=(document.getElementById('documentSearch')?.value||'')
   .trim()
   .toLowerCase();
@@ -717,6 +708,7 @@ function renderDocuments(documents=currentDocuments()){
 }
 
 async function loadDocuments(){
+ documentLoadState="loading";window.dispatchEvent(new Event("documents-summary-change"));
  const body=document.getElementById('documentsBody');
 
  try{
@@ -739,7 +731,9 @@ async function loadDocuments(){
   if(!response.ok)throw new Error(`API returned ${response.status}`);
 
   const data=await response.json();
-  const rows=Array.isArray(data.documents)?data.documents:[];
+  if(!Array.isArray(data.documents))throw new Error("Invalid document response");
+  const rows=data.documents;
+  documentLoadState="ready";
 
   liveDocuments=rows.map(normaliseDocument);
   populateDocumentTypeFilter();
@@ -758,6 +752,7 @@ async function loadDocuments(){
   await openLinkedImsSource();
 
  }catch(err){
+  documentLoadState="error";window.dispatchEvent(new Event("documents-summary-change"));
   console.error('Unable to load VERO Governance documents',err);
   body.innerHTML=
    '<tr><td colspan="5" class="empty">Unable to load controlled documents from VERO. Please refresh or contact Governance.</td></tr>';
@@ -1129,7 +1124,7 @@ document.addEventListener('DOMContentLoaded',()=>{loadDocuments().finally(()=>wi
  function render(u){avatar.textContent=initials(u);name.textContent=fullName(u);full.textContent=fullName(u);email.textContent=u?.email||'';admin.style.display=u?.vero_role==='Administrator'?'flex':'none';}
  async function load(){
   const t=localStorage.getItem(TOKEN); if(!t){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));return;}
-  try{const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t,Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('auth');const d=await r.json();const u=d.user||d;localStorage.setItem(USER,JSON.stringify(u));render(u);applyDocumentFilters();}
+  try{const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t,Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('auth');const d=await r.json();const u=d.user||d;localStorage.setItem(USER,JSON.stringify(u));documentIdentity=u;render(u);applyDocumentFilters();}
   catch(e){localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));}
  }
  trigger.addEventListener('click',e=>{e.stopPropagation();const open=account.classList.toggle('open');trigger.setAttribute('aria-expanded',String(open));});
@@ -1156,9 +1151,9 @@ document.addEventListener('DOMContentLoaded',()=>{loadDocuments().finally(()=>wi
 </dialog>
 <script src="approved-document-import.js?v=20261016-dates"></script>
 <link rel="stylesheet" href="documents-table.css?v=20261016">
-<script src="documents-table.js?v=20261016-sort-only"></script>
+<script src="documents-table.js?v=20261020-title-az"></script>
 <script src="document-metadata-editor.js?v=20261020"></script>
-<link rel="stylesheet" href="register-layout.css"><script src="register-layout.js"></script></body></html>
+<link rel="stylesheet" href="register-layout.css"><script src="register-layout.js?v=20261020-documents-summary"></script><link rel="stylesheet" href="documents-summary.css?v=20261020"><script src="documents-summary.js?v=20261020"></script></body></html>
 
 <style id="document-library-ui">
 .document-actions{
