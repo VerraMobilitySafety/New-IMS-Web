@@ -125,6 +125,8 @@
         <span>Client Services Management</span>
       </a>
 
+      <a id="clientServicesSiteNav" hidden style="display:none!important" class="${isActive('client-services-sites.html') ? 'active' : ''}" href="client-services-sites.html"><span class="ico" data-lucide="list"></span><span>Client Services Site List</span></a>
+
       <a class="${isActive('contractor-management.html') ? 'active' : ''}" href="contractor-management.html">
         <span class="ico" data-lucide="hard-hat"></span>
         <span>Contractor Management</span>
@@ -227,6 +229,11 @@
       </a>
     </div>
   `;
+
+  // Resolve the current role from the authenticated service; stay hidden on error.
+  const siteListNav=document.getElementById('clientServicesSiteNav');
+  const navSession=localStorage.getItem('vero_session_token');
+  if(navSession)fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/auth/me',{headers:{Authorization:'Bearer '+navSession,Accept:'application/json'},cache:'no-store'}).then(async response=>{if(!response.ok)return;const data=await response.json();if((data.user||data).vero_role==='Administrator'){siteListNav.hidden=false;siteListNav.style.display='flex';}}).catch(()=>{});
 
   /* Consistent Lucide line icons, loaded once for all VERO pages. */
   const lucideScriptId = 'vero-lucide-script';
