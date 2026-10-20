@@ -23,3 +23,4 @@ jobs:
           node tests/event-period.cjs
           node tests/event-account.cjs
           node tests/event-people.cjs
+      - run: node tests/event-history-tasks.cjs
