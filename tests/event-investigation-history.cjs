@@ -1,0 +1,14 @@
+const {JSDOM}=require('jsdom'),fs=require('node:fs'),assert=require('node:assert/strict');
+(async()=>{
+ const dom=new JSDOM('<main id="root"><button id="edit-event">Edit event</button></main>',{url:'https://example.invalid/',runScripts:'outside-only'}),w=dom.window,d=w.document;
+ w.eval(fs.readFileSync('investigation-history.js','utf8'));w.eval(fs.readFileSync('event-editor.js','utf8'));
+ const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;');
+ const event={id:'fixture',version:7,report:{description:'Original report',occurred_date:'2020-01-01',location:'Other',classification:{due_date:'2020-01-10'},details:{}},investigation:{summary:'Old findings',factors:[]},history:[],investigation_history:{warnings:['No full old edit log'],sources:[{reference:'42',match_method:'Original migration link',sections:[],factors:[{group:'People',selections:[],description:'<script>unsafe</script>'}],original_actions:[{title:'Retained action',owner:'Original owner',due_date:'2020-01-10'}],legacy_files:[{name:'original.pdf',size:100,available:true,file_id:'original'}],other_sections:[]}],actions:[]}};
+ const html=w.VeroInvestigationHistory.render(event,esc);assert.match(html,/Retained action/);assert.match(html,/No full old edit log/);assert.match(html,/data-file="original"/);assert.ok(!html.includes('<script>unsafe'));assert.ok(!html.includes('data-restore-original'));
+ let payload,notice;w.VeroEventEditor.open({event,root:d.querySelector('#root'),options:{locations:['Other'],factors:['People'],impacts:{}},esc,api:async(path,data)=>{payload=data},saved:async()=>{},message:m=>notice=m});
+ const form=d.querySelector('form');form.elements.description.value='Corrected report';form.elements.reason.value='Correct historical typo';form.elements.investigation_summary.value='Corrected findings';
+ form.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));await new Promise(r=>setTimeout(r,0));
+ assert.equal(payload.version,7);assert.equal(payload.reason,'Correct historical typo');assert.deepEqual(JSON.parse(JSON.stringify(payload.changes)),{description:'Corrected report',investigation_summary:'Corrected findings'});assert.match(notice,/Previous values/);assert.equal(event.report.description,'Original report');
+ const page=fs.readFileSync('incident-management.html','utf8');assert.match(page,/class="vero-lockup"/);assert.match(page,/class="vero-divider"/);assert.match(page,/class="vero-name">VERO/);assert.ok(!page.includes('<strong>VERO</strong>'));
+ dom.window.close();console.log('PASS: retained investigation history, safe original files and text, explicit versioned amendments, unchanged source and shared sidebar branding.');
+})().catch(e=>{console.error(e);process.exitCode=1});
