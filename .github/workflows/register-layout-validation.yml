@@ -1,7 +1,7 @@
 name: Register layout draft validation
 on:
   pull_request:
-    paths: ['register-layout.*', 'insurance*', 'documents.html', 'compliance.html', 'contractor-management.html', 'tests/*layout-browser.cjs', '.github/workflows/register-layout-validation.yml']
+    paths: ['register-layout.*', 'register-operations-layout.*', 'maintenance-management.html', 'sites.html', 'users.html', 'my-actions.html', 'client-services-sites.html', 'insurance*', 'documents.html', 'compliance.html', 'contractor-management.html', 'tests/*layout-browser.cjs', '.github/workflows/register-layout-validation.yml']
 permissions:
   contents: read
 jobs:
@@ -17,6 +17,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: node tests/insurance-layout-browser.cjs
       - run: node tests/register-layout-browser.cjs
+      - run: node tests/operations-layout-browser.cjs
       - run: node --test tests/compliance-type-filters.cjs
       - uses: actions/upload-artifact@v4
         with:

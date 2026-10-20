@@ -1,0 +1,21 @@
+/* Opt-in adjustments for the second register batch. */
+.vr-page[data-register-layout="contracts"] .project-content,
+.vr-page[data-register-layout="client-sites"] .project-content,
+.vr-page[data-register-layout="users"] .admin-content { padding:0!important; }
+.vr-page[data-register-layout="contracts"] .vr-card.active { box-shadow:inset 0 0 0 1px #a9c23f!important; }
+.vr-page[data-register-layout="users"] .admin-title[hidden] { display:none!important; }
+.vr-page[data-register-layout="actions"] .action-toolbar-filters { margin:0; }
+.vr-page[data-register-layout="actions"] .vr-search { flex-basis:220px!important; }
+.vr-page[data-register-layout="client-sites"] .vr-filters select { width:150px!important; }
+.vr-page[data-register-layout="client-sites"] .vr-search input { max-width:none!important; }
+.vr-page[data-register-layout="locations"] .sites-grid { margin:0; }
+@media(max-width:750px){
+ .vr-page[data-register-layout="users"] .hero-search { display:none; }
+ .vr-page[data-register-layout="actions"] .actions-page { padding:0!important; }
+}
+@media(max-width:500px){
+ .vr-page[data-register-layout="actions"] .vr-segments { display:grid!important; grid-template-columns:repeat(4,minmax(0,1fr)); }
+ .vr-page[data-register-layout="client-sites"] .vr-filters select { width:100%!important; }
+}
+
+.vr-page[data-register-layout="client-sites"] .vr-actions { justify-content:flex-start!important; }
