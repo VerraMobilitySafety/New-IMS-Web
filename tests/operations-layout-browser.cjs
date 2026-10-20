@@ -50,6 +50,7 @@ for(const width of [1440,1024,768,390])for(const file of ['maintenance-managemen
  }
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no page overflow '+file);
  await page.locator('#veroPageLoader').waitFor({state:'hidden'});
+ await page.evaluate(()=>scrollTo(0,0));
  await page.screenshot({path:path.join(out,file.replace('.html','')+'-register-'+width+'.png'),fullPage:true});
  if(['users.html','client-services-sites.html'].includes(file)){
   admin=false;await page.reload();

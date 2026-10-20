@@ -1,0 +1,36 @@
+.vr-page[data-register-layout="records"] .dashboard-content,
+.vr-page[data-register-layout="risk"] .dashboard-content { padding:0!important; }
+.vr-page[data-register-layout="records"] .records-toolbar { justify-content:flex-start!important; align-items:flex-start!important; }
+.vr-page[data-register-layout="records"] .records-tabs[hidden],
+.vr-page[data-register-layout="records"][data-records-manager="true"] .vr-context-summary,
+.vr-page[data-register-layout="incidents"] .vr-original-navigation[hidden],
+.vr-page[data-register-layout="incidents"] .vr-context-summary[hidden] { display:none!important; }
+.vr-page[data-register-layout="records"]:not([data-records-manager="true"]) .records-kpis,
+.vr-page[data-register-layout="records"]:not([data-records-manager="true"]) .records-manager-filter { display:none!important; }
+.vr-page[data-register-layout="records"] .vr-toolbar { display:flex!important; grid-area:auto!important; }
+.vr-page[data-register-layout="records"] #recordsRegisterPanel { display:block; }
+.vr-page[data-register-layout="records"] .records-kpis { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.vr-page[data-register-layout="records"] .records-table-wrap { margin-top:0!important; }
+.vr-page[data-register-layout="records"] .vr-register { overflow:visible; }
+.vr-page[data-register-layout="records"] .vr-more-body { left:auto; right:0; display:grid; gap:8px; min-width:230px; }
+.vr-page[data-register-layout="records"] .vr-more-body select { width:100%!important; max-width:none!important; }
+.vr-page[data-register-layout="records"] .records-table-wrap { border-radius:0 0 12px 12px; }
+.vr-page[data-register-layout="risk"] #veroCompactRiskLayout>.vr-register { margin-bottom:20px; }
+.vr-page[data-register-layout="risk"] .vero-matrix-register-grid { display:block!important; }
+.vr-page[data-register-layout="risk"] .vr-risk-refine { border-bottom:1px solid #e5e1de; padding:12px 18px; }
+.vr-page[data-register-layout="risk"] .vr-risk-refine summary { cursor:pointer; font-size:12px; font-weight:700; }
+.vr-page[data-register-layout="risk"] .vr-risk-refine .vero-risk-filter-panels { margin-top:12px; }
+.vr-page[data-register-layout="risk"] .vero-risk-primary-actions>[hidden] { display:none!important; }
+.vr-page[data-register-layout="risk"] .vr-risk-actions:not(:has(button:not([hidden]))) { display:none; }
+.vr-page[data-register-layout="risk"] .vr-risk-actions button[hidden] { display:none!important; }
+.vr-page[data-register-layout="incidents"] .vr-actions #new-report { background:#a9c23f; color:#3d3935; }
+.vr-page[data-register-layout="incidents"] .vr-view-toolbar { border:1px solid #e5e1de; border-radius:12px; background:white; margin-bottom:18px!important; }
+.vr-page[data-register-layout="incidents"] .vr-register .vr-view-toolbar { border:0; border-radius:0; margin-bottom:0!important; }
+.vr-page[data-register-layout="incidents"] .vr-register .event-period { margin:0; padding:0; }
+.vr-page[data-register-layout="incidents"] .vr-register .vr-search { max-width:400px; }
+.vr-page[data-register-layout="incidents"] .vr-register>h2,.vr-page[data-register-layout="incidents"] .vr-register>p { padding:0 18px; }
+@media(max-width:750px){
+ .vr-page[data-register-layout="records"] .records-kpis { grid-template-columns:1fr; }
+ .vr-page[data-register-layout="risk"] .vero-risk-filter-panels { grid-template-columns:1fr!important; }
+ .vr-page[data-register-layout="incidents"] .main { max-width:100%; }
+}

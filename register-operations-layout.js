@@ -47,7 +47,7 @@
    const menu=node('details','vr-more'),title=document.createElement('summary'),body=node('div','vr-more-body');title.textContent='More actions';body.append($('#siteMatchHistory'));menu.append(title,body);action.append(menu);body.addEventListener('click',()=>menu.open=false);document.addEventListener('click',e=>{if(!menu.contains(e.target))menu.open=false});menu.addEventListener('keydown',e=>{if(e.key==='Escape'){menu.open=false;title.focus()}});
    cards($('.site-register-kpis'));const extra=node('div','vr-card vr-context'),b=document.createElement('b'),span=document.createElement('span');b.textContent='12 months';span.textContent='Recent event history window';extra.append(b,span);$('.site-register-kpis').append(extra);
    const panel=container.querySelector('.panel'),bar=$('.site-register-filters'),search=$('#siteSearch').closest('label');cls(panel,'vr-register');panel.prepend(bar);cls(bar,'vr-toolbar');cls(search,'vr-search');
-   const filters=node('div','vr-filters');for(const child of [...bar.children])if(child!==search)filters.append(child);bar.append(filters);
+   const filters=node('div','vr-filters');for(const child of [...bar.children])if(child!==search){for(const text of [...child.childNodes])if(text.nodeType===3&&text.textContent.trim()){const label=node('span','vr-sr-only');label.textContent=text.textContent;text.replaceWith(label)}filters.append(child)}bar.append(filters);
   }
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();

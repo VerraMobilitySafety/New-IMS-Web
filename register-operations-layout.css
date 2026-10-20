@@ -19,3 +19,10 @@
 }
 
 .vr-page[data-register-layout="client-sites"] .vr-actions { justify-content:flex-start!important; }
+
+.vr-page[data-register-layout="client-sites"] .vr-filters label { flex:0 0 auto; }
+.vr-page[data-register-layout="client-sites"] .vr-filters select { width:130px!important; }
+.vr-page[data-register-layout="client-sites"] .vr-search { flex-basis:220px!important; max-width:360px; }
+.vr-page[data-register-layout="users"] .vr-actions { justify-content:flex-start!important; }
+@media(max-width:900px){.vr-page[data-register-layout="client-sites"] .vr-search { max-width:none; }}
+@media(max-width:500px){.vr-page[data-register-layout="client-sites"] .vr-filters label,.vr-page[data-register-layout="client-sites"] .vr-filters select { width:100%!important; }}
