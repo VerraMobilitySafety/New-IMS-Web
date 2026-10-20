@@ -118,13 +118,18 @@
         <span>Project Management</span>
       </a>
 
-      <a class="${maintenanceActive ? 'active' : ''}"
-         href="maintenance-management.html">
-        <span class="ico" data-lucide="file-signature"></span>
-        <span>Client Services Management</span>
-      </a>
-
-      <a id="clientServicesSiteNav" hidden style="display:none!important" class="${isActive('client-services-sites.html') ? 'active' : ''}" href="client-services-sites.html"><span class="ico" data-lucide="list"></span><span>Client Services Site List</span></a>
+      <div class="vero-nav-group ${isActive('client-services-sites.html') ? 'open' : ''}" id="clientServicesNavGroup">
+        <div class="vero-nav-parent">
+          <a class="${maintenanceActive ? 'active' : ''}" href="maintenance-management.html">
+            <span class="ico" data-lucide="file-signature"></span>
+            <span>Client Services Management</span>
+          </a>
+          <button id="clientServicesSiteExpand" hidden style="display:none!important" class="vero-nav-expand" type="button" aria-label="Expand Client Services Site List" aria-expanded="${isActive('client-services-sites.html') ? 'true' : 'false'}"><span>›</span></button>
+        </div>
+        <div class="vero-nav-children">
+          <a id="clientServicesSiteNav" hidden style="display:none!important" class="${isActive('client-services-sites.html') ? 'active' : ''}" href="client-services-sites.html">Client Services Site List</a>
+        </div>
+      </div>
 
       <a class="${isActive('contractor-management.html') ? 'active' : ''}" href="contractor-management.html">
         <span class="ico" data-lucide="hard-hat"></span>
@@ -231,8 +236,9 @@
 
   // Resolve the current role from the authenticated service; stay hidden on error.
   const siteListNav=document.getElementById('clientServicesSiteNav');
+  const siteListExpand=document.getElementById('clientServicesSiteExpand');
   const navSession=localStorage.getItem('vero_session_token');
-  if(navSession)fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/auth/me',{headers:{Authorization:'Bearer '+navSession,Accept:'application/json'},cache:'no-store'}).then(async response=>{if(!response.ok)return;const data=await response.json();if((data.user||data).vero_role==='Administrator'){siteListNav.hidden=false;siteListNav.style.display='flex';}}).catch(()=>{});
+  if(navSession)fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/auth/me',{headers:{Authorization:'Bearer '+navSession,Accept:'application/json'},cache:'no-store'}).then(async response=>{if(!response.ok)return;const data=await response.json();if((data.user||data).vero_role==='Administrator'){for(const control of [siteListNav,siteListExpand]){control.hidden=false;control.style.display='flex';}}}).catch(()=>{});
 
   /* Consistent Lucide line icons, loaded once for all VERO pages. */
   const lucideScriptId = 'vero-lucide-script';
@@ -329,6 +335,13 @@
   expandButton?.addEventListener('click', () => {
     const open = incidentGroup.classList.toggle('open');
     expandButton.setAttribute('aria-expanded', String(open));
+  });
+
+  const clientGroup = document.getElementById('clientServicesNavGroup');
+  const clientExpand = clientGroup?.querySelector('.vero-nav-expand');
+  clientExpand?.addEventListener('click', () => {
+    const open = clientGroup.classList.toggle('open');
+    clientExpand.setAttribute('aria-expanded', String(open));
   });
 
   /* Prevent main navigation labels wrapping */
