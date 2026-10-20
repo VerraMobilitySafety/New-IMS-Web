@@ -20,17 +20,29 @@ const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('nod
     if(fail)return route.fulfill({status:500,json:{message:'Unable to save.'}});
     for(const key of Object.keys(metadata))if(Object.hasOwn(writes.at(-1),key))metadata[key]=writes.at(-1)[key];
    }
-   return route.fulfill({json:{metadata,read_only_fields:readOnly,can_edit:true,revision_token:'b'.repeat(64),changed_fields:req.method()==='PUT'?['record_title']:[],owners:[{id:1,name:'Synthetic <img src=x onerror=alert(1)>'}]}});
+   return route.fulfill({json:{metadata,read_only_fields:readOnly,can_edit:true,revision_token:'b'.repeat(64),changed_fields:req.method()==='PUT'?['record_title']:[],owners:[
+    {id:1,name:'Same Name',email:'work@example.test'},
+    {id:2,name:'Same Name',email:'personal@example.test'},
+    {id:3,name:'No Email',email:null},
+    {id:4,name:'Unsafe <img src=x>',email:'<img src=x onerror=alert(1)>@example.test'}
+   ]}});
   });
   await page.goto('https://vero.test/fixture');
   const open=id=>page.evaluate(id=>{const m=document.getElementById('recordModal');m.dataset.activeRecordId=String(id);m.classList.add('open');},id);
   const close=()=>page.evaluate(()=>{const m=document.getElementById('recordModal');m.classList.remove('open');delete m.dataset.activeRecordId;});
   await open(1);await page.getByRole('button',{name:'Edit Record Details',exact:true}).click();
+  assert.deepEqual(await page.getByLabel('Owner',{exact:true}).locator('option').allTextContents(),[
+   'Same Name (work@example.test)','Same Name (personal@example.test)','No Email (ID 3)',
+   'Unsafe <img src=x> (<img src=x onerror=alert(1)>@example.test)'
+  ]);
+  assert.equal(await page.getByLabel('Owner',{exact:true}).inputValue(),'1','Existing owner ID preserved');
+  await page.getByLabel('Owner',{exact:true}).selectOption('2');
   await page.getByLabel('Title',{exact:true}).fill('Cancelled');
   await page.getByRole('button',{name:'Cancel',exact:true}).click();
   assert.equal(writes.length,0);
   await page.getByRole('button',{name:'Edit Record Details',exact:true}).click();
   assert.equal(await page.getByLabel('Title',{exact:true}).inputValue(),'Original');
+  assert.equal(await page.getByLabel('Owner',{exact:true}).inputValue(),'1','Cancel restores existing owner ID');
   await page.getByLabel('Title',{exact:true}).fill('Corrected');
   await page.getByRole('button',{name:'Save Details',exact:true}).click();
   assert.equal(writes.length,0,'Reason required');
@@ -88,6 +100,15 @@ const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('nod
    assert.equal(writes.length,count+1);
    assert.deepEqual(Object.keys(writes.at(-1)).sort(),['expected_revision','reason',key].sort());
   }
+  await page.getByRole('button',{name:'Edit Record Details',exact:true}).click();
+  await page.getByLabel('Owner',{exact:true}).selectOption({label:'Same Name (personal@example.test)'});
+  await page.getByLabel('Reason for correction').fill('Synthetic owner choice');
+  await page.getByRole('button',{name:'Save Details',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('#recordMetadataEditor [role=status]').textContent==='Details saved with audit history.');
+  assert.equal(writes.at(-1).owner_user_id,2,'Label selection submits the unchanged numeric account ID');
+  await close();await open(5);
+  await page.getByRole('button',{name:'Edit Record Details',exact:true}).click();
+  assert.equal(await page.getByLabel('Owner',{exact:true}).inputValue(),'2','Reload does not replace the selected account');
   // Integration: execute the actual drawer, close handler and save-refresh listener
   // with the real editor. Only network/data helpers are replaced by synthetic fixtures.
   const integration=await browser.newPage();const integrationWrites=[];
@@ -129,7 +150,11 @@ const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('nod
   await integration.getByLabel('Reason for correction').fill('Race regression');
   await integration.getByRole('button',{name:'Save Details',exact:true}).click();
   await integration.waitForFunction(()=>waiters.length===2);
-  await openIntegrated(2);await resolve(2,2,'Record B');
+  await openIntegrated(2);
+  assert.equal(await integration.locator('.record-drawer-body').isVisible(),false,'Previous details hidden while B loads');
+  assert.equal(await integration.locator('#drawerRecordSubtitle').textContent(),'');
+  assert.equal(await integration.locator('#restrictedRecordView').isVisible(),false);
+  await resolve(2,2,'Record B');
   await integration.waitForFunction(()=>document.getElementById('drawerRecordTitle').textContent==='Record B');
   await integration.getByRole('button',{name:'Edit Record Details',exact:true}).click();
   await resolve(1,1,'Late A');
@@ -154,6 +179,10 @@ const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('nod
   await integration.evaluate(()=>waiters[6].reject(Error('Late A failure')));
   await integration.waitForTimeout(30);
   assert.equal(await integration.locator('#drawerRecordTitle').textContent(),'Final B');
+  await openIntegrated(1);
+  await integration.evaluate(()=>waiters[8].reject(Error('Synthetic detail failure')));
+  await integration.waitForFunction(()=>document.getElementById('drawerRecordTitle').textContent==='Unable to load record');
+  assert.equal(await integration.locator('.record-drawer-body').isVisible(),false,'Failed loads must not show previous details');
   await integration.close();
   console.log('PASS Admin editor: cancel, reason, duplicate save, conflict, safe text/history, stale drawer and non-admin denial');
   console.log('PASS actual save-refresh integration: late A cannot overwrite B, same-record generation, close and stale failure');

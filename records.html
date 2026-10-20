@@ -1728,44 +1728,12 @@ body[data-records-manager="false"]
  </button>
 </section>
 
-<section class="records-kpis">
-
- <div class="records-kpi">
-  <span>Total Records</span>
-  <strong id="kpiTotalRecords">—</strong>
-  <small>All records registered in Vero.</small>
- </div>
-
- <div class="records-kpi">
-  <span>Classified Records</span>
-  <strong id="kpiClassifiedRecords">—</strong>
-  <small>Records assigned a security classification.</small>
- </div>
-
- <div class="records-kpi">
-  <span>Pending Disposition</span>
-  <strong id="kpiPendingDisposition">—</strong>
-  <small>Decisions awaiting approval or completion.</small>
- </div>
-
- <div class="records-kpi">
-  <span>Due for Disposal</span>
-  <strong id="kpiDueDisposal">—</strong>
-  <small>Records that have reached their retention expiry.</small>
- </div>
-
- <div class="records-kpi">
-  <span>Active Holds</span>
-  <strong id="kpiActiveHolds">—</strong>
-  <small>Records protected from disposal by an active hold.</small>
- </div>
-
- <div class="records-kpi">
-  <span>Record Copy Requests</span>
-  <strong id="kpiCopyRequests">—</strong>
-  <small>Requests awaiting approval and email delivery of a record.</small>
- </div>
-
+<section class="records-kpis" aria-label="Record summary" aria-live="polite">
+ <div class="records-kpi"><span>Total Records</span><strong id="kpiTotalRecords">—</strong><small>Records available to your account.</small></div>
+ <div class="records-kpi"><span>My Records</span><strong id="kpiMyRecords">—</strong><small>Records assigned to your account.</small></div>
+ <div class="records-kpi"><span>My Classified Records</span><strong id="kpiClassifiedRecords">—</strong><small>Your Public or Confidential records.</small></div>
+ <div class="records-kpi"><span>My Records Due for Disposal</span><strong id="kpiDueDisposal">—</strong><small>Your records due today or earlier, excluding disposed records and active holds.</small></div>
+ <div class="records-kpi"><span>My Copy Requests</span><strong id="kpiCopyRequests">—</strong><small>Your request total is currently unavailable.</small></div>
 </section>
 
 <section class="records-panel">
@@ -3387,49 +3355,11 @@ body[data-records-manager="false"]
   }
  }
 
- function updateKpis(records){
-  const today = new Date();
-  today.setHours(0,0,0,0);
-
-
-
-  const due = records.filter(r => {
-   const date = r.retention?.disposal_due_date;
-   if(!date || r.status === 'Disposed' || r.has_active_hold) return false;
-   const d = new Date(date + 'T00:00:00');
-   return d <= today;
-  }).length;
-
-  const activeHolds = records.filter(
-   r => r.has_active_hold
-  ).length;
-
-  const pendingDisposition = records.filter(
-   r => r.has_open_disposition
-  ).length;
-
-  document.getElementById('kpiTotalRecords').textContent =
-   records.length;
-
-  const classified = records.filter(r =>
-   ['Public','Confidential'].includes(
-    r.security_classification
-   )
-  ).length;
-
-  document.getElementById('kpiClassifiedRecords').textContent =
-   classified;
-
-  document.getElementById('kpiDueDisposal').textContent =
-   due;
-
-  document.getElementById('kpiActiveHolds').textContent =
-   activeHolds;
-
-  document.getElementById('kpiPendingDisposition').textContent =
-   pendingDisposition;
+ function updateKpis(records,personalCopyCount=null){
+  window.recordsSummarySnapshot=records;
+  window.recordsSummaryCopyCount=personalCopyCount;
+  window.dispatchEvent(new Event('records-summary-change'));
  }
-
 
  function populateAdvancedRecordFilters(){
   populateFilter(
@@ -3912,6 +3842,12 @@ body[data-records-manager="false"]
   // Track the record currently being displayed.
   modal.dataset.activeRecordId = String(recordId);
 
+  // Keep the previous record's details and controls out of the loading view.
+  modal.querySelector('.record-drawer-body').style.display = 'none';
+  document.getElementById('restrictedRecordView').style.display = 'none';
+  document.getElementById('drawerRecordSubtitle').textContent = '';
+  closeControlledPreview();
+
   if(holdActions){
    holdActions.style.display = 'none';
   }
@@ -4388,23 +4324,15 @@ body[data-records-manager="false"]
  }
 
  async function loadRecords(){
+  updateKpis(null);
   const body = document.getElementById('recordsTableBody');
 
   try{
    const data = await recordsFetch('/records');
-   enterpriseRecords = data.records || [];
+   if(!Array.isArray(data.records))throw new Error("Invalid records response");
+   enterpriseRecords = data.records;
 
-   updateKpis(enterpriseRecords);
-
-   // Live count of outstanding controlled copy requests.
-   const copyRequests =
-    document.getElementById('kpiCopyRequests');
-
-   if(copyRequests){
-    const count = Number(data.pending_copy_requests);
-    copyRequests.textContent =
-     Number.isFinite(count) ? count : '—';
-   }
+   updateKpis(enterpriseRecords,data.my_pending_copy_requests);
 
    populateFilter(
     'categoryFilter',
@@ -7554,4 +7482,4 @@ body[data-records-manager="false"]
 </script>
 
 <script src="nav.js"></script>
-<link rel="stylesheet" href="register-layout.css"><link rel="stylesheet" href="register-governance-layout.css"><link rel="stylesheet" href="records-register-layout.css?v=20261020"><script src="register-layout.js"></script><script src="register-governance-layout.js"></script></body></html>
+<link rel="stylesheet" href="register-layout.css"><link rel="stylesheet" href="register-governance-layout.css"><link rel="stylesheet" href="records-register-layout.css?v=20261020-personal"><script src="register-layout.js"></script><script src="register-governance-layout.js"></script><script src="records-summary.js?v=20261020"></script></body></html>

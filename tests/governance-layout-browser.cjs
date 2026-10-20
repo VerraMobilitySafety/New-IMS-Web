@@ -27,7 +27,7 @@ for(const width of [1440,1024,768,390])for(const file of ['records.html','risk.h
   await page.locator('body[data-records-manager="true"]').waitFor();await page.locator('#recordsTableBody [data-record-id]').waitFor();
   await page.getByText('More filters',{exact:true}).click();assert.equal(await page.locator('#classificationFilter').isVisible(),true);await page.locator('#classificationFilter').selectOption('Confidential');assert.match(await page.locator('#recordsTableBody').innerText(),/No records/);await page.locator('#classificationFilter').selectOption('');await page.getByText('More filters',{exact:true}).click();
   await page.getByLabel('Search records',{exact:true}).fill('missing');assert.match(await page.locator('#recordsTableBody').innerText(),/No records/);await page.getByLabel('Search records',{exact:true}).fill('');
-  await page.locator('#recordsRegisterPanel').getByLabel('View',{exact:true}).selectOption('retention');assert.equal(await page.locator('#retentionSchedulePanel').isVisible(),true);assert.equal(await page.locator('#recordsRegisterPanel').isVisible(),false);
+  await page.getByText('More filters',{exact:true}).click();await page.locator('#recordsRegisterPanel').getByLabel('View',{exact:true}).selectOption('retention');assert.equal(await page.locator('#retentionSchedulePanel').isVisible(),true);assert.equal(await page.locator('#recordsRegisterPanel').isVisible(),false);
   await page.locator('#retentionSchedulePanel').getByLabel('View',{exact:true}).selectOption('register');
  }else if(file==='risk.html'){
   await page.locator('#veroRiskTableBody').getByText('Synthetic domain',{exact:false}).first().waitFor();await page.locator('#veroRiskSearch').fill('missing');await page.locator('#veroRiskSearch').fill('');
