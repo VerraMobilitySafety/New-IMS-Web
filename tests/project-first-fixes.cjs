@@ -6,6 +6,7 @@ const register=fs.readFileSync(path.join(__dirname,'../project-management.html')
 function section(text,start,end){return text.slice(text.indexOf(start),text.indexOf(end,text.indexOf(start)));}
 function node(){return {textContent:'',innerHTML:'',hidden:true,disabled:false,value:'selected',files:[],children:[],classList:{toggle(){}},replaceChildren(){this.children=[]},appendChild(child){this.children.push(child)}};}
 function app(project={id:7,current_stage:'Project Execution',status:'In Progress',action_required_by:'Assigned PM',action_required_by_user_id:5}){
+ project={can_edit:!workflow.resolve(project).terminal,...project};
  const nodes=new Map();const get=id=>{if(!nodes.has(id))nodes.set(id,node());return nodes.get(id)};
  const c=vm.createContext({VeroProjectWorkflow:workflow,URLSearchParams,FormData,document:{getElementById:get,createElement:()=>node(),querySelectorAll:()=>[],querySelector:()=>null},console,Number,Date,Intl});
  vm.runInContext("let currentProject=null,currentRequest=null,signedInUser=null; const setText=(id,value)=>document.getElementById(id).textContent=value; const text=x=>x??'—'; const fmtDate=x=>x; const money=x=>x;",c);
@@ -90,6 +91,21 @@ test('workflow deep links only open a matching action owned by the signed-in use
 });
 test('terminal projects do not offer or submit a later contract upload',async()=>{
  const a=app({id:7,current_stage:'Project Closed'});assert.equal(a.get('projectContractUpload').hidden,true);a.c.apiFetch=async()=>assert.fail('must not upload');await a.c.uploadProjectContract({preventDefault(){}});
+});
+test('view-only projects never offer or send uploads even with a signed-in account',async()=>{
+ const a=app({id:7,current_stage:'Project Execution',can_edit:false});
+ assert.equal(a.get('projectContractUpload').hidden,true);
+ a.c.apiFetch=async()=>assert.fail('viewer cannot upload');await a.c.uploadProjectContract({preventDefault(){}});
+});
+test('server Administrator capability permits document management on a closed project',()=>{
+ const a=app({id:7,current_stage:'Project Closed',can_edit:true});
+ assert.equal(a.get('projectContractUpload').hidden,false);
+});
+test('hidden workspace deep link stops before requesting documents or related data',async()=>{
+ const a=app();let calls=0;a.c.location={search:'?id=99'};a.get('loadError').style={};
+ a.c.apiFetch=async()=>{calls++;return{ok:true,json:async()=>({projects:[]})}};
+ vm.runInContext(section(html,'const initialWorkspaceLoads=[];','function field('),a.c);
+ await a.c.loadProject();assert.equal(calls,1);assert.match(a.get('loadError').textContent,/not found/);
 });
 test('project pages load the shared helper and all inline scripts compile',()=>{
  for(const dir of ['.']){

@@ -1054,6 +1054,7 @@ async function loadMasterContract(){
 }
 async function uploadMasterContract(){
  if(!currentProject?.id)return alert('Save the project draft first so VERO can attach the contract to the project.');
+ if(currentProject.can_edit!==true)return alert('Project edit permission is required to upload documents.');
  const input=document.getElementById('masterContractFile');
  const file=input?.files?.[0]; if(!file)return alert('Choose a contract file first.');
  const card=document.getElementById('masterContractCard'); if(card)card.textContent='Uploading contract…';

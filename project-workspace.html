@@ -536,7 +536,7 @@ function renderProjectWorkflow(){
    action.textContent=workflow.actionLabel+' →';host.appendChild(action);
  }
  const upload=document.getElementById('projectContractUpload');
- if(upload)upload.hidden=!signedInUser||workflow.terminal;
+ if(upload)upload.hidden=!signedInUser||currentProject?.can_edit!==true;
 }
 function totalCost(r){return ['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(r?.[k])||0),0)}
 function renderRequest(r){currentRequest=r;renderProjectWorkflow();if(r.contract_start_date)setText('contractStart',fmtDate(r.contract_start_date));if(r.contract_expiry_date)setText('contractEnd',fmtDate(r.contract_expiry_date));renderMilestoneOverview();}
@@ -568,7 +568,7 @@ async function loadProjectDocuments(projectId){
 let projectContractUploadPending=false;
 async function uploadProjectContract(event){
  event.preventDefault();
- if(projectContractUploadPending||!currentProject?.id||!signedInUser||VeroProjectWorkflow.resolve(currentProject).terminal)return;
+ if(projectContractUploadPending||!currentProject?.id||!signedInUser||currentProject.can_edit!==true)return;
  const input=document.getElementById('projectContractFile'),file=input.files?.[0];
  const status=document.getElementById('projectContractUploadStatus'),button=document.getElementById('projectContractUploadButton');
  if(!file){status.textContent='Choose a contract file first.';return;}
