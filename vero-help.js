@@ -58,7 +58,6 @@
    if(coverage&&documentSources.length){
     const notes=[];
     if(coverage.state==='Preparing'||coverage.pending>0)notes.push('Some document contents are still being indexed.');
-    if(coverage.unreadable>0)notes.push('Search covers readable document text; some pages may need text recognition.');
     if(notes.length)text('small',notes.join(' '),reply);
    }
    const sourceBox=sources.length&&!guide?text('details','',reply):null;
