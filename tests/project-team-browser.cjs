@@ -8,7 +8,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   page.on('pageerror',e=>errors.push(e.message));
   await page.route('https://vero.test/**',async route=>{
    const req=route.request(),url=new URL(req.url());
-   if(url.pathname==='/fixture')return route.fulfill({contentType:'text/html',body:'<main><div id="projectTeam"></div></main><script src="/project-team.js"></script>'});
+   if(url.pathname==='/fixture')return route.fulfill({contentType:'text/html',body:'<meta charset="utf-8"><main><div id="projectTeam"></div></main><script src="/project-team.js"></script>'});
    if(url.pathname==='/project-team.js')return route.fulfill({contentType:'application/javascript',body:fs.readFileSync(path.join(__dirname,'../project-team.js'))});
    if(req.method()==='POST'){
     posts.push(req.postDataJSON());if(deny)return route.fulfill({status:403,json:{message:'Assigned Project manager or Administrator required.'}});
