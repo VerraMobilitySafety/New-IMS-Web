@@ -4,7 +4,7 @@ const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('nod
  const browser=await chromium.launch({headless:true,...(process.env.VERO_TEST_BROWSER?{executablePath:process.env.VERO_TEST_BROWSER}:{})});
  try{
   const page=await browser.newPage(),writes=[],errors=[];
-  let allowed=true,conflict=false,fail=false,slow=false;
+  let allowed=true,conflict=false,fail=false,slow=false,readOnly={};
   let metadata={record_title:'Original',description:null,record_type:'Report',record_category:'Evidence',owner_business_area:'Safety',owner_user_id:1,record_date:'2026-01-01'};
   page.on('pageerror',e=>errors.push(e.message));
   await page.route('**/*',async route=>{
@@ -18,9 +18,9 @@ const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('nod
     writes.push(req.postDataJSON());await new Promise(r=>setTimeout(r,80));
     if(conflict)return route.fulfill({status:409,json:{message:'This record changed.'}});
     if(fail)return route.fulfill({status:500,json:{message:'Unable to save.'}});
-    metadata={...metadata,record_title:writes.at(-1).record_title};
+    for(const key of Object.keys(metadata))if(Object.hasOwn(writes.at(-1),key))metadata[key]=writes.at(-1)[key];
    }
-   return route.fulfill({json:{metadata,can_edit:true,revision_token:'b'.repeat(64),changed_fields:req.method()==='PUT'?['record_title']:[],owners:[{id:1,name:'Synthetic <img src=x onerror=alert(1)>'}]}});
+   return route.fulfill({json:{metadata,read_only_fields:readOnly,can_edit:true,revision_token:'b'.repeat(64),changed_fields:req.method()==='PUT'?['record_title']:[],owners:[{id:1,name:'Synthetic <img src=x onerror=alert(1)>'}]}});
   });
   await page.goto('https://vero.test/fixture');
   const open=id=>page.evaluate(id=>{const m=document.getElementById('recordModal');m.dataset.activeRecordId=String(id);m.classList.add('open');},id);
@@ -37,7 +37,7 @@ const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('nod
   await page.getByLabel('Reason for correction').fill('Synthetic correction');
   await page.getByRole('button',{name:'Save Details',exact:true}).evaluate(b=>{b.click();b.click();});
   await page.waitForFunction(()=>saved===1);
-  assert.equal(writes.length,1);assert.equal(writes[0].description,null);
+  assert.equal(writes.length,1);assert.equal(Object.hasOwn(writes[0],'description'),false);
   assert.equal(await page.locator('#recordMetadataEditor img').count(),0);
   conflict=true;await page.getByRole('button',{name:'Edit Record Details',exact:true}).click();
   await page.getByLabel('Reason for correction').fill('Conflict');
@@ -70,6 +70,24 @@ const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('nod
   },historyLoader);
   assert.equal(await page.locator('#recordHistorySection').isVisible(),true,'Authorised Admin history overrides Controller-only hiding');
   assert.deepEqual(errors,[]);
+  // Legacy nulls must not be coerced into edits or block unrelated corrections.
+  allowed=true;metadata={...metadata,owner_user_id:null,record_date:null,record_type:null,record_category:null,owner_business_area:null};
+  readOnly=Object.fromEntries(['record_date','record_type','record_category','owner_business_area'].map(k=>[k,'An active assigned retention rule is required.']));
+  await close();await open(4);
+  for(const [label,value,key] of [['Title','Legacy title','record_title'],['Description','Legacy description','description'],['Owner','1','owner_user_id']]){
+   await page.getByRole('button',{name:'Edit Record Details',exact:true}).click();
+   assert.equal(await page.getByLabel('Record date',{exact:true}).isDisabled(),true);
+   assert.equal(await page.getByLabel('Category',{exact:true}).isDisabled(),true);
+   assert.match(await page.locator('#record-edit-help-record_date').textContent(),/active assigned retention rule/);
+   if(key==='owner_user_id')await page.getByLabel(label,{exact:true}).selectOption(value);
+   else await page.getByLabel(label,{exact:true}).fill(value);
+   await page.getByLabel('Reason for correction').fill('Legacy correction');
+   const count=writes.length;
+   await page.getByRole('button',{name:'Save Details',exact:true}).click();
+   await page.waitForFunction(()=>document.querySelector('#recordMetadataEditor [role=status]').textContent==='Details saved with audit history.');
+   assert.equal(writes.length,count+1);
+   assert.deepEqual(Object.keys(writes.at(-1)).sort(),['expected_revision','reason',key].sort());
+  }
   // Integration: execute the actual drawer, close handler and save-refresh listener
   // with the real editor. Only network/data helpers are replaced by synthetic fixtures.
   const integration=await browser.newPage();const integrationWrites=[];

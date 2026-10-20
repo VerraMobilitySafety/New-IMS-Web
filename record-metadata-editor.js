@@ -15,14 +15,14 @@
   owner_business_area:['Business area','text',255],owner_user_id:['Owner','select'],
   record_date:['Record date','date'],reason:['Reason for correction','textarea',3000]
  };
- const inputs={};
+ const inputs={},fieldNotes={};
  const grid=node('div');grid.className='record-detail-grid';
  for(const [key,[label,type,max]] of Object.entries(fields)){
   const wrap=node('label',label),input=node(type==='textarea'?'textarea':type==='select'?'select':'input');
   input.name=key;input.setAttribute('aria-label',label);
   if(input.tagName==='INPUT')input.type=type;
   if(max)input.maxLength=max;
-  input.required=key!=='description';wrap.append(input);grid.append(wrap);inputs[key]=input;
+  input.required=key==='reason';const help=node('small');help.id='record-edit-help-'+key;input.setAttribute('aria-describedby',help.id);wrap.append(input,help);grid.append(wrap);inputs[key]=input;fieldNotes[key]=help;
  }
  const note=node('p','Classification, access groups, retention, holds, disposition and files stay in their controlled workflows. Date and classification details must preserve the assigned retention rule.');
  const save=node('button','Save Details'),cancel=node('button','Cancel');
@@ -43,7 +43,7 @@
  function fill(){
   for(const key of Object.keys(fields))inputs[key].value=key==='reason'?'':data.metadata[key]??'';
  }
- function lock(){save.disabled=busy||conflicted;cancel.disabled=busy;edit.disabled=busy;for(const input of Object.values(inputs))input.disabled=busy;}
+ function lock(){save.disabled=busy||conflicted;cancel.disabled=busy;edit.disabled=busy;for(const [key,input] of Object.entries(inputs)){const why=data?.read_only_fields?.[key];input.disabled=busy||!!why;fieldNotes[key].textContent=why||'';}}
  async function load(force=false){
   const id=modal.classList.contains('open')?modal.dataset.activeRecordId:null;
   if(!force&&id===activeId)return;
@@ -56,9 +56,9 @@
    inputs.owner_user_id.replaceChildren();
    for(const owner of result.owners||[]){const option=node('option',owner.name);option.value=String(owner.id);inputs.owner_user_id.append(option);}
    if(!(result.owners||[]).some(o=>o.id===result.metadata.owner_user_id)){
-    const option=node('option','Current owner (inactive or unavailable)');option.value=String(result.metadata.owner_user_id);inputs.owner_user_id.append(option);
+    const option=node('option','Current owner (inactive or unavailable)');option.value=result.metadata.owner_user_id==null?'':String(result.metadata.owner_user_id);inputs.owner_user_id.append(option);
    }
-   fill();
+   fill();lock();
   }catch(error){
    if(ticket!==sequence||error.status===403)return;
    section.hidden=false;edit.hidden=true;status.textContent=error.message;
@@ -69,10 +69,13 @@
  form.onsubmit=async event=>{
   event.preventDefault();if(busy||conflicted||!data||!form.reportValidity())return;
   const id=activeId,ticket=sequence,payload={expected_revision:data.revision_token};
-  for(const key of Object.keys(fields))payload[key]=inputs[key].value;
-  payload.owner_user_id=Number(payload.owner_user_id);
-  // Preserve an absent optional description on a no-op.
-  if(!payload.description&&data.metadata.description===null)payload.description=null;
+  payload.reason=inputs.reason.value;
+  for(const key of Object.keys(fields)){
+   if(key==='reason'||data.read_only_fields?.[key])continue;
+   const before=data.metadata[key],raw=inputs[key].value;
+   if(raw===String(before??''))continue;
+   payload[key]=key==='owner_user_id'?Number(raw):raw;
+  }
   busy=true;lock();status.textContent='Saving details…';
   try{
    const result=await api(id,'PUT',payload);
