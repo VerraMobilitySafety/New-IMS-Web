@@ -3811,6 +3811,7 @@ function updateComplianceCounts(items){
     ? counts[type]||0
     : items.length;
   });
+ window.updateClientRequirementCount?.();
 }
 
 let obligationsLive={};
@@ -8249,5 +8250,5 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 
 
-<script src="compliance-contract-register.js?v=20261020-types"></script>
+<script src="compliance-contract-register.js?v=20261020-client-items"></script>
 
