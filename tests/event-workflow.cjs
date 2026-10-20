@@ -20,7 +20,7 @@ async function evidenceUpload(){
 
 (async()=>{
  await until(()=>d.querySelector('#incident-dashboard'));assert.equal(d.querySelector('#event-rows'),null);d.querySelector('#register').click();await until(()=>d.querySelector('#event-filter'));assert.match(d.body.textContent,/No events in this view/);
- assert.match(d.querySelector('#coverage').textContent,/Unverified/);assert.match(d.querySelector('#coverage').textContent,/not enabled/);
+ assert.equal(d.querySelector('#coverage'),null);for(const label of ['Workflow review','Notification delivery','Create an action','Assignment settings'])assert.equal([...d.querySelectorAll('.toolbar button')].some(b=>b.textContent===label),false);
  d.querySelector('#new-report').click();let f=d.querySelector('#report-form');
  for(const field of d.querySelectorAll('[data-impact]')){const [a,c]=field.querySelectorAll('select');assert.equal(c.disabled,true);a.value='Potential';a.dispatchEvent(new w.Event('change'));assert.equal(c.required,true);a.value='No';a.dispatchEvent(new w.Event('change'));assert.equal(c.disabled,true);assert.equal(c.required,false);}
  set(f,'description','<img src=x onerror=alert(1)> synthetic event');set(f,'occurred_date','2026-10-19');set(f,'occurred_time','12:30');set(f,'location','Other');d.querySelector('#location').dispatchEvent(new w.Event('change'));set(f,'address','Sydney');submit(f);
