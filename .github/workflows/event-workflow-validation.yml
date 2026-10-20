@@ -41,3 +41,5 @@ jobs:
       - run: node tests/event-investigation-prefill.cjs
 
       - run: node tests/event-record-deletion.cjs
+
+      - run: node tests/event-register-columns.cjs
