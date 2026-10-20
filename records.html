@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><title>VERRA | VERO — Records Management</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><title>VERRA | VERO — Records Management</title><script defer src="record-metadata-editor.js?v=20261020-admin"></script><style>
 
 :root {
     --verra-navy: #00263E;
@@ -3600,6 +3600,14 @@ body[data-records-manager="false"]
  // ============================================================
 
  let recordHistoryRequest = 0;
+ let recordDetailRequest = 0;
+ window.addEventListener('vero-record-metadata-saved',event=>{
+  const id=String(event.detail?.recordId||'');
+  if(document.getElementById('recordModal')?.dataset.activeRecordId===id){
+   void openRecordDrawer(id);
+   void loadRecords();
+  }
+ });
 
 
  function renderRecordHistory(history){
@@ -3868,7 +3876,8 @@ body[data-records-manager="false"]
 
    if(requestId !== recordHistoryRequest) return;
 
-   section.style.display = '';
+   // A successful history response authorises this panel independently of Controller-only controls.
+   section.style.setProperty('display','block','important');
    renderRecordHistory(data.history || []);
 
   }catch(error){
@@ -3895,6 +3904,11 @@ body[data-records-manager="false"]
   const holdActions =
    document.getElementById('recordHoldActions');
 
+  // Guard same-record refreshes as well as switching and closing the drawer.
+  const requestId = ++recordDetailRequest;
+  const current = () => requestId === recordDetailRequest &&
+   modal.classList.contains('open') &&
+   modal.dataset.activeRecordId === String(recordId);
   // Track the record currently being displayed.
   modal.dataset.activeRecordId = String(recordId);
 
@@ -3946,6 +3960,7 @@ body[data-records-manager="false"]
 
   try{
    const data = await recordsFetch('/records/' + recordId);
+   if(!current()) return;
    const r = data.record;
 
    const restrictedView =
@@ -4139,7 +4154,8 @@ body[data-records-manager="false"]
    // Load authorised viewing groups for this record.
    loadRecordViewingGroups(
     r.id,
-    r.security_classification
+    r.security_classification,
+    current
    ).catch(error=>{
     console.error('Unable to load viewing permissions',error);
    });
@@ -4172,6 +4188,7 @@ body[data-records-manager="false"]
      '/records/retention-rules'
     );
 
+    if(!current()) return;
     const canManageHolds =
      permissionData.permissions?.can_manage === true;
 
@@ -4187,6 +4204,7 @@ body[data-records-manager="false"]
     }
 
    }catch(permissionError){
+    if(!current()) return;
     console.warn(
      'Unable to verify Records Controller permission:',
      permissionError
@@ -4198,6 +4216,7 @@ body[data-records-manager="false"]
    }
 
   }catch(error){
+   if(!current()) return;
    console.error(error);
 
    document.getElementById('drawerRecordTitle').textContent =
@@ -4209,6 +4228,7 @@ body[data-records-manager="false"]
  }
 
  window.closeRecordDrawer = function(){
+  recordDetailRequest++;
   // Invalidate outstanding Record History requests.
   recordHistoryRequest++;
 
@@ -7301,7 +7321,11 @@ body[data-records-manager="false"]
  // RECORD VIEWING GROUP MANAGEMENT
  let editingRecordPermissionsId = null;
 
- async function loadRecordViewingGroups(recordId, classification){
+ async function loadRecordViewingGroups(recordId, classification, current = () => {
+  const modal = document.getElementById('recordModal');
+  return modal?.classList.contains('open') && modal.dataset.activeRecordId === String(recordId);
+ }){
+  if(!current()) return;
   const section =
    document.getElementById('recordPermissionsSection');
 
@@ -7322,6 +7346,7 @@ body[data-records-manager="false"]
    '/records/confidentiality-groups'
   );
 
+  if(!current()) return;
   const groupsData = groupsResponse.groups || [];
 
   let permissionsResponse;
@@ -7332,6 +7357,7 @@ body[data-records-manager="false"]
     '/viewing-groups'
    );
   }catch(error){
+   if(!current()) return;
    if(error.status === 403 ||
       /permission|forbidden|access/i.test(error.message)){
     summary.textContent = 'Restricted';
@@ -7340,6 +7366,7 @@ body[data-records-manager="false"]
    throw error;
   }
 
+  if(!current()) return;
   const selected = new Set(
    (permissionsResponse.groups || []).map(g=>Number(g.id))
   );
