@@ -1,0 +1,23 @@
+/* Records-only alignment with the Document Management primary action. */
+.vr-page[data-register-layout="records"] #addRecordBtn {
+ box-sizing:border-box;
+ height:43px;
+ padding:12px 16px;
+ border:0;
+ border-radius:8px;
+ font-family:Arial,sans-serif;
+ font-size:13px;
+ font-weight:800;
+ line-height:19px;
+ background:#a9c23f;
+ color:#3d3935;
+}
+.vr-page[data-register-layout="records"] .records-kpis {
+ grid-template-columns:repeat(6,minmax(0,1fr));
+}
+@media(max-width:900px) {
+ .vr-page[data-register-layout="records"] .records-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:500px) {
+ .vr-page[data-register-layout="records"] .records-kpis { grid-template-columns:1fr; }
+}
