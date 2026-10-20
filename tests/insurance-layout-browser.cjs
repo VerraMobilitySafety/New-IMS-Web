@@ -6,7 +6,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
  fs.mkdirSync(out,{recursive:true});
  const browser=await chromium.launch({headless:true,...(process.env.INSURANCE_BROWSER?{executablePath:process.env.INSURANCE_BROWSER}:{})});
  try{
- for(const width of [1440,390]){
+ for(const width of [1440,1024,768,390]){
   const context=await browser.newContext({viewport:{width,height:1100}});
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
@@ -32,6 +32,9 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies');
   const add=async(number,status,expiry)=>{
    await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
+   assert.equal(await page.locator('main').evaluate(e=>e.inert),true);
+   await page.keyboard.press('Shift+Tab');assert.equal(await page.getByRole('button',{name:'Add to Prototype'}).evaluate(e=>e===document.activeElement),true);
+   await page.keyboard.press('Tab');assert.equal(await page.getByLabel('Policy Name',{exact:true}).evaluate(e=>e===document.activeElement),true);
    await page.getByLabel('Policy Name',{exact:true}).fill('Synthetic '+number);
    await page.getByLabel('Policy Number',{exact:true}).fill(number);
    await page.getByLabel('Status',{exact:true}).fill(status);
@@ -39,6 +42,8 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
    await page.getByLabel('Broker',{exact:true}).fill('Hidden broker '+number);
    await page.getByLabel('Expiry Date',{exact:true}).fill(expiry);
    await page.getByRole('button',{name:'Add to Prototype'}).click();
+   assert.equal(await page.getByRole('button',{name:'+ Register Policy',exact:true}).evaluate(e=>e===document.activeElement),true);
+   assert.equal(await page.locator('main').evaluate(e=>e.inert),false);
   };
   const due=new Date();due.setDate(due.getDate()+30);
   await add('TEST-001','Active',due.toISOString().slice(0,10));
@@ -50,6 +55,9 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   await page.locator('#content tbody tr').click();
   assert.match(await page.locator('#policyDetails').innerText(),/Hidden broker TEST-002/);
   assert.equal(await page.locator('#policyDetails dt').count(),14);
+  for(const key of ['Tab','Shift+Tab','Tab']){await page.keyboard.press(key);assert.equal(await page.getByRole('button',{name:'Close',exact:true}).evaluate(e=>e===document.activeElement),true)}
+  await page.evaluate(()=>document.querySelector('#search').focus());assert.equal(await page.getByRole('button',{name:'Close',exact:true}).evaluate(e=>e===document.activeElement),true);
+  assert.equal(await page.locator('main').evaluate(e=>e.inert),true);
   await page.getByRole('button',{name:'Close',exact:true}).click();
   await page.getByLabel('Search insurance register').fill('');
   await page.locator('#content tbody tr').first().focus();
@@ -79,6 +87,9 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   await page.locator('#insuranceMore summary').click();
   await page.getByRole('button',{name:'+ Register Claim',exact:true}).click();
   assert.equal(await page.locator('#modal.open').count(),1);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#insuranceMore summary').evaluate(e=>e===document.activeElement),true);
+  await page.locator('#insuranceMore summary').click();await page.getByRole('button',{name:'+ Register Claim',exact:true}).click();
   await page.getByLabel('Claim Reference').fill('CLAIM-TEST');
   await page.getByLabel('Policy Number',{exact:true}).fill('TEST-001');
   await page.getByRole('button',{name:'Add to Prototype'}).click();
