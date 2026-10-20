@@ -3600,6 +3600,13 @@ body[data-records-manager="false"]
  // ============================================================
 
  let recordHistoryRequest = 0;
+ window.addEventListener('vero-record-metadata-saved',event=>{
+  const id=String(event.detail?.recordId||'');
+  if(document.getElementById('recordModal')?.dataset.activeRecordId===id){
+   void openRecordDrawer(id);
+   void loadRecords();
+  }
+ });
 
 
  function renderRecordHistory(history){
@@ -7527,4 +7534,5 @@ body[data-records-manager="false"]
 </script>
 
 <script src="nav.js"></script>
+<script src="record-metadata-editor.js?v=20261020-admin"></script>
 <link rel="stylesheet" href="register-layout.css"><link rel="stylesheet" href="register-governance-layout.css"><script src="register-layout.js"></script><script src="register-governance-layout.js"></script></body></html>
