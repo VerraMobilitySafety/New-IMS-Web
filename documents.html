@@ -618,7 +618,16 @@ function documentIsMine(doc){
  const ownerId=Number(doc.documentOwnerUserId),userId=Number(user.id);
  if(Number.isInteger(ownerId)&&ownerId>0)return Number.isInteger(userId)&&userId>0&&ownerId===userId;
  const ownerEmail=String(doc.documentOwnerEmail||"").trim().toLowerCase(),userEmail=String(user.email||"").trim().toLowerCase();
- return !!ownerEmail&&!!userEmail&&ownerEmail===userEmail;
+ if(ownerEmail)return !!userEmail&&ownerEmail===userEmail;
+ // Legacy API rows retain document_owner but have no joined owner ID/email.
+ // Preserve the register's existing name mapping for filtering only, never permissions.
+ const ownerName=documentOwnerNameKey(doc.documentOwner);
+ if(!ownerName||ownerName==='-'||ownerName==='—')return false;
+ return [
+  [user.first_name,user.last_name].filter(Boolean).join(' '),
+  user.name,
+  user.display_name
+ ].map(documentOwnerNameKey).filter(Boolean).includes(ownerName);
 }
 
 function documentIsDueForReview(doc){
@@ -1153,7 +1162,7 @@ document.addEventListener('DOMContentLoaded',()=>{loadDocuments().finally(()=>wi
 <link rel="stylesheet" href="documents-table.css?v=20261016">
 <script src="documents-table.js?v=20261020-title-az"></script>
 <script src="document-metadata-editor.js?v=20261020"></script>
-<link rel="stylesheet" href="register-layout.css"><script src="register-layout.js?v=20261020-documents-summary"></script><link rel="stylesheet" href="documents-summary.css?v=20261020"><script src="documents-summary.js?v=20261020"></script></body></html>
+<link rel="stylesheet" href="register-layout.css"><script src="register-layout.js?v=20261020-documents-summary"></script><link rel="stylesheet" href="documents-summary.css?v=20261020-ownership-font"><script src="documents-summary.js?v=20261020-ownership-font"></script></body></html>
 
 <style id="document-library-ui">
 .document-actions{

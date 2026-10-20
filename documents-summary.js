@@ -16,7 +16,10 @@
   const docs=currentDocuments();set('total',String(docs.length),'Current documents you can access');
   if(!documentIdentity){for(const key of ['mine','due'])set(key,'—','Confirming your account…');return}
   if(!documentIdentity.id&&!String(documentIdentity.email||'').trim()){for(const key of ['mine','due'])set(key,'—','Account identity unavailable');return}
-  const owned=docs.filter(documentIsMine),unresolved=docs.filter(d=>!(Number.isInteger(Number(d.documentOwnerUserId))&&Number(d.documentOwnerUserId)>0)&&!String(d.documentOwnerEmail||'').trim()).length;
+  const owned=docs.filter(documentIsMine),unresolved=docs.filter(d=>{
+   const name=documentOwnerNameKey(d.documentOwner);
+   return !(Number.isInteger(Number(d.documentOwnerUserId))&&Number(d.documentOwnerUserId)>0)&&!String(d.documentOwnerEmail||'').trim()&&(!name||name==='-'||name==='—');
+  }).length;
   set('mine',String(owned.length)+(unresolved?' known':''),unresolved?unresolved+' document'+(unresolved===1?' has':'s have')+' unconfirmed ownership':'Current documents assigned to you');
   const now=new Date(),today=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate())/86400000;
   const dates=owned.map(d=>reviewDay(d.nextReviewDate)),unknown=dates.filter(d=>d===null).length;
