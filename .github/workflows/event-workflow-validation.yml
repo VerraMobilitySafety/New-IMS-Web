@@ -28,3 +28,5 @@ jobs:
       - run: node tests/event-history-investigations.cjs
 
       - run: node tests/event-owner-alias.cjs
+
+      - run: node tests/event-monthly.cjs
