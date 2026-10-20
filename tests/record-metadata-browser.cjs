@@ -70,6 +70,74 @@ const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('nod
   },historyLoader);
   assert.equal(await page.locator('#recordHistorySection').isVisible(),true,'Authorised Admin history overrides Controller-only hiding');
   assert.deepEqual(errors,[]);
+  // Integration: execute the actual drawer, close handler and save-refresh listener
+  // with the real editor. Only network/data helpers are replaced by synthetic fixtures.
+  const integration=await browser.newPage();const integrationWrites=[];
+  await integration.route('**/*',async route=>{
+   const req=route.request(),url=new URL(req.url());
+   if(url.pathname==='/integration')return route.fulfill({contentType:'text/html',body:'<meta charset="utf-8"><body></body>'});
+   assert.match(url.pathname,/\/records\/[12]\/metadata$/);
+   const id=url.pathname.includes('/records/1/')?1:2;
+   if(req.method()==='PUT')integrationWrites.push(req.postDataJSON());
+   return route.fulfill({json:{metadata:{...metadata,record_title:id===1?'Record A':'Record B'},can_edit:true,
+    owners:[{id:1,name:'Admin'}],revision_token:'c'.repeat(64),changed_fields:['record_title']}});
+  });
+  await integration.goto('https://vero.test/integration');
+  const counterAndListener=html.slice(html.indexOf(' let recordHistoryRequest = 0;'),html.indexOf(' function renderRecordHistory('));
+  const drawerAndClose=html.slice(html.indexOf(' async function openRecordDrawer('),html.indexOf(' window.recordBackdropClose = function('));
+  await integration.evaluate(({html,counterAndListener,drawerAndClose,editor})=>{
+   const parsed=new DOMParser().parseFromString(html,'text/html');
+   document.body.append(document.importNode(parsed.getElementById('recordModal'),true));
+   localStorage.setItem('vero_session_token','synthetic');
+   window.waiters=[];
+   (0,eval)(`(()=>{
+    const enterpriseRecords=[],formatDate=x=>x||'-';
+    const loadRecordHistory=()=>{},loadRecordViewingGroups=async()=>{},closeControlledPreview=()=>{},loadRecords=()=>{};
+    const recordsFetch=path=>path==='/records/retention-rules'?Promise.resolve({permissions:{can_manage:false}}):
+     new Promise((resolve,reject)=>waiters.push({path,resolve,reject}));
+    ${counterAndListener}
+    ${drawerAndClose}
+    window.testOpenRecord=openRecordDrawer;
+   })();`);
+   (0,eval)(editor);
+  },{html,counterAndListener,drawerAndClose,editor:fs.readFileSync(__dirname+'/../record-metadata-editor.js','utf8')});
+  const openIntegrated=id=>integration.evaluate(id=>{void testOpenRecord(id);},id);
+  const resolve=async(index,id,title)=>integration.evaluate(({index,id,title})=>{
+   waiters[index].resolve({record:{id,record_title:title,record_code:'REC-'+id,status:'Active',security_classification:'Public',owner:{},retention:{}}});
+  },{index,id,title});
+  await openIntegrated(1);await resolve(0,1,'Record A');
+  await integration.getByRole('button',{name:'Edit Record Details',exact:true}).click();
+  await integration.getByLabel('Title',{exact:true}).fill('Saved A');
+  await integration.getByLabel('Reason for correction').fill('Race regression');
+  await integration.getByRole('button',{name:'Save Details',exact:true}).click();
+  await integration.waitForFunction(()=>waiters.length===2);
+  await openIntegrated(2);await resolve(2,2,'Record B');
+  await integration.waitForFunction(()=>document.getElementById('drawerRecordTitle').textContent==='Record B');
+  await integration.getByRole('button',{name:'Edit Record Details',exact:true}).click();
+  await resolve(1,1,'Late A');
+  await integration.waitForTimeout(30);
+  assert.equal(await integration.locator('#drawerRecordTitle').textContent(),'Record B');
+  assert.equal(await integration.getByLabel('Title',{exact:true}).inputValue(),'Record B');
+  assert.equal(await integration.locator('#recordModal').getAttribute('data-active-record-id'),'2');
+  await integration.locator('#recordMetadataEditor').getByRole('button',{name:'Cancel',exact:true}).click();
+  assert.equal(integrationWrites.length,1,'Cancel B must not save');
+  // The generation guard must reject older responses even for the same record.
+  await openIntegrated(2);await openIntegrated(2);
+  await resolve(4,2,'Newest B');await resolve(3,2,'Stale B');
+  await integration.waitForTimeout(30);
+  assert.equal(await integration.locator('#drawerRecordTitle').textContent(),'Newest B');
+  // Closing invalidates pending successes and failures.
+  await openIntegrated(1);
+  await integration.evaluate(()=>closeRecordDrawer());
+  await resolve(5,1,'Closed A');await integration.waitForTimeout(30);
+  assert.equal(await integration.locator('#recordModal').evaluate(m=>m.classList.contains('open')),false);
+  assert.notEqual(await integration.locator('#drawerRecordTitle').textContent(),'Closed A');
+  await openIntegrated(1);await openIntegrated(2);await resolve(7,2,'Final B');
+  await integration.evaluate(()=>waiters[6].reject(Error('Late A failure')));
+  await integration.waitForTimeout(30);
+  assert.equal(await integration.locator('#drawerRecordTitle').textContent(),'Final B');
+  await integration.close();
   console.log('PASS Admin editor: cancel, reason, duplicate save, conflict, safe text/history, stale drawer and non-admin denial');
+  console.log('PASS actual save-refresh integration: late A cannot overwrite B, same-record generation, close and stale failure');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
