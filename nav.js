@@ -4,57 +4,7 @@
   const nav = document.getElementById('vero-nav');
   if (!nav) return;
 
-  /* SIDEBAR CONFIGURATION */
-  const SIDEBAR_WIDTH = '300px';
-
-  document.documentElement.style.setProperty(
-    '--vero-sidebar-width',
-    SIDEBAR_WIDTH
-  );
-
-  const sidebar = document.querySelector('.sidebar');
-  const main = document.querySelector('.main');
-
-  if (sidebar) {
-    sidebar.style.width = SIDEBAR_WIDTH;
-    sidebar.style.display = 'flex';
-    sidebar.style.flexDirection = 'column';
-    sidebar.style.height = '100vh';
-    sidebar.style.overflow = 'hidden';
-
-    // Keep logo fixed and move Home closer to it.
-    const brand = sidebar.querySelector('.brand');
-    if (brand) {
-      brand.style.flexShrink = '0';
-      brand.style.marginBottom = '12px';
-    }
-
-    // Navigation scrolls independently.
-    const navContainer = nav.closest('nav') || nav;
-
-    navContainer.style.flex = '1 1 auto';
-    navContainer.style.minHeight = '0';
-    navContainer.style.overflowY = 'auto';
-    navContainer.style.overflowX = 'auto';
-    navContainer.style.scrollbarWidth = 'thin';
-    navContainer.style.scrollbarColor =
-      'rgba(255,255,255,.35) transparent';
-
-    // Keep footer fixed at bottom.
-    const footer = sidebar.querySelector('.side-foot');
-    if (footer) {
-      footer.style.position = 'relative';
-      footer.style.left = 'auto';
-      footer.style.bottom = 'auto';
-      footer.style.flexShrink = '0';
-      footer.style.paddingTop = '12px';
-    }
-  }
-
-  if (main) {
-    main.style.marginLeft = SIDEBAR_WIDTH;
-    main.style.width = `calc(100% - ${SIDEBAR_WIDTH})`;
-  }
+  /* Geometry and control styles live in the early vero-shell.css. */
 
   /* CURRENT PAGE */
   const path = (
@@ -95,7 +45,7 @@
          href="my-actions.html">
         <span class="ico" data-lucide="list-checks"></span>
         <span>My Actions</span>
-        <span id="vero-my-actions-count" class="vero-actions-count" hidden aria-label="Outstanding actions"></span>
+        <span class="vero-actions-slot"><span id="vero-my-actions-count" class="vero-actions-count" hidden aria-label="Outstanding actions"></span></span>
       </a>
 
       <a class="${isActive('reports.html') ? 'active' : ''}" href="reports.html">
@@ -266,91 +216,6 @@
     document.head.appendChild(script);
   }
 
-  /* DROPDOWN STYLING */
-  const styleId = 'vero-nav-dropdown-style';
-
-  if (!document.getElementById(styleId)) {
-    const style = document.createElement('style');
-    style.id = styleId;
-
-    style.textContent = `
-      #vero-nav .vero-risk-navigation summary { display:flex; align-items:center; gap:11px; padding:9px 12px; font-size:12px; border-left:3px solid transparent; border-radius:7px; cursor:pointer; color:#f7f7f6; }
-      #vero-nav .vero-risk-navigation summary::after {content:'›';margin-left:auto}
-      #vero-nav .vero-risk-navigation[open] summary::after {transform:rotate(90deg)}
-      #vero-nav .vero-risk-navigation[open] summary {background:rgba(255,255,255,.08);border-left-color:#A9C23F}
-      #vero-nav .vero-risk-navigation > a {margin-left:34px!important;font-size:11px!important}
-      #vero-nav .ico { width:20px;min-width:20px;display:inline-flex;align-items:center;justify-content:center; }
-      #vero-nav .ico svg { width:17px;height:17px;display:block;stroke:currentColor; }
-      #vero-nav .vero-actions-count {
-        margin-left:auto;
-        flex:0 0 auto;
-        min-width:22px;
-        height:22px;
-        padding:0 6px;
-        border-radius:999px;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        background:#A9C23F;
-        color:#252321;
-        font:800 11px Montserrat,Verdana,Arial,sans-serif;
-        line-height:1;
-      }
-      #vero-nav .vero-actions-count[hidden] { display:none; }
-      #vero-nav a:has(.vero-actions-count) { min-width:0; }
-      #vero-nav .vero-actions-count { white-space:nowrap; }
-      #vero-nav .vero-nav-parent {
-        display: flex;
-        align-items: center;
-      }
-
-      #vero-nav .vero-nav-parent > a {
-        flex: 1;
-        min-width: 0;
-      }
-
-      #vero-nav .vero-nav-expand {
-        background: transparent;
-        border: 0;
-        color: #f7f7f6;
-        padding: 9px 10px;
-        cursor: pointer;
-        font-size: 17px;
-      }
-
-      #vero-nav .vero-nav-expand span {
-        display: inline-block;
-        transition: transform .2s ease;
-      }
-
-      #vero-nav .vero-nav-group.open
-      .vero-nav-expand span {
-        transform: rotate(90deg);
-      }
-
-      #vero-nav .vero-nav-children {
-        display: none;
-        padding-left: 34px;
-        margin: 2px 0 6px;
-      }
-
-      #vero-nav .vero-nav-group.open
-      .vero-nav-children {
-        display: block;
-      }
-
-      #vero-nav .vero-nav-children a {
-        display: block;
-        padding: 8px 10px;
-        font-size: 10px;
-        line-height: 1.5;
-        white-space: normal;
-      }
-    `;
-
-    document.head.appendChild(style);
-  }
-
   /* DROPDOWN BEHAVIOUR */
   const incidentGroup =
     document.getElementById('incidentNavGroup');
@@ -402,12 +267,6 @@
   window.addEventListener('pageshow', updateMyActionsBadge);
   window.addEventListener('focus', updateMyActionsBadge);
 
-  /* Prevent main navigation labels wrapping */
-  nav.querySelectorAll(
-    '.nav-section > a > span:last-child'
-  ).forEach(label => {
-    label.style.whiteSpace = 'nowrap';
-  });
 })();
 
 

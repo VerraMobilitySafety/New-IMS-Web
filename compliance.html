@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head>
+<head><link rel="stylesheet" href="vero-shell.css">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/png" href="/favicon.png">
@@ -42,7 +42,6 @@ button,input,select,textarea{font-family:inherit}
 }
 
 .sidebar{
- width:260px;
  position:fixed;
  inset:0 auto 0 0;
  background:#252321;
@@ -168,8 +167,6 @@ button,input,select,textarea{font-family:inherit}
 }
 
 .main{
- margin-left:260px;
- width:calc(100% - 260px);
  padding:0 28px 35px;
  min-height:100vh;
 }
@@ -848,10 +845,10 @@ button,input,select,textarea{font-family:inherit}
 }
 
 @media(max-width:720px){
- .sidebar{width:82px;padding:22px 12px}
+ .sidebar{padding:22px 12px}
  .brand img{width:55px;right:auto;left:2px}
  .vero-lockup,.nav a span:not(.ico),.nav-label,.side-foot{display:none}
- .main{margin-left:82px;width:calc(100% - 82px);padding:0 18px 30px}
+ .main{padding:0 18px 30px}
  .global-hero{margin:0 -18px 20px}
  .hero-content{left:25px}
  .hero-content h1{font-size:27px}
@@ -861,7 +858,7 @@ button,input,select,textarea{font-family:inherit}
 }
 </style>
 <link rel="stylesheet" href="nav.css">
-<link rel="stylesheet" href="nav.css">
+
 <link rel="stylesheet" href="header.css">
 <link rel="stylesheet" href="compliance-assessment-risk.css">
 <link rel="stylesheet" href="risk-page-loader.css?v=20261016-rollout">
@@ -869,7 +866,7 @@ button,input,select,textarea{font-family:inherit}
 <script src="risk-nk9-animation.js?v=20261016-rollout"></script>
 <script src="risk-page-loader.js?v=20261016-rollout" data-tasks="account compliance"></script><link rel="stylesheet" href="compliance-contract-register.css?v=20261020-individual-register"></head>
 
-<body data-register-layout="compliance">
+<body class="vr-page" data-register-layout="compliance">
 <div class="app">
 
 <aside class="sidebar">
