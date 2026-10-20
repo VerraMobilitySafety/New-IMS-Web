@@ -31,3 +31,36 @@ test('contract sites retain failed saves, retry safely, edit and display list ro
   await page.getByRole('button',{name:'Events',exact:true}).click();await page.getByRole('link',{name:'Reported event',exact:true}).waitFor();assert.equal(await page.getByRole('link',{name:'+ Report Event',exact:true}).getAttribute('href'),'incident-management.html?view=report&contract_id=4');assert.deepEqual(errors,[]);await page.close();
  }}finally{await browser.close();}
 });
+
+test('administrator site register shows all sites and hides data and navigation from other roles',async()=>{
+ const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
+ try{for(const role of ['Administrator','Viewer']){
+  const page=await browser.newPage({viewport:{width:1500,height:1000}});
+  const sites=[{id:1,site_code:'REF-A',site_name:'Linked site',address:'Example road',status:'Active',source_groups:['NSW Mobile'],contracts:[{id:3,code:'1775M',name:'NSW agreement'}]}, {id:2,site_code:'REF-B',site_name:'Unlinked site',address:'Other road',status:'Active',source_groups:['UK source'],contracts:[]}, {id:3,site_code:'REF-C',site_name:'<img src=x onerror=alert(1)>',address:'',status:'Inactive',source_groups:[],contracts:[]}];
+  await page.addInitScript(()=>localStorage.setItem('vero_session_token','mock-only'));
+  await page.route('**/*',async route=>{
+   const u=new URL(route.request().url());
+   if(u.pathname.endsWith('/auth/me'))return route.fulfill({json:{user:{vero_role:role}}});
+   if(u.pathname.endsWith('/client-services-sites'))return route.fulfill(role==='Administrator'?{json:{sites}}:{status:403,json:{message:'Administrator required'}});
+   if(u.hostname!=='vero.test')return route.abort();
+   const file=path.resolve(root,'.'+u.pathname);if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});let body=fs.readFileSync(file);
+   if(file.endsWith('.html'))body=body.toString().replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace('</body>','<script src="client-services-sites.js"></script><script src="nav.js"></script></body>');
+   return route.fulfill({contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css','.png':'image/png'})[path.extname(file)]||'application/octet-stream',body});
+  });
+  await page.goto('https://vero.test/client-services-sites.html');
+  if(role==='Administrator'){
+   await page.getByRole('cell',{name:'Linked site',exact:true}).waitFor();
+   await page.getByRole('link',{name:'Client Services Site List',exact:true}).waitFor();
+   assert.equal(await page.locator('#siteRows tr').count(),3);assert.equal(await page.locator('#siteRows img').count(),0);
+   await page.getByLabel('Contract',{exact:true}).selectOption('unlinked');assert.equal(await page.locator('#siteRows tr').count(),2);
+   await page.getByLabel('Status',{exact:true}).selectOption('Active');assert.equal(await page.locator('#siteRows tr').count(),1);
+   await page.getByLabel('Search sites',{exact:true}).fill('UK source');assert.equal(await page.getByRole('cell',{name:'Unlinked site',exact:true}).count(),1);
+   assert.equal(await page.getByRole('link',{name:'Report Event',exact:true}).count(),0);
+  }else{
+   await page.getByText('Administrator access is required to view this page.',{exact:true}).waitFor();
+   assert.equal(await page.locator('#siteRegister').isVisible(),false);assert.equal(await page.locator('#siteRows tr').count(),0);assert.equal(await page.getByRole('link',{name:'Client Services Site List',exact:true}).isVisible(),false);
+  }
+  await page.close();
+ }}finally{await browser.close();}
+});
+
