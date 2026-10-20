@@ -41,21 +41,30 @@
    if(!response.ok)throw Error(data.message||'Ask Vero is unavailable right now. Please try again.');
    if(!Array.isArray(data.sources)||typeof data.message!=='string')throw Error('Vero could not read this answer. Please try again.');
    reply.replaceChildren();reply.classList.remove('vero-chat-pending');
-   if(!data.answer?.trim())text('p',data.message,reply);
-   if(typeof data.answer==='string'&&data.answer.trim())text('p',data.answer,reply).className='vero-help-answer';
-   if(data.mode==='search')text('small','Matched Vero guidance · AI routing is currently unavailable.',reply);
+   const sources=data.sources.slice(0,3);
+   const guide=sources.find(source=>safeLink(source.href)&&Array.isArray(source.steps)&&source.steps.length);
+   const hasAnswer=typeof data.answer==='string'&&data.answer.trim();
+   if(hasAnswer)text('p',data.answer,reply).className='vero-help-answer';
+   else if(guide){
+    text('p',guide.summary,reply);
+    const steps=text('ol','',reply);steps.className='vero-chat-steps';
+    guide.steps.slice(0,6).forEach(step=>{if(typeof step==='string')text('li',step,steps);});
+    const link=text('a','Open '+guide.title,reply);link.href=guide.href;link.className='vero-chat-action';
+   }else if(data.mode==='search'&&sources.length){
+    text('p','I couldn’t generate an answer just now. These source passages may help:',reply);
+   }else text('p',data.message,reply);
+   const documentSources=sources.filter(source=>typeof source.excerpt==='string');
    const coverage=data.document_search;
-   if(coverage){
+   if(coverage&&documentSources.length){
     const notes=[];
     if(coverage.state==='Preparing'||coverage.pending>0)notes.push('Some document contents are still being indexed.');
-    if(coverage.unreadable>0)notes.push('Some documents have unreadable pages or need text recognition.');
-    if(coverage.state==='Ready'&&coverage.eligible===0)notes.push('No current documents are enabled for AI search.');
+    if(coverage.unreadable>0)notes.push('Search covers readable document text; some pages may need text recognition.');
     if(notes.length)text('small',notes.join(' '),reply);
    }
-   const sources=data.sources.slice(0,3);
-   const sourceBox=sources.length?text('details','',reply):null;
-   if(sourceBox){sourceBox.className='vero-chat-sources';text('summary','Sources & guidance',sourceBox);}
+   const sourceBox=sources.length&&!guide?text('details','',reply):null;
+   if(sourceBox){sourceBox.className='vero-chat-sources';sourceBox.open=!hasAnswer;text('summary','Sources',sourceBox);}
    for(const source of sources){
+    if(!sourceBox)continue;
     if(!safeLink(source.href)||typeof source.title!=='string'||typeof source.summary!=='string')continue;
     const card=document.createElement('article');card.className='vero-help-card';sourceBox.appendChild(card);
     const heading=text('h4','',card),link=text('a',source.title,heading);link.href=source.href;
