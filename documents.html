@@ -229,7 +229,7 @@
     <div class="document-view-toggle" role="group" aria-label="Document view">
      <button type="button" class="document-view active" data-view="all" onclick="setDocumentView('all',this)">All Documents</button>
      <button type="button" class="document-view" data-view="mine" onclick="setDocumentView('mine',this)">My Documents</button>
-     <button type="button" class="document-view" data-view="review" onclick="setDocumentView('review',this)">Due for Review</button>
+     <button type="button" class="document-view" data-view="review" title="Overdue or due within the next 60 days" onclick="setDocumentView('review',this)">Due for Review</button>
     </div>
 
     <select id="documentTypeFilter" onchange="applyDocumentFilters()" aria-label="Filter by document type">
@@ -238,7 +238,7 @@
    </div>
   </div>
 
-  <table class="table">
+  <table class="table" id="controlledDocumentsTable" style="table-layout:fixed;min-width:880px"><colgroup><col style="width:40%"><col style="width:14%"><col style="width:18%"><col style="width:14%"><col style="width:14%"></colgroup>
    <thead><tr><th scope="col" data-doc-sort="document" aria-sort="none"><button class="doc-sort" type="button" data-doc-sort-button="document">Document <span aria-hidden="true" class="doc-sort-mark">↕</span></button></th><th scope="col" data-doc-sort="version" aria-sort="none"><button class="doc-sort" type="button" data-doc-sort-button="version">Current Version <span aria-hidden="true" class="doc-sort-mark">↕</span></button></th><th scope="col" data-doc-sort="owner" aria-sort="none"><button class="doc-sort" type="button" data-doc-sort-button="owner">Document Owner <span aria-hidden="true" class="doc-sort-mark">↕</span></button></th><th scope="col" data-doc-sort="published" aria-sort="none"><button class="doc-sort" type="button" data-doc-sort-button="published">Published Date <span aria-hidden="true" class="doc-sort-mark">↕</span></button></th><th scope="col" data-doc-sort="review" aria-sort="none"><button class="doc-sort" type="button" data-doc-sort-button="review">Next Review <span aria-hidden="true" class="doc-sort-mark">↕</span></button></th></tr></thead>
    <tbody id="documentsBody">
     <tr><td colspan="5" class="empty">Loading documents from VERO…</td></tr>
@@ -460,6 +460,7 @@ function openDocById(id){
 
  document.getElementById('drawerBack').classList.add('show');
  loadDocumentHistory(d.id);
+ window.VeroDocumentMetadata?.open(d);
 }
 function formatHistoryDate(value){
  if(!value)return '—';
@@ -603,32 +604,47 @@ function setDocumentView(view,button){
  applyDocumentFilters();
 }
 
+function documentOwnerNameKey(value){
+ const parts=String(value||'').trim().toLowerCase().replace(/\s+/g,' ').split(' ');
+ // Legacy registers can use a formal name while the account uses a preferred name.
+ const formalFirstNames={doug:'douglas',dougie:'douglas'};
+ if(parts.length>1)parts[0]=formalFirstNames[parts[0]]||parts[0];
+ return parts.join(' ');
+}
+
 function documentIsMine(doc){
  const user=currentUserForRequest();
-
- if(
-  doc.documentOwnerUserId===null ||
-  doc.documentOwnerUserId===undefined ||
-  user.id===null ||
-  user.id===undefined
- ){
-  return false;
+ const ownerId=Number(doc.documentOwnerUserId),userId=Number(user.id);
+ if(Number.isInteger(ownerId)&&ownerId>0){
+  return Number.isInteger(userId)&&userId>0&&ownerId===userId;
  }
-
- return Number(doc.documentOwnerUserId)===Number(user.id);
+ const ownerEmail=String(doc.documentOwnerEmail||'').trim().toLowerCase();
+ const userEmail=String(user.email||'').trim().toLowerCase();
+ if(ownerEmail)return !!userEmail&&ownerEmail===userEmail;
+ const ownerName=documentOwnerNameKey(doc.documentOwner);
+ if(!ownerName||ownerName==='—')return false;
+ const userNames=[
+  [user.first_name,user.last_name].filter(Boolean).join(' '),
+  user.name,
+  user.display_name
+ ].map(documentOwnerNameKey).filter(Boolean);
+ return userNames.includes(ownerName);
 }
 
 function documentIsDueForReview(doc){
  if(!doc.nextReviewDate)return false;
-
- const review=new Date(doc.nextReviewDate);
+ const raw=String(doc.nextReviewDate),dateOnly=/^(\d{4})-(\d{2})-(\d{2})(?:$|T)/.exec(raw);
+ let review;
+ if(dateOnly){
+  const year=Number(dateOnly[1]),month=Number(dateOnly[2])-1,day=Number(dateOnly[3]);
+  review=new Date(year,month,day);
+  if(review.getFullYear()!==year||review.getMonth()!==month||review.getDate()!==day)return false;
+ }else{
+  review=new Date(raw);
+ }
  if(Number.isNaN(review.getTime()))return false;
-
- const now=new Date();
- const dueWindow=new Date(now);
- dueWindow.setDate(dueWindow.getDate()+60);
-
- return review<=dueWindow;
+ const now=new Date(),dueWindow=new Date(now.getFullYear(),now.getMonth(),now.getDate()+61);
+ return review<dueWindow;
 }
 
 function applyDocumentFilters(){
@@ -1113,7 +1129,7 @@ document.addEventListener('DOMContentLoaded',()=>{loadDocuments().finally(()=>wi
  function render(u){avatar.textContent=initials(u);name.textContent=fullName(u);full.textContent=fullName(u);email.textContent=u?.email||'';admin.style.display=u?.vero_role==='Administrator'?'flex':'none';}
  async function load(){
   const t=localStorage.getItem(TOKEN); if(!t){location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));return;}
-  try{const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t,Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('auth');const d=await r.json();const u=d.user||d;localStorage.setItem(USER,JSON.stringify(u));render(u);}
+  try{const r=await fetch(API+'/auth/me',{headers:{Authorization:'Bearer '+t,Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error('auth');const d=await r.json();const u=d.user||d;localStorage.setItem(USER,JSON.stringify(u));render(u);applyDocumentFilters();}
   catch(e){localStorage.removeItem(TOKEN);localStorage.removeItem(USER);location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html'));}
  }
  trigger.addEventListener('click',e=>{e.stopPropagation();const open=account.classList.toggle('open');trigger.setAttribute('aria-expanded',String(open));});
@@ -1141,6 +1157,7 @@ document.addEventListener('DOMContentLoaded',()=>{loadDocuments().finally(()=>wi
 <script src="approved-document-import.js?v=20261016-dates"></script>
 <link rel="stylesheet" href="documents-table.css?v=20261016">
 <script src="documents-table.js?v=20261016-sort-only"></script>
+<script src="document-metadata-editor.js?v=20261020"></script>
 </body></html>
 
 <style id="document-library-ui">
@@ -1150,7 +1167,9 @@ document.addEventListener('DOMContentLoaded',()=>{loadDocuments().finally(()=>wi
 
 .document-library{
   width:100%;
+  overflow-x:auto;
 }
+#controlledDocumentsTable th,#controlledDocumentsTable td{overflow-wrap:anywhere;}
 
 .document-toolbar{
   display:flex;
