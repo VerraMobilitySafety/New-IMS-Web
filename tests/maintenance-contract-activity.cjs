@@ -64,3 +64,33 @@ test('administrator site register shows all sites and hides data and navigation 
  }}finally{await browser.close();}
 });
 
+
+test('administrator adds and edits shared sites with contract linking and retained failed saves',async()=>{
+ const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
+ try{for(const width of [1500,390]){
+  const page=await browser.newPage({viewport:{width,height:1000}}),posts=[],sites=[],contracts=[{id:3,code:'1775M',name:'NSW agreement'},{id:4,code:'OTHER',name:'Second agreement'}];let fail=true;
+  await page.addInitScript(()=>localStorage.setItem('vero_session_token','mock-only'));
+  await page.route('**/*',async route=>{
+   const request=route.request(),u=new URL(request.url());
+   if(u.pathname.endsWith('/auth/me'))return route.fulfill({json:{user:{vero_role:'Administrator'}}});
+   if(/\/client-services-sites(?:\/\d+)?$/.test(u.pathname)){
+    if(request.method()==='GET')return route.fulfill({json:{sites,contracts,users:[],can_manage:true}});
+    const data=request.postDataJSON();posts.push(data);if(fail)return route.fulfill({status:503,json:{message:'Temporary save failure'}});
+    const links=sites[0]?.contracts||[];if(data.contract_id&&!links.some(c=>c.id===data.contract_id))links.push(contracts.find(c=>c.id===data.contract_id));
+    const site={...data,id:21,contracts:links,source_groups:[],version:(sites[0]?.version||0)+1};sites[0]=site;return route.fulfill({json:{site}});
+   }
+   if(u.hostname!=='vero.test')return route.abort();const file=path.resolve(root,'.'+u.pathname);if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});let body=fs.readFileSync(file);
+   if(file.endsWith('.html'))body=body.toString().replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace('</body>','<script src="client-services-sites.js"></script><script>loadSites()</script><script src="nav.js"></script></body>');
+   return route.fulfill({contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css','.png':'image/png'})[path.extname(file)]||'application/octet-stream',body});
+  });
+  await page.goto('https://vero.test/client-services-sites.html');await page.getByRole('button',{name:'+ Add Site',exact:true}).click();
+  const dialog=page.locator('#globalSiteDialog');await dialog.getByLabel('Site reference',{exact:true}).fill('NEW-SITE');await dialog.getByLabel('Site name',{exact:true}).fill('New shared site');await dialog.getByLabel('Address',{exact:true}).fill('Example address');await dialog.getByLabel('Link to contract',{exact:true}).selectOption('3');
+  await dialog.getByRole('button',{name:'Add Site',exact:true}).click();await dialog.getByRole('alert').filter({hasText:'Temporary save failure'}).waitFor();assert.equal(await dialog.getByLabel('Site name',{exact:true}).inputValue(),'New shared site');fail=false;
+  await dialog.getByRole('button',{name:'Add Site',exact:true}).click();await page.getByRole('button',{name:'Edit site NEW-SITE',exact:true}).waitFor();assert.equal(posts[0].request_id,posts[1].request_id);assert.equal(posts[1].contract_id,3);
+  await page.getByRole('button',{name:'Edit site NEW-SITE',exact:true}).click();await dialog.getByText('1775M · NSW agreement',{exact:false}).waitFor();await dialog.getByLabel('Site name',{exact:true}).fill('Updated shared site');await dialog.getByLabel('Site status',{exact:true}).selectOption('Inactive');await dialog.getByLabel('Link to contract',{exact:true}).selectOption('4');
+  assert.equal(await dialog.evaluate(el=>el.getBoundingClientRect().width<=innerWidth),true);
+  await dialog.getByRole('button',{name:'Save Changes',exact:true}).click();await page.getByRole('cell',{name:'Updated shared site',exact:true}).waitFor();assert.equal(posts[2].version,1);assert.equal(posts[2].contract_id,4);assert.equal(sites[0].contracts.length,2);assert.equal(await page.getByRole('link',{name:'Report Event',exact:true}).count(),0);
+  await page.close();
+ }}finally{await browser.close();}
+});
+
