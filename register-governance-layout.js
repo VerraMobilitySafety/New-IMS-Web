@@ -85,10 +85,11 @@
     if(period){
      const note=period.querySelector('p');
      if(note){add(note,'vr-register-note');bar.after(note)}
-     filters.append(period);
+     add(period,'incident-time-filters');bar.append(period);
     }
     const monthly=dashboard.querySelector('.monthly-filters');
     if(monthly){filters.append(...monthly.children);monthly.remove()}
+    dashboard.querySelector('.monthly-heading')?.remove();
    }
   }
   new MutationObserver(render).observe(content,{childList:true});render();
