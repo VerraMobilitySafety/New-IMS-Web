@@ -867,7 +867,7 @@ button,input,select,textarea{font-family:inherit}
 <link rel="stylesheet" href="risk-page-loader.css?v=20261016-rollout">
 <link rel="stylesheet" href="risk-nk9-animation.css?v=20261016-rollout">
 <script src="risk-nk9-animation.js?v=20261016-rollout"></script>
-<script src="risk-page-loader.js?v=20261016-rollout" data-tasks="account compliance"></script><link rel="stylesheet" href="compliance-contract-register.css?v=20261020-types"></head>
+<script src="risk-page-loader.js?v=20261016-rollout" data-tasks="account compliance"></script><link rel="stylesheet" href="compliance-contract-register.css?v=20261020-count-summary"></head>
 
 <body>
 <div class="app">
@@ -1050,7 +1050,7 @@ button,input,select,textarea{font-family:inherit}
  </div>
 
  <input id="typeFilter" type="hidden" value="">
- <p id="registerCount" role="status" aria-live="polite">Loading requirements…</p>
+ <p id="registerCount" class="compliance-register-summary" role="status" aria-live="polite">Loading requirements…</p>
 
  <div class="table-wrap">
 
@@ -3115,7 +3115,7 @@ function filterRegister(){
  const registerCount=document.getElementById('registerCount');
  if(registerCount){
   registerCount.textContent=
-   count+' obligation'+(count===1?'':'s');
+   'Showing '+count+' common requirement'+(count===1?'':'s');
  }
 }
 
@@ -3769,15 +3769,6 @@ function renderComplianceRegister(items){
 
   body.appendChild(tr);
  });
-
- const registerCount=document.getElementById('registerCount');
-
- if(registerCount){
-  registerCount.textContent=
-   items.length+
-   ' obligation'+
-   (items.length===1?'':'s');
- }
 
  updateComplianceCounts(items);
  filterRegister();

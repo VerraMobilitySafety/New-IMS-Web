@@ -35,11 +35,11 @@ for(const width of [1500,390]) test(`Common requirements search lifecycle at ${w
   await page.locator('#applicabilityFilter').selectOption('');assert.equal(await visible(),1);
   // A counter supplied by another layout must still update, and must not be cached.
   await page.evaluate(()=>{const node=document.createElement('span');node.id='registerCount';document.body.append(node);filterRegister();});
-  assert.equal(await page.locator('#registerCount').textContent(),'1 obligation');
-  await search.fill('');assert.equal(await page.locator('#registerCount').textContent(),'2 obligations');
+  assert.equal(await page.locator('#registerCount').textContent(),'Showing 1 common requirement');
+  await search.fill('');assert.equal(await page.locator('#registerCount').textContent(),'Showing 2 common requirements');
   await page.evaluate(()=>{const old=document.getElementById('registerCount');const next=old.cloneNode(false);old.replaceWith(next);window.oldCounter=old;});
-  await search.fill('missing');assert.equal(await page.locator('#registerCount').textContent(),'0 obligations');
-  assert.equal(await page.evaluate(()=>oldCounter.textContent),'2 obligations');
+  await search.fill('missing');assert.equal(await page.locator('#registerCount').textContent(),'Showing 0 common requirements');
+  assert.equal(await page.evaluate(()=>oldCounter.textContent),'Showing 2 common requirements');
   await page.locator('#registerCount').evaluate(node=>node.remove());
   await search.fill('Another');assert.equal(await visible(),1);
   await page.addScriptTag({content:'const COMPLIANCE_API="https://example.invalid/api";function complianceAuthHeaders(){return {}}'});
