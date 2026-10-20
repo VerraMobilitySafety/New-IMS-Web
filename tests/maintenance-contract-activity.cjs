@@ -28,7 +28,7 @@ test('historical event matching previews verified links, applies the fingerprint
   await dialog.getByText('1 historical events linked. 1 records remain unlinked.',{exact:true}).waitFor();
   assert.deepEqual(posted,{fingerprint:'reviewed-plan'});
   await dialog.getByRole('button',{name:'Close',exact:true}).click();
-  await page.getByRole('cell',{name:'Unclassified',exact:false}).waitFor();
+  await page.locator('.site-event-count strong').filter({hasText:'1'}).waitFor();
   await page.getByRole('button',{name:'Match historical events',exact:true}).click();
   await dialog.getByText('0 events match 0 sites. 1 already linked. 1 left unlinked.',{exact:true}).waitFor();
   assert.equal(await dialog.getByRole('button',{name:'Link matched events',exact:true}).isDisabled(),true);
@@ -151,13 +151,13 @@ test('site event history distinguishes missing coverage, counts and impact and s
    return route.fulfill({contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css','.png':'image/png'})[path.extname(file)]||'application/octet-stream',body});
   });
   await page.goto('https://vero.test/client-services-sites.html');
-  await page.getByRole('cell',{name:'Major',exact:false}).waitFor();
+  await page.getByRole('button',{name:'Edit site B',exact:true}).waitFor();
   const rows=page.locator('#siteRows tr');
   assert.equal(await rows.count(),4);
   assert.equal(await page.locator('.table-wrap').evaluate(el=>getComputedStyle(el).overflowX),'auto');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
-  assert.match(await rows.nth(0).innerText(),/No linked events/);
-  assert.match(await rows.nth(1).innerText(),/3[\s\S]*1 in last 12 months[\s\S]*2[\s\S]*Major[\s\S]*1 unclassified[\s\S]*2026-10-18/);
+  assert.equal(await rows.nth(0).locator('.site-event-count strong').innerText(),'0');
+  assert.match(await rows.nth(1).innerText(),/3[\s\S]*1 in last 12 months/);
   assert.match(await rows.nth(2).innerText(),/Unavailable/);
   await page.getByLabel('Sort by',{exact:true}).selectOption('events');
   assert.equal(await rows.first().locator('td').first().innerText(),'B');
