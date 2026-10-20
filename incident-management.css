@@ -73,4 +73,4 @@ th{background:#f8f7f6;color:#706660;font-size:10px;font-weight:800;text-transfor
 
 .monthly-tooltip{position:fixed;z-index:1000;width:220px;padding:14px 16px;border-radius:8px;background:#3d3935;color:#fff;box-shadow:0 8px 26px #0003;border-top:3px solid #A9C23F;pointer-events:none;font:12px/1.6 Montserrat,Arial,sans-serif}.monthly-tooltip[hidden]{display:none!important}.monthly-tooltip>strong{display:block;font-size:13px;margin-bottom:7px}.tooltip-total,.tooltip-count{display:flex;align-items:center;gap:7px;padding:3px 0}.tooltip-total{border-bottom:1px solid #ffffff30;margin-bottom:4px;padding-bottom:7px}.tooltip-total b,.tooltip-count b{margin-left:auto}.tooltip-count i{width:9px;height:9px;border-radius:2px;display:inline-block}
 
-.current-month-notice{background:#faf7e9;padding:12px 16px;margin:0 0 18px;border-radius:5px}.month-validation-label{display:block;font-size:9px;line-height:1.4;color:#77631c;margin-top:3px;letter-spacing:0;text-transform:none}.tooltip-validation{display:block;color:#eee3b0;margin-bottom:8px}
+.tooltip-validation{display:block;color:#eee3b0;margin-bottom:8px}
