@@ -20,8 +20,7 @@ async function request(path,options={}){
 async function load(){
  try{
   const data=await request('/maintenance-contracts');contracts=data.contracts||[];canEditContractOwner=data.can_edit_owner===true;render();
-  document.getElementById('count').textContent=contracts.length+' customer contracts';
- }catch(e){document.getElementById('count').textContent=e.message;document.getElementById('rows').innerHTML='<tr><td colspan="8">'+esc(e.message)+'</td></tr>';}
+ }catch(e){document.getElementById('rows').innerHTML='<tr><td colspan="8">'+esc(e.message)+'</td></tr>';}
 }
 function filterMaintenance(value,button){maintenanceFilter=value;document.querySelectorAll('.lifecycle-card').forEach(x=>x.classList.remove('active'));button.classList.add('active');render();}
 function render(){
