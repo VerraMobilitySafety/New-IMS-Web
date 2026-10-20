@@ -1,78 +1,63 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 let chromium;try{({chromium}=require('playwright'));}catch(e){if(process.platform!=='win32')throw e;({chromium}=require('C:/Users/dbleasel/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));}
 const root=path.resolve(__dirname,'..'),html=fs.readFileSync(path.join(root,'compliance.html'),'utf8');
-const functions=['filterRegister','setComplianceType','setType','renderComplianceRegister','updateComplianceCounts'].map(name=>html.match(new RegExp('function '+name+'\\([^]*?\\n\\}'))?.[0]||(()=>{throw Error('Missing '+name)})()).join('\n');
-const items=[
- {id:1,compliance_type:'Regulatory',obligation_title:'WorkSafe incident notification',applicability:{type:'Jurisdiction'},current_assessment:{status:'Not Assessed'}},
- {id:2,compliance_type:'Internal',obligation_title:'Internal event reporting',applicability:{type:'Organisation'},current_assessment:{status:'Compliant'}},
- {id:3,compliance_type:'Client',obligation_title:'Monthly customer performance report',applicability:{type:'Project'},current_assessment:{status:'Compliant'}}
-];
-const clientActivities=Array.from({length:360},(_,i)=>({contract_id:1,obligation_id:3,obligation_code:'CM-07',common_requirement:'Customer reporting',assessment_status:'Not assessed',activity:{instance_id:'CO-'+i,verra_action:'Separate client duty '+i,timing_or_trigger:'Monthly',clause_reference:'Clause '+i,pdf_pages:[1]}}));
-for(const width of [1440,390])test(`Always-visible requirement types and contract navigation at ${width}px`,async()=>{
+const functions=['filterRegister','setComplianceType','setType','renderComplianceRegister','updateComplianceCounts'].map(name=>html.match(new RegExp('function '+name+'\\([^]*?\\n\\}'))[0]).join('\n');
+const common=[{id:1,obligation_code:'COM-CLIENT-CONTRACT-01',compliance_type:'Client',obligation_title:'Grouped reporting parent',current_assessment:{status:'Not Assessed'}},{id:2,compliance_type:'Regulatory',obligation_title:'Regulatory notification',applicability:{type:'Jurisdiction'},current_assessment:{status:'Not Assessed'}},{id:3,compliance_type:'Internal',obligation_title:'Internal event reporting',applicability:{type:'Organisation'},current_assessment:{status:'Not Assessed'}}];
+const contracts=[{id:10,code:'1795C',name:'Contract A'},{id:20,code:'1923C',name:'Contract B'},{id:30,code:'EMPTY',name:'Empty contract'}];
+const requirements=Array.from({length:360},(_,i)=>({contract_id:i<210?10:20,obligation_id:1,common_requirement:'Grouped reporting parent',assessment_status:'Not assessed',activity:{instance_id:'CO-'+i,verra_action:'Separate client duty '+i,timing_or_trigger:'Monthly',conditions_and_exceptions:'Only where contract applies',clause_reference:'Clause '+i,pdf_pages:[2]}}));
+async function setup(width,fail=false){
  const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
- try{
-  const page=await browser.newPage({viewport:{width,height:1100}}),errors=[];
-  page.on('pageerror',e=>errors.push(e.message));
-  await page.setContent(html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,''));
-  await page.addStyleTag({path:path.join(root,'compliance-contract-register.css')});
-  await page.addScriptTag({content:'var obligationsLive={};const COMPLIANCE_API="https://example.invalid/api";function complianceAuthHeaders(){return {}};function compliancePill(x){return x}function assessmentPill(x){return x||"Not Assessed"}function formatComplianceDate(){return "—"}window.openLiveObligation=()=>{};window.fetch=async()=>({ok:true,status:200,json:async()=>({contracts:[{id:1,code:"1795C",name:"Customer contract"}],requirements:'+JSON.stringify(clientActivities)+'})});'+functions});
-  await page.addScriptTag({path:path.join(root,'compliance-contract-register.js')});
-  const nav=page.locator('.compliance-type-panel'),common=page.locator('#complianceSearch').locator('xpath=ancestor::section[1]');
-  assert.equal(await common.isVisible(),true);
-  assert.equal(await nav.isVisible(),true);
-  await page.locator('.compliance-view[data-type="Regulatory"]').click();
-  // A refresh arriving after the selection must respect it.
-  await page.evaluate(data=>renderComplianceRegister(data),items);
-  assert.equal(await page.locator('#registerBody tr[data-type]:visible').count(),1);
-  assert.match(await page.locator('#registerBody').innerText(),/WorkSafe/);
-  assert.equal(await page.locator('.contract-register-views').isVisible(),false);
-  for(const type of ['Internal','']){
-   await page.locator('.compliance-view[data-type="'+type+'"]').click();
-   assert.equal(await page.locator('#registerBody tr[data-type]:visible').count(),type?1:3);
-   assert.equal(await page.locator('.compliance-view[aria-pressed="true"]').count(),1);
-  }
-  await page.locator('.compliance-view[data-type="Client"]').click();
-  assert.equal(await common.isVisible(),false);
+ const page=await browser.newPage({viewport:{width,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.setContent(html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,''));await page.addStyleTag({path:path.join(root,'compliance-contract-register.css')});
+ await page.addScriptTag({content:'var obligationsLive={};const COMPLIANCE_API="https://example.invalid/api";function complianceAuthHeaders(){return {}};function compliancePill(x){return x}function assessmentPill(x){return x||"Not Assessed"}function formatComplianceDate(){return "—"}window.openLiveObligation=async id=>{window.opened=id;document.getElementById("obligationModal").classList.add("show")};window.failContracts='+fail+';window.fetch=async()=>({ok:!window.failContracts,status:window.failContracts?503:200,json:async()=>('+JSON.stringify({contracts,requirements})+')});'+functions});
+ await page.addScriptTag({path:path.join(root,'compliance-contract-register.js')});await page.evaluate(items=>renderComplianceRegister(items),common);
+ return {browser,page,errors};
+}
+for(const width of [1440,390])test(`Individual All/type views and one shared assessment at ${width}px`,async()=>{
+ const {browser,page,errors}=await setup(width);try{
+  const count=()=>page.locator('#contractRequirementCount').innerText();
+  assert.match(await count(),/^362 requirements/);
+  assert.equal(await page.locator('.compliance-view[data-type=""] span').innerText(),'362');
+  assert.equal(await page.locator('#registerBody').isVisible(),false);
+  assert.equal(await page.locator('#commonRequirementView').count(),0);
   assert.equal(await page.locator('#contractRequirementRows tr[data-requirement]').count(),50);
-  assert.match(await page.locator('#contractRequirementCount').textContent(),/^360 contract-specific requirements/);
-  assert.equal(await page.locator('.compliance-view[data-type="Client"] span').textContent(),'360');
-  assert.equal(await page.locator('.contract-register-views').isVisible(),false);
-  await page.locator('#contractRequirementNext').click();
-  assert.match(await page.locator('#contractRequirementRows').textContent(),/Separate client duty 50/);
-  await page.locator('#contractRequirementSearch').fill('Clause 250');
-  assert.equal(await page.locator('#contractRequirementRows tr[data-requirement]').count(),1);
-  await page.locator('#contractRequirementSearch').fill('');
-  await page.evaluate(data=>renderComplianceRegister(data),items);
-  assert.equal(await page.locator('.compliance-view[data-type="Client"] span').textContent(),'360');
-  await page.locator('.compliance-view[data-type=""]').click();
-  await page.locator('#contractRequirementView').click();
-  assert.equal(await common.isVisible(),false);assert.equal(await nav.isVisible(),true);
-  await page.locator('.compliance-view[data-type="Internal"]').click();
-  assert.equal(await common.isVisible(),true);assert.equal(await page.locator('#contractRequirementRegister').isVisible(),false);
-  await page.locator('#complianceSearch').fill('WorkSafe');
-  assert.equal(await page.locator('#registerBody tr[data-type]:visible').count(),0);
-  assert.equal(await page.locator('#complianceFilterEmpty').count(),1);
-  assert.equal(await page.locator('#registerCount').textContent(),'Showing 0 common requirements');
-  await page.locator('.compliance-view[data-type="Regulatory"]').click();
-  assert.equal(await page.locator('#registerBody tr[data-type]:visible').count(),1);
-  assert.equal(await page.locator('#complianceFilterEmpty').count(),0);
-  await page.locator('#complianceSearch').fill('');
-  await page.locator('#statusFilter').selectOption('Compliant');
-  assert.equal(await page.locator('#registerBody tr[data-type]:visible').count(),0);
-  await page.locator('#statusFilter').selectOption('');
-  await page.locator('#applicabilityFilter').selectOption('Organisation');
-  assert.equal(await page.locator('#registerBody tr[data-type]:visible').count(),0);
-  await page.locator('#applicabilityFilter').selectOption('');
-  await page.evaluate(()=>setType('Client'));
-  assert.equal(await page.locator('.compliance-view[data-type="Client"]').getAttribute('aria-pressed'),'true');
-  assert.equal(await common.isVisible(),false);
-  assert.equal(await page.locator('#contractRequirementRegister').isVisible(),true);
-  for(const button of await nav.locator('button').all()){
-   const box=await button.boundingBox();assert.ok(box&&box.x>=0&&box.x+box.width<=width+1,'Type button overflows viewport');
-  }
-  const preview=path.resolve(root,'../../outputs/compliance-type-filter');fs.mkdirSync(preview,{recursive:true});
-  await page.locator('.compliance-view[data-type=""]').click();
-  await page.screenshot({path:path.join(preview,`compliance-types-${width}.png`),fullPage:false});
+  assert.equal(await page.locator('#contractRequirementRows .contract-requirement-open', {hasText:'Grouped reporting parent'}).count(),0);
+  await page.locator('.compliance-view[data-type="Regulatory"]').click();assert.match(await count(),/^1 requirement/);assert.match(await page.locator('#contractRequirementRows').innerText(),/Regulatory notification/);
+  await page.locator('.compliance-view[data-type="Internal"]').click();assert.match(await count(),/^1 requirement/);
+  await page.locator('.compliance-view[data-type="Client"]').click();assert.match(await count(),/^360 requirements/);
+  await page.locator('#contractRequirementNext').click();assert.match(await page.locator('#contractRequirementRows').innerText(),/Separate client duty 50/);
+  await page.locator('#contractRequirementFilter').selectOption('20');assert.match(await count(),/^150 requirements/);
+  await page.locator('#contractRequirementSearch').fill('Clause 250');assert.equal(await page.locator('#contractRequirementRows tr[data-requirement]').count(),1);
+  await page.locator('#contractRequirementRows summary').click();await page.getByRole('button',{name:'Review shared assessment',exact:true}).click();
+  assert.equal(await page.evaluate(()=>window.opened),1);assert.match(await page.locator('#sharedRequirementNotice').innerText(),/360 individual requirements/);
+  await page.locator('#obligationModal').evaluate(el=>el.classList.remove('show'));
+  // The existing parent assessment is the single result used by all 360 individual rows.
+  await page.evaluate(items=>renderComplianceRegister(items),common.map(r=>r.id===1?{...r,current_assessment:{status:'Compliant'}}:r));
+  await page.locator('#contractRequirementSearch').fill('');await page.locator('#contractRequirementFilter').selectOption('');
+  await page.locator('#requirementStatusFilter').selectOption('Compliant');assert.match(await count(),/^360 requirements/);
+  await page.locator('#requirementStatusFilter').selectOption('Not Assessed');assert.match(await count(),/^0 requirements/);
+  await page.locator('#requirementStatusFilter').selectOption('');await page.locator('.compliance-view[data-type=""]').click();assert.match(await count(),/^362 requirements/);
+  await page.locator('#contractRequirementFilter').selectOption('30');assert.match(await count(),/^0 requirements/);
+  await page.locator('#contractRequirementFilter').selectOption('');
+  await page.locator('#requirementApplicabilityFilter').selectOption('Organisation');assert.match(await count(),/^1 requirement/);
+  await page.locator('#requirementApplicabilityFilter').selectOption('');
+  await page.evaluate(()=>window.setComplianceRegisterError('Assessment data unavailable'));
+  assert.match(await count(),/totals are incomplete/);
+  assert.equal(await page.locator('.compliance-view[data-type=""] span').innerText(),'—');
+  await page.evaluate(items=>renderComplianceRegister(items),common);
+  assert.match(await count(),/^362 requirements/);
+  const out=path.resolve(root,'../../outputs/compliance-type-filter');fs.mkdirSync(out,{recursive:true});await page.screenshot({path:path.join(out,`individual-all-${width}.png`)});
   assert.deepEqual(errors,[]);
  }finally{await browser.close()}
+});
+test('Contract load failure is explicit and retry restores individual totals',async()=>{
+ const {browser,page}=await setup(1440,true);try{
+  await page.locator('#contractRequirementRetry').waitFor({state:'visible'});assert.equal(await page.locator('#contractRequirementRows .contract-requirement-open',{hasText:'Grouped reporting parent'}).count(),0);
+  await page.evaluate(()=>window.failContracts=false);await page.locator('#contractRequirementRetry').click();await page.getByText('362 requirements · showing 1–50',{exact:true}).waitFor();
+ }finally{await browser.close()}
+});
+test('IMS maintenance controls are not appended to the page toolbar',()=>{
+ const source=fs.readFileSync(path.join(root,'ims-requirements-import.js'),'utf8');
+ for(const name of ['button','reviewButton','exportButton','draftButton'])assert.ok(!source.includes("document.querySelector('.actions')?.append("+name+")"));
+ assert.ok(source.includes("has('ims_draft')"),'Existing draft deep links remain supported');
 });
