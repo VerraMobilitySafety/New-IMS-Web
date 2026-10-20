@@ -5,7 +5,7 @@ const root=path.join(__dirname,'..');
 test('administrators edit contract owners only in the workspace with retained failed saves',async()=>{
  const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
  try{for(const width of [1500,390]){
-  const page=await browser.newPage({viewport:{width,height:950}}),posts=[];let fail=true,admin=true;
+  const page=await browser.newPage({viewport:{width,height:950}}),posts=[];let fail=true,statusFail=true,admin=true;
   page.setDefaultTimeout(12000);
   const c={id:4,contract_code:'TEST-M',contract_name:'Test agreement',customer_name:'Customer',status:'Draft',requirement_count:0,source_count:0,owner_user_id:null,owner_version:0};
   await page.addInitScript(()=>localStorage.setItem('vero_session_token','mock-only'));
@@ -14,6 +14,11 @@ test('administrators edit contract owners only in the workspace with retained fa
    if(u.pathname.endsWith('/maintenance-contracts'))return route.fulfill({json:{contracts:[c],can_edit_owner:admin}});
    if(u.pathname.endsWith('/import-options'))return route.fulfill({json:{can_import:false,units:[]}});
    if(u.pathname.endsWith('/details'))return route.fulfill({json:{sources:[],requirements:[]}});
+   if(u.pathname.endsWith('/status')){
+    if(req.method()==='GET')return route.fulfill({json:{statuses:['Draft','Active','Inactive','Expired'],status:c.status,status_version:c.status_version||0}});
+    const data=req.postDataJSON();if(statusFail)return route.fulfill({status:503,json:{message:'Temporary status failure'}});
+    c.status=data.status;c.status_version=(c.status_version||0)+1;return route.fulfill({json:{status:c.status,status_version:c.status_version}});
+   }
    if(u.pathname.endsWith('/owner')){
     if(req.method()==='GET')return route.fulfill({json:{users:[{id:2,name:'Selected Owner',email:'owner@example.test'}],owner_user_id:c.owner_user_id,owner_version:c.owner_version}});
     const data=req.postDataJSON();posts.push(data);
@@ -54,8 +59,22 @@ test('administrators edit contract owners only in the workspace with retained fa
   await page.goto('https://vero.test/maintenance-management.html');await page.getByRole('link',{name:'Test agreement',exact:true}).waitFor();
   await page.getByRole('cell',{name:'Selected Owner',exact:true}).waitFor();
   assert.equal(await page.locator('[data-owner-edit]').count(),0);
+  await page.getByRole('link',{name:'Test agreement',exact:true}).click();
+  await page.getByRole('button',{name:'Edit status',exact:true}).click();
+  const statusDialog=page.locator('#contractStatusDialog');
+  await statusDialog.getByLabel('Contract status',{exact:true}).selectOption('Active');
+  await statusDialog.getByRole('button',{name:'Save status',exact:true}).click();
+  await statusDialog.getByRole('alert').filter({hasText:'Temporary status failure'}).waitFor();
+  assert.equal(await statusDialog.getByLabel('Contract status',{exact:true}).inputValue(),'Active');
+  statusFail=false;await statusDialog.getByRole('button',{name:'Save status',exact:true}).click();
+  await page.locator('#contractSummary').getByText('Active',{exact:true}).waitFor();
+  await page.reload();await page.locator('#contractSummary').getByText('Active',{exact:true}).waitFor();
+  await page.goto('https://vero.test/maintenance-management.html');await page.getByRole('link',{name:'Test agreement',exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Edit status',exact:true}).count(),0);
+  await page.getByRole('cell',{name:'Active',exact:true}).waitFor();
   admin=false;await page.goto('https://vero.test/maintenance-workspace.html?id=4');await page.locator('#contractSummary').getByText('Selected Owner',{exact:true}).waitFor();
   assert.equal(await page.getByRole('button',{name:'Edit owner',exact:true}).count(),0);
+  assert.equal(await page.getByRole('button',{name:'Edit status',exact:true}).count(),0);
   await page.close();
  }}finally{await browser.close();}
 });
