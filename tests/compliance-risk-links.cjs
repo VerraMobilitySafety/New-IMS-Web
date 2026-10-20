@@ -40,6 +40,7 @@ for(const width of [1500,390])test(`Risk Links isolated editor lifecycle at ${wi
   await open();await checks.first().waitFor().catch(async e=>{throw Error(e.message+" UI: "+await page.locator("#complianceRiskLinksModal").innerText()+" errors: "+JSON.stringify(errors))});assert.equal(await checks.first().isChecked(),true);
   assert.match(await page.locator('#riskLinksFields').innerText(),/Compliance . Tier 2/);
   assert.match(await page.locator('#complianceRiskLinksModal').innerText(),/Clearing all links is not supported/);
+  assert.match(await page.locator('#complianceRiskLinksModal').innerText(),/Saving an unchanged selection records a new audit revision/);
   const bounds=await page.locator('#complianceRiskLinksModal .drawer').boundingBox();assert.ok(bounds.x>=-1&&bounds.x+bounds.width<=width+1);
   await save.click();assert.match(await page.locator('#riskLinksMessage').innerText(),/Enter a reason/);assert.equal(writes.length,0);
   await reason.fill('Correct parent link');await checks.first().uncheck();await save.click();assert.match(await page.locator('#riskLinksMessage').innerText(),/at least one/);assert.equal(writes.length,0);

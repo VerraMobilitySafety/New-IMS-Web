@@ -4,7 +4,7 @@
  modal.innerHTML=`<div class="drawer compliance-requirement-drawer" role="dialog" aria-modal="true" aria-labelledby="riskLinksHeading">
   <div class="drawer-head"><div><p>COMPLIANCE REQUIREMENT</p><h2 id="riskLinksHeading">Edit Risk Links</h2></div><button class="btn outline" id="riskLinksClose" aria-label="Close Risk Links">Close</button></div>
   <div class="drawer-body"><p id="riskLinksRequirement"></p><p>Save parent areas without creating a formal assessment. Status, owner, review dates and assessment history stay unchanged.</p>
-   <section id="riskLinksFields"></section><p>Select at least one parent area. Clearing all links is not supported.</p>
+   <section id="riskLinksFields"></section><p>Select at least one parent area. Clearing all links is not supported. Saving an unchanged selection records a new audit revision to reaffirm the links.</p>
    <div class="field"><label for="riskLinksReason">Reason for change</label><textarea id="riskLinksReason" maxlength="2000" rows="3"></textarea></div>
    <p id="riskLinksMessage" role="status" aria-live="polite"></p>
   </div><div class="drawer-actions"><button class="btn outline" id="riskLinksReload">Reload saved links</button><button class="btn green" id="riskLinksSave" disabled>Save Risk Links</button></div></div>`;
