@@ -22,6 +22,7 @@
 .compliance-type-panel .compliance-view span{margin:0;font-size:11px}
 .compliance-type-panel .compliance-view:focus-visible{outline:2px solid #6b8325;outline-offset:3px}
 .contract-register-views[hidden]{display:none!important}
+.compliance-register-summary{margin:0;padding:12px 20px;color:#726b64;font:500 12px/1.5 Montserrat,Verdana,Arial,sans-serif;border-bottom:1px solid #e5e1de}
 @media(max-width:600px){.compliance-type-panel .compliance-view-toggle{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.compliance-type-panel .compliance-view{min-width:0;width:100%;margin:0}.compliance-type-panel{padding:16px}}
 
 /* Consistent typography and spacing in the requirement detail drawer. */

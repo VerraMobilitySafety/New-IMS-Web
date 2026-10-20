@@ -52,7 +52,7 @@ for(const width of [1440,390])test(`Always-visible requirement types and contrac
   await page.locator('#complianceSearch').fill('WorkSafe');
   assert.equal(await page.locator('#registerBody tr[data-type]:visible').count(),0);
   assert.equal(await page.locator('#complianceFilterEmpty').count(),1);
-  assert.equal(await page.locator('#registerCount').textContent(),'0 obligations');
+  assert.equal(await page.locator('#registerCount').textContent(),'Showing 0 common requirements');
   await page.locator('.compliance-view[data-type="Regulatory"]').click();
   assert.equal(await page.locator('#registerBody tr[data-type]:visible').count(),1);
   assert.equal(await page.locator('#complianceFilterEmpty').count(),0);
