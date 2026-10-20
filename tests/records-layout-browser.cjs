@@ -2,12 +2,12 @@ const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:
 const root=path.resolve(__dirname,'..'),out=path.resolve(root,'../preview');fs.mkdirSync(out,{recursive:true});
 (async()=>{const browser=await chromium.launch({headless:true,...(process.env.INSURANCE_BROWSER?{executablePath:process.env.INSURANCE_BROWSER}:{})});try{
 for(const width of [1440,1173,1024,768,390])for(const file of ['records.html']){
- const context=await browser.newContext({viewport:{width,height:1100}}),page=await context.newPage(),errors=[];let manager=true;page.on('pageerror',e=>errors.push(e.message));
+ const context=await browser.newContext({viewport:{width,height:1100}}),page=await context.newPage(),errors=[];let manager=true,summaryRole="User",businessRoles=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(()=>{localStorage.setItem('vero_session_token','synthetic');localStorage.setItem('vero_current_user',JSON.stringify({id:999}))});
  await page.route('**/*',route=>{const u=new URL(route.request().url());if(u.hostname!=='vero.test'){
  if(!u.pathname.startsWith('/api/'))return route.abort();const p=u.pathname.replace('/api','');let data={};
- if(p==='/auth/me')data={user:{id:1,first_name:'Preview',last_name:'User',email:'preview@example.test',vero_role:'User'}};
- if(p==='/auth/my-roles')data={roles:[]};
+ if(p==='/auth/me')data={user:{id:1,first_name:'Preview',last_name:'User',email:'preview@example.test',vero_role:summaryRole}};
+ if(p==='/auth/my-roles')data={roles:businessRoles};
  if(p==='/records')data={records:[{id:1,record_code:'REC-TEST',record_title:'Synthetic record',record_category:'General',source_module:'Manual',status:'Active',security_classification:'Public',owner:{user_id:1,first_name:'Preview',last_name:'User'},has_active_hold:false,retention:{rule_code:'RET-1',disposal_due_date:null}}],pending_copy_requests:77,my_pending_copy_requests:3};
  if(p==='/records/retention-rules')data={rules:[],permissions:{can_manage:manager}};
  if(p==='/records/holds')data={holds:[]};if(p==='/records/dispositions')data={dispositions:[]};
@@ -67,6 +67,15 @@ await page.locator('#recordsTableBody [data-record-id]').waitFor();
  await page.evaluate(()=>scrollTo(0,0));
  await page.screenshot({path:path.join(out,file.replace('.html','')+'-button-cards-'+width+'.png'),fullPage:true});
  if(file==='records.html'){manager=false;await page.reload();await page.locator('body[data-records-manager="false"]').waitFor();assert.equal(await page.locator('.records-kpis').isVisible(),false);assert.equal(await page.locator('#addRecordBtn').isVisible(),false);assert.equal(await page.locator('#recordsRegisterPanel').getByLabel('View',{exact:true}).locator('option').count(),1);assert.equal(await page.locator('#classificationFilter').isVisible(),false)}
+ if(width===1440){
+  for(const scenario of ['Administrator','Compliance Officer']){
+   summaryRole=scenario==='Administrator'?'Administrator':'User';businessRoles=scenario==='Compliance Officer'?[{id:4,role_name:'Compliance Officer'}]:[];
+   await page.reload();await page.locator('.records-kpis[data-personal-summary-visible="true"]').waitFor();
+   assert.equal(await page.locator('#addRecordBtn').isVisible(),false,'summary role never enables record registration');
+   assert.equal(await page.locator('#recordsRegisterPanel').getByLabel('View',{exact:true}).locator('option').count(),1,'summary role never enables governance panels');
+  }
+  summaryRole='User';businessRoles=[{role_name:'Compliance officer'}];await page.reload();await page.locator('body[data-records-manager="false"]').waitFor();assert.equal(await page.locator('.records-kpis').isVisible(),false,'only canonical active business role returned by API enables cards');
+ }
  assert.deepEqual(errors,[]);console.log('PASS '+file+' '+width+'px layout, existing controls and role visibility');await context.close();
 }
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});

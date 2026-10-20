@@ -49,7 +49,18 @@
   const token=localStorage.getItem('vero_session_token');if(!token)return;
   fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/auth/me',{headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store'})
    .then(r=>{if(!r.ok)throw Error('Identity unavailable');return r.json()})
-   .then(data=>{identity=data.user||data;render()}).catch(()=>{identity=null;render()});
+   .then(async data=>{
+    identity=data.user||data;render();
+    let show=identity.vero_role==='Administrator';
+    if(!show){
+     try{
+      const response=await fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/auth/my-roles',{headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store'});
+      if(response.ok){const roles=await response.json();show=Array.isArray(roles.roles)&&roles.roles.some(role=>role.role_name==='Compliance Officer')}
+     }catch{}
+    }
+    // Summary visibility only: do not change recordsManager or governance permissions.
+    document.querySelector('.records-kpis').dataset.personalSummaryVisible=String(show);
+   }).catch(()=>{identity=null;render()});
  }
  window.addEventListener('records-summary-change',render);
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
