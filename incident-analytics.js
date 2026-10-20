@@ -12,6 +12,11 @@ window.VeroMonthlyReports={render({data:d,content,esc,tabs,period,navigate,bind,
  document.getElementById('monthly-type').onchange=e=>filter(e.target.value,d.domain||'');document.getElementById('monthly-domain').onchange=e=>filter(d.type||'',e.target.value);
  content.querySelectorAll('[data-type-filter]').forEach(b=>b.onclick=()=>filter(d.type===b.dataset.typeFilter?'':b.dataset.typeFilter,d.domain||''));
  content.querySelectorAll('[data-domain]').forEach(b=>b.onclick=()=>filter(d.type||'',b.dataset.domain));
+ const tooltip=document.createElement('div');tooltip.id='monthly-chart-tooltip';tooltip.className='monthly-tooltip';tooltip.setAttribute('role','tooltip');tooltip.hidden=true;content.querySelector('#monthly-event-dashboard').append(tooltip);
+ const hide=()=>{tooltip.hidden=true;};
+ const show=(button,m)=>{tooltip.innerHTML=`<strong>${monthLabel(m.month)}</strong><span class="tooltip-total">Total <b>${m.total}</b></span>${types.filter(t=>t!=='Unverified'||m.types[t]).map((t,i)=>`<span class="tooltip-count"><i class="series-${i}"></i>${label[t]}<b>${m.types[t]}</b></span>`).join('')}`;tooltip.hidden=false;const anchor=button.getBoundingClientRect(),width=tooltip.offsetWidth||220,height=tooltip.offsetHeight||150;tooltip.style.left=Math.max(12,Math.min(window.innerWidth-width-12,anchor.left+anchor.width/2-width/2))+'px';tooltip.style.top=Math.max(12,Math.min(window.innerHeight-height-12,anchor.top-height-10))+'px';};
+ content.querySelectorAll('.month-column').forEach(button=>{const m=d.months[Number(button.dataset.month)];button.setAttribute('aria-describedby',tooltip.id);button.removeAttribute('title');button.onmouseenter=()=>show(button,m);button.onmouseleave=hide;button.onfocus=()=>show(button,m);button.onblur=hide;button.onkeydown=event=>{if(event.key==='Escape')hide();};});
+ content.querySelector('.monthly-chart-scroll').onscroll=hide;
  content.querySelectorAll('[data-month]').forEach(b=>b.onclick=()=>drill(d.months[Number(b.dataset.month)]));
  content.querySelectorAll('[data-cell-month]').forEach(b=>b.onclick=()=>drill(d.months[Number(b.dataset.cellMonth)],b.dataset.cellType));
 }};
