@@ -13,7 +13,7 @@ async function scenario(admin,deep=false,empty=false){
  };w.eval(script);await wait(()=>d.querySelector('#incident-dashboard'));
  assert.equal(calls.includes('/incidents'),false,'Landing must not request the event register');assert.equal(d.querySelector('#event-rows'),null);
  assert.equal(d.querySelector('[data-metric=total]').textContent,empty?'0':'12');assert.equal(d.querySelector('[data-metric=active]').textContent,empty?'0':'2');
- assert.equal(d.querySelector('#dashboard-title'),null);assert.equal(d.querySelector('.dashboard-date'),null);
+ assert.equal(d.querySelector('.dashboard-workspace'),null);assert.equal(d.querySelector('#dashboard-title'),null);assert.equal(d.querySelector('.dashboard-date'),null);
  assert.equal(d.querySelector('#incident-dashboard').textContent.includes('Private event narrative'),false);
  assert.equal(d.querySelector('#incident-dashboard').textContent.includes('NaN'),false);
  if(!empty)assert.match(d.querySelector('#incident-dashboard').textContent,/8 historical events on hold/);
