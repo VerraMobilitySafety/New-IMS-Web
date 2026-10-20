@@ -181,11 +181,18 @@
         <span>Records Management</span>
       </a>
 
-      <a class="${isActive('risk.html') ? 'active' : ''}"
-         href="risk.html">
-        <span class="ico" data-lucide="triangle-alert"></span>
-        <span>Risk Management</span>
-      </a>
+      <div class="vero-nav-group ${['risk.html', 'safe-work-method-statement.html', 'take-5.html'].includes(path) ? 'open' : ''}" id="riskNavGroup">
+        <div class="vero-nav-parent">
+          <a class="${isActive('risk.html') ? 'active' : ''}" href="risk.html">
+            <span class="ico" data-lucide="triangle-alert"></span><span>Risk Management</span>
+          </a>
+          <button class="vero-nav-expand" type="button" aria-label="Expand Risk Management" aria-controls="riskNavChildren" aria-expanded="${['risk.html', 'safe-work-method-statement.html', 'take-5.html'].includes(path) ? 'true' : 'false'}"><span>›</span></button>
+        </div>
+        <div class="vero-nav-children" id="riskNavChildren">
+          <a class="${isActive('safe-work-method-statement.html') ? 'active' : ''}" href="safe-work-method-statement.html" ${isActive('safe-work-method-statement.html') ? 'aria-current="page"' : ''}>Safe Work Method Statement</a>
+          <a class="${isActive('take-5.html') ? 'active' : ''}" href="take-5.html" ${isActive('take-5.html') ? 'aria-current="page"' : ''}>Take 5</a>
+        </div>
+      </div>
 
       <a class="${isActive('insurance.html') ? 'active' : ''}" href="insurance.html">
         <span class="ico" data-lucide="shield-check"></span>
@@ -342,6 +349,13 @@
   clientExpand?.addEventListener('click', () => {
     const open = clientGroup.classList.toggle('open');
     clientExpand.setAttribute('aria-expanded', String(open));
+  });
+
+  const riskGroup = document.getElementById('riskNavGroup');
+  const riskExpand = riskGroup?.querySelector('.vero-nav-expand');
+  riskExpand?.addEventListener('click', () => {
+    const open = riskGroup.classList.toggle('open');
+    riskExpand.setAttribute('aria-expanded', String(open));
   });
 
   /* Prevent main navigation labels wrapping */
