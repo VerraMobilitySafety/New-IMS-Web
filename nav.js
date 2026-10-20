@@ -125,7 +125,7 @@
         <span>Client Services Management</span>
       </a>
 
-      <a id="clientServicesSiteNav" hidden style="display:none" class="${isActive('client-services-sites.html') ? 'active' : ''}" href="client-services-sites.html"><span class="ico" data-lucide="list"></span><span>Client Services Site List</span></a>
+      <a id="clientServicesSiteNav" hidden style="display:none!important" class="${isActive('client-services-sites.html') ? 'active' : ''}" href="client-services-sites.html"><span class="ico" data-lucide="list"></span><span>Client Services Site List</span></a>
 
       <a class="${isActive('contractor-management.html') ? 'active' : ''}" href="contractor-management.html">
         <span class="ico" data-lucide="hard-hat"></span>
@@ -339,3 +339,5 @@
     label.style.whiteSpace = 'nowrap';
   });
 })();
+
+
