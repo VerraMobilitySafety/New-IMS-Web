@@ -38,6 +38,35 @@ async function loadSites(){
 for(const id of ['siteSearch','siteContract','siteStatus','siteEventFilter','siteSort'])siteEl(id).addEventListener(id==='siteSearch'?'input':'change',()=>{sitePage=0;drawSites();});
 siteEl('sitePrevious').onclick=()=>{sitePage--;drawSites();};siteEl('siteNext').onclick=()=>{sitePage++;drawSites();};siteEl('siteRetry').onclick=()=>{siteEl('siteRetry').hidden=true;void loadSites();};
 siteEl('siteAdd').onclick=()=>openSiteEditor(null);
+siteEl('siteMatchHistory').onclick=()=>openHistoricalMatches();
+
+async function openHistoricalMatches(){
+ let dialog=document.getElementById('historicalSiteDialog');if(dialog)dialog.remove();
+ dialog=document.createElement('dialog');dialog.id='historicalSiteDialog';dialog.className='contract-site-dialog';dialog.setAttribute('aria-labelledby','historicalSiteTitle');
+ dialog.innerHTML='<h2 id="historicalSiteTitle">Match historical events to sites</h2><p class="note">Only exact site references in the same source contract group are matched. Original reports and migration holds are retained.</p><p id="historicalMatchStatus" role="status">Checking source records…</p><div id="historicalMatchPreview"></div><div class="dialog-actions"><button id="historicalMatchClose" type="button">Close</button><button id="historicalMatchApply" type="button" class="primary" disabled>Link matched events</button></div>';
+ document.body.append(dialog);dialog.querySelector('#historicalMatchClose').onclick=()=>dialog.close();dialog.showModal();
+ const status=dialog.querySelector('#historicalMatchStatus'),preview=dialog.querySelector('#historicalMatchPreview'),apply=dialog.querySelector('#historicalMatchApply'),close=dialog.querySelector('#historicalMatchClose');
+ async function request(method='GET',data){
+  const token=localStorage.getItem('vero_session_token');if(!token)throw Error('Please sign in again.');
+  const response=await fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/client-services-site-history-matches',{method,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:data?JSON.stringify(data):undefined,cache:'no-store'});
+  const result=await response.json();if(!response.ok)throw Error(result.message||'Unable to match historical events.');return result;
+ }
+ try{
+  const plan=await request();
+  status.textContent=plan.matches.length+' events match '+new Set(plan.matches.map(m=>m.site_id)).size+' sites. '+plan.already_linked+' already linked. '+plan.unresolved.length+' left unlinked.';
+  preview.innerHTML='<details><summary>View matched events ('+plan.matches.length+')</summary><ul>'+plan.matches.map(m=>'<li>'+siteEscape(m.event_reference)+' → '+siteEscape(m.site_code)+' · '+siteEscape(m.contract_group)+'</li>').join('')+'</ul></details><details><summary>Unlinked records ('+plan.unresolved.length+')</summary><ul>'+plan.unresolved.map(m=>'<li>'+siteEscape(m.event_reference)+' · '+siteEscape(m.reason)+'</li>').join('')+'</ul></details>';
+  apply.disabled=!plan.matches.length;
+  apply.onclick=async()=>{
+   apply.disabled=true;close.disabled=true;status.textContent='Linking verified matches…';
+   try{
+    const result=await request('POST',{fingerprint:plan.fingerprint});
+    status.textContent=result.linked+' historical events linked. '+result.remaining+' records remain unlinked.';
+    apply.hidden=true;await loadSites();
+   }catch(error){status.textContent=error.message+' Close and reopen to refresh the matching plan.';}
+   finally{close.disabled=false;}
+  };
+ }catch(error){status.textContent=error.message;}
+}
 
 function openSiteEditor(site){
  let dialog=document.getElementById('globalSiteDialog');if(dialog)dialog.remove();dialog=document.createElement('dialog');dialog.id='globalSiteDialog';dialog.className='contract-site-dialog';document.body.append(dialog);
@@ -65,5 +94,7 @@ function openSiteEditor(site){
  };
  dialog.showModal();
 }
+
+
 
 

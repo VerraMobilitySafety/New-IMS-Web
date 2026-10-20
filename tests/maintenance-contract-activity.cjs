@@ -1,6 +1,39 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 let chromium;try{({chromium}=require('playwright'));}catch(e){({chromium}=require('C:/Users/dbleasel/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));}
 const root=path.join(__dirname,'..');
+
+test('historical event matching previews verified links, applies the fingerprint and refreshes counts',async()=>{
+ const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
+ try{
+  const page=await browser.newPage({viewport:{width:1200,height:950}});let linked=false,posted=null;
+  const site={id:1,site_code:'A-01',site_name:'Example site',status:'Active',address:'',contracts:[],source_groups:[],event_summary:{total:0,open:0,recent:0,highest_score:null,last_date:null,unclassified:0}};
+  await page.addInitScript(()=>localStorage.setItem('vero_session_token','mock-only'));
+  await page.route('**/*',async route=>{
+   const req=route.request(),u=new URL(req.url());
+   if(u.pathname.endsWith('/client-services-site-history-matches')){
+    if(req.method()==='POST'){posted=req.postDataJSON();linked=true;return route.fulfill({json:{linked:1,remaining:1}});}
+    return route.fulfill({json:{fingerprint:'reviewed-plan',matches:linked?[]:[{event_id:'1',event_reference:'Event 1',site_id:1,site_code:'A-01',contract_group:'Source group'}],already_linked:linked?1:0,unresolved:[{event_reference:'Event 2',reason:'No explicit site reference'}]}});
+   }
+   if(u.pathname.endsWith('/client-services-sites'))return route.fulfill({json:{sites:[{...site,event_summary:{...site.event_summary,total:linked?1:0,unclassified:linked?1:0}}],contracts:[],users:[]}});
+   if(u.hostname!=='vero.test')return route.abort();const file=path.resolve(root,'.'+u.pathname);
+   if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});
+   let body=fs.readFileSync(file);if(file.endsWith('.html'))body=body.toString().replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace('</body>','<script src="client-services-sites.js"></script><script>loadSites()</script></body>');
+   return route.fulfill({contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css'})[path.extname(file)]||'application/octet-stream',body});
+  });
+  await page.goto('https://vero.test/client-services-sites.html');
+  await page.getByRole('button',{name:'Match historical events',exact:true}).click();
+  const dialog=page.locator('#historicalSiteDialog');
+  await dialog.getByText('1 events match 1 sites. 0 already linked. 1 left unlinked.',{exact:true}).waitFor();
+  await dialog.getByRole('button',{name:'Link matched events',exact:true}).click();
+  await dialog.getByText('1 historical events linked. 1 records remain unlinked.',{exact:true}).waitFor();
+  assert.deepEqual(posted,{fingerprint:'reviewed-plan'});
+  await dialog.getByRole('button',{name:'Close',exact:true}).click();
+  await page.getByRole('cell',{name:'Unclassified',exact:false}).waitFor();
+  await page.getByRole('button',{name:'Match historical events',exact:true}).click();
+  await dialog.getByText('0 events match 0 sites. 1 already linked. 1 left unlinked.',{exact:true}).waitFor();
+  assert.equal(await dialog.getByRole('button',{name:'Link matched events',exact:true}).isDisabled(),true);
+ }finally{await browser.close();}
+});
 test('contract sites retain failed saves, retry safely, edit and display list rows without event links on desktop/mobile',async()=>{
  const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
  try{for(const width of [1500,390]){
@@ -142,4 +175,6 @@ test('site event history distinguishes missing coverage, counts and impact and s
   await page.close();
  }}finally{await browser.close();}
 });
+
+
 
