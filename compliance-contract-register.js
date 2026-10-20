@@ -9,12 +9,23 @@ function installContractRequirementRegister(){
  commonPanel.before(switcher,panel);
  const $=id=>document.getElementById(id);let data=[],contracts=new Map(),page=0,loading=true,loadNumber=0;
  const size=50;
+ function updateClientCount(){
+  if(loading)return;
+  const badge=document.querySelector('.compliance-view[data-type="Client"] span');
+  if(badge)badge.textContent=data.length;
+ }
+ window.updateClientRequirementCount=updateClientCount;
  function view(specific){commonPanel.hidden=specific;panel.hidden=!specific;$('contractRequirementView').setAttribute('aria-pressed',String(specific));$('commonRequirementView').setAttribute('aria-pressed',String(!specific));}
  window.showComplianceTypeView=type=>{
-  switcher.hidden=!!type&&type!=='Client';
-  view(false);
+  switcher.hidden=!!type;
+  view(type==='Client');
  };
- $('contractRequirementView').onclick=()=>view(true);$('commonRequirementView').onclick=()=>view(false);
+ $('contractRequirementView').onclick=()=>{
+  const clientButton=document.querySelector('.compliance-view[data-type="Client"]');
+  if(clientButton&&typeof window.setComplianceType==='function')window.setComplianceType(clientButton,'Client');
+  else view(true);
+ };
+ $('commonRequirementView').onclick=()=>view(false);
  const params=new URLSearchParams(location.search);
  view(params.has('contract_id')&&!params.has('obligation_id'));
  if(params.has('contract_id')&&!params.has('obligation_id')){
@@ -46,7 +57,7 @@ function installContractRequirementRegister(){
    contracts=new Map(d.contracts.map(c=>[String(c.id),c]));data=d.requirements;
    $('contractRequirementFilter').innerHTML='<option value="">All contracts</option>'+d.contracts.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.code)+' · '+esc(c.name)+'</option>').join('');
    const initial=new URLSearchParams(location.search).get('contract_id');if(initial&&contracts.has(initial))$('contractRequirementFilter').value=initial;
-   loading=false;render();
+   loading=false;updateClientCount();render();
   }catch(e){if(number!==loadNumber)return;loading=false;$('contractRequirementCount').textContent=e.message;$('contractRequirementRows').innerHTML='<tr><td colspan="5">Requirements could not be loaded. Use Retry loading to try again.</td></tr>';$('contractRequirementRetry').hidden=false;}
  }
  $('contractRequirementRetry').onclick=load;load();
