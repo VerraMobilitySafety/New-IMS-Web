@@ -45,3 +45,5 @@ jobs:
       - run: node tests/event-register-columns.cjs
 
       - run: node tests/event-investigation-review.cjs
+
+      - run: node tests/event-historical-action-links.cjs

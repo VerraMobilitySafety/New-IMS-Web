@@ -1,0 +1,11 @@
+/* Restore existing historical relationships without publishing or resending. */
+window.VeroHistoricalActionLinks={async bind({event,root,api,esc,refresh,message}){
+ if(!event.can_link_historical_actions)return;
+ const panel=document.createElement('details');panel.className='card';panel.id='historical-action-links';panel.innerHTML='<summary>Verified historical action links</summary><p>Checking original source matches…</p>';root.append(panel);
+ panel.ontoggle=async()=>{if(!panel.open||panel.dataset.loaded)return;panel.dataset.loaded='true';
+ try{const plan=await api('/incidents/'+event.id+'/history/action-links');if(!panel.isConnected)return;
+ panel.innerHTML='<summary>Verified historical action links</summary><p>'+esc(plan.notice)+'</p>'+plan.links.map((a,i)=>`<form data-history-link="${i}"><h4>${esc(a.title)}</h4><p>Historical owner: ${esc(a.owner_name||'Not recorded')} · Due ${esc(a.due_date)} · Status ${esc(a.status)}</p><p>Exact description, owner email and due date match the original investigation and action forms. The match is unique across the retained sources.</p><p>Sources: ${esc(a.source_key)} · ${esc(a.action_source_key)}</p><label>Reason for restoring the event link<textarea name="reason" required maxlength="2000"></textarea></label><button type="submit">Restore existing action link</button></form>`).join('')+plan.blocked.map(m=>'<p class="note">'+esc(m)+'</p>').join('')+(!plan.links.length&&!plan.blocked.length?'<p>No verified unlinked historical actions remain for this event.</p>':'');
+ for(const form of panel.querySelectorAll('form'))form.onsubmit=async ev=>{ev.preventDefault();if(!form.reportValidity())return;const a=plan.links[Number(form.dataset.historyLink)],button=form.querySelector('button');button.disabled=true;form.dataset.requestId ||= crypto.randomUUID();try{const result=await api('/incidents/'+event.id+'/history/action-links',{action_id:a.action_id,preview_token:a.preview_token,request_id:form.dataset.requestId,reason:form.elements.reason.value});await refresh();message(result.notice);}catch(error){message(error.message,true);button.disabled=false;}};
+ }catch(error){if(panel.isConnected)panel.innerHTML='<summary>Verified historical action links</summary><p class="note">'+esc(error.message)+'</p>';}
+ };
+}};
