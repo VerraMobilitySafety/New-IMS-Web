@@ -2,6 +2,118 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 let chromium;try{({chromium}=require('playwright'));}catch(e){({chromium}=require('C:/Users/dbleasel/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));}
 const root=path.join(__dirname,'..');
 
+
+test('contract compliance lists individual requirements with search paging and central assessment links',async()=>{
+ const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
+ try{for(const width of [1500,390]){
+  const page=await browser.newPage({viewport:{width,height:950}});page.setDefaultTimeout(12000);
+  await page.addInitScript(()=>localStorage.setItem('vero_session_token','mock-only'));
+  const activity=i=>({instance_id:'REQ-'+i,verra_action:'Requirement '+i,timing_or_trigger:'Every month',conditions_and_exceptions:i===0?'<Site-specific condition>':'Condition '+i,clause_reference:'Clause '+i,pdf_pages:[i+1]});
+  await page.route('**/*',async route=>{
+   const u=new URL(route.request().url());
+   if(u.pathname.endsWith('/maintenance-contracts'))return route.fulfill({json:{contracts:[{id:4,contract_code:'TEST-M',contract_name:'Test agreement',status:'Draft',requirement_count:2},{id:5,contract_code:'EMPTY',contract_name:'Empty contract',status:'Draft',requirement_count:0}],can_edit_owner:false}});
+   if(u.pathname.endsWith('/details'))return route.fulfill({json:{sources:[],requirements:u.pathname.includes('/4/')?[{id:42,code:'COM-42',title:'Shared requirement',activities:Array.from({length:52},(_,i)=>activity(i))}]:[]}});
+   if(u.hostname!=='vero.test')return route.abort();
+   const file=path.resolve(root,'.'+u.pathname);if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});
+   let body=fs.readFileSync(file);if(file.endsWith('.html'))body=body.toString().replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace('</body>','<script src="customer-contracts.js"></script><script>loadContractWorkspace()</script></body>');
+   return route.fulfill({contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css'})[path.extname(file)]||'application/octet-stream',body});
+  });
+  await page.goto('https://vero.test/maintenance-workspace.html?id=4');
+  await page.getByRole('button',{name:'Compliance',exact:true}).click();
+  const rows=page.locator('#contractComplianceRows');await rows.getByRole('link',{name:'Requirement 0',exact:true}).waitFor();
+  assert.equal(await rows.locator('tr').count(),50);
+  assert.equal(await rows.getByRole('link',{name:'Requirement 0',exact:true}).getAttribute('href'),'compliance.html?obligation_id=42');
+  assert.equal(await rows.getByRole('link',{name:'Open assessment',exact:true}).first().getAttribute('href'),'compliance.html?obligation_id=42');
+  await rows.locator('summary').first().click();await rows.getByText('<Site-specific condition>',{exact:false}).waitFor();
+  await page.locator('#contractComplianceNext').click();await rows.getByRole('link',{name:'Requirement 50',exact:true}).waitFor();
+  assert.equal(await rows.locator('tr').count(),2);
+  await page.locator('#contractComplianceSearch').fill('Clause 51');await rows.getByRole('link',{name:'Requirement 51',exact:true}).waitFor();
+  assert.equal(await rows.locator('tr').count(),1);
+  assert.equal(await page.locator('#contractCompliancePrevious').isDisabled(),true);
+  await page.locator('#contractComplianceSearch').fill('unmatched');await rows.getByText('No requirements match your search.',{exact:true}).waitFor();
+  await page.goto('https://vero.test/maintenance-workspace.html?id=5');
+  await page.getByRole('button',{name:'Compliance',exact:true}).click();await page.getByText('No requirements linked to this contract.',{exact:true}).waitFor();
+  await page.close();
+ }}finally{await browser.close();}
+});
+
+test('administrators edit contract owners only in the workspace with retained failed saves',async()=>{
+ const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
+ try{for(const width of [1500,390]){
+  const page=await browser.newPage({viewport:{width,height:950}}),posts=[];let fail=true,statusFail=true,admin=true;
+  page.setDefaultTimeout(12000);
+  const c={id:4,contract_code:'TEST-M',contract_name:'Test agreement',customer_name:'Customer',status:'Draft',requirement_count:0,source_count:0,owner_user_id:null,owner_version:0};
+  await page.addInitScript(()=>localStorage.setItem('vero_session_token','mock-only'));
+  await page.route('**/*',async route=>{
+   const req=route.request(),u=new URL(req.url());
+   if(u.pathname.endsWith('/maintenance-contracts'))return route.fulfill({json:{contracts:[c],can_edit_owner:admin}});
+   if(u.pathname.endsWith('/import-options'))return route.fulfill({json:{can_import:false,units:[]}});
+   if(u.pathname.endsWith('/details'))return route.fulfill({json:{sources:[],requirements:[]}});
+   if(u.pathname.endsWith('/status')){
+    if(req.method()==='GET')return route.fulfill({json:{statuses:['Draft','Active','Inactive','Expired'],status:c.status,status_version:c.status_version||0}});
+    const data=req.postDataJSON();if(statusFail)return route.fulfill({status:503,json:{message:'Temporary status failure'}});
+    c.status=data.status;c.status_version=(c.status_version||0)+1;return route.fulfill({json:{status:c.status,status_version:c.status_version}});
+   }
+   if(u.pathname.endsWith('/owner')){
+    if(req.method()==='GET')return route.fulfill({json:{users:[{id:2,name:'Selected Owner',email:'owner@example.test'}],owner_user_id:c.owner_user_id,owner_version:c.owner_version}});
+    const data=req.postDataJSON();posts.push(data);
+    if(fail)return route.fulfill({status:503,json:{message:'Temporary save failure'}});
+    c.owner_user_id=data.owner_user_id;c.owner_name=data.owner_user_id?'Selected Owner':null;c.owner_version++;return route.fulfill({json:{owner_user_id:c.owner_user_id,owner_name:c.owner_name,owner_version:c.owner_version}});
+   }
+   if(u.hostname!=='vero.test')return route.abort();const file=path.resolve(root,'.'+u.pathname);
+   if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});
+   let body=fs.readFileSync(file);
+   if(file.endsWith('.html'))body=body.toString().replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace('</body>','<script src="customer-contracts.js"></script><script>'+(u.pathname.includes('workspace')?'loadContractWorkspace()':'load()')+'</script></body>');
+   return route.fulfill({contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css'})[path.extname(file)]||'application/octet-stream',body});
+  });
+  await page.goto('https://vero.test/maintenance-management.html');
+  await page.getByRole('link',{name:'Test agreement',exact:true}).waitFor();
+  assert.equal(await page.locator('[data-owner-edit]').count(),0);
+  await page.getByRole('link',{name:'Test agreement',exact:true}).click();
+  await page.getByRole('button',{name:'Edit owner',exact:true}).click();
+  const dialog=page.locator('#contractOwnerDialog');
+  await dialog.getByLabel('Contract owner',{exact:true}).selectOption('2');
+  assert.equal(await dialog.evaluate(el=>el.getBoundingClientRect().width<=innerWidth),true);
+  await dialog.getByRole('button',{name:'Save owner',exact:true}).click();
+  await dialog.getByRole('alert').filter({hasText:'Temporary save failure'}).waitFor();
+  assert.equal(await dialog.getByLabel('Contract owner',{exact:true}).inputValue(),'2');
+  fail=false;await dialog.getByRole('button',{name:'Save owner',exact:true}).click();
+  await page.locator('#contractSummary').getByText('Selected Owner',{exact:true}).waitFor();
+  assert.equal(posts[1].owner_version,0);
+  await page.reload();await page.getByRole('button',{name:'Edit owner',exact:true}).click();
+  await dialog.getByLabel('Contract owner',{exact:true}).locator('option:checked').filter({hasText:'Selected Owner'}).waitFor({state:'attached'});
+  assert.equal(await dialog.getByLabel('Contract owner',{exact:true}).inputValue(),'2');
+  await dialog.getByLabel('Contract owner',{exact:true}).selectOption('');
+  await dialog.getByRole('button',{name:'Save owner',exact:true}).click();
+  await page.locator('#contractSummary').getByText('Unassigned',{exact:true}).waitFor();
+  await page.goto('https://vero.test/maintenance-workspace.html?id=4');
+  await page.getByRole('button',{name:'Edit owner',exact:true}).click();
+  await dialog.getByLabel('Contract owner',{exact:true}).selectOption('2');
+  await dialog.getByRole('button',{name:'Save owner',exact:true}).click();
+  await page.locator('#contractSummary').getByText('Selected Owner',{exact:true}).waitFor();
+  await page.goto('https://vero.test/maintenance-management.html');await page.getByRole('link',{name:'Test agreement',exact:true}).waitFor();
+  await page.getByRole('cell',{name:'Selected Owner',exact:true}).waitFor();
+  assert.equal(await page.locator('[data-owner-edit]').count(),0);
+  await page.getByRole('link',{name:'Test agreement',exact:true}).click();
+  await page.getByRole('button',{name:'Edit status',exact:true}).click();
+  const statusDialog=page.locator('#contractStatusDialog');
+  await statusDialog.getByLabel('Contract status',{exact:true}).selectOption('Active');
+  await statusDialog.getByRole('button',{name:'Save status',exact:true}).click();
+  await statusDialog.getByRole('alert').filter({hasText:'Temporary status failure'}).waitFor();
+  assert.equal(await statusDialog.getByLabel('Contract status',{exact:true}).inputValue(),'Active');
+  statusFail=false;await statusDialog.getByRole('button',{name:'Save status',exact:true}).click();
+  await page.locator('#contractSummary').getByText('Active',{exact:true}).waitFor();
+  await page.reload();await page.locator('#contractSummary').getByText('Active',{exact:true}).waitFor();
+  await page.goto('https://vero.test/maintenance-management.html');await page.getByRole('link',{name:'Test agreement',exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Edit status',exact:true}).count(),0);
+  await page.getByRole('cell',{name:'Active',exact:true}).waitFor();
+  admin=false;await page.goto('https://vero.test/maintenance-workspace.html?id=4');await page.locator('#contractSummary').getByText('Selected Owner',{exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Edit owner',exact:true}).count(),0);
+  assert.equal(await page.getByRole('button',{name:'Edit status',exact:true}).count(),0);
+  await page.close();
+ }}finally{await browser.close();}
+});
+
 test('historical event matching previews verified links, applies the fingerprint and refreshes counts',async()=>{
  const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
  try{
@@ -175,6 +287,8 @@ test('site event history distinguishes missing coverage, counts and impact and s
   await page.close();
  }}finally{await browser.close();}
 });
+
+
 
 
 
