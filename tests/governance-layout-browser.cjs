@@ -22,7 +22,7 @@ for(const width of [1440,1024,768,390])for(const file of ['records.html','risk.h
  return route.fulfill({json:data});}
  const local=path.resolve(root,'.'+decodeURIComponent(u.pathname));if(!local.startsWith(root+path.sep)||!fs.existsSync(local))return route.fulfill({status:404,body:''});return route.fulfill({body:fs.readFileSync(local),contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css','.png':'image/png'})[path.extname(local)]||'application/octet-stream'});
  });
- await page.goto('https://vero.test/'+file+(file==='incident-management.html'?'?view=register':''));await page.locator('.vr-summary:visible').first().waitFor();
+ await page.goto('https://vero.test/'+file+(file==='incident-management.html'?'?view=register':''));if(file!=='risk.html')await page.locator('.vr-summary:visible').first().waitFor();
  if(file==='records.html'){
   await page.locator('body[data-records-manager="true"]').waitFor();await page.locator('#recordsTableBody [data-record-id]').waitFor();
   await page.getByText('More filters',{exact:true}).click();assert.equal(await page.locator('#classificationFilter').isVisible(),true);await page.locator('#classificationFilter').selectOption('Confidential');assert.match(await page.locator('#recordsTableBody').innerText(),/No records/);await page.locator('#classificationFilter').selectOption('');await page.getByText('More filters',{exact:true}).click();
@@ -30,15 +30,16 @@ for(const width of [1440,1024,768,390])for(const file of ['records.html','risk.h
   await page.locator('#recordsRegisterPanel').getByLabel('View',{exact:true}).selectOption('retention');assert.equal(await page.locator('#retentionSchedulePanel').isVisible(),true);assert.equal(await page.locator('#recordsRegisterPanel').isVisible(),false);
   await page.locator('#retentionSchedulePanel').getByLabel('View',{exact:true}).selectOption('register');
  }else if(file==='risk.html'){
-  await page.locator('#veroRiskTableBody').getByText('Synthetic domain',{exact:false}).first().waitFor();await page.getByLabel('Search risks',{exact:true}).fill('missing');await page.getByLabel('Search risks',{exact:true}).fill('');
-  await page.getByText('Classification and context filters',{exact:true}).click();assert.equal(await page.locator('#veroTier4Filter').isVisible(),true);assert.equal(await page.locator('#veroSiteFilter').isDisabled(),true);await page.getByText('Classification and context filters',{exact:true}).click();assert.equal(await page.locator('#veroRiskMatrix').isVisible(),true);
-  assert.equal(await page.locator('#veroAddRiskButton').isVisible(),false);
+  await page.locator('#veroRiskTableBody').getByText('Synthetic domain',{exact:false}).first().waitFor();await page.locator('#veroRiskSearch').fill('missing');await page.locator('#veroRiskSearch').fill('');
+  assert.equal(await page.locator('#veroTier4Filter').isVisible(),true);assert.equal(await page.locator('#veroSiteFilter').isDisabled(),true);assert.equal(await page.locator('#veroRiskMatrix').isVisible(),true);
+  assert.equal(await page.locator('#veroAddRiskButton').isVisible(),false);assert.equal(await page.locator('.vr-summary,.vr-risk-refine').count(),0);assert.equal(await page.locator('body').getAttribute('data-register-layout'),null);
  }else{
   await page.locator('#event-rows a').first().waitFor();await page.getByLabel('Search events',{exact:true}).fill('road');assert.equal(await page.locator('#event-rows a').count(),1);await page.locator('#event-filter').selectOption('complete');assert.equal(await page.locator('#event-rows a').count(),0);await page.getByLabel('Search events',{exact:true}).fill('');assert.equal(await page.locator('#event-rows a').count(),1);await page.locator('#event-filter').selectOption('all');
   assert.equal(await page.getByLabel('View',{exact:true}).locator('option[value="injury-register-button"]').count(),0);
   await page.getByLabel('View',{exact:true}).selectOption('dashboard');await page.locator('#incident-dashboard .vr-summary').waitFor();await page.getByLabel('View',{exact:true}).selectOption('register');await page.locator('#event-rows a').first().waitFor();
  }
- await page.locator('#veroPageLoader').waitFor({state:'hidden'});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no overflow '+file);
+ await page.locator('#veroPageLoader').waitFor({state:'hidden'});// Risk deliberately restores its pre-layout mobile behavior.
+ if(file!=='risk.html'||width>=768)assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no overflow '+file);
  await page.evaluate(()=>scrollTo(0,0));
  await page.screenshot({path:path.join(out,file.replace('.html','')+'-register-'+width+'.png'),fullPage:true});
  if(file==='records.html'){manager=false;await page.reload();await page.locator('body[data-records-manager="false"]').waitFor();assert.equal(await page.locator('.records-kpis').isVisible(),false);assert.equal(await page.locator('#addRecordBtn').isVisible(),false);assert.equal(await page.locator('#recordsRegisterPanel').getByLabel('View',{exact:true}).locator('option').count(),1);assert.equal(await page.locator('#classificationFilter').isVisible(),false)}
