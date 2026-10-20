@@ -1,6 +1,6 @@
 const {JSDOM}=require('jsdom'),fs=require('node:fs'),assert=require('node:assert/strict');
 const base=JSON.parse(fs.readFileSync('tests/investigation-question-fixture.json','utf8'));
-const review={version:2,systems:['Planning and risk assessment','Procedures and work design'],questions:Object.fromEntries(['timeline','evidence','controls','immediate_causes','conclusion','uncertainties','barrier_analysis','organisational_review','similar_events','control_verification','failed_controls_followup','evidence_gaps'].map(k=>[k,k.replaceAll('_',' ')])),ai_enabled:false};
+const review={version:3,system_hints:{'Planning and risk assessment':'Consider planned controls and foreseeable harm'},systems:['Planning and risk assessment','Procedures and work design'],questions:Object.fromEntries(['timeline','evidence','controls','immediate_causes','conclusion','uncertainties','action_effectiveness','barrier_analysis','organisational_review','similar_events','control_verification','failed_controls_followup','evidence_gaps'].map(k=>[k,k.replaceAll('_',' ')])),ai_enabled:false};
 const wait=async fn=>{for(let i=0;i<100;i++){if(fn())return;await new Promise(r=>setTimeout(r,5));}throw Error('UI timeout');};
 (async()=>{
  const dom=new JSDOM('<div id="event-backdrop"><div id="root"></div></div>',{url:'https://example.invalid/',runScripts:'outside-only'}),w=dom.window,d=w.document;
@@ -10,26 +10,28 @@ const wait=async fn=>{for(let i=0;i<100;i++){if(fn())return;await new Promise(r=
  let payload;
  const bind=e=>{root.innerHTML=w.VeroInvestigationContainer.render(e,options,esc,'');w.VeroInvestigationContainer.bind({event:e,options,esc,root,api:async(path,data)=>{if(path.endsWith('/files'))return {files:[]};payload=data;return {};},message:()=>{},refresh:async()=>{}});};
  bind(event);let form=root.querySelector('form');const change=(node,value)=>{node.value=value;node.dispatchEvent(new w.Event('change',{bubbles:true}));};
+ assert.match(form.textContent,/foreseeable harm/);assert.equal(form.querySelector('[data-review-question="action_effectiveness"]').hidden,false);
  assert.equal(form.querySelector('[name="potential_score"]'),null);assert.equal(form.querySelector('[name="severity_rationale"]'),null);
  assert.match(form.querySelector('[data-review-scope]').textContent,/Focused.*report/);assert.match(form.querySelector('[data-report-severity]').textContent,/Insignificant Event/);
  assert.equal(form.querySelector('[data-review-question="organisational_review"]').hidden,true);
  bind({...event,investigation_review_basis:{score:4,label:'Major Event'}});form=root.querySelector('form');assert.equal(form.querySelector('[data-review-question="organisational_review"]').hidden,false);
  const retained=form.querySelector('[data-review-answer="organisational_review"]');retained.value='Evidence retained after report reassessment';
  const deeper={questionnaire:{review:{version:2,answers:{organisational_review:retained.value}}}};
- bind({...event,investigation:{draft:deeper}});form=root.querySelector('form');assert.equal(form.querySelector('[data-review-question="organisational_review"]').hidden,false);assert.equal(form.querySelector('[data-retained-answer]').hidden,true);
+ bind({...event,investigation:{draft:deeper}});form=root.querySelector('form');assert.match(form.querySelector('[data-question-upgrade]').textContent,/saved answers are preserved/);assert.equal(form.querySelector('[data-review-question="organisational_review"]').hidden,false);assert.equal(form.querySelector('[data-retained-answer]').hidden,true);
  assert.equal(form.querySelector('[data-review-question="organisational_review"] small').hidden,false);
  change(form.querySelector('[data-system-assessment]'),'failed');assert.equal(form.querySelector('[data-review-question="failed_controls_followup"]').hidden,false);
  change(form.querySelector('[data-system-assessment]'),'unknown');assert.equal(form.querySelector('[data-review-question="evidence_gaps"]').hidden,false);
  form.querySelector('[data-add-root]').click();form.querySelector('[data-root-description]').value='<script>Underlying failure</script>';form.querySelector('[data-root-description]').dispatchEvent(new w.Event('input',{bubbles:true}));form.querySelector('[data-root-evidence]').value='Verified procedure';
  form.querySelector('[data-root-links] input').checked=true;
  form.querySelector('#save-investigation-progress').click();await wait(()=>payload);
- assert.equal(payload.questionnaire.review.version,2);assert.equal('potential_score' in payload.questionnaire.review,false);assert.equal(payload.questionnaire.review.action_links.length,1);assert.equal(payload.questionnaire.review.action_links[0].kind,'existing');assert.equal(payload.questionnaire.review.systems[0].assessment,'unknown');assert.equal(payload.questionnaire.review.root_causes[0].evidence,'Verified procedure');
+ assert.equal(payload.questionnaire.review.version,3);assert.equal('potential_score' in payload.questionnaire.review,false);assert.equal(payload.questionnaire.review.action_links.length,1);assert.equal(payload.questionnaire.review.action_links[0].kind,'existing');assert.equal(payload.questionnaire.review.systems[0].assessment,'unknown');assert.equal(payload.questionnaire.review.root_causes[0].evidence,'Verified procedure');
  const saved=JSON.parse(JSON.stringify(payload));bind({...event,investigation:{draft:saved}});form=root.querySelector('form');assert.equal(form.querySelector('[data-root-description]').value,'<script>Underlying failure</script>');assert.equal(form.querySelector('[data-root-links] input').checked,true);assert.equal(root.querySelector('script'),null);
  // New action links use stable item keys and survive collection, alongside existing links.
  form.querySelector('#investigation-add-action').click();await wait(()=>form.querySelector('.investigation-action-row [data-root-links]'));
  const row=form.querySelector('.investigation-action-row');row.querySelector('[data-action-title]').value='Correct underlying failure';row.querySelector('[data-root-links] input').checked=true;
  payload=null;form.querySelector('#save-investigation-progress').click();await wait(()=>payload);assert.equal(payload.questionnaire.review.action_links.length,2);assert.equal(payload.questionnaire.review.action_links.find(l=>l.kind==='new').action_key,row.dataset.key);
  const complete=w.VeroInvestigationReview.render(payload.questionnaire.review,esc);assert.ok(complete.includes('&lt;script>'));assert.match(w.VeroInvestigationReview.render(null,esc),/have not been inferred/);
+ bind({...event,investigation_review_basis:{score:3,label:'Moderate Event'}});assert.equal(root.querySelector('[data-review-question="similar_events"]').hidden,false);assert.equal(root.querySelector('[data-review-question="control_verification"]').hidden,true);
  bind({...event,investigation_review_basis:{score:null,label:'Unverified'}});assert.match(root.querySelector('[data-review-scope]').textContent,/Comprehensive.*unverified/);
  dom.window.close();console.log('PASS: adaptive depth, unknown severity, system follow-ups, retained evidence, linked existing/new actions, persistence and escaping.');
 })().catch(e=>{console.error(e);process.exitCode=1});
