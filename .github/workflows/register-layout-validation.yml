@@ -23,7 +23,11 @@ jobs:
       - run: node tests/governance-layout-browser.cjs
       - run: node --test tests/compliance-type-filters.cjs
       - run: node --test tests/risk-filters.cjs
+      - name: Collect preview artifacts
+        run: |
+          mkdir -p register-previews
+          cp ../preview/*.png register-previews/
       - uses: actions/upload-artifact@v4
         with:
           name: synthetic-register-previews
-          path: ../preview/*.png
+          path: register-previews/*.png
