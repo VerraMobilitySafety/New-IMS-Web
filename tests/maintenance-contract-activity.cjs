@@ -44,7 +44,7 @@ test('administrator site register shows all sites and hides data and navigation 
    if(u.pathname.endsWith('/client-services-sites'))return route.fulfill(role==='Administrator'?{json:{sites}}:{status:403,json:{message:'Administrator required'}});
    if(u.hostname!=='vero.test')return route.abort();
    const file=path.resolve(root,'.'+u.pathname);if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});let body=fs.readFileSync(file);
-   if(file.endsWith('.html'))body=body.toString().replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace('</body>','<script src="client-services-sites.js"></script><script src="nav.js"></script></body>');
+   if(file.endsWith('.html'))body=body.toString().replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace('</body>','<script src="client-services-sites.js"></script><script>loadSites()</script><script src="nav.js"></script></body>');
    return route.fulfill({contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css','.png':'image/png'})[path.extname(file)]||'application/octet-stream',body});
   });
   await page.goto('https://vero.test/client-services-sites.html');

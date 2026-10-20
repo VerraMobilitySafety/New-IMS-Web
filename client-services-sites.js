@@ -23,8 +23,6 @@ async function loadSites(){
   siteEl('allSiteTotal').textContent=allSites.length.toLocaleString();siteEl('activeSiteTotal').textContent=allSites.filter(s=>s.status==='Active').length.toLocaleString();siteEl('unlinkedSiteTotal').textContent=allSites.filter(s=>!s.contracts.length).length.toLocaleString();
   siteEl('siteRegister').hidden=false;siteEl('siteMessage').textContent='';drawSites();
  }catch(e){siteEl('siteMessage').textContent=e.message;siteEl('siteRetry').hidden=false;}
- finally{window.VeroPageLoader?.ready('maintenance');}
 }
 for(const id of ['siteSearch','siteContract','siteStatus'])siteEl(id).addEventListener(id==='siteSearch'?'input':'change',()=>{sitePage=0;drawSites();});
 siteEl('sitePrevious').onclick=()=>{sitePage--;drawSites();};siteEl('siteNext').onclick=()=>{sitePage++;drawSites();};siteEl('siteRetry').onclick=()=>{siteEl('siteRetry').hidden=true;void loadSites();};
-void loadSites();
