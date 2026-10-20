@@ -65,3 +65,5 @@ th{background:#f8f7f6;color:#706660;font-size:10px;font-weight:800;text-transfor
 
 
 .global-hero .hero-tools{position:absolute;right:28px;top:22px;z-index:3}.hero-tools .avatar{width:36px;height:36px;min-width:36px;border-radius:50%;display:grid;place-items:center;background:#302e2b;color:#fff;border:2px solid #fffc;font-size:11px;font-weight:800}.hero-tools .vero-account-trigger,.hero-tools .vero-account-trigger:hover{border:0;background:transparent;padding:0}.vero-account-menu small{letter-spacing:normal}@media(max-width:650px){.global-hero .hero-tools{right:18px;top:18px}}
+
+.history-people form{padding:0;border:0;box-shadow:none;margin:0}.history-people label{max-width:680px}.history-people .note{margin-top:20px}.history-people td{overflow-wrap:anywhere}.history-people h4{margin:12px 0}
