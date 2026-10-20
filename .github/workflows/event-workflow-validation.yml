@@ -19,3 +19,4 @@ jobs:
           node tests/event-history.cjs
           node tests/event-drawer.cjs
           node tests/event-dashboard.cjs
+          node tests/event-actions-dashboard.cjs
