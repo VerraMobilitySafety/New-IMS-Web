@@ -1,0 +1,8 @@
+.home-ai-box{margin:0}.home-ai-box input{min-width:0}.home-ai-box button:disabled{opacity:.55;cursor:wait}
+.vero-help-result{margin-top:18px;border-top:1px solid var(--line);padding-top:12px;font-size:13px;line-height:1.65;overflow-wrap:anywhere;color:var(--ink)}
+.vero-help-result[hidden]{display:none}.vero-help-result>p{margin:0 0 10px}.vero-help-result>small{display:block;color:#68625e;margin-bottom:10px}
+.vero-help-card{padding:14px;background:#f7f8f4;border:1px solid var(--line);border-radius:8px;margin-top:10px}
+.vero-help-card h4{font-size:13px;margin:0 0 7px}.vero-help-card a{color:#296575;text-decoration:underline;text-underline-offset:3px}
+.vero-help-card p{font-size:12px!important;margin:0!important;color:var(--ink)!important}.vero-help-card ol{padding-left:20px;margin:10px 0 0}.vero-help-card li{margin:5px 0;font-size:12px}
+.home-ai-box input:focus-visible,.home-ai-box button:focus-visible,.vero-help-card a:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+

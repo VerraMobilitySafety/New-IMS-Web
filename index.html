@@ -239,10 +239,11 @@
  <div class="panel"><div class="panel-head"><h3>My Actions</h3><span id="myActionsCount">Loading…</span></div><div class="home-actions" id="myActionsList">
   <div class="empty">Loading your actions…</div>
  </div></div>
- <div class="panel"><div class="home-ai"><div class="ai-title"><h3>VERO AI</h3><span class="beta">BETA</span></div><p>Ask questions about documents, risks, compliance and governance across Verra Mobility.</p>
-  <div class="home-ai-box"><input id="homeAI" placeholder="e.g. What are our working at heights requirements?"><button onclick="askAI()">➤</button></div>
-  <div class="ai-note">Answers use current, approved controlled information only.</div>
-  <div class="quick-q"><button onclick="setQ(this)">Show current WHS policies</button><button onclick="setQ(this)">What are our high risks?</button><button onclick="setQ(this)">When is the next document review?</button><button onclick="setQ(this)">What compliance evidence is due?</button></div>
+ <div class="panel"><div class="home-ai"><div class="ai-title"><h3>Ask Vero</h3><span class="beta">BETA</span></div><p>Find what you need and learn how to do things in Vero.</p>
+  <form id="veroHelpForm" class="home-ai-box"><input id="homeAI" aria-label="Ask Vero a question" maxlength="1000" required placeholder="Where can I find a procedure?"><button id="veroHelpSubmit" type="submit" aria-label="Ask Vero">➤</button></form>
+  <div class="ai-note">Short guidance with links to Vero pages and matching controlled documents.</div>
+  <div class="quick-q"><button type="button" onclick="setQ(this)">How do I report an incident?</button><button type="button" onclick="setQ(this)">How do I add a project risk?</button><button type="button" onclick="setQ(this)">Where is the working at heights procedure?</button></div>
+  <section id="veroHelpResult" class="vero-help-result" aria-label="Ask Vero answer" aria-live="polite" aria-atomic="true" hidden></section>
  </div></div>
 </section>
 
@@ -616,7 +617,6 @@ document.addEventListener('DOMContentLoaded',()=>{
  window.updateGreeting?.();
  loadMyActions().finally(()=>window.VeroPageLoader?.ready('home-actions'));
 });
-function askAI(){let q=document.getElementById('homeAI').value.trim();if(!q)return alert('Enter a question first.');alert('Prototype: VERO AI will route this question to the appropriate governance source.');}
 function setQ(b){document.getElementById('homeAI').value=b.textContent;document.getElementById('homeAI').focus();}
 </script>
 <script>
@@ -653,5 +653,8 @@ function setQ(b){document.getElementById('homeAI').value=b.textContent;document.
 </script>
 
 <script src="nav.js"></script>
+<link rel="stylesheet" href="vero-help.css?v=20261020">
+<script src="vero-help.js?v=20261020"></script>
 </body></html>
+
 

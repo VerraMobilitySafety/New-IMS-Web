@@ -730,6 +730,17 @@ async function loadDocuments(){
   liveDocuments=rows.map(normaliseDocument);
   populateDocumentTypeFilter();
   applyDocumentFilters();
+  const linkedDocumentId=new URLSearchParams(location.search).get('document');
+  if(linkedDocumentId){
+   const linkedDocument=liveDocuments.find(d=>String(d.id)===linkedDocumentId);
+   if(linkedDocument&&String(linkedDocument.workflowStatus).toLowerCase()==='current'&&linkedDocument.allowView){
+    openDocById(linkedDocumentId);
+   }else{
+    const notice=document.createElement('p');notice.setAttribute('role','status');notice.className='empty';
+    notice.textContent='This document is no longer current or is unavailable. Please search the current document register.';
+    body.closest('table').before(notice);
+   }
+  }
   await openLinkedImsSource();
 
  }catch(err){
