@@ -2,7 +2,7 @@ const {JSDOM}=require('jsdom'),fs=require('node:fs'),assert=require('node:assert
 const script=fs.readFileSync(__dirname+'/../incident-management.js','utf8');
 const wait=async fn=>{for(let i=0;i<100;i++){if(fn())return;await new Promise(r=>setTimeout(r,10));}throw Error('UI timed out');};
 async function scenario(deepLink=false){
- const dom=new JSDOM('<main><p id="message"></p><div class="toolbar"><button id="new-report">Report</button><button id="register">Register</button><button id="manual"></button><button id="configuration"></button></div><div id="coverage"></div><section id="content"></section></main>',{url:'https://example.invalid/incident-management.html?contract_id=5'+(deepLink?'&event=allowed':''),runScripts:'outside-only'});
+ const dom=new JSDOM('<main><p id="message"></p><div class="toolbar"><button id="new-report">Report</button><button id="register">Register</button><button id="manual"></button><button id="configuration"></button></div><div id="coverage"></div><section id="content"></section></main>',{url:'https://example.invalid/incident-management.html?contract_id=5&view=register'+(deepLink?'&event=allowed':''),runScripts:'outside-only'});
  const w=dom.window,d=w.document;w.localStorage.setItem('vero_session_token','synthetic-test');
  const event={id:'allowed',status:'Under Investigation',report:{description:'Synthetic private event',classification:{summary:'Hazard',due_date:'2026-11-01'},details:{}},investigation:{},actions:[],history:[],can_complete:false};
  const calls=[];w.fetch=async(url,init)=>{const path=new URL(url).pathname.replace('/api','');calls.push(path);let value;
@@ -21,7 +21,7 @@ async function scenario(deepLink=false){
  assert.equal(d.querySelector('#event-backdrop'),null);assert.equal(register.inert,false);assert.equal(d.body.style.overflow,'');assert.equal(new URL(w.location).searchParams.has('event'),false);assert.equal(filter.value,deepLink?'all':'open');
  const link=d.querySelector('a[data-event]');link.focus();link.dispatchEvent(new w.MouseEvent('click',{button:-1,bubbles:true,cancelable:true}));await wait(()=>d.querySelector('#event-backdrop'));d.querySelector('#event-close').click();assert.equal(d.activeElement,link);
  // A denied direct link leaves only the accessible register and a generic error.
- w.history.pushState(null,'','?event=forbidden&contract_id=5');w.dispatchEvent(new w.PopStateEvent('popstate'));await wait(()=>d.querySelector('#message').textContent.includes('access denied'));
+ w.history.pushState(null,'','?view=register&event=forbidden&contract_id=5');w.dispatchEvent(new w.PopStateEvent('popstate'));await wait(()=>d.querySelector('#message').textContent.includes('access denied'));
  assert.equal(d.querySelector('#event-backdrop'),null);assert.equal(d.querySelector('#event-rows').closest('.card'),register);assert.equal(calls.includes('/incidents/forbidden/files'),false);assert.equal(d.querySelector('#manual').hidden,true);
  dom.window.close();
 }

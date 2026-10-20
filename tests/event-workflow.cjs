@@ -19,7 +19,7 @@ async function evidenceUpload(){
 }
 
 (async()=>{
- await until(()=>d.querySelector('#event-filter'));assert.match(d.body.textContent,/No events in this view/);
+ await until(()=>d.querySelector('#incident-dashboard'));assert.equal(d.querySelector('#event-rows'),null);d.querySelector('#register').click();await until(()=>d.querySelector('#event-filter'));assert.match(d.body.textContent,/No events in this view/);
  assert.match(d.querySelector('#coverage').textContent,/Unverified/);assert.match(d.querySelector('#coverage').textContent,/not enabled/);
  d.querySelector('#new-report').click();let f=d.querySelector('#report-form');
  for(const field of d.querySelectorAll('[data-impact]')){const [a,c]=field.querySelectorAll('select');assert.equal(c.disabled,true);a.value='Potential';a.dispatchEvent(new w.Event('change'));assert.equal(c.required,true);a.value='No';a.dispatchEvent(new w.Event('change'));assert.equal(c.disabled,true);assert.equal(c.required,false);}
