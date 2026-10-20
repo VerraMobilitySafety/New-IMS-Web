@@ -54,6 +54,14 @@
 .vr-page[data-register-layout="incidents"] #incident-dashboard .vr-filters,
 .vr-page[data-register-layout="incidents"] #monthly-event-dashboard .vr-filters { margin-left:0; justify-content:flex-start; flex:1 1 auto; width:auto; }
 .vr-page[data-register-layout="incidents"] .incident-time-filters { margin-left:auto!important; flex:0 0 auto; }
+.vr-page[data-register-layout="incidents"] #incident-dashboard .vr-view-toolbar,
+.vr-page[data-register-layout="incidents"] #monthly-event-dashboard .vr-view-toolbar { display:grid!important; grid-template-columns:minmax(0,1fr) auto; align-items:start!important; }
+.vr-page[data-register-layout="incidents"] .incident-time-filters label { display:flex; align-items:center; gap:6px; font:700 10px Montserrat,Arial,sans-serif; text-transform:capitalize; }
+.vr-page[data-register-layout="incidents"] .incident-time-filters select { width:auto; max-width:220px; padding:10px 12px; border:1px solid #e5e1de; border-radius:8px; background:#fff; font:700 10px Montserrat,Arial,sans-serif; text-transform:capitalize; }
+@media(max-width:650px){
+ .vr-page[data-register-layout="incidents"] #incident-dashboard .vr-view-toolbar,
+ .vr-page[data-register-layout="incidents"] #monthly-event-dashboard .vr-view-toolbar { grid-template-columns:minmax(0,1fr); }
+}
 .vr-page[data-register-layout="incidents"] .vr-view-toolbar { border:1px solid #e5e1de; border-radius:12px; background:white; margin-bottom:18px!important; }
 .vr-page[data-register-layout="incidents"] .vr-register .vr-view-toolbar { border:0; border-radius:0; margin-bottom:0!important; }
 .vr-page[data-register-layout="incidents"] .vr-register .event-period { margin:0; padding:0; }
