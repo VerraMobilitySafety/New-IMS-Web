@@ -97,8 +97,7 @@
         <span>My Actions</span>
       </a>
 
-      <a class="placeholder" href="#" onclick="return false"
-         aria-label="My Reports — coming soon">
+      <a class="${isActive('reports.html') ? 'active' : ''}" href="reports.html">
         <span class="ico" data-lucide="chart-no-axes-column"></span>
         <span>My Reports</span>
       </a>
