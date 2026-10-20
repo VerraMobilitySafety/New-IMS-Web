@@ -53,6 +53,23 @@ el('checkNsw').onclick=async()=>{
  }catch(error){message.textContent=error.message;}
  finally{el('checkNsw').disabled=false;}
 };
+el('checkOwners').onclick=async()=>{
+ if(busy)return;el('checkOwners').disabled=true;el('applyOwners').hidden=true;
+ try{
+  const plan=await request('POST',{format:'vero-cognito-sites-v1',action:'link-site-owners'});
+  el('ownerStatus').textContent=plan.owners.map(o=>o.name+' ('+o.status+'): '+o.sites+' sites').join('\n')+'\n'+plan.matched_sites+' sites ready to link. Existing owners are preserved; unmatched emails remain unassigned.';
+  el('applyOwners').hidden=plan.matched_sites===0;
+  el('applyOwners').onclick=async()=>{
+   if(busy)return;busy=true;el('applyOwners').disabled=true;el('checkOwners').disabled=true;
+   try{const result=await request('POST',{format:'vero-cognito-sites-v1',action:'link-site-owners',apply:true,fingerprint:plan.fingerprint});el('ownerStatus').textContent=result.updated_sites+' sites linked to their Cognito owners. User access and invitation status are unchanged.';el('applyOwners').hidden=true;}
+   catch(e){el('ownerStatus').textContent=e.message;el('applyOwners').hidden=true;}
+   finally{busy=false;el('applyOwners').disabled=false;el('checkOwners').disabled=false;}
+  };
+ }catch(e){el('ownerStatus').textContent=e.message;}
+ finally{el('checkOwners').disabled=false;}
+};
 refresh().catch(e=>{el('registerStatus').textContent=e.message;});
+
+
 
 
