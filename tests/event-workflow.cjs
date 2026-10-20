@@ -12,10 +12,10 @@ async function until(fn){for(let i=0;i<100;i++){if(fn())return;await new Promise
 function set(form,name,value){form.elements.namedItem(name).value=value;}
 function submit(form){form.dispatchEvent(new w.Event('submit',{bubbles:true,cancelable:true}));}
 async function evidenceUpload(){
- const Native=w.FormData;d.querySelector('#message').textContent='';
+ const Native=w.FormData;(d.querySelector('#event-message')||d.querySelector('#message')).textContent='';
  w.FormData=class extends Native{getAll(name){return name==='files'?[{name:'synthetic.txt',size:3,arrayBuffer:async()=>new Uint8Array([1,2,3]).buffer}]:super.getAll(name);}};
  submit(d.querySelector('#upload-form'));w.FormData=Native;
- await until(()=>d.querySelector('#message').textContent==='Files uploaded.');
+ await until(()=>(d.querySelector('#event-message')||d.querySelector('#message')).textContent==='Files uploaded.');
 }
 
 (async()=>{

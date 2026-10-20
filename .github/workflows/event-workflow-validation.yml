@@ -17,3 +17,4 @@ jobs:
           node tests/event-tfnsw.cjs
           node tests/event-report-parity.cjs
           node tests/event-history.cjs
+          node tests/event-drawer.cjs
