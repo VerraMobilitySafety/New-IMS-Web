@@ -14,7 +14,7 @@ test('historical event matching previews verified links, applies the fingerprint
     if(req.method()==='POST'){posted=req.postDataJSON();linked=true;return route.fulfill({json:{linked:1,remaining:1}});}
     return route.fulfill({json:{fingerprint:'reviewed-plan',matches:linked?[]:[{event_id:'1',event_reference:'Event 1',site_id:1,site_code:'A-01',contract_group:'Source group'}],already_linked:linked?1:0,unresolved:[{event_reference:'Event 2',reason:'No explicit site reference'}]}});
    }
-   if(u.pathname.endsWith('/client-services-sites'))return route.fulfill({json:{sites:[{...site,event_summary:{...site.event_summary,total:linked?1:0,unclassified:linked?1:0}}],contracts:[],users:[]}});
+   if(u.pathname.endsWith('/client-services-sites'))return route.fulfill({json:{sites:[{...site,event_summary:{...site.event_summary,total:linked?1:0,recent:linked?1:0,unclassified:linked?1:0}}],contracts:[],users:[]}});
    if(u.hostname!=='vero.test')return route.abort();const file=path.resolve(root,'.'+u.pathname);
    if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});
    let body=fs.readFileSync(file);if(file.endsWith('.html'))body=body.toString().replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace('</body>','<script src="client-services-sites.js"></script><script>loadSites()</script></body>');
@@ -157,7 +157,7 @@ test('site event history distinguishes missing coverage, counts and impact and s
   assert.equal(await page.locator('.table-wrap').evaluate(el=>getComputedStyle(el).overflowX),'auto');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);
   assert.equal(await rows.nth(0).locator('.site-event-count strong').innerText(),'0');
-  assert.match(await rows.nth(1).innerText(),/3[\s\S]*1 in last 12 months/);
+  assert.equal(await rows.nth(1).locator('.site-event-count strong').innerText(),'1');
   assert.match(await rows.nth(2).innerText(),/Unavailable/);
   await page.getByLabel('Sort by',{exact:true}).selectOption('events');
   assert.equal(await rows.first().locator('td').first().innerText(),'B');
