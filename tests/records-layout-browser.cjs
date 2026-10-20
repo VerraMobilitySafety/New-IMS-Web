@@ -8,7 +8,7 @@ for(const width of [1440,1173,1024,768,390])for(const file of ['records.html']){
  if(!u.pathname.startsWith('/api/'))return route.abort();const p=u.pathname.replace('/api','');let data={};
  if(p==='/auth/me')data={user:{id:1,first_name:'Preview',last_name:'User',email:'preview@example.test',vero_role:'User'}};
  if(p==='/auth/my-roles')data={roles:[]};
- if(p==='/records')data={records:[{id:1,record_code:'REC-TEST',record_title:'Synthetic record',record_category:'General',source_module:'Manual',status:'Active',security_classification:'Public',owner:{user_id:1,first_name:'Preview',last_name:'User'},has_active_hold:false,retention:{rule_code:'RET-1',disposal_due_date:null}}],pending_copy_requests:0};
+ if(p==='/records')data={records:[{id:1,record_code:'REC-TEST',record_title:'Synthetic record',record_category:'General',source_module:'Manual',status:'Active',security_classification:'Public',owner:{user_id:1,first_name:'Preview',last_name:'User'},has_active_hold:false,retention:{rule_code:'RET-1',disposal_due_date:null}}],pending_copy_requests:77,my_pending_copy_requests:3};
  if(p==='/records/retention-rules')data={rules:[],permissions:{can_manage:manager}};
  if(p==='/records/holds')data={holds:[]};if(p==='/records/dispositions')data={dispositions:[]};
  if(p==='/risk-registers')data={registers:[{id:1,register_code:'RISK-GLOBAL',register_name:'Master'}]};
@@ -29,11 +29,13 @@ for(const width of [1440,1173,1024,768,390])for(const file of ['records.html']){
   const button=await page.locator("#addRecordBtn").evaluate(e=>{const s=getComputedStyle(e);return {height:e.getBoundingClientRect().height,font:s.fontFamily,size:s.fontSize,weight:s.fontWeight,padding:s.padding,border:s.borderTopWidth,radius:s.borderRadius}});
   assert.deepEqual(button,{height:43,font:"Arial, sans-serif",size:"13px",weight:"800",padding:"12px 16px",border:"0px",radius:"8px"});
   await page.waitForFunction(()=>document.getElementById('kpiMyRecords').textContent==='1');
-  assert.equal(await page.locator('#kpiCopyRequests').innerText(),'—');
+  assert.equal(await page.locator('#kpiCopyRequests').innerText(),'3','use personal count, not global 77');
   assert.equal(await page.locator('#recordsRegisterPanel details #categoryFilter').count(),1);
   assert.equal(await page.locator('#recordsRegisterPanel details select[aria-label="View"]').count(),1);
   assert.equal(await page.locator('#recordsRegisterPanel .vr-filters > #sourceFilter').count(),1,'leave All Sources in place');
   if(width===1440){
+   for(const invalid of [undefined,null,-1,'3',1.5]){await page.evaluate(value=>{window.recordsSummaryCopyCount=value;window.dispatchEvent(new Event('records-summary-change'))},invalid);assert.equal(await page.locator('#kpiCopyRequests').innerText(),'—')}
+   await page.evaluate(()=>{window.recordsSummaryCopyCount=0;window.dispatchEvent(new Event('records-summary-change'))});assert.equal(await page.locator('#kpiCopyRequests').innerText(),'0');
    await page.evaluate(()=>{window.recordsSummarySnapshot=[
     {owner:{user_id:1},security_classification:'Public',status:'Active',has_active_hold:false,retention:{disposal_due_date:'2020-01-01'}},
     {owner:{user_id:'1'},security_classification:'Confidential',status:'Disposed',has_active_hold:false,retention:{disposal_due_date:'2020-01-01'}},

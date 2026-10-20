@@ -5,7 +5,9 @@
  function render(){
   const set=(key,value,note)=>{const el=document.getElementById(key);el.textContent=value;el.nextElementSibling.textContent=note};
   const rows=window.recordsSummarySnapshot;
-  set('kpiCopyRequests','—','Your request total is currently unavailable.');
+  const requests=window.recordsSummaryCopyCount;
+  const validRequests=Array.isArray(rows)&&Number.isSafeInteger(requests)&&requests>=0;
+  set('kpiCopyRequests',validRequests?String(requests):'—',validRequests?'Your submitted or under-review copy requests.':'Your request total is currently unavailable.');
   if(!Array.isArray(rows)){
    for(const key of ['kpiTotalRecords','kpiMyRecords','kpiClassifiedRecords','kpiDueDisposal'])set(key,'—','Waiting for a successful records load.');
    return;

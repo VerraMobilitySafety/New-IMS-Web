@@ -3355,8 +3355,9 @@ body[data-records-manager="false"]
   }
  }
 
- function updateKpis(records){
+ function updateKpis(records,personalCopyCount=null){
   window.recordsSummarySnapshot=records;
+  window.recordsSummaryCopyCount=personalCopyCount;
   window.dispatchEvent(new Event('records-summary-change'));
  }
 
@@ -4325,7 +4326,7 @@ body[data-records-manager="false"]
    if(!Array.isArray(data.records))throw new Error("Invalid records response");
    enterpriseRecords = data.records;
 
-   updateKpis(enterpriseRecords);
+   updateKpis(enterpriseRecords,data.my_pending_copy_requests);
 
    populateFilter(
     'categoryFilter',
