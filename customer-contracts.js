@@ -63,6 +63,30 @@ async function editContractOwner(c){
   };
  }catch(e){error.textContent=e.message;}
 }
+
+async function editContractStatus(c){
+ if(!workspace||!c||!canEditContractOwner)return;
+ document.getElementById('contractStatusDialog')?.remove();
+ const dialog=document.createElement('dialog');dialog.id='contractStatusDialog';dialog.className='contract-owner-dialog';dialog.setAttribute('aria-labelledby','contractStatusTitle');
+ dialog.innerHTML='<form><h2 id="contractStatusTitle">Edit contract status</h2><p>'+esc(c.contract_code)+' · '+esc(c.contract_name)+'</p><label>Status<select name="status" aria-label="Contract status" disabled><option value="">Loading statuses…</option></select></label><p role="alert"></p><div class="contract-owner-actions"><button type="button">Cancel</button><button type="submit" class="primary" disabled>Save status</button></div></form>';
+ document.body.append(dialog);dialog.querySelector('[type=button]').onclick=()=>dialog.close();dialog.showModal();
+ const form=dialog.querySelector('form'),select=form.elements.status,save=form.querySelector('[type=submit]'),error=form.querySelector('[role=alert]');
+ try{
+  const options=await request('/maintenance-contracts/'+c.id+'/status');
+  select.innerHTML=options.statuses.map(s=>'<option value="'+esc(s)+'">'+esc(s)+'</option>').join('');
+  if(!options.statuses.includes(options.status))select.insertAdjacentHTML('beforeend','<option value="'+esc(options.status)+'" disabled>'+esc(options.status)+'</option>');
+  select.value=options.status;select.disabled=false;save.disabled=false;
+  form.onsubmit=async event=>{
+   event.preventDefault();save.disabled=true;select.disabled=true;error.textContent='';
+   try{
+    const result=await request('/maintenance-contracts/'+c.id+'/status',{method:'POST',body:JSON.stringify({status:select.value,status_version:options.status_version})});
+    Object.assign(c,result);dialog.close();await openContract(c);
+   }catch(e){error.textContent=e.message;}
+   finally{save.disabled=false;select.disabled=false;}
+  };
+ }catch(e){error.textContent=e.message;}
+}
+
 function drawTab(){
  document.getElementById('tabs').innerHTML=names.map(n=>'<button data-tab="'+n+'" class="'+(tab===n?'active':'')+'">'+n+'</button>').join('');
  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;drawTab();});
@@ -71,7 +95,7 @@ function drawTab(){
  if(tab==='Sites'){void window.VeroContractActivity.sites(c,el,request);return;}
  if(tab==='Events'){void window.VeroContractActivity.events(c,el,request);return;}
  if(tab==='Overview'){
-  el.innerHTML='<div class="fields">'+[['Contract reference',c.contract_code],['Customer',c.customer_name],['Contract type','Customer'],['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Compliance','Not assessed'],['Source files',c.source_count],['Linked requirements',c.requirement_count],['Scope',c.scope],['Notes',c.notes]].map(([label,value])=>'<div class="field"><label>'+esc(label)+'</label><p>'+esc(value||'—')+'</p>'+(label==='Owner'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractOwnerEdit">Edit owner</button>':'')+'</div>').join('')+'</div>';document.getElementById('contractOwnerEdit')?.addEventListener('click',()=>editContractOwner(c));return;
+  el.innerHTML='<div class="fields">'+[['Contract reference',c.contract_code],['Customer',c.customer_name],['Contract type','Customer'],['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Compliance','Not assessed'],['Source files',c.source_count],['Linked requirements',c.requirement_count],['Scope',c.scope],['Notes',c.notes]].map(([label,value])=>'<div class="field"><label>'+esc(label)+'</label><p>'+esc(value||'—')+'</p>'+(label==='Owner'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractOwnerEdit">Edit owner</button>':'')+(label==='Status'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractStatusEdit">Edit status</button>':'')+'</div>').join('')+'</div>';document.getElementById('contractOwnerEdit')?.addEventListener('click',()=>editContractOwner(c));document.getElementById('contractStatusEdit')?.addEventListener('click',()=>editContractStatus(c));return;
  }
  if(!contractDetails){el.textContent='Loading linked records…';return;}
  if(tab==='Records'){
