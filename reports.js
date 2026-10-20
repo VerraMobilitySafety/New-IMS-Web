@@ -70,6 +70,6 @@ async function run(refresh=true){if(!data)return choose();const ticket=++sequenc
 }
 $('reportSelect').addEventListener('change',choose);$('filters').addEventListener('submit',e=>{e.preventDefault();run()});$('filterFields').addEventListener('change',()=>clear());$('resetFilters').addEventListener('click',()=>{if(data){clear();fields();run()}else choose()});
 $('exportReport').addEventListener('click',()=>{if(!exportRows.length)return;const cell=v=>'"'+String(v??'').replace(/^[\s]*[=+\-@]/,m=>"'"+m).replace(/"/g,'""')+'"';const csv='\ufeff'+[...exportMeta,[],...exportRows].map(row=>row.map(cell).join(',')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='vero-'+selected()+'-'+today()+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)});
-choose();
+choose().finally(()=>window.dispatchEvent(new Event('vero-reports-ready')));
 })();
 document.getElementById('reportMenu').addEventListener('click',()=>{const open=document.getElementById('reportSidebar').classList.toggle('mobile-open');document.getElementById('reportMenu').setAttribute('aria-expanded',String(open));document.getElementById('reportMenu').textContent=open?'Close menu':'Menu'});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('reportSidebar').classList.contains('mobile-open')){document.getElementById('reportMenu').click();document.getElementById('reportMenu').focus()}});
