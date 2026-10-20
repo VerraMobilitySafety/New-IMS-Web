@@ -10,14 +10,29 @@
   if(typeof href!=='string'||!/^[-a-z]+\.html(?:\?(?:document=[1-9]\d*|document_id=[1-9]\d*&page=[1-9]\d*))?$/.test(href))return false;
   const [page,query]=href.split('?');return pages.has(page)&&(!query||page==='documents.html');
  }
- function message(value){result.hidden=false;result.replaceChildren();text('p',value,result);}
+ function scrollChat(){result.scrollTop=result.scrollHeight;}
+ function initials(){
+  try{const user=JSON.parse(localStorage.getItem('vero_current_user')||'null');const value=((user?.first_name||'').charAt(0)+(user?.last_name||'').charAt(0)).toUpperCase();if(value)return value;}catch{}
+  return document.getElementById('veroAccountAvatar')?.textContent.trim()||'You';
+ }
+ function bubble(value,user=false){
+  result.hidden=false;
+  const row=text('div','',result);row.className='vero-chat-message '+(user?'vero-chat-user':'vero-chat-vero');
+  text('span',user?initials():'V',row).className='vero-chat-avatar';
+  const content=text('div','',row);content.className='vero-chat-content';
+  text('span',user?initials():'Vero',content).className='vero-chat-name';
+  const body=text('div','',content);body.className='vero-chat-bubble';
+  if(value)text('p',value,body);scrollChat();return body;
+ }
+ function message(value){bubble(value);scrollChat();}
  form.addEventListener('submit',async event=>{
   event.preventDefault();if(button.disabled)return;
   const question=input.value.trim();
   if(!question||question.length>1000){message('Enter a question of 1 to 1,000 characters.');input.focus();return;}
   const token=localStorage.getItem('vero_session_token');
   if(!token){message('Please sign in to ask Vero a question.');return;}
-  button.disabled=true;result.setAttribute('aria-busy','true');message('Finding the right place in Vero…');
+  bubble(question,true);input.value='';
+  button.disabled=true;result.setAttribute('aria-busy','true');const reply=bubble('Vero is thinking…');reply.classList.add('vero-chat-pending');
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),30000);
   try{
    const response=await fetch(API+'/help/ask',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({question}),signal:controller.signal,cache:'no-store'});
@@ -25,20 +40,24 @@
    const data=await response.json().catch(()=>({}));
    if(!response.ok)throw Error(data.message||'Ask Vero is unavailable right now. Please try again.');
    if(!Array.isArray(data.sources)||typeof data.message!=='string')throw Error('Vero could not read this answer. Please try again.');
-   message(data.message);
-   if(typeof data.answer==='string'&&data.answer.trim())text('p',data.answer,result).className='vero-help-answer';
-   if(data.mode==='search')text('small','Matched Vero guidance · AI routing is currently unavailable.',result);
+   reply.replaceChildren();reply.classList.remove('vero-chat-pending');
+   if(!data.answer?.trim())text('p',data.message,reply);
+   if(typeof data.answer==='string'&&data.answer.trim())text('p',data.answer,reply).className='vero-help-answer';
+   if(data.mode==='search')text('small','Matched Vero guidance · AI routing is currently unavailable.',reply);
    const coverage=data.document_search;
    if(coverage){
     const notes=[];
     if(coverage.state==='Preparing'||coverage.pending>0)notes.push('Some document contents are still being indexed.');
     if(coverage.unreadable>0)notes.push('Some documents have unreadable pages or need text recognition.');
     if(coverage.state==='Ready'&&coverage.eligible===0)notes.push('No current documents are enabled for AI search.');
-    if(notes.length)text('small',notes.join(' '),result);
+    if(notes.length)text('small',notes.join(' '),reply);
    }
-   for(const source of data.sources.slice(0,3)){
+   const sources=data.sources.slice(0,3);
+   const sourceBox=sources.length?text('details','',reply):null;
+   if(sourceBox){sourceBox.className='vero-chat-sources';text('summary','Sources & guidance',sourceBox);}
+   for(const source of sources){
     if(!safeLink(source.href)||typeof source.title!=='string'||typeof source.summary!=='string')continue;
-    const card=document.createElement('article');card.className='vero-help-card';result.appendChild(card);
+    const card=document.createElement('article');card.className='vero-help-card';sourceBox.appendChild(card);
     const heading=text('h4','',card),link=text('a',source.title,heading);link.href=source.href;
     text('p',source.summary,card);
     const quotes=Array.isArray(data.quotes)?data.quotes.filter(q=>q.id===source.id&&typeof q.text==='string'):[];
@@ -46,8 +65,8 @@
     else if(typeof source.excerpt==='string')text('blockquote',source.excerpt,card);
     if(Array.isArray(source.steps)&&source.steps.length){const list=document.createElement('ol');card.appendChild(list);source.steps.slice(0,6).forEach(step=>{if(typeof step==='string')text('li',step,list);});}
    }
-  }catch(error){message(error.name==='AbortError'?'That took too long. Your question is still here—please try again.':error.message||'Ask Vero is unavailable right now. Please try again.');}
-  finally{clearTimeout(timer);button.disabled=false;result.setAttribute('aria-busy','false');}
+  }catch(error){input.value=question;reply.replaceChildren();reply.classList.remove('vero-chat-pending');text('p',error.name==='AbortError'?'That took too long. Your question is still here—please try again.':error.message||'Ask Vero is unavailable right now. Please try again.',reply);}
+  finally{clearTimeout(timer);button.disabled=false;result.setAttribute('aria-busy','false');scrollChat();}
  });
 })();
 
