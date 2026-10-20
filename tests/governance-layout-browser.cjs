@@ -16,7 +16,7 @@ for(const width of [1440,1024,768,390])for(const file of ['records.html','risk.h
  if(p==='/risk/hierarchical-register')data={rows:[{kind:'category',id:4,tier:4,name:'Synthetic domain',status:'Active'}]};
  if(p==='/risk/master-aggregation')data={aggregations:[]};if(p==='/risk/approved-matrix-positions')data={positions:[]};
  if(p==='/risk/classification-exposure-summary')data={summaries:[]};if(p==='/risk/operational-contexts')data={projects:[],contracts:[],vm_locations:[]};
- if(p==='/incidents/options')data={users:[],unverified:{},administrator:false,injury_register:false};
+ if(p==='/incidents/options')data={users:[],unverified:{},administrator:manager,injury_register:false};
  if(p==='/incidents')data={events:[{id:'test-event',status:'Under investigation',report:{description:'Synthetic road event',classification:{summary:'Safety',due_date:'2099-01-01'}}},{id:'closed-event',status:'Complete',report:{description:'Synthetic completed event',classification:{summary:'Quality',due_date:'2099-01-01'}}}]};
  if(p==='/incidents/dashboard')data={metrics:{events:2,under_investigation:1,completed:1,awaiting_assignment:0,active_investigations:1,overdue:0}};
  if(p==='/incidents/analytics')data={as_of:'2026-10-21',total:0,months:[],types:{},domains:{},notice:''};
@@ -47,6 +47,11 @@ for(const width of [1440,1024,768,390])for(const file of ['records.html','risk.h
    await page.locator(tab==='overview'?'#incident-dashboard .vr-view-toolbar':'#monthly-event-dashboard .vr-view-toolbar').waitFor();
   }
   assert.equal(await page.locator('#new-report').evaluate(el=>getComputedStyle(el).height),'43px');
+  assert.match(await page.locator('#new-report').innerText(),/\+ Report an Event/);
+  assert.equal(await page.locator('.vr-actions .incident-admin-view').isVisible(),true);
+  assert.equal(await page.locator('[data-report-tab="overview"]').innerText(),'Status');
+  assert.equal(await page.getByText('Based on when the event occurred. Includes events without a confirmed date.',{exact:true}).count(),0);
+  assert.equal(await page.locator('.vr-filters').evaluate(el=>getComputedStyle(el).textTransform),'capitalize');
   await page.getByLabel('View',{exact:true}).selectOption('register');await page.locator('#event-rows a').first().waitFor();
  }
  await page.locator('#veroPageLoader').waitFor({state:'hidden'});// Risk deliberately restores its pre-layout mobile behavior.
@@ -54,6 +59,7 @@ for(const width of [1440,1024,768,390])for(const file of ['records.html','risk.h
  await page.evaluate(()=>scrollTo(0,0));
  await page.screenshot({path:path.join(out,file.replace('.html','')+'-register-'+width+'.png'),fullPage:true});
  if(file==='records.html'){manager=false;await page.reload();await page.locator('body[data-records-manager="false"]').waitFor();assert.equal(await page.locator('.records-kpis').isVisible(),false);assert.equal(await page.locator('#addRecordBtn').isVisible(),false);assert.equal(await page.locator('#recordsRegisterPanel').getByLabel('View',{exact:true}).locator('option').count(),1);assert.equal(await page.locator('#classificationFilter').isVisible(),false)}
+ if(file==='incident-management.html'){manager=false;await page.reload();await page.locator('body[data-incident-administrator="false"]').waitFor();await page.locator('#event-rows a').first().waitFor();assert.equal(await page.getByLabel('View',{exact:true}).isVisible(),false);assert.equal(await page.locator('#new-report').isVisible(),true)}
  assert.deepEqual(errors,[]);console.log('PASS '+file+' '+width+'px layout, existing controls and role visibility');await context.close();
 }
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});

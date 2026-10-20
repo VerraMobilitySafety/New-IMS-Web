@@ -24,6 +24,6 @@ async function select(period){const old=d.querySelector('#event-period');old.val
  const list=calls.findLast(u=>u.pathname.endsWith('/events'));assert.equal(list.searchParams.get('date_from'),'2001-01-01');assert.equal(list.searchParams.get('date_to'),'2001-01-31');
  d.querySelector('[data-event]').click();await wait(()=>d.querySelector('#event-backdrop'));d.querySelector('#event-close').click();assert.equal(new URL(w.location).searchParams.get('date_to'),'2001-01-31');assert.equal(d.querySelector('#event-period').value,'custom');
  d.querySelector('#dashboard').click();await wait(()=>d.querySelector('#incident-dashboard'));assert.equal(d.querySelector('#event-period').value,'custom');
- await select('all');assert.equal(latest().searchParams.has('date_from'),false);assert.equal(latest().searchParams.has('date_to'),false);assert.match(d.querySelector('.event-period').textContent,/Includes events without a confirmed date/);
+ await select('all');assert.equal(latest().searchParams.has('date_from'),false);assert.equal(latest().searchParams.has('date_to'),false);assert.doesNotMatch(d.querySelector('.event-period').textContent,/Based on when the event occurred|Includes events without a confirmed date/);
  dom.window.close();console.log('PASS: rolling and custom occurrence-date ranges, leap-day clamping, validation, dashboard/register/drawer retention and All time reset.');
 })().catch(e=>{console.error(e);dom.window.close();process.exitCode=1;});
