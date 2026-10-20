@@ -55,7 +55,7 @@
     if(!show){
      try{
       const response=await fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/auth/my-roles',{headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store'});
-      if(response.ok){const roles=await response.json();show=Array.isArray(roles.roles)&&roles.roles.some(role=>role.role_name==='Compliance Officer')}
+      if(response.ok){const roles=await response.json();show=Array.isArray(roles.roles)&&roles.roles.some(role=>role.role_name==='Compliance Controller')}
      }catch{}
     }
     // Summary visibility only: do not change recordsManager or governance permissions.

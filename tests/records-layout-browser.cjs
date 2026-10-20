@@ -68,13 +68,13 @@ await page.locator('#recordsTableBody [data-record-id]').waitFor();
  await page.screenshot({path:path.join(out,file.replace('.html','')+'-button-cards-'+width+'.png'),fullPage:true});
  if(file==='records.html'){manager=false;await page.reload();await page.locator('body[data-records-manager="false"]').waitFor();assert.equal(await page.locator('.records-kpis').isVisible(),false);assert.equal(await page.locator('#addRecordBtn').isVisible(),false);assert.equal(await page.locator('#recordsRegisterPanel').getByLabel('View',{exact:true}).locator('option').count(),1);assert.equal(await page.locator('#classificationFilter').isVisible(),false)}
  if(width===1440){
-  for(const scenario of ['Administrator','Compliance Officer']){
-   summaryRole=scenario==='Administrator'?'Administrator':'User';businessRoles=scenario==='Compliance Officer'?[{id:4,role_name:'Compliance Officer'}]:[];
+  for(const scenario of ['Administrator','Compliance Controller']){
+   summaryRole=scenario==='Administrator'?'Administrator':'User';businessRoles=scenario==='Compliance Controller'?[{id:4,role_name:'Compliance Controller'}]:[];
    await page.reload();await page.locator('.records-kpis[data-personal-summary-visible="true"]').waitFor();
    assert.equal(await page.locator('#addRecordBtn').isVisible(),false,'summary role never enables record registration');
    assert.equal(await page.locator('#recordsRegisterPanel').getByLabel('View',{exact:true}).locator('option').count(),1,'summary role never enables governance panels');
   }
-  summaryRole='User';businessRoles=[{role_name:'Compliance officer'}];await page.reload();await page.locator('body[data-records-manager="false"]').waitFor();assert.equal(await page.locator('.records-kpis').isVisible(),false,'only canonical active business role returned by API enables cards');
+  for(const role of ['Compliance controller','Compliance Officer']){summaryRole='User';businessRoles=[{role_name:role}];await page.reload();await page.locator('.records-kpis[data-personal-summary-visible="false"]').waitFor({state:'attached'});assert.equal(await page.locator('.records-kpis').isVisible(),false,'only canonical active Compliance Controller enables cards')}
  }
  assert.deepEqual(errors,[]);console.log('PASS '+file+' '+width+'px layout, existing controls and role visibility');await context.close();
 }
