@@ -1,0 +1,7 @@
+.vr-page[data-register-layout="documents"] #documentsSummary { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.vr-page[data-register-layout="documents"] #documentsSummary,
+.vr-page[data-register-layout="documents"] #documentsSummary .vr-card { font-family:Montserrat,Verdana,Arial,sans-serif; }
+.vr-page[data-register-layout="documents"] #documentsSummary small { display:block; margin-top:8px; font-family:inherit; font-size:11px; line-height:1.5; color:#68615b; }
+@media(max-width:750px) {
+ .vr-page[data-register-layout="documents"] #documentsSummary { grid-template-columns:1fr; }
+}

@@ -63,7 +63,7 @@ const contractor={contractors:[{id:1,contractor_code:'CTR-TEST',company_name:'Ex
    await page.locator('.vr-more summary').click();await page.getByRole('button',{name:/Add Worker/}).click();assert.equal(await page.locator('#modal.open').count(),1);
    await page.getByRole('button',{name:'Cancel',exact:true}).click();
   }
-  assert.equal(await page.locator('.vr-summary>.vr-card').count(),4);
+  assert.equal(await page.locator('.vr-summary>.vr-card').count(),file==='documents.html'?3:4);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no page overflow');
   await page.screenshot({path:path.join(out,file.replace('.html','')+'-register-'+width+'.png'),fullPage:true});
   assert.deepEqual(errors,[]);console.log('PASS '+file+' '+width+'px: existing filters/actions/views and common layout');await context.close();

@@ -95,6 +95,7 @@
          href="my-actions.html">
         <span class="ico" data-lucide="list-checks"></span>
         <span>My Actions</span>
+        <span id="vero-my-actions-count" class="vero-actions-count" hidden aria-label="Outstanding actions"></span>
       </a>
 
       <a class="${isActive('reports.html') ? 'active' : ''}" href="reports.html">
@@ -181,11 +182,18 @@
         <span>Records Management</span>
       </a>
 
-      <a class="${isActive('risk.html') ? 'active' : ''}"
-         href="risk.html">
-        <span class="ico" data-lucide="triangle-alert"></span>
-        <span>Risk Management</span>
-      </a>
+      <div class="vero-nav-group ${['risk.html', 'safe-work-method-statement.html', 'take-5.html'].includes(path) ? 'open' : ''}" id="riskNavGroup">
+        <div class="vero-nav-parent">
+          <a class="${isActive('risk.html') ? 'active' : ''}" href="risk.html">
+            <span class="ico" data-lucide="triangle-alert"></span><span>Risk Management</span>
+          </a>
+          <button class="vero-nav-expand" type="button" aria-label="Expand Risk Management" aria-controls="riskNavChildren" aria-expanded="${['risk.html', 'safe-work-method-statement.html', 'take-5.html'].includes(path) ? 'true' : 'false'}"><span>›</span></button>
+        </div>
+        <div class="vero-nav-children" id="riskNavChildren">
+          <a class="${isActive('safe-work-method-statement.html') ? 'active' : ''}" href="safe-work-method-statement.html" ${isActive('safe-work-method-statement.html') ? 'aria-current="page"' : ''}>Safe Work Method Statement</a>
+          <a class="${isActive('take-5.html') ? 'active' : ''}" href="take-5.html" ${isActive('take-5.html') ? 'aria-current="page"' : ''}>Take 5</a>
+        </div>
+      </div>
 
       <a class="${isActive('insurance.html') ? 'active' : ''}" href="insurance.html">
         <span class="ico" data-lucide="shield-check"></span>
@@ -273,6 +281,24 @@
       #vero-nav .vero-risk-navigation > a {margin-left:34px!important;font-size:11px!important}
       #vero-nav .ico { width:20px;min-width:20px;display:inline-flex;align-items:center;justify-content:center; }
       #vero-nav .ico svg { width:17px;height:17px;display:block;stroke:currentColor; }
+      #vero-nav .vero-actions-count {
+        margin-left:auto;
+        flex:0 0 auto;
+        min-width:22px;
+        height:22px;
+        padding:0 6px;
+        border-radius:999px;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        background:#A9C23F;
+        color:#252321;
+        font:800 11px Montserrat,Verdana,Arial,sans-serif;
+        line-height:1;
+      }
+      #vero-nav .vero-actions-count[hidden] { display:none; }
+      #vero-nav a:has(.vero-actions-count) { min-width:0; }
+      #vero-nav .vero-actions-count { white-space:nowrap; }
       #vero-nav .vero-nav-parent {
         display: flex;
         align-items: center;
@@ -344,6 +370,38 @@
     clientExpand.setAttribute('aria-expanded', String(open));
   });
 
+  const riskGroup = document.getElementById('riskNavGroup');
+  const riskExpand = riskGroup?.querySelector('.vero-nav-expand');
+  riskExpand?.addEventListener('click', () => {
+    const open = riskGroup.classList.toggle('open');
+    riskExpand.setAttribute('aria-expanded', String(open));
+  });
+  /* Signed-in user's outstanding actions, from the same API as My Actions. */
+  async function updateMyActionsBadge() {
+    const badge = document.getElementById('vero-my-actions-count');
+    const token = localStorage.getItem('vero_session_token');
+    if (!badge || !token) { if (badge) badge.hidden = true; return; }
+    try {
+      const response = await fetch(
+        'https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/my-actions',
+        { headers: { Authorization: 'Bearer ' + token, Accept: 'application/json' }, cache: 'no-store' }
+      );
+      if (!response.ok) throw new Error('Actions request returned ' + response.status);
+      const data = await response.json();
+      if (!Array.isArray(data.actions)) throw new Error('Missing actions list');
+      const count = data.actions.length;
+      badge.textContent = count > 99 ? '99+' : String(count);
+      badge.setAttribute('aria-label', count + ' outstanding actions');
+      badge.hidden = count === 0;
+    } catch (error) {
+      badge.hidden = true;
+      console.warn('VERO could not refresh the My Actions count', error);
+    }
+  }
+  updateMyActionsBadge();
+  window.addEventListener('pageshow', updateMyActionsBadge);
+  window.addEventListener('focus', updateMyActionsBadge);
+
   /* Prevent main navigation labels wrapping */
   nav.querySelectorAll(
     '.nav-section > a > span:last-child'
@@ -351,5 +409,6 @@
     label.style.whiteSpace = 'nowrap';
   });
 })();
+
 
 
