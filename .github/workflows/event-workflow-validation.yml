@@ -37,3 +37,5 @@ jobs:
       - run: node tests/event-investigation-history.cjs
 
       - run: node tests/event-investigation-form.cjs
+
+      - run: node tests/event-investigation-prefill.cjs
