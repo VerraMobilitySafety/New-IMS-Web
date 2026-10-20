@@ -43,6 +43,10 @@ for(const width of [1440,1024,768,390])for(const file of ['records.html','risk.h
     const cards=el.querySelector('.vr-summary'),bar=el.querySelector('.vr-view-toolbar');
     return {cardsFirst:!!(cards.compareDocumentPosition(bar)&Node.DOCUMENT_POSITION_FOLLOWING),segments:bar.querySelectorAll('.vr-segments [data-report-tab]').length,period:!!bar.querySelector('#event-period')};
    });assert.deepEqual(layout,{cardsFirst:true,segments:5,period:true});
+   const alignment=await page.locator('.vr-view-toolbar').evaluate(el=>{
+    const filters=el.querySelector('.vr-filters'),time=el.querySelector('.incident-time-filters');
+    return {separate:time.parentElement===el&&!filters.contains(time),left:getComputedStyle(filters).justifyContent,gap:getComputedStyle(el.parentElement).gap};
+   });assert.deepEqual(alignment,{separate:true,left:'flex-start',gap:'12px'});
    await page.locator('[data-report-tab="'+tab+'"]').click();
    await page.locator(tab==='overview'?'#incident-dashboard .vr-view-toolbar':'#monthly-event-dashboard .vr-view-toolbar').waitFor();
   }
