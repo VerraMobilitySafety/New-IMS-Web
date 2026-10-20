@@ -1,7 +1,7 @@
 /* Counts describe the authorised current-document register, independent of filters. */
 (()=>{
  function reviewDay(value){
-  const match=/^(\d{4})-(\d{2})-(\d{2})(?:$|T)/.exec(String(value||''));
+  const match=/^(\d{4})-(\d{2})-(\d{2})(?:T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,9})?(?:Z|[+-](?:0\d|1[0-4]):[0-5]\d))?$/.exec(String(value||''));
   if(!match)return null;
   const year=Number(match[1]),month=Number(match[2])-1,day=Number(match[3]),date=new Date(Date.UTC(year,month,day));
   return date.getUTCFullYear()===year&&date.getUTCMonth()===month&&date.getUTCDate()===day?date.getTime()/86400000:null;

@@ -35,7 +35,17 @@ for(const width of [1440,1173,1024,768,390]){
  if(width>750)assert.equal(new Set(tops).size,1,'three desktop cards in one row');
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
  await page.locator('#veroPageLoader').waitFor({state:'hidden'});await page.screenshot({path:path.join(out,'documents-summary-'+width+'.png'),fullPage:true});
- if(width===1440){fail=true;await page.evaluate(()=>loadDocuments());for(const key of ['total','mine','due'])assert.equal(await page.locator('[data-count="'+key+'"]').innerText(),'—');fail=false;empty=true;await page.evaluate(()=>loadDocuments());for(const key of ['total','mine','due'])assert.equal(await page.locator('[data-count="'+key+'"]').innerText(),'0')}
+ if(width===1440){
+  for(const invalid of ['2026-10-20Tgarbage','2026-10-20T25:99:00Z','2026-10-20T24:00:00Z','2026-10-20extra']){
+   await page.evaluate(value=>{liveDocuments[0].nextReviewDate=value;applyDocumentFilters()},invalid);
+   assert.equal(await page.locator('[data-count="due"]').innerText(),'2 known',invalid);
+  }
+  for(const valid of ['2026-10-20T12:30:00Z','2026-10-20T12:30:00.123+10:00']){
+   await page.evaluate(value=>{liveDocuments[0].nextReviewDate=value;applyDocumentFilters()},valid);
+   assert.equal(await page.locator('[data-count="due"]').innerText(),'3 known',valid);
+  }
+  fail=true;await page.evaluate(()=>loadDocuments());for(const key of ['total','mine','due'])assert.equal(await page.locator('[data-count="'+key+'"]').innerText(),'—');fail=false;empty=true;await page.evaluate(()=>loadDocuments());for(const key of ['total','mine','due'])assert.equal(await page.locator('[data-count="'+key+'"]').innerText(),'0')
+ }
  assert.deepEqual(errors,[]);console.log('PASS Documents '+width+'px: authenticated counts, 0/29/30-day boundaries, missing dates, A-Z and stable ties, filters, one row, load failure/empty handling');await context.close();
 }
 }finally{await browser.close()}})().catch(e=>{console.error(e);process.exit(1)});
