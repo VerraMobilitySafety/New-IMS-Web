@@ -44,3 +44,6 @@
  .vr-page[data-register-layout="risk"] .vero-risk-filter-panels { grid-template-columns:1fr!important; }
  .vr-page[data-register-layout="incidents"] .main { max-width:100%; }
 }
+@media(min-width:751px) and (max-width:850px){
+ .vr-page[data-register-layout="incidents"] .main { margin-left:300px!important; width:calc(100% - 300px)!important; }
+}
