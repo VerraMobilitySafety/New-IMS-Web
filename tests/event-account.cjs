@@ -13,6 +13,6 @@ async function scenario(admin){
  const trigger=d.querySelector('#veroAccountTrigger');trigger.click();assert.equal(trigger.getAttribute('aria-expanded'),'true');assert(d.querySelector('#veroAccount').classList.contains('open'));
  d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert.equal(trigger.getAttribute('aria-expanded'),'false');assert.equal(d.activeElement,trigger);
  trigger.click();d.querySelector('#incident-dashboard').click();assert.equal(trigger.getAttribute('aria-expanded'),'false');
- trigger.click();d.querySelector('#veroAccountSignOut').click();await wait(()=>!w.localStorage.getItem('vero_session_token'));assert.equal(w.localStorage.getItem('vero_current_user'),null);assert.equal(calls.find(c=>c.path==='/auth/logout').init.method,'POST');dom.window.close();
+ w.localStorage.setItem('vero_session_token','refreshed-synthetic-token');trigger.click();d.querySelector('#veroAccountSignOut').click();await wait(()=>!w.localStorage.getItem('vero_session_token'));assert.equal(w.localStorage.getItem('vero_current_user'),null);assert.equal(calls.find(c=>c.path==='/auth/logout').init.method,'POST');assert.equal(calls.find(c=>c.path==='/auth/logout').init.headers.Authorization,'Bearer refreshed-synthetic-token');dom.window.close();
 }
 (async()=>{await scenario(true);await scenario(false);console.log('PASS: authenticated header identity, escaped profile data, admin-only management link, menu dismissal and standard sign-out cleanup.');})().catch(e=>{console.error(e);process.exitCode=1;});
