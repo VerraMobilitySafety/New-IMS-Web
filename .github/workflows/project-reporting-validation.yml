@@ -1,10 +1,10 @@
 name: Project reporting and delivery validation
 on:
   pull_request:
-    paths: ['project-reporting.*', 'project-delivery.js', 'project-workspace.html', 'project-management.html', 'tests/project-reporting-browser.cjs', '.github/workflows/project-reporting-validation.yml']
+    paths: ['project-team.js', 'tests/project-team-browser.cjs', 'project-reporting.*', 'project-delivery.js', 'project-workspace.html', 'project-management.html', 'tests/project-reporting-browser.cjs', '.github/workflows/project-reporting-validation.yml']
   push:
     branches: [main, feature/project-monthly-reporting]
-    paths: ['project-reporting.*', 'project-delivery.js', 'project-workspace.html', 'project-management.html', 'tests/project-reporting-browser.cjs', '.github/workflows/project-reporting-validation.yml']
+    paths: ['project-team.js', 'tests/project-team-browser.cjs', 'project-reporting.*', 'project-delivery.js', 'project-workspace.html', 'project-management.html', 'tests/project-reporting-browser.cjs', '.github/workflows/project-reporting-validation.yml']
 permissions:
   contents: read
 jobs:
@@ -18,8 +18,10 @@ jobs:
       - run: npm install --no-save playwright
       - run: npx playwright install --with-deps chromium
       - run: node tests/project-first-fixes.cjs
+      - run: node tests/project-execution-initialization.cjs
       - run: node tests/project-document-viewer.cjs
       - run: node tests/project-reporting-browser.cjs
+      - run: node tests/project-team-browser.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

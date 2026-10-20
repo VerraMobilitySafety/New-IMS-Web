@@ -1054,6 +1054,7 @@ async function loadMasterContract(){
 }
 async function uploadMasterContract(){
  if(!currentProject?.id)return alert('Save the project draft first so VERO can attach the contract to the project.');
+ if(currentProject.can_edit!==true)return alert('Project edit permission is required to upload documents.');
  const input=document.getElementById('masterContractFile');
  const file=input?.files?.[0]; if(!file)return alert('Choose a contract file first.');
  const card=document.getElementById('masterContractCard'); if(card)card.textContent='Uploading contract…';
@@ -1681,6 +1682,7 @@ async function openProjectExecution(p){
   const d=await res.json().catch(()=>({}));
   if(!res.ok)throw new Error(d.message||'Unable to load Project Execution');
   currentExecution=d.execution;
+  const needsInitialization=d.execution_initialized===false||d.checklist_initialization_required===true;
   const items=currentExecution.items||[];
   const sections=[...new Set(items.map(x=>x.section_name))];
   const answered=items.filter(x=>x.response).length;
@@ -1696,14 +1698,14 @@ async function openProjectExecution(p){
     <div style="opacity:.72;margin-top:4px">items updated</div>
    </section>
    ${sections.length?sections.map(section=>`<div style="margin:28px 0 12px"><h2 style="margin:0">${esc(section)}</h2></div>${items.filter(x=>x.section_name===section).map(executionItemHtml).join('')}`).join(''):
-     `<section class="approval-section"><h3>No execution template found</h3><p>This project type does not yet have execution items configured.</p></section>`}
+     `<section class="approval-section"><h3>${needsInitialization?'Execution checklist not initialized':'No execution template found'}</h3><p>${needsInitialization?(d.is_project_manager?'Select Initialize Project Execution to prepare the checklist.':'The assigned Project Manager or Administrator must initialize execution.'):'This project type does not yet have execution items configured.'}</p></section>`}
    <section class="approval-section"><h3>Overall Comments</h3><textarea id="executionOverallComments" style="width:100%;min-height:110px">${esc(currentExecution.overall_comments||'')}</textarea></section>
    <div id="executionError" class="approval-error"></div><div id="executionSuccess" class="approval-success"></div>
   </div>`;
   body.querySelectorAll('input,textarea,select').forEach(el=>{if(!d.is_project_manager)el.disabled=true});
   const foot=document.querySelector('#setupPanel .setup-foot');
   foot.innerHTML=d.is_project_manager
-    ? `<button id="executionSaveBtn" class="btn green" type="button">Save Project Execution</button>`
+    ? `<button id="executionSaveBtn" class="btn green" type="button">${needsInitialization?'Initialize Project Execution':'Save Project Execution'}</button>`
     : `VERO Project Execution • Read only`;
   const saveBtn=document.getElementById('executionSaveBtn');
   if(saveBtn) saveBtn.addEventListener('click',saveProjectExecution);
@@ -1725,9 +1727,9 @@ async function saveProjectExecution(){
   const res=await apiFetch(PROJECT_EXECUTION_API(currentProject.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items,overall_comments:document.getElementById('executionOverallComments')?.value||''})});
   const d=await res.json().catch(()=>({}));
   if(!res.ok)throw new Error(d.message||'Unable to save Project Execution');
-  if(ok){ok.textContent='Project Execution saved.';ok.style.display='block';ok.scrollIntoView({behavior:'smooth',block:'nearest'})}
-  if(btn)btn.textContent='Saved ✓';
-  setTimeout(()=>{if(btn){btn.disabled=false;btn.textContent='Save Project Execution'}},1200);
+  await openProjectExecution({raw:currentProject});
+  const saved=document.getElementById('executionSuccess');
+  if(saved){saved.textContent='Project Execution saved.';saved.style.display='block';saved.scrollIntoView({behavior:'smooth',block:'nearest'})}
  }catch(e){
   console.error(e);
   if(er){er.textContent=e.message;er.style.display='block';er.scrollIntoView({behavior:'smooth',block:'nearest'})}

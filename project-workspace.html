@@ -362,6 +362,7 @@
 <link rel="stylesheet" href="project-reporting.css?v=20261020-monthly">
 <script src="project-reporting.js?v=20261020-monthly2"></script>
 <script src="project-delivery.js?v=20261020-delivery"></script>
+<script src="project-team.js?v=20261020-team"></script>
 </head>
 <body><div class="app"><aside class="sidebar">
  <div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
@@ -429,6 +430,7 @@
  <section id="compliance" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Compliance</h2><div><button type="button" class="btn green" onclick="createProjectCompliance()">Add Requirement</button> <span id="projectComplianceCount">Loading…</span></div></div><div id="projectComplianceList" class="empty-state">Loading applicable obligations…</div></div></section>
 
  <section id="documents" class="ws-view">
+ <div id="projectTeam" class="panel"></div>
  <form id="projectContractUpload" class="panel" hidden onsubmit="uploadProjectContract(event)" style="padding:18px;margin-bottom:16px">
   <h2 style="font-size:18px;margin-top:0">Add Master Services Contract</h2>
   <p>Attach a contract to this project. Existing documents are retained.</p>
@@ -536,7 +538,7 @@ function renderProjectWorkflow(){
    action.textContent=workflow.actionLabel+' →';host.appendChild(action);
  }
  const upload=document.getElementById('projectContractUpload');
- if(upload)upload.hidden=!signedInUser||workflow.terminal;
+ if(upload)upload.hidden=!signedInUser||currentProject?.can_edit!==true;
 }
 function totalCost(r){return ['labour_cost_budget','materials_cost_budget','travel_cost_budget','subcontractor_cost_budget','other_cost_budget'].reduce((a,k)=>a+(Number(r?.[k])||0),0)}
 function renderRequest(r){currentRequest=r;renderProjectWorkflow();if(r.contract_start_date)setText('contractStart',fmtDate(r.contract_start_date));if(r.contract_expiry_date)setText('contractEnd',fmtDate(r.contract_expiry_date));renderMilestoneOverview();}
@@ -568,7 +570,7 @@ async function loadProjectDocuments(projectId){
 let projectContractUploadPending=false;
 async function uploadProjectContract(event){
  event.preventDefault();
- if(projectContractUploadPending||!currentProject?.id||!signedInUser||VeroProjectWorkflow.resolve(currentProject).terminal)return;
+ if(projectContractUploadPending||!currentProject?.id||!signedInUser||currentProject.can_edit!==true)return;
  const input=document.getElementById('projectContractFile'),file=input.files?.[0];
  const status=document.getElementById('projectContractUploadStatus'),button=document.getElementById('projectContractUploadButton');
  if(!file){status.textContent='Choose a contract file first.';return;}
@@ -916,7 +918,7 @@ async function loadProjectGovernance(id){
 }
 
 const initialWorkspaceLoads=[];
-async function loadProject(){const id=new URLSearchParams(location.search).get('id')||new URLSearchParams(location.search).get('project'),err=document.getElementById('loadError');if(!id){err.style.display='block';err.textContent='No project ID was supplied in the URL.';return}try{const res=await apiFetch(PROJECTS_API,{cache:'no-store'});if(!res.ok)throw new Error('Projects API returned '+res.status);const data=await res.json(),rows=Array.isArray(data)?data:(data.projects||[]),p=rows.find(x=>String(x.id)===String(id));if(!p)throw new Error('Project '+id+' was not found in the VERO Projects Register.');renderProject(p);initialWorkspaceLoads.push(Promise.allSettled([loadProjectGovernance(p.id),openProjectRiskDeepLink()]));await loadProjectDocuments(p.id);void VeroProjectReporting.mountProject({project:p,fetch:apiFetch,baseUrl:API_BASE});void VeroProjectDelivery.mount({project:p,fetch:apiFetch,baseUrl:API_BASE});const [rr,mr]=await Promise.all([apiFetch(PROJECT_REQUEST_API(p.id),{cache:'no-store'}),apiFetch(PROJECT_MILESTONES_API(p.id),{cache:'no-store'})]);if(mr.ok)currentMilestones=(await mr.json()).milestones||[];if(rr.status===404){renderNoRequest();renderMilestoneOverview();return}if(!rr.ok)throw new Error('New Project Request API returned '+rr.status);renderRequest((await rr.json()).request);}catch(e){err.style.display='block';err.textContent='Unable to load this project from VERO. '+e.message}}
+async function loadProject(){const id=new URLSearchParams(location.search).get('id')||new URLSearchParams(location.search).get('project'),err=document.getElementById('loadError');if(!id){err.style.display='block';err.textContent='No project ID was supplied in the URL.';return}try{const res=await apiFetch(PROJECTS_API,{cache:'no-store'});if(!res.ok)throw new Error('Projects API returned '+res.status);const data=await res.json(),rows=Array.isArray(data)?data:(data.projects||[]),p=rows.find(x=>String(x.id)===String(id));if(!p)throw new Error('Project '+id+' was not found in the VERO Projects Register.');renderProject(p);initialWorkspaceLoads.push(Promise.allSettled([loadProjectGovernance(p.id),openProjectRiskDeepLink()]));await loadProjectDocuments(p.id);void VeroProjectTeam.mount({project:p,fetch:apiFetch,baseUrl:API_BASE});void VeroProjectReporting.mountProject({project:p,fetch:apiFetch,baseUrl:API_BASE});void VeroProjectDelivery.mount({project:p,fetch:apiFetch,baseUrl:API_BASE});const [rr,mr]=await Promise.all([apiFetch(PROJECT_REQUEST_API(p.id),{cache:'no-store'}),apiFetch(PROJECT_MILESTONES_API(p.id),{cache:'no-store'})]);if(mr.ok)currentMilestones=(await mr.json()).milestones||[];if(rr.status===404){renderNoRequest();renderMilestoneOverview();return}if(!rr.ok)throw new Error('New Project Request API returned '+rr.status);renderRequest((await rr.json()).request);}catch(e){err.style.display='block';err.textContent='Unable to load this project from VERO. '+e.message}}
 function field(l,v){return `<div class="detail"><label>${esc(l)}</label><strong>${esc(text(v))}</strong></div>`}
 function openRequest(){editRequest();document.getElementById('setupPanel').classList.add('show');document.body.style.overflow='hidden';}
 function val(name,def=''){const v=currentRequest?.[name];return v===null||v===undefined?def:v}
