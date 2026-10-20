@@ -42,3 +42,26 @@ th{background:#f8f7f6;color:#706660;font-size:10px;font-weight:800;text-transfor
 .incident-actions-table td:first-child{min-width:270px;max-width:500px;overflow-wrap:anywhere}.incident-actions-table td{vertical-align:top}.action-pagination{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px}.action-pagination button{margin-left:8px}#incident-actions-dashboard .section-title h3{margin-bottom:6px}#incident-actions-dashboard .section-title>label{min-width:215px}#incident-actions-dashboard .dashboard-history button{margin-top:12px}@media(max-width:650px){#incident-actions-dashboard .section-title{display:block}.action-pagination{align-items:flex-start;flex-direction:column}}
 
 .event-period{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin:0 0 20px}.event-period>label{min-width:185px;margin:0}.event-period>p{margin:0 0 10px;font-size:10px;flex:1;min-width:200px}#period-custom{display:flex;gap:12px;align-items:flex-end}#period-custom[hidden]{display:none}#period-custom label{margin:0}#period-custom button{margin-bottom:1px;white-space:nowrap}@media(max-width:650px){#period-custom{flex-wrap:wrap}.event-period{align-items:stretch}.event-period>label{flex:1}}
+
+/* VERO GLOBAL ACCOUNT MENU */
+.vero-account{position:relative;z-index:50}
+.vero-account-trigger{display:flex;align-items:center;gap:9px;border:0;background:transparent;padding:0;cursor:pointer;font-family:inherit;color:inherit}
+.vero-account-trigger .avatar{cursor:pointer}
+.vero-account-name{font-size:11px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.22);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vero-account-caret{font-size:9px;color:rgba(255,255,255,.9);transition:transform .16s ease}
+.vero-account.open .vero-account-caret{transform:rotate(180deg)}
+.vero-account-menu{position:absolute;right:0;top:48px;width:250px;background:#fff;border:1px solid rgba(61,57,53,.12);border-radius:11px;box-shadow:0 16px 38px rgba(30,28,26,.18);overflow:hidden;display:none;text-align:left;color:#292725}
+.vero-account.open .vero-account-menu{display:block}
+.vero-account-profile{padding:15px 16px 13px;border-bottom:1px solid #E5E1DE}
+.vero-account-profile b{display:block;font-size:12px;color:#3D3935;margin-bottom:4px}
+.vero-account-profile small{display:block;font-size:9px;color:#857874;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vero-account-item{width:100%;display:flex;align-items:center;gap:9px;border:0;background:#fff;padding:12px 16px;font:700 10px Montserrat,Verdana,Arial,sans-serif;color:#3D3935;text-decoration:none;cursor:pointer}
+.vero-account-item:hover{background:#F7F8F7}
+.vero-account-item.admin{display:none}
+.vero-account-item.signout{border-top:1px solid #E5E1DE;color:#8f2929}
+.vero-account-icon{width:18px;text-align:center;font-size:13px}
+@media(max-width:720px){.vero-account-name{display:none}.vero-account-menu{right:0;width:230px}}
+
+
+
+.global-hero .hero-tools{position:absolute;right:28px;top:22px;z-index:3}.hero-tools .avatar{width:36px;height:36px;min-width:36px;border-radius:50%;display:grid;place-items:center;background:#302e2b;color:#fff;border:2px solid #fffc;font-size:11px;font-weight:800}.hero-tools .vero-account-trigger,.hero-tools .vero-account-trigger:hover{border:0;background:transparent;padding:0}.vero-account-menu small{letter-spacing:normal}@media(max-width:650px){.global-hero .hero-tools{right:18px;top:18px}}
