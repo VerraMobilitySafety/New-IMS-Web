@@ -2,16 +2,17 @@ const {chromium}=require('playwright'),fs=require('node:fs'),path=require('node:
 const root=path.resolve(__dirname,'..'),out=path.resolve(root,'../preview');fs.mkdirSync(out,{recursive:true});
 const titles=['Zebra','alpha','Bravo','charlie','delta','echo','foxtrot','ALPHA','golf'];
 const dates=['2026-10-20','2026-11-18','2026-11-19','2026-10-19',null,'2026-02-30','2026-10-20','2026-10-21','2026-10-20'];
-const rows=titles.map((title,i)=>({id:i+1,document_title:title,document_number:i===0?'AAA-001':'ZZZ-'+i,status:'Current',document_type:'Policy',document_owner_user_id:i===6?9:i>=7?null:7,document_owner_email:i===7?'PREVIEW@example.test':'',document_owner:i===8?null:'Douglas Fixture',document_owner_name:null,review_date:dates[i],version_number:1}));
+const rows=titles.map((title,i)=>({id:i+1,document_title:title,document_number:i===0?'AAA-001':'ZZZ-'+i,status:'Current',document_type:'Policy',document_owner_user_id:i===6?9:i>=7?null:7,document_owner_email:i===7?'PREVIEW@example.test':'',document_owner:i===8?null:'Douglas Bleasel',document_owner_name:null,review_date:dates[i],version_number:1}));
 // API source: ims_document_json / LEFT JOIN users; legacy document_owner remains when joined fields are null.
 // New-IMS-API main 6aa73a1c3764aca1fdf51d9e81a4e3097a8fa53a, function_app.py:5162-5280.
 // Contract-shaped synthetic fixture, not a captured production payload.
+// Read-only live UI diagnosis confirmed account Dougie Bleasel and legacy owner Douglas Bleasel.
 const legacyRows=[
- {id:21,document_title:'Alpha policy',document_owner:'Douglas Fixture'},
+ {id:21,document_title:'Alpha policy',document_owner:'Douglas Bleasel'},
  {id:22,document_title:'Beta policy',document_owner:'Another Person'},
- {id:23,document_title:'Conflict ID',document_owner:'Douglas Fixture',document_owner_user_id:9},
- {id:24,document_title:'Conflict email',document_owner:'Douglas Fixture',document_owner_email:'other@example.test'},
- {id:25,document_title:'Zeta procedure',document_owner:'  DOUG   Fixture  '}
+ {id:23,document_title:'Conflict ID',document_owner:'Douglas Bleasel',document_owner_user_id:9},
+ {id:24,document_title:'Conflict email',document_owner:'Douglas Bleasel',document_owner_email:'other@example.test'},
+ {id:25,document_title:'Zeta procedure',document_owner:'  DOUG   Bleasel  '}
 ].map(r=>({document_owner_user_id:null,document_owner_name:null,document_owner_email:null,status:'Current',document_type:'Policy',review_date:'2026-10-20',version_number:1,...r}));
 rows.push({...rows[0],id:10,status:'Draft',document_title:'Hidden draft'});
 (async()=>{const browser=await chromium.launch({headless:true,...(process.env.INSURANCE_BROWSER?{executablePath:process.env.INSURANCE_BROWSER}:{})});try{
@@ -21,7 +22,7 @@ for(const width of [1440,1173,1024,768,390]){
  await page.addInitScript(()=>{localStorage.setItem('vero_session_token','synthetic');localStorage.setItem('vero_current_user',JSON.stringify({id:7,email:'preview@example.test'}))});
  let releaseAuth;const authGate=new Promise(r=>releaseAuth=r);let fail=false,empty=false,legacy=false;
  await page.route('**/*',async route=>{const u=new URL(route.request().url());
-  if(u.pathname.endsWith('/auth/me')){await authGate;return route.fulfill({json:{user:{id:7,first_name:'Doug',last_name:'Fixture',email:'preview@example.test',vero_role:'User'}}})}
+  if(u.pathname.endsWith('/auth/me')){await authGate;return route.fulfill({json:{user:{id:7,first_name:'Dougie',last_name:'Bleasel',email:'preview@example.test',vero_role:'User'}}})}
   if(u.pathname.endsWith('/documents'))return fail?route.fulfill({status:503,json:{message:'unavailable'}}):route.fulfill({json:{status:"success",documents:empty?[]:legacy?legacyRows:rows}});
   if(u.hostname!=='vero.test')return route.abort();
   const file=path.resolve(root,'.'+decodeURIComponent(u.pathname));if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});
