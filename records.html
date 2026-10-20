@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><title>VERRA | VERO — Records Management</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><title>VERRA | VERO — Records Management</title><script defer src="record-metadata-editor.js?v=20261020-admin"></script><style>
 
 :root {
     --verra-navy: #00263E;
@@ -3875,7 +3875,8 @@ body[data-records-manager="false"]
 
    if(requestId !== recordHistoryRequest) return;
 
-   section.style.display = '';
+   // A successful history response authorises this panel independently of Controller-only controls.
+   section.style.setProperty('display','block','important');
    renderRecordHistory(data.history || []);
 
   }catch(error){
@@ -7534,5 +7535,4 @@ body[data-records-manager="false"]
 </script>
 
 <script src="nav.js"></script>
-<script src="record-metadata-editor.js?v=20261020-admin"></script>
 <link rel="stylesheet" href="register-layout.css"><link rel="stylesheet" href="register-governance-layout.css"><script src="register-layout.js"></script><script src="register-governance-layout.js"></script></body></html>

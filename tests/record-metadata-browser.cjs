@@ -60,6 +60,15 @@ const {chromium}=require('playwright'),fs=require('node:fs'),assert=require('nod
   assert.match(await page.locator('#recordHistoryTimeline').innerText(),/New <img>/);
   assert.match(await page.locator('#recordHistoryTimeline').innerText(),/Admin <b>/);
   assert.equal(await page.locator('#recordHistoryTimeline img,#recordHistoryTimeline script').count(),0);
+  const historyLoader=html.slice(html.indexOf(' async function loadRecordHistory('),html.indexOf(' async function openRecordDrawer('));
+  await page.evaluate(async source=>{
+   const section=document.createElement('section');section.id='recordHistorySection';
+   document.body.append(section);section.append(document.getElementById('recordHistoryTimeline'));
+   const style=document.createElement('style');style.textContent='#recordHistorySection{display:none!important}';document.head.append(style);
+   (0,eval)('var recordHistoryRequest=0; var recordsFetch=async()=>({history:[]});'+source);
+   await loadRecordHistory(1);
+  },historyLoader);
+  assert.equal(await page.locator('#recordHistorySection').isVisible(),true,'Authorised Admin history overrides Controller-only hiding');
   assert.deepEqual(errors,[]);
   console.log('PASS Admin editor: cancel, reason, duplicate save, conflict, safe text/history, stale drawer and non-admin denial');
  }finally{await browser.close();}
