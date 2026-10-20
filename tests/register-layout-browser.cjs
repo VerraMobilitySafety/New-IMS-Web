@@ -6,7 +6,7 @@ const contracts=[{id:10,code:'CON-TEST',name:'Synthetic contract'}],requirements
 const contractor={contractors:[{id:1,contractor_code:'CTR-TEST',company_name:'Example contractor',service_type:'Road services',risk_level:'Low',contract_owner:'Preview Owner',status:'Approved'}],workers:[{contractor_id:1,first_name:'Example',last_name:'Worker',status:'Current'}],requirements:[{contractor_id:1,requirement_type:'Insurance',reference:'TEST-001',compliance_status:'Current'}],monitoring:[],contracts:[]};
 (async()=>{
  fs.mkdirSync(out,{recursive:true});const browser=await chromium.launch({headless:true,...(process.env.INSURANCE_BROWSER?{executablePath:process.env.INSURANCE_BROWSER}:{})});
- try{for(const width of [1440,390])for(const file of ['documents.html','compliance.html','contractor-management.html']){
+ try{for(const width of [1440,1024,768,390])for(const file of ['documents.html','compliance.html','contractor-management.html']){
   const context=await browser.newContext({viewport:{width,height:1100}}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.addInitScript(()=>localStorage.setItem('vero_session_token','synthetic'));
   await page.route('**/*',async route=>{
