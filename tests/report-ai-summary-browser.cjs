@@ -18,7 +18,7 @@ try{for(const width of [1440,390]){
  await page.addInitScript(()=>{localStorage.setItem('vero_session_token','synthetic');Date=class extends Date{constructor(...args){super(...(args.length?args:['2026-10-20T03:00:00Z']))}static now(){return new Date().getTime()}}});
 
  const ready=()=>page.waitForFunction(()=>document.querySelector('#reportStatus').textContent.startsWith('Report updated'));
- await page.goto('https://vero.test/reports.html');await ready();
+ await page.goto('https://vero.test/reports.html');await ready();await page.evaluate(()=>{document.body.classList.remove('conversation-start');document.querySelector('#reportScope').open=true;document.querySelector('#reportDataDetails').open=true;document.querySelector('#generateAiSummary').hidden=false});await page.locator('#reportSelect').selectOption('risk-exposure');await ready();
  for(const id of ['risk-exposure','risk-reviews','project-summary','project-trend','event-trend']){
   await page.locator('#reportSelect').selectOption(id);await ready();
   assert.equal(await page.locator('#aiSummaryPanel').isHidden(),true);
@@ -31,12 +31,12 @@ try{for(const width of [1440,390]){
   if(id==='event-trend')assert.ok((await page.locator('#aiSummaryBody').textContent()).includes('500 most recently'));
  }
  aiFail=true;await page.locator('#generateAiSummary').click();await page.waitForFunction(()=>document.querySelector('#aiSummaryStatus').textContent.includes('unavailable'));
- assert.equal(await page.locator('#copyAiSummary').isDisabled(),true);assert.equal(await page.locator('#generateAiSummary').isDisabled(),false);aiFail=false;
+ assert.equal(await page.locator('#copyAiSummary').isDisabled(),false);assert.equal(await page.locator('#generateAiSummary').isDisabled(),false);aiFail=false;
  aiDelay=true;await page.locator('#generateAiSummary').click();await page.locator('[name=classification]').selectOption('Incident');
  assert.equal(await page.locator('#aiSummaryPanel').isHidden(),true);assert.equal(await page.locator('#generateAiSummary').isDisabled(),true);
  await page.waitForTimeout(800);assert.equal(await page.locator('#aiSummaryPanel').isHidden(),true);aiDelay=false;
- await page.getByRole('button',{name:'Run report',exact:true}).click();await ready();
- await page.locator('[name=from]').fill('2025-01');await page.locator('[name=to]').fill('2025-02');await page.getByRole('button',{name:'Run report',exact:true}).click();await ready();assert.equal(await page.locator('#generateAiSummary').isDisabled(),true);
+ await page.getByRole('button',{name:'Apply scope',exact:true}).click();await ready();
+ await page.locator('[name=from]').fill('2025-01');await page.locator('[name=to]').fill('2025-02');await page.getByRole('button',{name:'Apply scope',exact:true}).click();await ready();assert.equal(await page.locator('#generateAiSummary').isDisabled(),true);
  await page.locator('#reportSelect').selectOption('risk-exposure');await ready();await page.locator('#generateAiSummary').click();await page.waitForFunction(()=>!document.querySelector('#copyAiSummary').disabled);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);assert.deepEqual(errors,[]);
  await page.evaluate(()=>{window.print=()=>{window.didPrint=true;window.dispatchEvent(new Event('afterprint'))}});await page.locator('#printAiSummary').click();assert.equal(await page.evaluate(()=>window.didPrint),true);await page.emulateMedia({media:'print'});assert.equal(await page.locator('#reportOutput').isVisible(),false);assert.equal(await page.locator('.management-brand').isVisible(),true);assert.equal(await page.locator('#printAiSummary').isVisible(),false);await page.emulateMedia({media:'screen'});if(output)await page.screenshot({path:path.join(output,'ai-summary-'+width+'.png'),fullPage:true});
