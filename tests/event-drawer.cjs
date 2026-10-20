@@ -19,7 +19,7 @@ async function scenario(deepLink=false){
  d.querySelector('#event-close').dispatchEvent(new w.KeyboardEvent('keydown',{key:'Tab',shiftKey:true,bubbles:true,cancelable:true}));assert.equal(d.activeElement.tagName,'SUMMARY');
  d.querySelector('#event-close').dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));
  assert.equal(d.querySelector('#event-backdrop'),null);assert.equal(register.inert,false);assert.equal(d.body.style.overflow,'');assert.equal(new URL(w.location).searchParams.has('event'),false);assert.equal(filter.value,deepLink?'all':'open');
- const link=d.querySelector('a[data-event]');link.focus();link.click();await wait(()=>d.querySelector('#event-backdrop'));d.querySelector('#event-close').click();assert.equal(d.activeElement,link);
+ const link=d.querySelector('a[data-event]');link.focus();link.dispatchEvent(new w.MouseEvent('click',{button:-1,bubbles:true,cancelable:true}));await wait(()=>d.querySelector('#event-backdrop'));d.querySelector('#event-close').click();assert.equal(d.activeElement,link);
  // A denied direct link leaves only the accessible register and a generic error.
  w.history.pushState(null,'','?event=forbidden&contract_id=5');w.dispatchEvent(new w.PopStateEvent('popstate'));await wait(()=>d.querySelector('#message').textContent.includes('access denied'));
  assert.equal(d.querySelector('#event-backdrop'),null);assert.equal(d.querySelector('#event-rows').closest('.card'),register);assert.equal(calls.includes('/incidents/forbidden/files'),false);assert.equal(d.querySelector('#manual').hidden,true);
