@@ -125,7 +125,6 @@ async function openImport(){
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeContract();});
 if(!workspace)request('/maintenance-contracts/import-options').then(options=>{importOptions=options;const button=document.querySelector('.project-tools button');if(button){button.textContent='Import Contracts';button.hidden=!options.can_import;button.onclick=openImport;}}).catch(()=>{});
 function addContractRetry(action){const b=document.createElement('button');b.textContent='Retry loading contract';b.onclick=action;document.getElementById('tabContent').appendChild(b);}
-if(!workspace)request('/maintenance-contracts/import-options').then(options=>{if(options.can_import){const link=document.createElement('a');link.href='site-import.html';link.textContent='Import Sites';link.className='btn';document.querySelector('.project-tools')?.appendChild(link);}}).catch(()=>{});
 async function loadContractWorkspace(){
  try{
   const id=new URLSearchParams(location.search).get('id');
