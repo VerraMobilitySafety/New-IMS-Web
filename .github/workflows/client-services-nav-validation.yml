@@ -1,0 +1,17 @@
+name: Client Services navigation permissions
+on:
+  pull_request:
+    paths: ['nav.js', 'tests/client-services-nav.cjs', '.github/workflows/client-services-nav-validation.yml']
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --package-lock=false jsdom@26.1.0
+      - run: node --check nav.js
+      - run: node tests/client-services-nav.cjs
