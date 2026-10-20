@@ -55,7 +55,7 @@
  }
  function incidents(){
   const action=$('#new-report').closest('.toolbar'),content=$('#content');add(action,'vr-actions');
-  const buttons=['dashboard','register','incident-actions','injury-register-button'].map(id=>$('#'+id));
+  const buttons=['dashboard','register','incident-actions','injury-register-button','deleted-records'].map(id=>$('#'+id)).filter(Boolean);
   const nav=node('div','vr-original-navigation');action.after(nav);nav.append(...buttons);nav.hidden=true;
   const context=contexts(action,[['Event reporting','Report and investigate events'],['Accessible events','Existing account permissions apply'],['Investigation actions','Track linked prevention actions'],['Dashboards','Available through the View selector']]);
   function render(){
@@ -67,7 +67,7 @@
    const available=buttons.filter(b=>!b.hidden).map(b=>[b.id,b.textContent]);
    const view=viewControl(available,value=>$('#'+value).click());filters.append(view.label);
    const route=new URLSearchParams(location.search).get('view');
-   view.select.value=route==='register'?'register':route==='actions'?'incident-actions':route==='injuries'?'injury-register-button':'dashboard';
+   view.select.value=route==='register'?'register':route==='actions'?'incident-actions':route==='injuries'?'injury-register-button':route==='deleted'?'deleted-records':'dashboard';
    if(register){
     const state=$('#event-filter');filters.append(state.closest('label'));const period=register.querySelector('.event-period');
     if(period){const note=period.querySelector('p');if(note){add(note,'vr-register-note');register.append(note)}filters.append(period)}
