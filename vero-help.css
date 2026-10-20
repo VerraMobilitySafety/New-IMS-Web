@@ -12,3 +12,38 @@
 .vero-help-result{font-size:13px;line-height:1.65;font-weight:500}.home-ai .vero-help-answer{font-size:13px!important;line-height:1.7;color:var(--ink);white-space:pre-line}
 .vero-help-card h4{font-weight:700}.vero-help-card blockquote{font-size:12px;line-height:1.65;margin:12px 0 0;padding:0 0 0 12px;border-left:3px solid var(--green);color:#494540}
 
+
+/* The chat owns its scroll area; neighbouring dashboard cards keep their own height. */
+.vero-home-chat{align-items:start;grid-template-columns:minmax(0,1.35fr) minmax(340px,.85fr)}
+.vero-home-chat>.panel{min-width:0}
+.vero-chat-panel{height:clamp(520px,calc(100dvh - 260px),720px);overflow:hidden}
+.vero-chat-panel .home-ai{height:100%;box-sizing:border-box;padding:0;display:flex;flex-direction:column;min-height:0}
+.vero-chat-header{padding:20px 20px 16px;border-bottom:1px solid var(--line);flex:none}
+.vero-chat-header p{margin:10px 0 0;font-size:12px}
+.vero-chat-logo,.vero-chat-avatar{display:grid;place-items:center;flex:none;background:var(--green);color:#302e2b;font-size:12px;font-weight:800}
+.vero-chat-logo{width:30px;height:30px;border-radius:9px}
+.vero-chat-panel .vero-help-result{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:20px 16px;margin:0;border:0;scrollbar-width:thin;background:#fafaf8}
+.vero-chat-message{display:flex;align-items:flex-start;gap:8px;margin:0 0 18px}
+.vero-chat-avatar{width:28px;height:28px;border-radius:50%;margin-top:21px;font-size:10px}
+.vero-chat-content{min-width:0;max-width:calc(100% - 36px)}
+.vero-chat-name{display:block;font-size:10px;font-weight:700;color:#77706c;margin-bottom:5px}
+.vero-chat-bubble{padding:12px 14px;border:1px solid #e6e3df;border-radius:0 14px 14px 14px;background:#fff;overflow-wrap:anywhere}
+.home-ai .vero-chat-bubble p{margin:0;color:var(--ink);font-size:12px;line-height:1.7;white-space:pre-line}
+.vero-chat-bubble small{display:block;font-size:10px;color:#77706c;margin-top:10px}
+.vero-chat-user{flex-direction:row-reverse}
+.vero-chat-user .vero-chat-avatar{background:#302e2b;color:#fff}
+.vero-chat-user .vero-chat-name{text-align:right}
+.vero-chat-user .vero-chat-bubble{background:#edf3d9;border-color:#e1e9c8;border-radius:14px 0 14px 14px}
+.vero-chat-pending{color:#77706c}
+.vero-chat-compose{padding:14px 16px 12px;border-top:1px solid var(--line);background:#fff;flex:none}
+.vero-chat-compose .home-ai-box{margin:0 0 8px}
+.vero-chat-compose .ai-note{font-size:10px;line-height:1.5;font-weight:500}
+.vero-chat-sources{margin-top:12px}
+.vero-chat-sources summary{cursor:pointer;font-size:11px;font-weight:700;color:#296575;padding:3px 0}
+.vero-chat-sources .vero-help-card{padding:10px;margin-top:10px;border:0;border-radius:6px}
+.vero-chat-sources .vero-help-card h4,.vero-chat-sources .vero-help-card p,.vero-chat-sources .vero-help-card blockquote,.vero-chat-sources .vero-help-card li{font-size:11px!important}
+.vero-chat-bubble .quick-q{margin-top:12px;gap:7px}
+.vero-chat-bubble .quick-q button{text-align:left;font-size:10px}
+@media(max-width:1000px){.vero-home-chat{grid-template-columns:minmax(0,1fr)}.vero-chat-panel{height:580px;max-height:80dvh;min-height:380px}}
+
+.vero-chat-panel *{font-family:Montserrat,Verdana,Arial,sans-serif!important}
