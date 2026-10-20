@@ -24,6 +24,16 @@
 .vr-page[data-register-layout="risk"] .vr-risk-actions:not(:has(button:not([hidden]))) { display:none; }
 .vr-page[data-register-layout="risk"] .vr-risk-actions button[hidden] { display:none!important; }
 .vr-page[data-register-layout="incidents"] .vr-actions #new-report { background:#a9c23f; color:#3d3935; }
+.vr-page[data-register-layout="incidents"] .vr-actions #new-report {
+ box-sizing:border-box; height:43px; padding:12px 16px; border:0; border-radius:8px;
+ font-family:Arial,sans-serif; font-size:13px; font-weight:800; line-height:19px;
+}
+.vr-page[data-register-layout="incidents"] .vr-view-toolbar .report-tabs { margin:0; padding:0; }
+.vr-page[data-register-layout="incidents"] .vr-view-toolbar .event-period { margin:0; padding:0; gap:10px; }
+.vr-page[data-register-layout="incidents"] .vr-view-toolbar label { margin:0; }
+.vr-page[data-register-layout="incidents"] .vr-view-toolbar select { margin-top:0; }
+.vr-page[data-register-layout="incidents"] .vr-view-toolbar .event-period>label { min-width:0; }
+.vr-page[data-register-layout="incidents"] .vr-view-toolbar #period-custom { flex-wrap:wrap; }
 .vr-page[data-register-layout="incidents"] .vr-view-toolbar { border:1px solid #e5e1de; border-radius:12px; background:white; margin-bottom:18px!important; }
 .vr-page[data-register-layout="incidents"] .vr-register .vr-view-toolbar { border:0; border-radius:0; margin-bottom:0!important; }
 .vr-page[data-register-layout="incidents"] .vr-register .event-period { margin:0; padding:0; }
@@ -33,4 +43,7 @@
  .vr-page[data-register-layout="records"] .records-kpis { grid-template-columns:1fr; }
  .vr-page[data-register-layout="risk"] .vero-risk-filter-panels { grid-template-columns:1fr!important; }
  .vr-page[data-register-layout="incidents"] .main { max-width:100%; }
+}
+@media(min-width:751px) and (max-width:850px){
+ .vr-page[data-register-layout="incidents"] .main { margin-left:300px!important; width:calc(100% - 300px)!important; }
 }
