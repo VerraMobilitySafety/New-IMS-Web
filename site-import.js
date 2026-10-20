@@ -34,4 +34,25 @@ el('run').onclick=async()=>{
  finally{busy=false;el('run').disabled=false;el('preview').disabled=false;el('importFile').disabled=false;}
 };
 window.addEventListener('beforeunload',event=>{if(busy){event.preventDefault();event.returnValue='';}});
+el('checkNsw').onclick=async()=>{
+ if(busy)return;
+ const message=el('nswStatus'),apply=el('applyNsw');apply.hidden=true;el('checkNsw').disabled=true;
+ try{
+  const plan=await request('POST',{format:'vero-cognito-sites-v1',action:'correct-nsw-contracts'});
+  message.textContent=plan.groups.map(g=>g.name+': '+g.sites+' sites → '+g.contract).join('\n')+(plan.create_mobile_contract?'\n1971OS will be added from the source agreement register.':'')+'\nSite identities, details, Cognito source records and linked events are retained. Only the incorrect NSW contract links are replaced.';
+  apply.hidden=false;
+  apply.onclick=async()=>{
+   if(busy)return;busy=true;apply.disabled=true;el('preview').disabled=true;el('run').disabled=true;el('importFile').disabled=true;el('checkNsw').disabled=true;message.textContent='Correcting NSW site links…';
+   try{
+    const result=await request('POST',{format:'vero-cognito-sites-v1',action:'correct-nsw-contracts',apply:true,fingerprint:plan.fingerprint});
+    message.textContent=result.corrected_sites+' sites corrected. '+result.links_added+' correct links added; '+result.incorrect_links_removed+' incorrect links removed.\n'+result.groups.map(g=>g.contract+': '+g.sites+' sites').join('\n');
+    apply.hidden=true;await refresh();
+   }catch(error){message.textContent=error.message+' Check the mapping again before retrying.';apply.hidden=true;}
+   finally{busy=false;apply.disabled=false;el('preview').disabled=false;el('run').disabled=false;el('importFile').disabled=false;el('checkNsw').disabled=false;}
+  };
+ }catch(error){message.textContent=error.message;}
+ finally{el('checkNsw').disabled=false;}
+};
 refresh().catch(e=>{el('registerStatus').textContent=e.message;});
+
+
