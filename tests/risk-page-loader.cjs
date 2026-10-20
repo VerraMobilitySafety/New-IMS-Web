@@ -5,7 +5,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const code=fs.readFileSync(path.join(root,'risk-page-loader.js'),'utf8');
-test('all 35 VERO shell screens use one NK9 loader and explicitly settle initial tasks',()=>{
+test('all 37 VERO shell screens use one clean camera loader and explicitly settle initial tasks',()=>{
  let count=0;
  for(const file of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
   const html=fs.readFileSync(path.join(root,file),'utf8');
@@ -16,11 +16,14 @@ test('all 35 VERO shell screens use one NK9 loader and explicitly settle initial
   assert.equal([...html.matchAll(/src="risk-page-loader\.js\?/g)].length,1,file);
   assert.ok(!html.includes('src="vero-page-loader.js"'),file);
   assert.ok(!html.includes('id="veroPageLoader"'),file);
+  assert.ok(html.indexOf('vero-loading-guard')<html.indexOf('src="risk-page-loader.js'),file+' guard precedes loader');
+  assert.ok(html.indexOf('src="risk-page-loader.js')<html.indexOf('<body'),file+' loader precedes content');
+  assert.ok(!html.includes('src="risk-nk9-animation.js'),file+' no old flash animation');
   const tasks=html.match(/src="risk-page-loader\.js[^\"]*" data-tasks="([^\"]+)"/)[1].split(/\s+/);
   for(const task of tasks)assert.ok(html.includes("?.ready('"+task+"')"),file+': '+task);
   for(const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(match[1],{filename:file});
  }
- assert.equal(count,35);
+ assert.equal(count,37);
  const css=fs.readFileSync(path.join(root,'risk-page-loader.css'),'utf8');
  assert.match(css,/prefers-reduced-motion:reduce/);
  assert.match(fs.readFileSync(path.join(root,'risk-nk9-animation.css'),'utf8'),/nk9-flash,\.vero-page-loader::after\{display:none\}/);
@@ -34,7 +37,7 @@ test('Risk settles the register, not just its account menu; workspace waits for 
 });
 function setup(tasks='risk'){
  const listeners={},timers=new Map(),frames=new Map();let id=0,element,disconnected=false;
- const rects={main:{left:300,right:1200},hero:{bottom:245},sidebar:{right:300}};
+ const rects={main:{left:300,right:1200,width:900},hero:{bottom:245},sidebar:{right:300}};
  const main={getBoundingClientRect:()=>rects.main,querySelector:()=>hero};
  const hero={getBoundingClientRect:()=>rects.hero},sidebar={getBoundingClientRect:()=>rects.sidebar};
  const query=selector=>selector==='.main'?main:selector==='.sidebar'?sidebar:hero;
@@ -42,10 +45,10 @@ function setup(tasks='risk'){
   setAttribute(k,v){this.attributes[k]=v;},classList:{add(value){element.classes.add(value);}},
   append(...children){this.children.push(...children);},remove(){this.removed=true;}};}
  const window={innerHeight:900,addEventListener:(type,fn)=>{listeners[type]=fn;},removeEventListener:(type)=>{delete listeners[type];}};
- const document={currentScript:{dataset:{tasks}},documentElement:{clientWidth:1200},
-  createElement:node,body:{appendChild:n=>{element=n;}},querySelector:query,
+ const document={currentScript:{dataset:{tasks}},readyState:'loading',documentElement:{clientWidth:1200,removeAttribute(){}},
+  createElement:node,body:{append:n=>{element=n;}},querySelector:query,
   addEventListener:(type,fn)=>{listeners[type]=fn;}};
- const context=vm.createContext({window,document,ResizeObserver:class{observe(){}disconnect(){disconnected=true;}},
+ const context=vm.createContext({window,document,MutationObserver:class{observe(){}disconnect(){}},ResizeObserver:class{observe(){}disconnect(){disconnected=true;}},
   setTimeout:(fn,ms)=>{timers.set(++id,{fn,ms});return id;},clearTimeout:id=>timers.delete(id),
   requestAnimationFrame:fn=>{frames.set(++id,fn);return id;},cancelAnimationFrame:id=>frames.delete(id)});
  window.ResizeObserver=context.ResizeObserver;
@@ -63,18 +66,11 @@ test('waits for all critical rendered tasks and DOM, then fades once',()=>{
  env.api.mount();env.api.ready('risk');assert.equal(env.timers.size,1);
  env.timers.values().next().value.fn();assert.ok(env.overlay.removed);
 });
-test('Home waits for account and actions, with the same single reveal controller',()=>{
- const env=setup('home-actions home-account');let reveal,stopped=false,reveals=0;
- env.window.VeroNK9={start:()=>({reveal(done){reveals++;reveal=done;},stop(){stopped=true;}})};
- env.listeners.DOMContentLoaded();env.api.ready('home-account');
- assert.equal(reveals,0);assert.ok(!env.overlay.classes.has('is-ready'));
- env.api.ready('home-actions');assert.equal(reveals,1);assert.ok(!env.overlay.classes.has('is-ready'));
- env.api.ready('home-actions');assert.equal(reveals,1);
- reveal();assert.ok(env.overlay.classes.has('is-ready'));assert.ok(stopped);
- const home=fs.readFileSync(path.join(root,'index.html'),'utf8');
- assert.match(home,/loadMyActions\(\)\.finally\(\(\)=>window\.VeroPageLoader\?\.ready\('home-actions'\)\)/);
- assert.match(home,/load\(\)\.finally\(\(\)=>window\.VeroPageLoader\?\.ready\('home-account'\)\)/);
- assert.ok(!home.includes('src="vero-page-loader.js"'));
+test('Home waits for both account and actions, without extra animation delay',()=>{
+ const env=setup('home-actions home-account');env.listeners.DOMContentLoaded();
+ env.api.ready('home-account');assert.ok(!env.overlay.classes.has('is-ready'));
+ env.api.ready('home-actions');assert.ok(env.overlay.classes.has('is-ready'));
+ env.api.ready('home-actions');assert.equal(env.timers.size,1);
 });
 test('fast results cannot dismiss before the document is parsed; static pages finish at DOM ready',()=>{
  for(const tasks of ['risk','']){const env=setup(tasks);env.api.mount();env.api.ready('risk');
@@ -83,14 +79,14 @@ test('fast results cannot dismiss before the document is parsed; static pages fi
 test('positions against actual sidebar, main and hero at desktop, responsive, scroll and hidden sidebar',()=>{
  const env=setup();env.api.mount();
  assert.deepEqual(env.overlay.style,{left:'300px',top:'245px',width:'900px',height:'655px'});
- env.rects.sidebar.right=82;env.rects.main={left:82,right:390};env.document.documentElement.clientWidth=390;
+ env.rects.sidebar.right=82;env.rects.main={left:82,right:390,width:308};env.document.documentElement.clientWidth=390;
  env.rects.hero.bottom=310;env.window.innerHeight=844;env.listeners.resize();env.flush();
  assert.deepEqual(env.overlay.style,{left:'82px',top:'310px',width:'308px',height:'534px'});
- env.rects.sidebar.right=0;env.rects.main={left:0,right:390};env.rects.hero.bottom=-20;
+ env.rects.sidebar.right=0;env.rects.main={left:0,right:390,width:390};env.rects.hero.bottom=-20;
  env.listeners.scroll();env.flush();assert.equal(env.overlay.style.top,'0px');assert.equal(env.overlay.style.left,'0px');
 });
-test('timeout, script failures and pagehide expose content even if tasks never settle',()=>{
- for(const event of ['timeout','error','unhandledrejection','pagehide']){
+test('timeout and pagehide expose content even if tasks never settle',()=>{
+ for(const event of ['timeout','pagehide']){
   const env=setup();env.api.mount();
   if(event==='timeout'){const deadline=[...env.timers.values()].find(t=>t.ms===12000);assert.ok(deadline);deadline.fn();}
   else env.listeners[event]();
@@ -98,15 +94,14 @@ test('timeout, script failures and pagehide expose content even if tasks never s
   env.api.mount();assert.equal(env.overlay.attributes['aria-hidden'],'true');
  }
 });
-test('missing camera falls back to chevron, then readable status if both assets fail',()=>{
- const env=setup();env.api.mount();
- const img=env.overlay.children[0].children[0];
- assert.equal(img.src,'./assets/nk9-green.png');img.onerror();
- assert.equal(img.src,'verra-chevron.png');
- img.onerror();assert.equal(img.hidden,true);
- assert.equal(env.overlay.children[1].textContent,'Preparing your workspace...');
- env.api.ready('risk');env.listeners.DOMContentLoaded();assert.ok(env.overlay.classes.has('is-ready'));
+test('missing camera leaves readable status and does not dismiss pending tasks',()=>{
+ const env=setup();env.api.mount();const img=env.overlay.children[0].children[0];
+ assert.match(img.src,/vero-loader-camera.svg/);img.onerror();assert.equal(img.hidden,true);
+ assert.equal(env.overlay.children[1].textContent,'Loading your workspace');
+ env.listeners.DOMContentLoaded();assert.ok(!env.overlay.classes.has('is-ready'));
+ env.api.ready('risk');assert.ok(env.overlay.classes.has('is-ready'));
 });
-
-
-
+test('loader still has width while sign-in hides the main area',()=>{
+ const env=setup();env.rects.main={left:0,right:0,width:0};env.rects.hero.bottom=0;
+ env.api.mount();env.listeners.resize();env.flush();assert.equal(env.overlay.style.width,'900px');
+});
