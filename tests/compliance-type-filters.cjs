@@ -8,7 +8,7 @@ const requirements=Array.from({length:360},(_,i)=>({contract_id:i<210?10:20,obli
 async function setup(width,fail=false){
  const browser=await chromium.launch({headless:true,...(process.platform==='win32'?{executablePath:process.env.VERO_TEST_BROWSER||'C:/Program Files/Google/Chrome/Application/chrome.exe'}:{})});
  const page=await browser.newPage({viewport:{width,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.setContent(html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,''));await page.addStyleTag({path:path.join(root,'compliance-contract-register.css')});
+ await page.setContent(html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,''));await page.addStyleTag({path:path.join(root,'vero-shell.css')});await page.addStyleTag({path:path.join(root,'compliance-contract-register.css')});
  await page.addScriptTag({content:'var obligationsLive={};const COMPLIANCE_API="https://example.invalid/api";function complianceAuthHeaders(){return {}};function compliancePill(x){return x}function assessmentPill(x){return x||"Not Assessed"}function formatComplianceDate(){return "—"}window.openLiveObligation=async id=>{window.opened=id;document.getElementById("obligationModal").classList.add("show")};window.failContracts='+fail+';window.fetch=async()=>({ok:!window.failContracts,status:window.failContracts?503:200,json:async()=>('+JSON.stringify({contracts,requirements})+')});'+functions});
  await page.addStyleTag({path:path.join(root,'register-layout.css')});
  await page.addScriptTag({path:path.join(root,'register-layout.js')});
