@@ -3,7 +3,13 @@
 const types=['Hazard','Near Miss','Incident','Unverified'],selectedMonths=new Set();
 const label={Hazard:'Hazards','Near Miss':'Near Misses',Incident:'Incidents',Unverified:'Unverified'};
 const monthLabel=value=>new Date(value+'-01T00:00:00Z').toLocaleDateString('en-AU',{month:'short',year:'numeric',timeZone:'UTC'});
-window.VeroMonthlyReports={render({data:d,content,esc,tabs,period,navigate,bind,periodParams,context='',api,users=[],openEvent}){
+window.VeroMonthlyReports={renderEvents({results,events,esc,users=[],openEvent,onError=()=>{}}){
+ const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Australia/Sydney',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const state=e=>e.status==='Complete'?'Closed':e.report?.classification?.due_date&&e.report.classification.due_date<today?'Overdue':'Open';
+ const owner=e=>users.find(u=>String(u.id)===String(e.investigator_id))?.name||e.investigator_name||'Unassigned';
+ results.innerHTML='<div class="table-wrap"><table class="event-register-table"><thead><tr><th>Ref Number</th><th>Event</th><th>Status</th><th>Owner</th></tr></thead><tbody>'+events.map(e=>`<tr><td>${esc(e.legacy?.event_reference||e.id.slice(0,8))}</td><td><button type="button" class="chart-event-open" data-chart-event="${esc(e.id)}">${esc(e.legacy?.register_description?.trim()||e.report?.description||'')}</button>${e.report?.vm_site_review?.status==='Unverified'?'<span class="badge">Site Unverified</span>':''}</td><td>${state(e)}</td><td>${esc(owner(e))}</td></tr>`).join('')+(events.length?'':'<tr><td colspan="4">No events in this selection.</td></tr>')+'</tbody></table></div>';
+ results.querySelectorAll('[data-chart-event]').forEach(b=>b.onclick=async()=>{try{await openEvent(b.dataset.chartEvent);}catch(error){onError(error);}});
+},render({data:d,content,esc,tabs,period,navigate,bind,periodParams,context='',api,users=[],openEvent}){
  const peak=Math.max(1,...d.months.map(m=>m.total));
  const currentMonth=(d.as_of||new Intl.DateTimeFormat('en-CA',{timeZone:'Australia/Sydney',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())).slice(0,7),current=m=>m.month===currentMonth,validationNote="These events haven’t been validated yet.";
 
@@ -20,8 +26,6 @@ window.VeroMonthlyReports={render({data:d,content,esc,tabs,period,navigate,bind,
  const root=content.querySelector('#monthly-event-dashboard'),panel=document.createElement('section');panel.className='card chart-events';panel.setAttribute('aria-label','Selected Events');root.append(panel);
  const available=new Set(d.months.map(m=>m.month));for(const month of selectedMonths)if(!available.has(month))selectedMonths.delete(month);
  const cache=new Map();let request=0;
- const today=d.as_of||new Date().toISOString().slice(0,10),due=e=>e.report?.classification?.due_date||'',state=e=>e.status==='Complete'?'Closed':due(e)&&due(e)<today?'Overdue':'Open';
- const owner=e=>users.find(u=>String(u.id)===String(e.investigator_id))?.name||e.investigator_name||'Unassigned';
  async function update(){
   const version=++request,months=d.months.filter(m=>selectedMonths.has(m.month));
   root.querySelectorAll('.month-column').forEach(b=>b.setAttribute('aria-pressed',String(selectedMonths.has(d.months[Number(b.dataset.month)].month))));
@@ -35,8 +39,7 @@ window.VeroMonthlyReports={render({data:d,content,esc,tabs,period,navigate,bind,
    if(version!==request||!root.isConnected)return;
    const events=[...new Map(groups.flat().map(e=>[e.id,e])).values()].sort((a,b)=>String(b.report?.occurred_date||'').localeCompare(String(a.report?.occurred_date||''))||String(a.id).localeCompare(String(b.id)));
    count.textContent=events.length+' '+(events.length===1?'Event':'Events')+' · '+months.map(m=>monthLabel(m.month)).join(' · ');
-   results.innerHTML='<div class="table-wrap"><table class="event-register-table"><thead><tr><th>Event</th><th>Status</th><th>Owner</th><th>Due Date</th></tr></thead><tbody>'+events.map(e=>`<tr><td><button type="button" class="chart-event-open" data-chart-event="${esc(e.id)}"><strong>${esc(e.legacy?.event_reference||e.id.slice(0,8))}</strong><span>${esc((e.report?.description||'').slice(0,110))}</span></button></td><td>${state(e)}</td><td>${esc(owner(e))}</td><td>${state(e)==='Closed'?'—':esc(due(e)||'Not Recorded')}</td></tr>`).join('')+(events.length?'':'<tr><td colspan="4">No events in this selection.</td></tr>')+'</tbody></table></div>';
-   results.querySelectorAll('[data-chart-event]').forEach(b=>b.onclick=async()=>{try{await openEvent(b.dataset.chartEvent);}catch(error){count.textContent=error.message;}});
+   window.VeroMonthlyReports.renderEvents({results,events,esc,users,openEvent,onError:error=>{count.textContent=error.message;}});
   }catch(error){if(version===request&&root.isConnected){results.textContent='Events could not be loaded. '+error.message;const retry=document.createElement('button');retry.type='button';retry.textContent='Try Again';retry.onclick=update;results.append(retry);}}
   finally{if(version===request)panel.removeAttribute('aria-busy');}
  }
