@@ -13,6 +13,8 @@ for(const scenario of ['register','edit','legacy','country change']){
   for(const [name,value] of Object.entries({name:'New',number:'P-2',insurer:'Insurer',inception:'2026-01-01',expiry:'2027-01-01',country:'AU'}))await page.locator('#f'+name).fill(value);
   await page.locator('#fclass').selectOption('Cyber');
   assert.deepEqual(await page.locator('#fstate option').evaluateAll(es=>es.map(e=>e.value)),['','ACT','NSW','NT','QLD','SA','TAS','VIC','WA']);
+  assert.equal((await page.locator('#fstate').innerText()).includes('\uFFFD'),false);
+  assert.ok((await page.locator('#fstate').innerText()).includes('ACT - Australian Capital Territory'));
   await page.locator('#fstate').selectOption('NSW');await page.getByRole('button',{name:'Save Draft',exact:true}).click();
   await page.waitForFunction(()=>!document.querySelector('#modal').classList.contains('open'));
   assert.equal(server.posts[0].state_territory,'NSW');assert.equal(server.posts[0].country_code,'AU');

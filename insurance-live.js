@@ -50,9 +50,9 @@ function jurisdictionState(value=''){
  input.id='fstate';input.name='state';
  if(country==='AU'){
   for(const [code,label] of [['','Country-wide'],['ACT','Australian Capital Territory'],['NSW','New South Wales'],['NT','Northern Territory'],['QLD','Queensland'],['SA','South Australia'],['TAS','Tasmania'],['VIC','Victoria'],['WA','Western Australia']]){
-   const option=document.createElement('option');option.value=code;option.textContent=code?code+' — '+label:label;input.append(option);
+   const option=document.createElement('option');option.value=code;option.textContent=code?code+' - '+label:label;input.append(option);
   }
- }else{input.maxLength=100;input.placeholder=country?'Optional — blank means country-wide':'Choose a country first'}
+ }else{input.maxLength=100;input.placeholder=country?'Optional - blank means country-wide':'Choose a country first'}
  input.disabled=!country;
  previous.replaceWith(input);input.value=value;
 }
