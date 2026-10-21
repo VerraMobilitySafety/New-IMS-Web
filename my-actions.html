@@ -360,7 +360,7 @@
 
 
 
-</head>
+<link rel="stylesheet" href="action-details.css?v=20261022-edit"></head>
 <body class="vr-page" data-register-layout="actions"><div class="app"><aside class="sidebar">
  <div class="brand"><span class="vero-brand-logo" role="img" aria-label="Verra Mobility"></span><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
@@ -1358,7 +1358,9 @@ document.getElementById('assignRecordReviewerBtn')
  });
 
 function openActionDetail(index){
- const action=allActions[index]; if(!action)return;
+ const action=allActions[index];
+ if(action?.managed_task_id){window.VeroActionDetails.open(action.managed_task_id,{personal:true,onSaved:()=>loadActions()});return;}
+ if(!action)return;
  if(action.source==='Risks'&&/^Site Risk (Review|Correction|Treatment|Treatment Verification)$/.test(action.action_type||'')&&Number.isSafeInteger(Number(action.site_id))&&Number(action.site_id)>0&&Number.isSafeInteger(Number(action.risk_id))&&Number(action.risk_id)>0){location.href='client-services-site.html?'+new URLSearchParams({id:String(action.site_id),risk_id:String(action.risk_id)});return;}
  if(action.source==='Insurance'&&action.action_type==='Insurance Renewal'){location.href='insurance.html?renewals=1';return;}
  if(action.source==='Incidents' && /^[0-9a-f-]{36}$/i.test(String(action.source_id||''))){location.href='incident-management.html?'+(action.action_type==='Investigation'?'event=':'action=')+encodeURIComponent(action.source_id);return;}
@@ -2804,7 +2806,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 
-<link rel="stylesheet" href="register-layout.css"><link rel="stylesheet" href="register-operations-layout.css"><script src="register-layout.js"></script><script src="register-operations-layout.js"></script></body></html>
+<link rel="stylesheet" href="register-layout.css"><link rel="stylesheet" href="register-operations-layout.css"><script src="register-layout.js"></script><script src="register-operations-layout.js"></script><script src="action-details.js?v=20261022-edit"></script><script>const managedTaskKey=new URLSearchParams(location.search).get("managed_task");if(managedTaskKey)window.VeroActionDetails.open(managedTaskKey,{personal:true,onSaved:()=>loadActions()});</script><script src="workflow-task-completion.js?v=20261022-source"></script></body></html>
 
 <style>
 #actionDetailAdditional .action-btn-approve{
