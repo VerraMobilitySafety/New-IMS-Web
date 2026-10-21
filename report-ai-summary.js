@@ -37,7 +37,8 @@ async function generate(options={}){if(!snapshot||button.disabled)throw Error('T
 }
 button.addEventListener('click',()=>generate().catch(()=>{}));
 copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(copyText);copy.textContent='Copied';}catch{status.textContent='Copy is unavailable in this browser. You can select and copy the summary text.';}setTimeout(()=>copy.textContent='Copy summary',2000);});
-print.addEventListener('click',()=>{if(print.disabled)return;const details=body.querySelector('details');const wasOpen=details?.open;if(details)details.open=true;const restore=()=>{if(details)details.open=wasOpen;window.removeEventListener('afterprint',restore);};window.addEventListener('afterprint',restore);window.print();});
+$('reportExportFormat').addEventListener('change',()=>{print.textContent=$('reportExportFormat').value==='pptx'?'Export PowerPoint':'Export PDF';});
+print.addEventListener('click',async()=>{if(print.disabled)return;if($('reportExportFormat').value==='pptx'){print.disabled=true;print.textContent='Preparing PowerPoint…';try{await window.VeroReportPowerPoint.download();status.textContent='PowerPoint downloaded.';}catch(error){status.textContent=error.message||'PowerPoint export failed. Please try again.';}finally{print.disabled=!copyText;print.textContent=$('reportExportFormat').value==='pptx'?'Export PowerPoint':'Export PDF';}return;}const details=body.querySelector('details');const wasOpen=details?.open;if(details)details.open=true;const restore=()=>{if(details)details.open=wasOpen;window.removeEventListener('afterprint',restore);};window.addEventListener('afterprint',restore);window.print();});
 window.VeroReportSummary={clear,ready,generate,
  getState:()=>snapshot&&lastResult?.management_report?.length===3?JSON.parse(JSON.stringify({snapshot,result:lastResult})):null,
  sessionMatches:()=>!!sessionToken&&sessionToken===localStorage.getItem('vero_session_token'),

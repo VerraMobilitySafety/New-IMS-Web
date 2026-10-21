@@ -31,6 +31,7 @@ jobs:
 
       - run: node tests/event-monthly.cjs
       - run: node tests/event-list-sort.cjs
+      - run: node tests/event-editor.cjs
 
       - run: node tests/event-response-recovery.cjs
       - run: node tests/event-injury-register.cjs
