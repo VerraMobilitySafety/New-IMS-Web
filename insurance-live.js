@@ -397,11 +397,26 @@ async function renewalList(){
     const summary=document.createElement('p');summary.textContent=c.expiry_date+' - '+c.stage+' - '+c.policy_ids.length+' policy/policies - '+c.task_status;section.append(summary);
     if(c.kind==='programme')programmeButton(section,'Open programme / certificates',()=>programmeDetail(c.target_id));
     else{const index=livePolicies.findIndex(p=>p.id===c.target_id);if(index>=0)programmeButton(section,'Open policy / certificates',()=>{closeForm();openPolicyDetails(index)})}
-    if(result.enabled&&c.can_start&&c.cycle_id&&c.task_status==='Open')programmeButton(section,'Start assigned renewal',async e=>{const button=e.currentTarget;button.disabled=true;try{await request('/insurance/renewals/'+c.cycle_id+'/start',{method:'POST',body:'{}'});if(generation===editGeneration)renewalList()}catch(error){if(generation===editGeneration){const message=document.createElement('p');message.setAttribute('role','alert');message.textContent='Change not confirmed: '+error.message;section.append(message);button.disabled=false}}});
+    if(result.enabled&&c.can_start&&c.cycle_id&&c.task_status==='Open')programmeButton(section,'Start assigned renewal',async e=>{const button=e.currentTarget;button.disabled=true;try{await request('/insurance/renewals/'+c.cycle_id+'/start',{method:'POST',body:JSON.stringify({expected_revision:c.revision})});if(generation===editGeneration)renewalList()}catch(error){if(generation===editGeneration){const message=document.createElement('p');message.setAttribute('role','alert');message.textContent='Change not confirmed: '+error.message;section.append(message);button.disabled=false}}});
+    if(result.enabled&&c.cycle_id&&c.task_status!=='Renewed'&&(c.can_start||c.can_reassign))programmeButton(section,'Manage renewal evidence',()=>renewalManage(c));
     list.append(section);
    }
   };search.oninput=draw;draw();
  }catch(error){if(generation!==editGeneration)return;host.textContent='Renewals could not be loaded: '+error.message;programmeButton(host,'Retry renewals',renewalList)}
+}
+async function renewalManage(c){
+ const host=programmeHost('Renewal evidence'),generation=editGeneration;host.textContent='Loading evidence options.';
+ try{const data=await request('/insurance/renewals/'+c.cycle_id+'/evidence-options');if(generation!==editGeneration)return;host.replaceChildren();
+ const note=document.createElement('p');note.textContent='Replacement cover and an existing linked certificate are required for every original policy. This records evidence only; it does not purchase or accept insurance.';host.append(note);
+ const status=document.createElement('p');status.setAttribute('role','status');host.append(status);
+ const select=(label,options)=>{const field=document.createElement('label');field.className='field';field.textContent=label;const input=document.createElement('select');input.add(new Option('Select…',''));for(const o of options)input.add(new Option(o.name||o.title,o.id));field.append(input);host.append(field);return input};
+ const submit=async(button,operation,payload)=>{button.disabled=true;status.textContent='Saving renewal change.';try{await request('/insurance/renewals/'+c.cycle_id+'/'+operation,{method:'POST',body:JSON.stringify({expected_revision:c.revision,...payload})});if(generation===editGeneration)renewalList()}catch(error){if(generation===editGeneration){status.textContent='Change not confirmed: '+error.message;programmeButton(host,'Refresh renewal',renewalList);button.disabled=false}}};
+ if(c.can_start&&!c.stale){const mappings=data.members.map(member=>{const policy=select('Replacement for '+member.name,data.replacements),record=select('Linked certificate',[]);policy.onchange=()=>{record.replaceChildren(new Option('Select…',''));for(const cert of data.replacements.find(p=>String(p.id)===policy.value)?.certificates||[])record.add(new Option(cert.title,cert.id))};return{member,policy,record}});
+ const label=document.createElement('label'),confirmed=document.createElement('input');confirmed.type='checkbox';label.append(confirmed,document.createTextNode('I confirm the selected replacement cover and certificates cover every original policy in this renewal cycle.'));host.append(label);
+ programmeButton(host,'Complete renewal',e=>{if(!confirmed.checked||mappings.some(m=>!m.policy.value||!m.record.value)){status.textContent='Select every replacement and certificate, then confirm coverage.';return}submit(e.currentTarget,'complete',{coverage_confirmed:true,replacements:mappings.map(m=>({source_policy_id:m.member.id,replacement_policy_id:Number(m.policy.value),record_id:Number(m.record.value)}))})});}
+ if(c.can_reassign){const manager=select('Assign to active Insurance Manager',data.managers),reason=programmeField(host,'Reassignment reason','reason');programmeButton(host,'Reassign renewal',e=>{if(!manager.value||!reason.value.trim()){status.textContent='Select a manager and provide a reason.';return}submit(e.currentTarget,'reassign',{assigned_to_user_id:Number(manager.value),reason:reason.value})})}
+ programmeButton(host,'Back to renewals',renewalList);
+ }catch(error){if(generation===editGeneration){host.textContent='Evidence could not be loaded: '+error.message;programmeButton(host,'Back to renewals',renewalList)}}
 }
 function programmeField(container,label,name,value='',type='text'){
  const field=document.createElement('label');field.className='field';field.textContent=label;
