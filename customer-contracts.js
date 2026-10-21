@@ -36,7 +36,7 @@ async function openContract(c){
  if(!c)return openImport();
  if(!workspace){location.href='maintenance-workspace.html?id='+encodeURIComponent(c.id);return;}
  selected=c;contractDetails=null;tab='Overview';document.getElementById('heroName').textContent=c.contract_name;document.title='VERO — '+c.contract_name;document.getElementById('heroCustomer').textContent=[c.contract_code,c.customer_name].filter(Boolean).join(' · ');document.getElementById('contractSummary').innerHTML=[['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Renewal',date(c.expiry_date)],['Linked requirements',c.requirement_count??0]].map(([label,value])=>'<div class="kpi"><b>'+esc(value??'—')+'</b><span>'+label+'</span></div>').join('');drawTab();
- try{const details=await request('/maintenance-contracts/'+c.id+'/details');if(selected?.id===c.id){contractDetails=details;drawTab();}}catch(e){if(selected?.id===c.id){document.getElementById('tabContent').textContent=e.message;addContractRetry(()=>openContract(c));}}
+ try{const details=await request('/maintenance-contracts/'+c.id+'/details');if(selected?.id===c.id){contractDetails=details;if(!['Documents','Client Documents'].includes(tab))drawTab();}}catch(e){if(selected?.id===c.id){if(['Documents','Client Documents'].includes(tab))return;document.getElementById('tabContent').textContent=e.message;addContractRetry(()=>openContract(c));}}
 }
 function closeContract(){}
 async function editContractOwner(c){
@@ -160,4 +160,4 @@ async function loadContractWorkspace(){
 const initialContract=new URLSearchParams(location.search).get('contract_id');
 if(initialContract&&!workspace)location.replace('maintenance-workspace.html?id='+encodeURIComponent(initialContract));
 
-
+

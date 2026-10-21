@@ -1,0 +1,18 @@
+name: Maintenance linked documents
+on:
+  pull_request:
+    paths: ['maintenance-documents.js', 'customer-contracts.js', 'maintenance-workspace.html', 'maintenance-management.html', 'tests/maintenance-documents*.cjs', '.github/workflows/maintenance-documents-validation.yml']
+permissions:
+  contents: read
+jobs:
+  maintenance-documents:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save jsdom playwright@1.62.1
+      - run: npx playwright install --with-deps chromium
+      - run: node --test tests/maintenance-documents.cjs tests/maintenance-documents-browser.cjs tests/project-document-viewer.cjs
