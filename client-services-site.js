@@ -32,10 +32,10 @@ async function load(){
 }
 el('siteAssess').onclick=()=>create(null);
 el('siteReviewClose').onclick=()=>{reviewVersion++;el('siteRiskReview').hidden=true;};
-(async()=>{try{
+window.VeroSiteWorkspaceReady=(async()=>{try{
  if(!Number.isSafeInteger(id)||id<=0)throw Error('Choose a valid site from the Client Services Site List.');
  if(!localStorage.getItem('vero_session_token')){location.replace('login.html?return='+encodeURIComponent('client-services-site.html?id='+id));return;}
  await load();const riskId=Number(new URLSearchParams(location.search).get('risk_id'));if(Number.isSafeInteger(riskId)&&riskId>0)await openReview(riskId);
 }catch(error){el('siteWorkspaceStatus').textContent=error.message;const retry=node('button','Retry');retry.onclick=()=>location.reload();el('siteWorkspaceStatus').append(' ',retry);}
-finally{window.VeroPageLoader?.ready('maintenance');}})();
+})();
 })();
