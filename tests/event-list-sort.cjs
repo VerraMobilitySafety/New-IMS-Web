@@ -28,4 +28,8 @@ search('Beta');assert.deepEqual(order(),['same','early','unknown']);click('ref')
 w.VeroMonthlyReports.renderEvents(args);assert.equal(d.querySelector('input').value,'Beta');assert.deepEqual(order(),['early','same','unknown'],'Search and sort survive selection refresh');
 search('no such event');assert.deepEqual(order(),[]);assert.match(d.querySelector('.event-list-table').textContent,/No events match your search/);assert.equal(d.querySelector('.event-search-count').textContent,'0 of 4 Events');
 search('');assert.deepEqual(order(),['early','same','late','unknown']);
+const many=Array.from({length:61},(_,i)=>({id:'row-'+i,legacy:{event_reference:String(i+1)},report:{description:'Example '+i,occurred_date:'2026-01-01'},status:'Complete'}));
+w.VeroMonthlyReports.renderEvents({...args,events:many});assert.equal(order().length,25);assert.equal(d.querySelector('[data-page=previous]').disabled,true);
+d.querySelector('[data-page=next]').click();assert.equal(order().length,25);assert.equal(order()[0],'row-25');d.querySelector('[data-page=next]').click();assert.equal(order().length,11);assert.equal(d.querySelector('[data-page=next]').disabled,true);
+search('Example 60');assert.deepEqual(order(),['row-60'],'Search covers every page and resets pagination');search('');assert.equal(order().length,25);assert.equal(d.querySelector('[data-page=previous]').disabled,true);
 dom.window.close();console.log('PASS: newest occurrence first, invalid dates last, all columns toggle, numeric references, stable ties, focus and event opening.');

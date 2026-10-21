@@ -104,3 +104,5 @@
 
 .event-list-search { display:flex; flex-direction:column; gap:6px; max-width:480px; margin-bottom:12px; font-weight:600; }
 .event-list-search input { width:100%; }
+
+.event-list-pagination { display:flex; align-items:center; justify-content:flex-end; gap:12px; margin-top:12px; flex-wrap:wrap; }
