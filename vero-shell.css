@@ -71,13 +71,15 @@
 #clientServicesSiteExpand { position: absolute; right: 0; top: 0; }
 #clientServicesNavGroup.open .vero-nav-children { min-height: 40px; }
 #vero-nav .vero-nav-expand { background: transparent; border: 0; color: #f7f7f6; padding: 9px 10px; cursor: pointer; font-size: 17px; flex: 0 0 30px; }
-#vero-nav .vero-nav-expand span { display: inline-block; transition: transform .2s ease; }
+#vero-nav .vero-nav-expand { position: relative; color: #A9C23F; }
+#vero-nav { --vero-nav-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m7 4 6 6-6 6' stroke='%23A9C23F' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+#vero-nav .vero-nav-expand span { position: absolute; left: calc(50% - 9px); top: calc(50% - 9px); display: block; width: 18px; height: 18px; font-size: 0; background: var(--vero-nav-chevron) center/contain no-repeat; transition: transform .2s ease; }
 #vero-nav .vero-nav-group.open .vero-nav-expand span { transform: rotate(90deg); }
 #vero-nav .vero-nav-children { display: none; padding-left: 34px; margin: 2px 0 6px; }
 #vero-nav .vero-nav-group.open .vero-nav-children { display: block; }
 #vero-nav .vero-nav-children a { display: block; padding: 8px 10px; font-size: 10px; line-height: 1.5; white-space: normal; }
 #vero-nav .vero-risk-navigation summary { display: flex; align-items: center; gap: 11px; padding: 9px 12px; font-size: 12px; border-left: 3px solid transparent; border-radius: 7px; cursor: pointer; color: #f7f7f6; }
-#vero-nav .vero-risk-navigation summary::after { content: '›'; margin-left: auto; }
+#vero-nav .vero-risk-navigation summary::after { content: ''; flex: 0 0 18px; width: 18px; height: 18px; margin-left: auto; color: #A9C23F; background: var(--vero-nav-chevron) center/contain no-repeat; transition: transform .2s ease; }
 #vero-nav .vero-risk-navigation[open] summary::after { transform: rotate(90deg); }
 #vero-nav .vero-risk-navigation[open] summary { background: rgba(255,255,255,.08); border-left-color: #A9C23F; }
 #vero-nav .vero-risk-navigation > a { margin-left: 34px !important; font-size: 11px !important; }
@@ -113,4 +115,4 @@
 #vero-nav .vero-actions-count{width:32px;padding:0}
 #vero-nav .vero-nav-expand{font-family:Arial,sans-serif!important;line-height:20px;min-height:38px}
 #vero-nav summary{list-style:none}#vero-nav summary::-webkit-details-marker{display:none}
-@media(prefers-reduced-motion:reduce){#vero-nav .vero-nav-expand span{transition:none}}
+@media(prefers-reduced-motion:reduce){#vero-nav .vero-nav-expand span,#vero-nav .vero-risk-navigation summary::after{transition:none}}
