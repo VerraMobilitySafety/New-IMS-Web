@@ -12,16 +12,24 @@ async function test(preReady=false){
  w.localStorage.setItem('vero_session_token','isolated-test');
  let fail=false,saved=null;
  w.fetch=async(url,init={})=>{calls.push({url,init});if(url.endsWith('/options'))return{ok:true,json:async()=>({hazard_types:['Traffic <img onerror=alert(1)>','Electrical'],employees:['Test Employee']})};
+  if(url.endsWith('/swms'))return{ok:true,json:async()=>({items:[{id:101,kind:'document',status:'Current',reference:'SWMS-01',title:'Inspect road equipment'},{id:102,kind:'request',status:'Draft',title:'Unapproved draft'}]})};
+  if(url.endsWith('/maintenance-contracts'))return{ok:true,json:async()=>({contracts:[{id:1,contract_name:'Contract One'},{id:2,contract_name:'Contract Two'}]})};
+  if(url.endsWith('/1/sites'))return{ok:true,json:async()=>({sites:[{id:11,site_code:'S-11',site_name:'Test site'}]})};
+  if(url.endsWith('/2/sites'))return{ok:true,json:async()=>({sites:[{id:22,site_code:'S-22',site_name:'Different site'}]})};
+  if(url.includes('/site-context?'))return{ok:true,json:async()=>({site:{site:'S-11 · Test site'},risks:[{id:7,code:'R-7',title:'Known vehicle movement',score:60}],events:[{id:'e1',title:'Previous near miss',date:'2026-09-01',status:'Complete'}],event_total:1})};
   if(init.method==='PUT'){if(fail)return{ok:false,json:async()=>({message:'Save unavailable'})};const body=JSON.parse(init.body);saved={id:url.split('/').pop(),version:body.version+1,status:body.submit?'Submitted':'Draft',payload:body.payload};return{ok:true,json:async()=>({assessment:saved})};}
   if(url.endsWith('/take5'))return{ok:true,json:async()=>({assessments:saved?[{...saved,task:saved.payload.task,site:saved.payload.site,updated_at:'2026-10-22T00:00:00Z'}]:[]})};
   return{ok:true,json:async()=>({assessment:saved})};
  };
  if(preReady)d.getElementById('vh').hidden=false;
- w.eval(script);if(!preReady)assert.equal(calls.length,0,'wait for authenticated ready event');w.dispatchEvent(new w.Event('vero-risk-auth-ready'));await wait();
+ w.eval(fs.readFileSync(path.join(root,'take5-work-context.js'),'utf8'));w.eval(script);if(!preReady)assert.equal(calls.length,0,'wait for authenticated ready event');w.dispatchEvent(new w.Event('vero-risk-auth-ready'));await wait();
  assert.equal(d.getElementById('take5Drawer').open,false,'register opens without a form');assert.equal(d.getElementById('take5Total').textContent,'0');d.getElementById('take5New').click();assert.equal(d.getElementById('take5Drawer').open,true);assert.equal(w.document.body.style.overflow,'hidden');
  const input=(el,value)=>{el.value=value;el.dispatchEvent(new w.Event(el.tagName==='SELECT'?'change':'input',{bubbles:true}));};
  assert.equal(d.querySelectorAll('.t5-check input').length,9);assert.equal(d.querySelectorAll('#take5Hazards img').length,0,'hazard names render safely');
- input(d.getElementById('take5_task'),'Inspect road equipment');input(d.getElementById('take5_site'),'Test site');
+ assert.equal(d.getElementById('take5_risk_assessment'),null);assert.equal(d.getElementById('take5_swms').lastElementChild.textContent,'Other');assert(!d.getElementById('take5_swms').textContent.includes('Unapproved draft'));
+ input(d.getElementById('take5_swms'),'other');assert.equal(d.getElementById('take5_other_task').hidden,false);input(d.getElementById('take5_task'),'Inspect road equipment');input(d.getElementById('take5_swms'),'101');assert.equal(d.getElementById('take5_other_task').hidden,true);
+ input(d.getElementById('take5_contract'),'1');await wait();input(d.getElementById('take5_site'),'11');await wait();assert.match(d.getElementById('take5SiteContext').textContent,/Known vehicle movement/);assert.match(d.getElementById('take5SiteContext').textContent,/Previous near miss/);
+ input(d.getElementById('take5_contract'),'2');assert.equal(d.getElementById('take5SiteContext').hidden,true);await wait();assert(!d.getElementById('take5_site').textContent.includes('Test site'));input(d.getElementById('take5_contract'),'1');await wait();input(d.getElementById('take5_site'),'11');await wait();
  d.querySelectorAll('.t5-check input').forEach(el=>{el.checked=true;el.dispatchEvent(new w.Event('change'));});
  let card=d.querySelector('#take5Hazards .t5-card'),selects=card.querySelectorAll('select');
  input(selects[0],'Other');assert.equal(card.querySelectorAll('input')[2].required,true);
@@ -37,12 +45,13 @@ async function test(preReady=false){
  fail=true;d.getElementById('take5Save').click();await wait();assert.match(d.getElementById('take5Status').textContent,/Save unavailable/);assert.equal(d.getElementById('take5Save').disabled,false);
  fail=false;d.getElementById('take5Save').click();await wait();assert.match(d.getElementById('take5Status').textContent,/Draft saved/);
  const puts=calls.filter(c=>c.init.method==='PUT');assert.equal(puts[0].url,puts[1].url,'retry uses same assessment ID');
+ const linked=JSON.parse(puts[1].init.body).payload;assert.equal(linked.contract_id,1);assert.equal(linked.site_id,11);assert.equal(linked.swms_id,101);assert.equal(linked.task,'SWMS-01 · Inspect road equipment');
  d.getElementById('take5Form').dispatchEvent(new w.Event('submit',{cancelable:true}));await wait();assert.match(d.getElementById('take5Status').textContent,/submitted and saved/);assert.equal(d.getElementById('take5Fields').disabled,true);assert.equal(d.getElementById('take5Save').hidden,true);assert.equal(d.querySelectorAll('.t5-register-row').length,1);assert.equal(d.getElementById('take5Submitted').textContent,'1');
  d.getElementById('take5Close').click();assert.equal(d.getElementById('take5Drawer').open,false);assert.equal(w.document.body.style.overflow,'');
  input(d.getElementById('take5Search'),'no match');assert.equal(d.querySelectorAll('.t5-register-row').length,0);d.getElementById('take5ClearFilters').click();const row=d.querySelector('.t5-register-row');row.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));await wait();assert.equal(d.getElementById('take5Drawer').open,true);assert.equal(d.getElementById('take5Fields').disabled,true,'row reopens submitted assessment read-only');d.getElementById('take5Close').click();
  d.getElementById('take5New').click();assert.equal(d.getElementById('take5Fields').disabled,false);assert.equal(d.getElementById('take5_task').value,'');
  const before=calls.filter(c=>c.init.method==='PUT').length;d.getElementById('take5Form').dispatchEvent(new w.Event('submit',{cancelable:true}));await wait();assert.equal(calls.filter(c=>c.init.method==='PUT').length,before,'incomplete submissions never sent');
- input(d.getElementById('take5_task'),'Unsaved task');w.confirm=()=>false;d.getElementById('take5Close').click();assert.equal(d.getElementById('take5Drawer').open,true,'cancel preserves unsaved work');w.confirm=()=>true;d.getElementById('take5Drawer').dispatchEvent(new w.Event('cancel',{cancelable:true}));assert.equal(d.getElementById('take5Drawer').open,false,'Escape closes after discard confirmation');
+ input(d.getElementById('take5_swms'),'other');input(d.getElementById('take5_task'),'Unsaved task');w.confirm=()=>false;d.getElementById('take5Close').click();assert.equal(d.getElementById('take5Drawer').open,true,'cancel preserves unsaved work');w.confirm=()=>true;d.getElementById('take5Drawer').dispatchEvent(new w.Event('cancel',{cancelable:true}));assert.equal(d.getElementById('take5Drawer').open,false,'Escape closes after discard confirmation');
  dom.window.close();console.log('PASS Take 5: auth gate, exact scoring, checks, repeaters, signature invalidation, retry, save, submit, read-only records, required fields and safe text.');
 }
 test().then(()=>test(true)).catch(e=>{console.error(e);process.exitCode=1;});
