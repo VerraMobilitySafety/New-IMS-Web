@@ -1,10 +1,10 @@
 name: Reporting summary validation
 on:
   pull_request:
-    paths: ['reports.*', 'report-conversation.js', 'tests/report-conversation-browser.cjs', 'report-ai-summary.js', 'tests/report-ai-summary-browser.cjs', 'nav.js', 'tests/reports-browser.cjs', '.github/workflows/reports-validation.yml']
+    paths: ['reports.*', 'saved-reports.js', 'tests/saved-reports-browser.cjs', 'report-conversation.js', 'tests/report-conversation-browser.cjs', 'report-ai-summary.js', 'tests/report-ai-summary-browser.cjs', 'nav.js', 'tests/reports-browser.cjs', '.github/workflows/reports-validation.yml']
   push:
     branches: [main]
-    paths: ['reports.*', 'report-conversation.js', 'tests/report-conversation-browser.cjs', 'report-ai-summary.js', 'tests/report-ai-summary-browser.cjs', 'nav.js', 'tests/reports-browser.cjs', '.github/workflows/reports-validation.yml']
+    paths: ['reports.*', 'saved-reports.js', 'tests/saved-reports-browser.cjs', 'report-conversation.js', 'tests/report-conversation-browser.cjs', 'report-ai-summary.js', 'tests/report-ai-summary-browser.cjs', 'nav.js', 'tests/reports-browser.cjs', '.github/workflows/reports-validation.yml']
 permissions:
   contents: read
 jobs:
@@ -23,3 +23,5 @@ jobs:
       - run: node tests/report-ai-summary-browser.cjs
 
       - run: node tests/report-conversation-browser.cjs
+
+      - run: node tests/saved-reports-browser.cjs
