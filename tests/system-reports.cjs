@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
-const context={window:{}};vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../system-reports.js'),'utf8'),context);const api=context.window.VeroSystemReports;
+const context={window:{},URLSearchParams};for(const file of ['report-catalogue.js','report-query.js'])vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'..',file),'utf8'),context);vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../system-reports.js'),'utf8'),context);const api=context.window.VeroSystemReports;
 test('each register is authorised independently; unavailable data is not zero',async()=>{
  const calls=[];const sources=await api.load('projects,insurance',async path=>{calls.push(path);if(path.includes('insurance'))throw Object.assign(Error(),{status:403});return {projects:[{id:1,project_name:'Alpha',status:'Open',project_owner:'',target_end_date:'2026-01-01'}]};});
  assert.equal(calls.length,2);const result=api.analyse(sources,{group_by:'status'},'2026-10-21');assert.equal(result[0].total,1);assert.equal(result[0].missingOwner,1);assert.equal(result[0].pastDate,1);assert.equal(result[1].error,'Access unavailable');assert.equal(result[1].total,undefined);
@@ -34,4 +34,28 @@ test('investigation sites use recorded Verra context, retain every site and sepa
  const result=api.analyse(sources,{group_by:'site'},'2026-10-21')[0];assert.equal(result.total,9);assert.equal(result.groups.length,8);assert.ok(!JSON.stringify(result).includes('Client Must Not Become Verra Site'));assert.ok(result.rows.some(r=>r.status==='Historical Hold'));assert.ok(result.groups.some(g=>g[0]==='Verra Site Not Recorded'));
  const tables=[];api.render(sources,{group_by:'site'},{kpis:()=>'',note:()=>'',table:(title,headers,rows)=>{tables.push({title,headers,rows});return '';}},'2026-10-21');
  const sites=tables.find(t=>t.title==='Investigations by Verra Mobility Site');assert.equal(sites.rows.length,8);assert.ok(!tables.some(t=>t.title.startsWith('Matching register entries')));assert.deepEqual(Array.from(sites.rows.find(r=>r[0]==='Site 0')),['Site 0',2,1,0,0,1,0]);
+});
+
+test('typed questions paginate assets, apply source-specific date filters and group without question-specific code',async()=>{
+ const calls=[];const sources=await api.load('assets',async path=>{calls.push(path);return {total:3,assets:path.includes('offset=2')?[{id:3,asset_tag:'A3',asset_name:'Van',category:'Vehicle',next_service_date:'2027-01-01',owner_name:'Sam',site_name:'Sydney'}]:[{id:1,asset_tag:'A1',asset_name:'Car',category:'Vehicle',next_service_date:'2026-01-01',owner_name:'Alex',site_name:'Sydney'},{id:2,asset_tag:'A2',asset_name:'Tool',category:'Equipment',next_service_date:null,owner_name:'Sam',site_name:'Melbourne'}]};});
+ assert.equal(calls.length,2);assert.equal(sources[0].rows.length,3);assert.equal(sources[0].limited,false);
+ const result=api.analyse(sources,{group_by:'owner',where:JSON.stringify([{source:'assets',field:'next_service_date',op:'before',value:'2026-10-21'}])},'2026-10-21')[0];assert.equal(result.total,1);assert.equal(result.groups[0][0],'Alex');
+});
+test('contractor relationships use authorised company metadata and parent failures retain partial coverage',async()=>{
+ const data={data:{contractors:[{id:1,company_name:'Company A'}],workers:[{id:2,contractor_id:1,first_name:'Alex',last_name:'Smith',induction_status:'Complete',status:'Active'}]}};
+ const sources=await api.load('contractor-workers',async()=>data);assert.equal(sources[0].rows[0].contractor,'Company A');assert.equal(sources[0].rows[0].title,'Alex Smith');
+ const child=await api.load('project-milestones',async path=>{if(path==='/projects')return {projects:[{id:1,project_name:'A'},{id:2,project_name:'B'}]};if(path.includes('/1/'))return {milestones:[{id:1,milestone_name:'Gate',target_date:'2026-12-01'}]};throw Object.assign(Error(),{status:403});});assert.equal(child[0].partial,1);assert.equal(child[0].rows[0].project,'A');
+});
+test('numeric aggregation excludes unrecorded values and runs separately per group',async()=>{
+ const sources=await api.load('retention-rules',async()=>({rules:[{id:1,rule_name:'A',record_category:'Finance',retention_period_months:12},{id:2,rule_name:'B',record_category:'Finance',retention_period_months:24},{id:3,rule_name:'C',record_category:'Operations',retention_period_months:null}]}));const result=api.analyse(sources,{group_by:'type',aggregate:'average',measure:'retention_period_months'},'2026-10-21')[0];assert.equal(result.groups.find(r=>r[0]==='Finance')[1],18);assert.equal(result.groups.find(r=>r[0]==='Operations')[1],'Not supplied');
+});
+test('unconnected topics and protected injury details never become zero counts or sample evidence',async()=>{
+ const sources=await api.load('assurance,injury-register',async()=>({records:[{id:1,fields:{'IP Name':'PRIVATE NAME','Description of Injury':'PRIVATE MEDICAL DETAIL','Injury Classification':'First Aid','Claim Status':'Closed','Date of Injury':'2026-01-01'}}]}));assert.ok(sources[0].error);assert.ok(!JSON.stringify(sources).includes('PRIVATE'));const tables=[];api.render(sources,{}, {kpis:()=>'',note:()=>'',table:(title,headers,rows)=>{tables.push({title,rows});return '';}},'2026-10-21');assert.ok(!tables.some(t=>t.title.startsWith('Matching register entries')));
+});
+
+test('percentage groups retain boolean false and use matching source population',()=>{
+ const rows=[{id:1,overdue:true},{id:2,overdue:false},{id:3,overdue:false}];const result=api.analyse([{id:'all-actions',rows}],{group_by:'overdue',aggregate:'percentage'},'2026-10-21')[0];assert.equal(result.groups.find(r=>r[0]==='false')[1],66.67);assert.equal(result.groups.find(r=>r[0]==='true')[1],33.33);
+});
+test('new catalogue sources use the same reader and grouping engine without a preset question',async()=>{
+ const catalogue=JSON.parse(JSON.stringify(context.window.VeroReportQuery.catalogue));catalogue.sources['new-register']={name:'New Register',path:'/new-register',key:'items',page:'index.html',title:'name',code:'id',fields:{id:{path:'id',type:'text',label:'ID'},title:{path:'name',type:'text',label:'Name'},region:{path:'region',type:'text',label:'Region'}}};api.configure(catalogue);const sources=await api.load('new-register',async()=>({items:[{id:1,name:'One',region:'North'},{id:2,name:'Two',region:'North'}]}));assert.equal(api.analyse(sources,{group_by:'region'},'2026-10-21')[0].groups[0][1],2);
 });
