@@ -34,7 +34,9 @@ function setup(pageScripts=scripts) {
   window:{addEventListener(type,fn){listeners[type]=fn;}}
  });
  vm.runInContext(helper, context);
- vm.runInContext(pageScripts[0], context);
+ const controller=pageScripts.find(code=>/async function load(?:My)?Actions\(/.test(code));
+ assert.ok(controller,'Find the actions controller independently of shell/bootstrap script order');
+ vm.runInContext(controller, context);
  return {context,api:context.window.VeroRiskActions,elements,listeners};
 }
 const risk = extra => ({id:'project-risk-review-21-v1',source:'Risks',
