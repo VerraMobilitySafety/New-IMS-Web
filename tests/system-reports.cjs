@@ -59,3 +59,12 @@ test('percentage groups retain boolean false and use matching source population'
 test('new catalogue sources use the same reader and grouping engine without a preset question',async()=>{
  const catalogue=JSON.parse(JSON.stringify(context.window.VeroReportQuery.catalogue));catalogue.sources['new-register']={name:'New Register',path:'/new-register',key:'items',page:'index.html',title:'name',code:'id',fields:{id:{path:'id',type:'text',label:'ID'},title:{path:'name',type:'text',label:'Name'},region:{path:'region',type:'text',label:'Region'}}};api.configure(catalogue);const sources=await api.load('new-register',async()=>({items:[{id:1,name:'One',region:'North'},{id:2,name:'Two',region:'North'}]}));assert.equal(api.analyse(sources,{group_by:'region'},'2026-10-21')[0].groups[0][1],2);
 });
+const {test:coverageTest}=require('node:test');
+coverageTest('unassessed risk query uses assessment state independently of lifecycle and retains named details',async()=>{
+ const seen=[]; const sources=await api.load('risks',async path=>{seen.push(path);return {risks:[{id:1,risk_code:'R1',risk_title:'Unassessed open risk',risk_owner:'Alex',status:'Open',assessment_state:'Not Assessed',assessment_basis:'No Recorded Assessment In Accessible Scope',awaiting_assessment:2},{id:2,risk_title:'Assessed draft',status:'Draft',assessment_state:'Assessed',awaiting_assessment:0}]};});
+ assert.equal(seen[0],'/risks?assessment_coverage=true');
+ const filters={group_by:'assessment_state',where:JSON.stringify([{source:'risks',field:'assessment_state',op:'equals',value:'Not Assessed'}]),columns:'code,title,owner,status,assessment_state,assessment_basis,awaiting_assessment'};
+ const result=api.analyse(sources,filters,'2026-10-21');assert.equal(result[0].total,1);assert.equal(result[0].rows[0].owner,'Alex');assert.equal(result[0].rows[0].status,'Open');
+ const tables=[];api.render(sources,filters,{kpis:()=>'',note:()=>'',table:(title,headers,rows)=>{tables.push({title,headers,rows});return '';}},'2026-10-21');
+ assert.ok(tables.find(t=>t.title.includes('requested details')).rows[0].includes('Unassessed open risk'));
+});
