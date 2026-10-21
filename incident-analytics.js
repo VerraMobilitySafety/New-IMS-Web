@@ -1,14 +1,23 @@
 /* Accessible monthly charts over permission-scoped server aggregates. */
 (()=>{'use strict';
-const types=['Hazard','Near Miss','Incident','Unverified'],selectedMonths=new Set();
+const types=['Hazard','Near Miss','Incident','Unverified'],selectedMonths=new Set(),eventListSort={key:'newest',direction:-1};
+const eventListCollator=new Intl.Collator('en-AU',{numeric:true,sensitivity:'base'});
 const label={Hazard:'Hazards','Near Miss':'Near Misses',Incident:'Incidents',Unverified:'Unverified'};
 const monthLabel=value=>new Date(value+'-01T00:00:00Z').toLocaleDateString('en-AU',{month:'short',year:'numeric',timeZone:'UTC'});
 window.VeroMonthlyReports={renderEvents({results,events,esc,users=[],openEvent,onError=()=>{}}){
  const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Australia/Sydney',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  const state=e=>e.status==='Complete'?'Closed':e.report?.classification?.due_date&&e.report.classification.due_date<today?'Overdue':'Open';
  const owner=e=>users.find(u=>String(u.id)===String(e.investigator_id))?.name||e.investigator_name||'Unassigned';
- results.innerHTML='<div class="table-wrap"><table class="event-register-table"><thead><tr><th>Ref Number</th><th>Event</th><th>Status</th><th>Owner</th></tr></thead><tbody>'+events.map(e=>`<tr><td>${esc(e.legacy?.event_reference||e.id.slice(0,8))}</td><td><button type="button" class="chart-event-open" data-chart-event="${esc(e.id)}">${esc(e.legacy?.register_description?.trim()||e.report?.description||'')}</button>${e.report?.vm_site_review?.status==='Unverified'?'<span class="badge">Site Unverified</span>':''}</td><td>${state(e)}</td><td>${esc(owner(e))}</td></tr>`).join('')+(events.length?'':'<tr><td colspan="4">No events in this selection.</td></tr>')+'</tbody></table></div>';
+ const ref=e=>String(e.legacy?.event_reference||e.id.slice(0,8)),description=e=>e.legacy?.register_description?.trim()||e.report?.description||'';
+ const occurred=e=>{const date=e.report?.occurred_date;if(!/^\d{4}-\d{2}-\d{2}$/.test(date||''))return null;const base=Date.parse(date+'T00:00:00Z');if(!Number.isFinite(base)||new Date(base).toISOString().slice(0,10)!==date)return null;const time=String(e.report?.occurred_time||'').match(/(?:^|T)([0-2]\d:[0-5]\d(?::[0-5]\d)?)/)?.[1]||'00:00';const stamp=Date.parse(date+'T'+time+(time.length===5?':00':'')+'Z');return Number.isFinite(stamp)?stamp:base;};
+ const newest=(a,b)=>{const left=occurred(a),right=occurred(b);return left===null&&right!==null?1:right===null&&left!==null?-1:(right??0)-(left??0)||eventListCollator.compare(ref(b),ref(a))||String(a.id).localeCompare(String(b.id));};
+ function draw(){
+ const value={ref,description,status:state,owner};const sorted=[...events].sort((a,b)=>eventListSort.key==='newest'?newest(a,b):eventListSort.direction*eventListCollator.compare(value[eventListSort.key](a),value[eventListSort.key](b))||newest(a,b));
+ results.innerHTML='<p class="sr-only" role="status">'+(eventListSort.key==='newest'?'Newest events first':esc(eventListSort.key)+' '+(eventListSort.direction===1?'ascending':'descending'))+'</p><div class="table-wrap"><table class="event-register-table"><thead><tr>'+[['ref','Ref Number'],['description','Event'],['status','Status'],['owner','Owner']].map(([key,label])=>`<th scope="col" aria-sort="${eventListSort.key===key?(eventListSort.direction===1?'ascending':'descending'):'none'}"><button type="button" class="event-list-sort" data-event-sort="${key}">${label}<span aria-hidden="true">${eventListSort.key===key?(eventListSort.direction===1?'↑':'↓'):'↕'}</span></button></th>`).join('')+'</tr></thead><tbody>'+sorted.map(e=>`<tr><td>${esc(e.legacy?.event_reference||e.id.slice(0,8))}</td><td><button type="button" class="chart-event-open" data-chart-event="${esc(e.id)}">${esc(e.legacy?.register_description?.trim()||e.report?.description||'')}</button>${e.report?.vm_site_review?.status==='Unverified'?'<span class="badge">Site Unverified</span>':''}</td><td>${state(e)}</td><td>${esc(owner(e))}</td></tr>`).join('')+(events.length?'':'<tr><td colspan="4">No events in this selection.</td></tr>')+'</tbody></table></div>';
  results.querySelectorAll('[data-chart-event]').forEach(b=>b.onclick=async()=>{try{await openEvent(b.dataset.chartEvent);}catch(error){onError(error);}});
+ results.querySelectorAll('[data-event-sort]').forEach(b=>b.onclick=()=>{const key=b.dataset.eventSort;eventListSort.direction=eventListSort.key===key?-eventListSort.direction:1;eventListSort.key=key;draw();results.querySelector('[data-event-sort="'+key+'"]').focus({preventScroll:true});});
+ }
+ draw();
 },render({data:d,content,esc,tabs,period,navigate,bind,periodParams,context='',api,users=[],openEvent}){
  const peak=Math.max(1,...d.months.map(m=>m.total));
  const currentMonth=(d.as_of||new Intl.DateTimeFormat('en-CA',{timeZone:'Australia/Sydney',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())).slice(0,7),current=m=>m.month===currentMonth,validationNote="These events haven’t been validated yet.";
