@@ -26,7 +26,9 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   const add=async(number,status,expiry)=>{
    await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
    assert.equal(await page.locator('main').evaluate(e=>e.inert),true);
+   await page.keyboard.press('Shift+Tab');assert.equal(await page.getByRole('button',{name:'Close',exact:true}).evaluate(e=>e===document.activeElement),true);
    await page.keyboard.press('Shift+Tab');assert.equal(await page.getByRole('button',{name:'Save Draft'}).evaluate(e=>e===document.activeElement),true);
+   await page.keyboard.press('Tab');assert.equal(await page.getByRole('button',{name:'Close',exact:true}).evaluate(e=>e===document.activeElement),true);
    await page.keyboard.press('Tab');assert.equal(await page.getByLabel('Policy Name',{exact:true}).evaluate(e=>e===document.activeElement),true);
    await page.getByLabel('Policy Name',{exact:true}).fill('Synthetic '+number);
    await page.getByLabel('Policy Number',{exact:true}).fill(number);
