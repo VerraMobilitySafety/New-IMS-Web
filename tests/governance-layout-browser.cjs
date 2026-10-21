@@ -37,6 +37,7 @@ for(const width of [1440,1024,768,390])for(const file of ['records.html','risk.h
  }else{
   await page.locator('#event-rows a').first().waitFor();await page.getByLabel('Search events',{exact:true}).fill('road');assert.equal(await page.locator('#event-rows a').count(),1);await page.locator('#event-filter').selectOption('complete');assert.equal(await page.locator('#event-rows a').count(),0);await page.getByLabel('Search events',{exact:true}).fill('');assert.equal(await page.locator('#event-rows a').count(),1);await page.locator('#event-filter').selectOption('all');
   assert.equal(await page.getByLabel('View',{exact:true}).locator('option[value="injury-register-button"]').count(),0);
+  assert.equal(await page.getByLabel('View',{exact:true}).locator('option[value="incident-actions"]').count(),0);
   await page.getByLabel('View',{exact:true}).selectOption('dashboard');await page.locator('#incident-dashboard .vr-summary').waitFor();
   for(const tab of ['monthly','Safety','Quality','Environment','overview']){
    const layout=await page.locator('#content').evaluate(el=>{
