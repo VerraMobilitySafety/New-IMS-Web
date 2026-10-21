@@ -49,7 +49,7 @@
     </div>
 
     <div class="nav-section">
-      <div class="nav-label">Operations</div>
+      <div class="nav-label">Operations Management</div>
 
       <a class="${isActive('sites.html') ? 'active' : ''}"
          href="sites.html">
@@ -83,7 +83,7 @@
     </div>
 
     <div class="nav-section">
-      <div class="nav-label">Specific Risk Management Systems</div>
+      <div class="nav-label">Specific Risk Management</div>
 
       <details class="vero-risk-navigation" ${["alcohol-and-other-drugs.html","driving.html","electrical-works.html","emergency-management.html","ergonomics-and-sedentary-work.html","extreme-temperatures.html","fatigue.html","hazardous-substances-and-dangerous-goods.html","manual-handling.html","personal-protective-equipment.html","plant-and-equipment.html","psychosocial-risk.html","public-interaction.html","visitors.html","working-at-heights.html","working-from-home.html","working-near-traffic.html"].includes(path) ? 'open' : ''}><summary><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Safety Risks</span></summary><a class="${isActive('alcohol-and-other-drugs.html') ? 'active' : ''}" href="alcohol-and-other-drugs.html">Alcohol and Other Drugs</a>
 <a class="${isActive('driving.html') ? 'active' : ''}" href="driving.html">Driving</a>
@@ -112,7 +112,7 @@
     </div>
 
     <div class="nav-section">
-      <div class="nav-label">Governance</div>
+      <div class="nav-label">Governance Management</div>
 
       <a class="${isActive('documents.html') ? 'active' : ''}"
          href="documents.html">
