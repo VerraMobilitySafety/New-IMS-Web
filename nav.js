@@ -1,7 +1,7 @@
 /* Shared navigation: prerender markup with scripts/build-navigation.cjs; hydrate without replacing it. */
 /* Inline navigation icons: Lucide 0.456.0, ISC licence (vendor/lucide-LICENSE). */
 (function(){'use strict';
- const VERSION='20261021-stable';
+ const VERSION='20261021-assets';
  function renderNavigation(path){  /* CURRENT PAGE */
   path=(path||'index.html').toLowerCase();
 
@@ -75,6 +75,11 @@
           <a id="clientServicesSiteNav" hidden style="display:none!important" class="${isActive('client-services-sites.html') ? 'active' : ''}" href="client-services-sites.html">Client Services Site List</a>
         </div>
       </div>
+
+      <a class="${isActive('asset-management.html') ? 'active' : ''}" href="asset-management.html" ${isActive('asset-management.html') ? 'aria-current="page"' : ''}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="M3 8v9l9 5 9-5V8M12 13v9"/></svg>
+        <span>Asset Management</span>
+      </a>
 
       <a class="${isActive('contractor-management.html') ? 'active' : ''}" href="contractor-management.html">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"></path><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"></path><path d="M4 15v-3a6 6 0 0 1 6-6"></path><path d="M14 6a6 6 0 0 1 6 6v3"></path></svg>
