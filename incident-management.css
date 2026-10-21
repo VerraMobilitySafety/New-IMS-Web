@@ -172,3 +172,7 @@ th{background:#f8f7f6;color:#706660;font-size:10px;font-weight:800;text-transfor
 .investigation-support>summary,.investigation-prefill-note>summary{font-weight:700;cursor:pointer}
 .event-drawer [data-review-question]{margin:10px 0}
 .event-drawer [data-review-question]>label{margin-bottom:4px}
+
+/* Match the report container width while retaining the mobile full-width layout. */
+.report-container.report-drawer.event-drawer{width:min(640px,95vw)}
+@media(max-width:650px){.report-container.report-drawer.event-drawer{width:100vw}}
