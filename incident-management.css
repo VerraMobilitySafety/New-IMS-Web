@@ -105,3 +105,25 @@ th{background:#f8f7f6;color:#706660;font-size:10px;font-weight:800;text-transfor
 #report-backdrop [data-impact]>legend{padding:0;margin-bottom:6px;line-height:1.5}
 #report-backdrop [data-impact]>select{max-width:none;width:100%;margin-top:0}
 #report-backdrop [data-impact]:last-of-type{margin-bottom:0}
+
+/* Consistent compact spacing throughout Report an Event. */
+#report-backdrop .report-section{padding:16px 20px}
+#report-backdrop .report-section h3{margin:0 0 10px}
+#report-backdrop .report-section label{margin:8px 0}
+#report-backdrop .report-section .grid{gap:4px 16px}
+#report-backdrop .report-section .grid>label{margin:6px 0}
+#report-backdrop .report-section input,#report-backdrop .report-section select,#report-backdrop .report-section textarea{margin-top:4px}
+#report-backdrop .report-section textarea{min-height:76px}
+#report-backdrop .report-section p{margin:6px 0 10px}
+#report-backdrop .report-section .report-person{padding:9px 12px;margin:0}
+#report-backdrop .report-repeat{padding:10px 12px;margin:8px 0}
+#report-backdrop .report-repeat label{margin:4px 0 8px}
+#report-backdrop .report-repeat>button{padding:6px 10px}
+#report-backdrop .classification-preview{padding:10px 12px;margin:12px 0}
+#report-backdrop .field-help{margin-top:3px;line-height:1.5}
+#report-backdrop .report-footer{padding:14px 20px;gap:12px}
+#report-backdrop #report-message:empty{display:none}
+#report-backdrop .report-section [data-impact]>select{margin-top:0}
+#report-backdrop #tfnsw-report fieldset,#report-backdrop #uk-report fieldset{padding:10px 0;margin:8px 0}
+#report-backdrop .check-label{gap:8px;line-height:1.5}
+@media(max-width:650px){#report-backdrop .report-section{padding:14px 16px}#report-backdrop .report-footer{padding:14px 16px}}
