@@ -30,7 +30,7 @@ test('desktop generation saves to the selected service; summaries, search, links
  const s=await screen();try{const p=s.page;
  assert.equal(await p.locator('#swmsCurrent').textContent(),'1');assert.equal(await p.locator('#swmsDue').textContent(),'1');
  assert.equal(await p.locator('#swmsRows a[href="maintenance-workspace.html?id=8"]').count(),2);
- await p.locator('#swmsGenerate').click();await p.locator('#swmsDialog').waitFor({state:'visible'});assert.equal(await p.locator('#swmsContract').inputValue(),'8');
+ await p.locator('#swmsGenerate').click();await p.locator('#swmsDialog').waitFor({state:'visible'});const rect=await p.locator('#swmsDialog').boundingBox();assert.equal(rect.x+rect.width,1440);assert.equal(rect.y,0);assert.equal(rect.height,1000);if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-drawer-desktop.png')});assert.equal(await p.locator('#swmsContract').inputValue(),'8');
  for(const [name,value] of Object.entries({title:'Camera maintenance',location:'Eastern Creek',responsible_person:'Site supervisor',scope:'Maintain camera system',high_risk_work:'Work near traffic — NSW',site_conditions:'Live road and public interface',consultation:'Crew briefing 22 October',resources:'Authorised crew and equipment',emergency:'Site emergency plan and first aid',monitoring:'Supervisor checks before and during work'}))await p.locator('[name="'+name+'"]').fill(value);
  for(const input of await p.locator('.swms-step [data-field]').all())await input.fill('Site-specific '+await input.getAttribute('data-field'));
  await p.locator('#swmsReviewConfirmed').check();await p.locator('#swmsSubmit').click();await p.locator('#swmsDialog').waitFor({state:'hidden'});await p.locator('#swmsTotal').filter({hasText:'3'}).waitFor();
@@ -46,7 +46,7 @@ test('desktop generation saves to the selected service; summaries, search, links
 test('mobile layout and work-step controls remain usable',async()=>{
  const s=await screen(390);try{const p=s.page;assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  await p.locator('#swmsGenerate').click();await p.locator('#swmsAddStep').click();assert.equal(await p.locator('.swms-step').count(),2);await p.getByRole('button',{name:'Remove step'}).last().click();assert.equal(await p.locator('.swms-step').count(),1);
- assert.ok(await p.locator('#swmsDialog').evaluate(e=>e.getBoundingClientRect().width<innerWidth));
+ assert.ok(await p.locator('#swmsDialog').evaluate(e=>e.getBoundingClientRect().width<innerWidth));const rect=await p.locator('#swmsDialog').boundingBox();assert.equal(rect.x+rect.width,390);assert.equal(rect.y,0);assert.equal(rect.height,1000);if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-drawer-mobile.png')});
  await p.locator('#swmsClose').click();if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-mobile.png'),fullPage:true});
  }finally{await s.browser.close();}
 });
