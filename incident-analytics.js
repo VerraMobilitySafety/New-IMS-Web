@@ -22,7 +22,7 @@ window.VeroMonthlyReports={renderEvents({results,events,esc,users=[],openEvent,o
  results.querySelectorAll('[data-event-sort]').forEach(b=>b.onclick=()=>{const key=b.dataset.eventSort;eventListSort.direction=eventListSort.key===key?-eventListSort.direction:1;eventListSort.key=key;draw();results.querySelector('[data-event-sort="'+key+'"]').focus({preventScroll:true});});
  }
  draw();
-},render({data:d,content,esc,tabs,period,navigate,bind,periodParams,context='',api,users=[],openEvent}){
+},render({data:d,content,esc,tabs,period,navigate,bind,periodParams,context='',api,users=[],openEvent,listPath='/incidents'}){
  const peak=Math.max(1,...d.months.map(m=>m.total));
  const currentMonth=(d.as_of||new Intl.DateTimeFormat('en-CA',{timeZone:'Australia/Sydney',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())).slice(0,7),current=m=>m.month===currentMonth,validationNote="These events haven’t been validated yet.";
 
@@ -45,13 +45,12 @@ window.VeroMonthlyReports={renderEvents({results,events,esc,users=[],openEvent,o
   panel.innerHTML='<div class="chart-events-heading"><h3>Events</h3><button type="button" id="clear-chart-months" '+(months.length?'':'hidden')+'>Clear Selection</button></div><p class="chart-event-count" role="status"></p><div class="chart-event-results"></div>';
   panel.querySelector('#clear-chart-months').onclick=()=>{selectedMonths.clear();update();};
   const count=panel.querySelector('.chart-event-count'),results=panel.querySelector('.chart-event-results');
-  if(!months.length){panel.removeAttribute('aria-busy');count.textContent='Select month bars to show events.';return;}
   count.textContent=months.map(m=>monthLabel(m.month)).join(' · ');panel.setAttribute('aria-busy','true');
   try{
-   const groups=await Promise.all(months.map(m=>{if(!cache.has(m.month)){const p=new URLSearchParams({reporting:'monthly',date_from:m.date_from,date_to:m.date_to});if(d.type)p.set('type',d.type);if(d.domain)p.set('domain',d.domain);for(const key of ['contract_name','vm_site']){const value=new URLSearchParams(location.search).get(key);if(value)p.set(key,value);}const contract=new URLSearchParams(location.search).get('contract_id');const endpoint=contract?'/maintenance-contracts/'+encodeURIComponent(contract)+'/events':'/incidents';const pending=api(endpoint+'?'+p).then(data=>data.events||[]).catch(error=>{cache.delete(m.month);throw error;});cache.set(m.month,pending);}return cache.get(m.month);}));
+   const groups=await Promise.all((months.length?months:[null]).map(m=>{const key=m?.month||'all';if(!cache.has(key)){const p=new URLSearchParams({reporting:'monthly',...(m?{date_from:m.date_from,date_to:m.date_to}:{})});if(d.type)p.set('type',d.type);if(d.domain)p.set('domain',d.domain);for(const key of ['contract_name','vm_site']){const value=new URLSearchParams(location.search).get(key);if(value)p.set(key,value);}const contract=new URLSearchParams(location.search).get('contract_id');const endpoint=contract?'/maintenance-contracts/'+encodeURIComponent(contract)+'/events':'/incidents';const pending=api(m?endpoint+'?'+p:listPath+(listPath.includes('?')?'&':'?')+'reporting=monthly').then(data=>data.events||[]).catch(error=>{cache.delete(key);throw error;});cache.set(key,pending);}return cache.get(key);}));
    if(version!==request||!root.isConnected)return;
    const events=[...new Map(groups.flat().map(e=>[e.id,e])).values()].sort((a,b)=>String(b.report?.occurred_date||'').localeCompare(String(a.report?.occurred_date||''))||String(a.id).localeCompare(String(b.id)));
-   count.textContent=events.length+' '+(events.length===1?'Event':'Events')+' · '+months.map(m=>monthLabel(m.month)).join(' · ');
+   count.textContent=events.length+' '+(events.length===1?'Event':'Events')+(months.length?' · '+months.map(m=>monthLabel(m.month)).join(' · '):'');
    window.VeroMonthlyReports.renderEvents({results,events,esc,users,openEvent,onError:error=>{count.textContent=error.message;}});
   }catch(error){if(version===request&&root.isConnected){results.textContent='Events could not be loaded. '+error.message;const retry=document.createElement('button');retry.type='button';retry.textContent='Try Again';retry.onclick=update;results.append(retry);}}
   finally{if(version===request)panel.removeAttribute('aria-busy');}
