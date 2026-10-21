@@ -8,8 +8,13 @@ function drawSites(){
  const sites=allSites.filter(s=>(!status||s.status===status)&&(!contract||(contract==='unlinked'?!s.contracts.length:s.contracts.some(c=>String(c.id)===contract)))&&(!history||(history==='reported'?s.event_summary?.recent>0:history==='open'?s.event_summary?.open>0:s.event_summary?.recent===0))&&(!query||[s.site_code,s.site_name,s.address,s.owner_name,...s.source_groups,...s.contracts.flatMap(c=>[c.code,c.name])].some(v=>String(v||'').toLowerCase().includes(query))));
  sites.sort((a,b)=>(sort==='events'?(b.event_summary?.recent??-1)-(a.event_summary?.recent??-1):sort==='open'?(b.event_summary?.open??-1)-(a.event_summary?.open??-1):sort==='impact'?(b.event_summary?.highest_score??-1)-(a.event_summary?.highest_score??-1):0)||a.site_code.localeCompare(b.site_code));
  const pages=Math.max(1,Math.ceil(sites.length/50));sitePage=Math.min(sitePage,pages-1);
- siteEl('siteRows').innerHTML=sites.slice(sitePage*50,sitePage*50+50).map(s=>'<tr><td><strong>'+siteEscape(s.site_code)+'</strong></td><td>'+siteEscape(s.site_name)+'</td><td class="site-event-count">'+(s.event_summary?'<strong>'+s.event_summary.recent+'</strong>':'Unavailable')+'</td><td>'+siteEscape(s.address||'—')+'</td><td>'+(s.contracts.length?s.contracts.map(c=>'<a href="maintenance-workspace.html?id='+encodeURIComponent(c.id)+'">'+siteEscape(c.code)+' · '+siteEscape(c.name)+'</a>').join('<br>'):'<span class="site-unlinked">Awaiting contract link</span>')+'</td><td>'+siteEscape(s.source_groups.join(', ')||'—')+'</td><td><span class="pill">'+siteEscape(s.status)+'</span></td><td><button class="btn" data-site-edit="'+s.id+'" aria-label="Edit site '+siteEscape(s.site_code)+'">Edit</button></td></tr>').join('')||'<tr><td colspan="8">No sites match these filters.</td></tr>';
+ siteEl('siteRows').innerHTML=sites.slice(sitePage*50,sitePage*50+50).map(s=>'<tr data-site-open="'+s.id+'" tabindex="0"><td><a class="site-open-link" href="client-services-site.html?id='+encodeURIComponent(s.id)+'">'+siteEscape(s.site_code)+'</a></td><td>'+siteEscape(s.site_name)+'</td><td class="site-event-count">'+(s.event_summary?'<strong>'+s.event_summary.recent+'</strong>':'Unavailable')+'</td><td>'+siteEscape(s.address||'—')+'</td><td>'+(s.contracts.length?s.contracts.map(c=>'<a href="maintenance-workspace.html?id='+encodeURIComponent(c.id)+'">'+siteEscape(c.code)+' · '+siteEscape(c.name)+'</a>').join('<br>'):'<span class="site-unlinked">Awaiting contract link</span>')+'</td><td>'+siteEscape(s.source_groups.join(', ')||'—')+'</td><td><span class="pill">'+siteEscape(s.status)+'</span></td><td><button class="btn" data-site-edit="'+s.id+'" aria-label="Edit site '+siteEscape(s.site_code)+'">Edit</button></td></tr>').join('')||'<tr><td colspan="8">No sites match these filters.</td></tr>';
  siteEl('siteRows').querySelectorAll('[data-site-edit]').forEach(button=>button.onclick=()=>openSiteEditor(allSites.find(s=>String(s.id)===button.dataset.siteEdit)));
+ siteEl('siteRows').querySelectorAll('[data-site-open]').forEach(row=>{
+  const open=()=>location.assign('client-services-site.html?id='+encodeURIComponent(row.dataset.siteOpen));
+  row.addEventListener('click',event=>{if(!event.target.closest('a,button,input,select,textarea'))open();});
+  row.addEventListener('keydown',event=>{if(event.target===row&&(event.key==='Enter'||event.key===' ')){event.preventDefault();open();}});
+ });
  siteEl('sitePrevious').disabled=sitePage===0;siteEl('siteNext').disabled=sitePage+1>=pages;
 }
 async function loadSites(){
@@ -88,6 +93,7 @@ function openSiteEditor(site){
  };
  dialog.showModal();
 }
+
 
 
 
