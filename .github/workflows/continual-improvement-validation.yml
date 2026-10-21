@@ -1,10 +1,10 @@
 name: Continual Improvement details and editing validation
 on:
   pull_request:
-    paths: ['continual-improvement*', 'action-details*', 'my-actions.html', 'tests/continual-improvement-browser.cjs', '.github/workflows/continual-improvement-validation.yml']
+    paths: ['continual-improvement*', 'action-details*', 'workflow-task-completion*', 'tests/workflow-task-completion.cjs', 'my-actions.html', 'tests/continual-improvement-browser.cjs', '.github/workflows/continual-improvement-validation.yml']
   push:
     branches: [main]
-    paths: ['continual-improvement*', 'action-details*', 'my-actions.html', 'tests/continual-improvement-browser.cjs', '.github/workflows/continual-improvement-validation.yml']
+    paths: ['continual-improvement*', 'action-details*', 'workflow-task-completion*', 'tests/workflow-task-completion.cjs', 'my-actions.html', 'tests/continual-improvement-browser.cjs', '.github/workflows/continual-improvement-validation.yml']
 jobs:
   action-details:
     runs-on: ubuntu-latest
@@ -15,4 +15,5 @@ jobs:
           node-version: 22
       - run: npm install --no-save playwright
       - run: npx playwright install --with-deps chromium
+      - run: node --test tests/workflow-task-completion.cjs
       - run: node tests/continual-improvement-browser.cjs
