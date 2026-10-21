@@ -184,7 +184,7 @@ async function ready(page){
    await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies',{force:true});
    assert.match(await page.locator('#content').innerText(),/Loading policies/);
    assert.equal(await page.locator('#active').innerText(),'\u2014');
-   await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
+   assert.equal(await page.locator('.insurance-actions').isVisible(),false,'registration stays hidden until audience resolves');
    assert.equal(await page.locator('#modal.open').count(),0,'do not build incomplete financial form before access resolves');
    release();server.getGate=null;await ready(page);
    await fill(page);
@@ -240,11 +240,10 @@ async function ready(page){
    assert.match(await page.locator('#content').innerText(),/could not be loaded/);
   });
   await check('missing adapter cannot fall back to prototype policy save',{noAdapter:true},async(page,server)=>{
-   await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
-   assert.equal(await page.locator('#form [type="submit"]').isDisabled(),true);
-   await page.evaluate(()=>document.querySelector('#form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));
+   assert.equal(await page.locator('.insurance-actions').isVisible(),false);
+   assert.equal(await page.locator('#insurancePanel').isVisible(),false);
+   assert.equal(await page.locator('#modal.open').count(),0);
    assert.equal(await page.evaluate(()=>data.policies.length),0);
-   assert.match(await page.locator('#insuranceFormStatus').innerText(),/Nothing was saved/);
    assert.deepEqual(server.posts,[]);
   });
  }finally{await browser.close()}

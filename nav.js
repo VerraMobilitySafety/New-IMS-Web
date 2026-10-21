@@ -211,6 +211,7 @@
   function rememberNavigation(nav){try{const groups={};nav.querySelectorAll('.vero-nav-group[id]').forEach(el=>groups[el.id]=el.classList.contains('open'));sessionStorage.setItem('vero-nav-state',JSON.stringify({version:1,groups,details:[...nav.querySelectorAll('.vero-risk-navigation')].map(el=>el.open),scroll:nav.closest('nav').scrollTop}));}catch{}}
 
  if(typeof module!=='undefined'&&module.exports){module.exports={renderNavigation,VERSION};return;}
+ const insuranceNavGuard=document.createElement('link');insuranceNavGuard.rel='stylesheet';insuranceNavGuard.href='insurance-nav.css';document.head.append(insuranceNavGuard);
  window.VeroNav={restore:restoreNavigation};
  function init(){
   const nav=document.getElementById('vero-nav');if(!nav)return;
@@ -219,7 +220,10 @@
    // Resolve the current role from the authenticated service; stay hidden on error.
   const siteListNav=document.getElementById('clientServicesSiteNav');
   const siteListExpand=document.getElementById('clientServicesSiteExpand');
+  const insuranceLink=nav.querySelector('a[href="insurance.html"]');
+  if(insuranceLink){insuranceLink.hidden=true;insuranceLink.style.display='none';}
   const navSession=localStorage.getItem('vero_session_token');
+  if(navSession&&insuranceLink)fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/insurance/access',{headers:{Authorization:'Bearer '+navSession,Accept:'application/json'},cache:'no-store'}).then(async response=>{if(!response.ok)return;const data=await response.json();if(data.status==='success'&&data.allowed===true){insuranceLink.dataset.insuranceAdmitted='true';insuranceLink.hidden=false;insuranceLink.style.display='';}}).catch(()=>{});
   if(navSession)fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/auth/me',{headers:{Authorization:'Bearer '+navSession,Accept:'application/json'},cache:'no-store'}).then(async response=>{if(!response.ok)return;const data=await response.json();if((data.user||data).vero_role==='Administrator'){for(const control of [siteListNav,siteListExpand]){control.hidden=false;control.style.display='flex';}}}).catch(()=>{});
 
   /* Consistent Lucide line icons, loaded once for all VERO pages. */

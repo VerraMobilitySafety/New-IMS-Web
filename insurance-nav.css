@@ -1,0 +1,2 @@
+/* Only Insurance navigation depends on server-confirmed audience admission. */
+a[href="insurance.html"]:not([data-insurance-admitted]){display:none!important}

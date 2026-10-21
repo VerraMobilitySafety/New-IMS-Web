@@ -111,3 +111,8 @@
 .insurance-policy-drawer .insurance-coverage-fields { grid-column:1 / -1; }
 .insurance-policy-drawer .insurance-coverage-fields label { min-width:0; display:grid; gap:6px; }
 .insurance-policy-drawer .insurance-coverage-fields input { width:100%; box-sizing:border-box; }
+
+/* Insurance module content is fail-closed until the server admits this account. */
+.insurance-access-pending .main > :not(.global-hero):not(#insuranceApiStatus):not(#insuranceRefresh),
+.insurance-access-denied .main > :not(.global-hero):not(#insuranceApiStatus):not(#insuranceRefresh){display:none!important}
+.insurance-access-denied #modal{display:none!important}

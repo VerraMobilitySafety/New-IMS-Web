@@ -18,6 +18,12 @@ function setFinancialAccess(allowed){
 }
 setFinancialAccess(false);
 const token=()=>localStorage.getItem('vero_session_token');
+function pageAccess(allowed){
+ document.body.classList.remove('insurance-access-pending');
+ document.body.classList.toggle('insurance-access-denied',!allowed);
+ for(const el of document.querySelectorAll('.insurance-actions,#insurancePanel,.kpis'))el.inert=!allowed;
+ if(!allowed){canCreate=false;canEdit=false;canAttach=false;canRegisterActive=false;linkingAccess=false;readOnly=true;financialWriteAccess=false;setFinancialAccess(false);livePolicies=[];data.policies.length=0;editGeneration++;}
+}
 function message(text){status.textContent=text;status.hidden=!text}
 async function request(path,options={}){
  if(!token())throw new Error('Sign in to access insurance policies.');
@@ -28,7 +34,10 @@ async function request(path,options={}){
    ...(options.body instanceof FormData?{}:{'Content-Type':'application/json'})
   },cache:'no-store'});
   const body=await res.json().catch(()=>null);
-  if(!res.ok){const error=new Error(body?.message||'Request failed ('+res.status+')');error.status=res.status;throw error}
+  if(!res.ok){
+   if(res.status===401)pageAccess(false);
+   if(res.status===403){try{const access=await fetch(API+'/insurance/access',{headers:{Authorization:'Bearer '+token(),Accept:'application/json'},cache:'no-store',signal:controller.signal});if(access.status===401||access.status===403)pageAccess(false);}catch{}}
+   const error=new Error(body?.message||'Request failed ('+res.status+')');error.status=res.status;throw error}
   if(!body||body.status!=='success')throw new Error('Invalid Insurance API response.');
   return body;
  }finally{clearTimeout(timer)}
@@ -283,6 +292,7 @@ async function load(prefix=''){
   const result=await request('/insurance/policies');
   if(!Array.isArray(result.policies)||result.policies.some(p=>!p||!p.id||typeof p.status!=='string'||
       !Array.isArray(p.insured_entities)||(result.financial_access===true&&!Array.isArray(p.coverages))))throw new Error('Invalid policy list.');
+  pageAccess(true);
   readOnly=result.read_only!==false;
   financialWriteAccess=result.financial_write_access===true;
   canCreate=result.can_create_policies===true;
@@ -295,8 +305,8 @@ async function load(prefix=''){
   data.policies.splice(0,data.policies.length,...livePolicies.map(policyView));state='ready';
   message(result.limited?'Showing the latest 500 accessible policies; cards and search cover this subset.':'');
  }catch(error){
-  state='error';livePolicies=[];data.policies.length=0;
-  message(prefix+'Policies could not be loaded: '+error.message);
+  state='error';pageAccess(false);livePolicies=[];data.policies.length=0;
+  message(error.status===403?'You do not have access to Insurance.':prefix+'Policies could not be loaded: '+error.message);
  }finally{load.pending=false;render();updateSubmit();
   document.querySelector('[onclick="openForm(\'policies\')"]').hidden=state==='ready'&&!canCreate;
  }
