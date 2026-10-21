@@ -163,3 +163,27 @@ th{background:#f8f7f6;color:#706660;font-size:10px;font-weight:800;text-transfor
 .event-drawer .report-heading h2{color:#fff;font-size:24px;margin:5px 0}
 .event-drawer .report-heading small,.event-drawer .report-heading p{color:#ddd}
 .event-drawer .report-heading #event-close{background:transparent;border:0;color:#fff;font-size:25px;font-weight:400;line-height:1;padding:0 3px;border-radius:0}
+
+.investigation-help{font-size:11px;font-weight:400;margin:4px 0 10px;color:#625d58}
+.investigation-help>summary{cursor:pointer;color:#167d8d;list-style:none;width:fit-content}
+.investigation-help>summary:focus-visible{outline:2px solid #167d8d;outline-offset:3px}
+.investigation-help p{margin:6px 0;line-height:1.6}
+.event-drawer .investigation-support{padding:14px 0;border-bottom:1px solid var(--line)}
+.investigation-support>summary,.investigation-prefill-note>summary{font-weight:700;cursor:pointer}
+.event-drawer [data-review-question]{margin:10px 0}
+.event-drawer [data-review-question]>label{margin-bottom:4px}
+
+/* Match the report container width while retaining the mobile full-width layout. */
+.report-container.report-drawer.event-drawer{width:min(640px,95vw)}
+@media(max-width:650px){.report-container.report-drawer.event-drawer{width:100vw}}
+
+.event-drawer .system-checklist-row{padding:9px 0;border-bottom:1px solid var(--line)}
+.system-checklist-heading{display:grid;grid-template-columns:minmax(0,1fr) 175px;align-items:center;gap:12px}
+.event-drawer .system-checklist-heading label{margin:0;font-size:12px}
+.event-drawer .system-checklist-heading select{margin:0;padding:8px 10px}
+.event-drawer .system-checklist-row>.investigation-help{margin:3px 0}
+.event-drawer .system-checklist-row [data-system-evidence]{margin:7px 0 2px}
+.event-drawer .system-checklist-row textarea{min-height:64px}
+.system-required{color:#167d8d}.system-scope-note{font-size:11px;color:#625d58}
+.system-extra{margin:10px 0}.system-extra>summary{font-weight:600;cursor:pointer;color:#167d8d}
+@media(max-width:450px){.system-checklist-heading{grid-template-columns:minmax(0,1fr) 145px;gap:8px}}

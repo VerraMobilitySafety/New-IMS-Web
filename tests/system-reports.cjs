@@ -26,3 +26,12 @@ test('detail sample represents several topics instead of filling entirely with t
 test('combined render keeps populations separate and displays partial coverage',()=>{
  const ui={kpis:()=>'',table:(title,headers,rows)=>title+JSON.stringify(rows),note:s=>s};const result=api.render([{id:'projects',rows:[]},{id:'insurance',error:'Source unavailable'}],{},ui,'2026-10-21');assert.ok(result.html.includes('Source unavailable; no count available'));assert.ok(result.html.includes('must not be added'));assert.ok(result.html.includes('Projects'));assert.throws(()=>api.render([{id:'projects',error:'Source unavailable'}],{},ui,'2026-10-21'));
 });
+
+test('investigation sites use recorded Verra context, retain every site and separate historical holds',async()=>{
+ const events=Array.from({length:6},(_,i)=>({id:i,status:'Under Investigation',investigator_name:'Investigator',report:{location:'Depot',vm_location_name:'Site '+i}}));
+ events.push({id:10,status:'Under Investigation',migration_hold:true,report:{location:'Depot',reference_name:'Site 0'}},{id:11,status:'Complete',report:{location:'Client Site',reference_name:'Client Must Not Become Verra Site'}},{id:12,status:'Finding Investigator',report:{location:'Depot'}},{id:13,restricted:true,report:{location:'Depot',reference_name:'Restricted'}});
+ const sources=await api.load('investigations',async path=>{assert.equal(path,'/incidents?reporting=monthly');return {events};});
+ const result=api.analyse(sources,{group_by:'site'},'2026-10-21')[0];assert.equal(result.total,9);assert.equal(result.groups.length,8);assert.ok(!JSON.stringify(result).includes('Client Must Not Become Verra Site'));assert.ok(result.rows.some(r=>r.status==='Historical Hold'));assert.ok(result.groups.some(g=>g[0]==='Verra Site Not Recorded'));
+ const tables=[];api.render(sources,{group_by:'site'},{kpis:()=>'',note:()=>'',table:(title,headers,rows)=>{tables.push({title,headers,rows});return '';}},'2026-10-21');
+ const sites=tables.find(t=>t.title==='Investigations by Verra Mobility Site');assert.equal(sites.rows.length,8);assert.ok(!tables.some(t=>t.title.startsWith('Matching register entries')));assert.deepEqual(Array.from(sites.rows.find(r=>r[0]==='Site 0')),['Site 0',2,1,0,0,1,0]);
+});
