@@ -16,6 +16,13 @@ test('unknown modules and groupings fail closed; session changes cancel aggregat
  assert.throws(()=>api.selected('database'));assert.throws(()=>api.selected('projects,projects'));assert.throws(()=>api.analyse([{id:'projects',rows:[]}],{group_by:'secret'},'2026-10-21'));
  await assert.rejects(api.load('projects',async()=>{throw Object.assign(Error('changed'),{sessionChanged:true});}));
 });
+test('fields omitted by source are not misreported as missing ownership or dates',async()=>{
+ const sources=await api.load('events,actions',async path=>path==='/incidents'?{events:[{id:1,status:'Complete',report:{occurred_date:'2026-10-01'}}]}:{actions:[{id:1,title:'Check',assigned_to_user_id:7}]});
+ const rows=api.analyse(sources,{},'2026-10-21');assert.equal(rows[0].missingOwner,null);assert.equal(rows[0].missingDate,0);assert.equal(rows[1].missingDate,null);assert.equal(rows[1].pastDate,null);
+});
+test('detail sample represents several topics instead of filling entirely with the first register',()=>{
+ const sources=[{id:'risks',rows:Array.from({length:30},(_,i)=>({id:i,title:'Risk '+i}))},{id:'documents',rows:[{id:1,title:'Procedure'}]}];const tables=[];api.render(sources,{}, {kpis:()=>'',note:()=>'',table:(title,head,rows)=>{tables.push({title,rows});return '';}},'2026-10-21');const sample=tables.find(t=>t.title.startsWith('Matching register entries'));assert.equal(sample.rows.length,20);assert.ok(sample.rows.some(r=>r[0]==='Documents'));
+});
 test('combined render keeps populations separate and displays partial coverage',()=>{
  const ui={kpis:()=>'',table:(title,headers,rows)=>title+JSON.stringify(rows),note:s=>s};const result=api.render([{id:'projects',rows:[]},{id:'insurance',error:'Source unavailable'}],{},ui,'2026-10-21');assert.ok(result.html.includes('Source unavailable; no count available'));assert.ok(result.html.includes('must not be added'));assert.ok(result.html.includes('Projects'));assert.throws(()=>api.render([{id:'projects',error:'Source unavailable'}],{},ui,'2026-10-21'));
 });
