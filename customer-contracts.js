@@ -93,7 +93,7 @@ function drawTab(){
  if(tab==='Risks'){void drawContractRisks(c);return;}
  if(tab==='Sites'){void window.VeroContractActivity.sites(c,el,request);return;}
  if(tab==='Events'){void window.VeroContractActivity.events(c,el,request);return;}
- if(tab==='Documents'){void VeroMaintenanceDocuments.mount(el,c,request,API);return;}
+ if(tab==='Documents'){void VeroSwmsService.mount(el,c,API,request);return;}
  if(tab==='Client Documents'){void VeroLinkedDocuments.mount(el,{type:'Client',name:c.customer_name,label:c.customer_name},null,API,request);return;}
  if(tab==='Overview'){
   el.innerHTML='<div class="fields">'+[['Contract reference',c.contract_code],['Customer',c.customer_name],['Contract type','Customer'],['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Compliance','Not assessed'],['Source files',c.source_count],['Linked requirements',c.requirement_count],['Scope',c.scope],['Notes',c.notes]].map(([label,value])=>'<div class="field"><label>'+esc(label)+'</label><p>'+esc(value||'—')+'</p>'+(label==='Owner'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractOwnerEdit">Edit owner</button>':'')+(label==='Status'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractStatusEdit">Edit status</button>':'')+'</div>').join('')+'</div>';document.getElementById('contractOwnerEdit')?.addEventListener('click',()=>editContractOwner(c));document.getElementById('contractStatusEdit')?.addEventListener('click',()=>editContractStatus(c));return;
