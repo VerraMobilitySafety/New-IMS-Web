@@ -4,7 +4,7 @@ window.VeroReportingCatalogue={
   "sources": {
     "risks": {
       "name": "Risks",
-      "path": "/risks",
+      "path": "/risks?assessment_coverage=true",
       "key": "risks",
       "page": "risk.html",
       "title": "risk_title",
@@ -68,9 +68,34 @@ window.VeroReportingCatalogue={
           "path": "treatment_strategy",
           "type": "text",
           "label": "Treatment Strategy"
+        },
+        "assessment_state": {
+          "path": "assessment_state",
+          "type": "text",
+          "label": "Assessment State"
+        },
+        "assessment_basis": {
+          "path": "assessment_basis",
+          "type": "text",
+          "label": "Assessment Basis"
+        },
+        "applicable_contexts": {
+          "path": "applicable_contexts",
+          "type": "number",
+          "label": "Accessible Applicable Contexts"
+        },
+        "approved_contexts": {
+          "path": "approved_contexts",
+          "type": "number",
+          "label": "Approved Operational Assessments"
+        },
+        "awaiting_assessment": {
+          "path": "awaiting_assessment",
+          "type": "number",
+          "label": "Contexts Awaiting Approved Assessment"
         }
       },
-      "notice": "Master register metadata only. Approved inherent/residual exposure calculations use the specialised Risk Exposure report; recorded master values must not be presented as approved operational assessment positions."
+      "notice": "Assessment state is Assessed when a valid recorded master residual position or approved operational residual position exists; otherwise Not Assessed within accessible scope. Draft/submitted operational assessments do not count as approved. Recorded master positions are not proof of operational approval. awaiting_assessment counts accessible applicable contexts without approved assessments; an assessed master may still have context gaps. Lifecycle status is separate. No inaccessible context is included."
     },
     "projects": {
       "name": "Projects",
