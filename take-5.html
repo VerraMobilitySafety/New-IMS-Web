@@ -1,5 +1,162 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><style id="vero-loading-guard">html[data-vero-loading] .main>:not(.global-hero):not(.workspace-hero){visibility:hidden!important}html[data-vero-loading] .main{background:#f4f6f8}</style><script>document.documentElement.setAttribute('data-vero-loading','');window.__veroLoaderDeadline=setTimeout(function(){document.documentElement.removeAttribute('data-vero-loading');window.VeroPageLoader?.dismiss();},12000);</script><link rel="stylesheet" href="risk-page-loader.css?v=20261021-clean-camera"><script src="risk-page-loader.js?v=20261021-clean-camera" data-tasks="account"></script><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>VERO — Take 5</title><link rel="icon" href="favicon.png"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="nav.css"><link rel="stylesheet" href="specific-risk-pages.css?v=20261020-suite"><link rel="stylesheet" href="header.css"><script>window.addEventListener('vero-risk-auth-settled',()=>window.VeroPageLoader?.ready('account'));window.addEventListener('vero-risk-resources-settled',()=>window.VeroPageLoader?.ready('resources'));</script></head><body>
-<aside class="sidebar"><div class="brand"><img src="verra-logo.png" alt="Verra Mobility"><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div><nav class="nav" aria-label="VERO"><div id="vero-nav"></div></nav><div class="side-foot">VERO · Prototype environment</div></aside>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="vero-shell.css?v=20261021-stable"><script src="nav.js?v=20261021-stable"></script><style id="vero-loading-guard">html[data-vero-loading] .main>:not(.global-hero):not(.workspace-hero){visibility:hidden!important}html[data-vero-loading] .main{background:#f4f6f8}</style><script>document.documentElement.setAttribute('data-vero-loading','');window.__veroLoaderDeadline=setTimeout(function(){document.documentElement.removeAttribute('data-vero-loading');window.VeroPageLoader?.dismiss();},12000);</script><link rel="stylesheet" href="risk-page-loader.css?v=20261021-clean-camera"><script src="risk-page-loader.js?v=20261021-clean-camera" data-tasks="account"></script><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>VERO — Take 5</title><link rel="icon" href="favicon.png"><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="specific-risk-pages.css?v=20261020-suite"><link rel="stylesheet" href="header.css"><script>window.addEventListener('vero-risk-auth-settled',()=>window.VeroPageLoader?.ready('account'));window.addEventListener('vero-risk-resources-settled',()=>window.VeroPageLoader?.ready('resources'));</script></head><body>
+<aside class="sidebar"><div class="brand"><span class="vero-brand-logo" role="img" aria-label="Verra Mobility"></span><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div><nav class="nav" aria-label="VERO"><div id="vero-nav" data-vero-nav="20261021-stable">
+    <div class="nav-section">
+      <a class=""
+         href="index.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+        <span>Home</span>
+      </a>
+
+      <a class=""
+         href="my-actions.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="m3 17 2 2 4-4"></path><path d="m3 7 2 2 4-4"></path><path d="M13 6h8"></path><path d="M13 12h8"></path><path d="M13 18h8"></path></svg>
+        <span>My Actions</span>
+        <span class="vero-actions-slot"><span id="vero-my-actions-count" class="vero-actions-count" hidden aria-label="Outstanding actions"></span></span>
+      </a>
+
+      <a class="" href="reports.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><line x1="18" x2="18" y1="20" y2="10"></line><line x1="12" x2="12" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="14"></line></svg>
+        <span>My Reports</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Operations</div>
+
+      <a class=""
+         href="sites.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        <span>Verra Mobility Locations</span>
+      </a>
+
+      <a class=""
+         href="project-management.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path><path d="M8 10v4"></path><path d="M12 10v2"></path><path d="M16 10v6"></path></svg>
+        <span>Project Management</span>
+      </a>
+
+      <div class="vero-nav-group " id="clientServicesNavGroup">
+        <div class="vero-nav-parent">
+          <a class="" href="maintenance-management.html">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2"></path><path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"></path><path d="M8 18h1"></path></svg>
+            <span>Client Services Management</span>
+          </a>
+          <button id="clientServicesSiteExpand" hidden style="display:none!important" class="vero-nav-expand" type="button" aria-label="Expand Client Services Site List" aria-expanded="false"><span>›</span></button>
+        </div>
+        <div class="vero-nav-children">
+          <a id="clientServicesSiteNav" hidden style="display:none!important" class="" href="client-services-sites.html">Client Services Site List</a>
+        </div>
+      </div>
+
+      <a class="" href="contractor-management.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"></path><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"></path><path d="M4 15v-3a6 6 0 0 1 6-6"></path><path d="M14 6a6 6 0 0 1 6 6v3"></path></svg>
+        <span>Contractor Management</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Specific Risk Management Systems</div>
+
+      <details class="vero-risk-navigation" ><summary><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Safety Risks</span></summary><a class="" href="alcohol-and-other-drugs.html">Alcohol and Other Drugs</a>
+<a class="" href="driving.html">Driving</a>
+<a class="" href="electrical-works.html">Electrical Works</a>
+<a class="" href="emergency-management.html">Emergency Management</a>
+<a class="" href="ergonomics-and-sedentary-work.html">Ergonomics and Sedentary Work</a>
+<a class="" href="extreme-temperatures.html">Extreme Temperatures</a>
+<a class="" href="fatigue.html">Fatigue</a>
+<a class="" href="hazardous-substances-and-dangerous-goods.html">Hazardous Substances and Dangerous Goods</a>
+<a class="" href="manual-handling.html">Manual Handling</a>
+<a class="" href="personal-protective-equipment.html">Personal Protective Equipment</a>
+<a class="" href="plant-and-equipment.html">Plant and Equipment</a>
+<a class="" href="psychosocial-risk.html">Psychosocial Risk</a>
+<a class="" href="public-interaction.html">Public Interaction</a>
+<a class="" href="visitors.html">Visitors</a>
+<a class="" href="working-at-heights.html">Working at Heights</a>
+<a class="" href="working-from-home.html">Working from Home</a>
+<a class="" href="working-near-traffic.html">Working Near Traffic</a></details>
+
+      <a class="placeholder" href="#" onclick="return false">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+        <span>Quality Risks</span>
+      </a>
+
+      <details class="vero-risk-navigation" ><summary><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg><span>Environment Risks</span></summary><a class="" href="waste-management.html">Waste Management</a></details>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Governance</div>
+
+      <a class=""
+         href="documents.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M20 7h-3a2 2 0 0 1-2-2V2"></path><path d="M9 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h7l4 4v10a2 2 0 0 1-2 2Z"></path><path d="M3 7.6v12.8A1.6 1.6 0 0 0 4.6 22h9.8"></path></svg>
+        <span>Document Management</span>
+      </a>
+
+      <a class=""
+         href="records.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg>
+        <span>Records Management</span>
+      </a>
+
+      <div class="vero-nav-group open" id="riskNavGroup">
+        <div class="vero-nav-parent">
+          <a class="" href="risk.html">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>Risk Management</span>
+          </a>
+          <button class="vero-nav-expand" type="button" aria-label="Expand Risk Management" aria-controls="riskNavChildren" aria-expanded="true"><span>›</span></button>
+        </div>
+        <div class="vero-nav-children" id="riskNavChildren">
+          <a class="" href="safe-work-method-statement.html" >Safe Work Method Statement</a>
+          <a class="active" href="take-5.html" aria-current="page">Take 5</a>
+        </div>
+      </div>
+
+      <a class="" href="insurance.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>
+        <span>Insurance Management</span>
+      </a>
+
+      <a class=""
+         href="compliance.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg>
+        <span>Compliance Management</span>
+      </a>
+
+      <!-- Incident Management + Business Continuity -->
+      <div class="vero-nav-group "
+           id="incidentNavGroup">
+
+        <div class="vero-nav-parent">
+          <a class=""
+             href="incident-management.html"
+             >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M7 18v-6a5 5 0 1 1 10 0v6"></path><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"></path><path d="M21 12h1"></path><path d="M18.5 4.5 18 5"></path><path d="M2 12h1"></path><path d="M12 2v1"></path><path d="m4.929 4.929.707.707"></path><path d="M12 12v6"></path></svg>
+            <span>Incident Management</span>
+          </a>
+
+          <button class="vero-nav-expand"
+                  type="button"
+                  aria-label="Expand Business Continuity Management"
+                  aria-expanded="false">
+            <span>›</span>
+          </button>
+        </div>
+
+        <div class="vero-nav-children">
+          <a class="placeholder"
+             href="#"
+             onclick="return false">
+            Business Continuity Management
+          </a>
+        </div>
+      </div>
+
+      <a class="placeholder" href="#" onclick="return false">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="m9 14 2 2 4-4"></path></svg>
+        <span>Assurance Management</span>
+      </a>
+    </div>
+  </div><!-- vero-nav:end --></nav><div class="side-foot">VERO · Prototype environment</div></aside><script>window.VeroNav?.restore(document.getElementById("vero-nav"));</script>
 <div class="heights-topbar"><button type="button" id="heights-menu" aria-expanded="false" aria-label="Toggle navigation">☰ Menu</button><span>Risk Management</span><a href="index.html">Home</a></div><div id="heights-auth-status" role="status">Loading Take 5…</div>
 <div id="vh" data-task-risk="take-5" hidden><div class="shell"><main class="main"><section class="global-hero"><div class="hero-content"><div class="hero-kicker">RISK MANAGEMENT</div><h1>Take 5</h1><p>Review the task, current conditions and controls before starting work.</p><div class="hero-rule"></div></div><div class="hero-tools"><div class="vero-account" id="veroAccount"><button class="vero-account-trigger" id="veroAccountTrigger" type="button" aria-haspopup="true" aria-expanded="false"><div class="avatar" id="veroAccountAvatar">—</div><span class="vero-account-name" id="veroAccountName">Signed in user</span><span class="vero-account-caret">▼</span></button><div class="vero-account-menu" id="veroAccountMenu"><div class="vero-account-profile"><b id="veroAccountFullName">Signed in user</b><small id="veroAccountEmail"></small></div><a class="vero-account-item admin" id="veroUserManagement" href="users.html"><span class="vero-account-icon">♙</span><span>User Management</span></a><button class="vero-account-item signout" type="button" id="veroAccountSignOut"><span class="vero-account-icon">↪</span><span>Sign out</span></button></div></div></div></section>
 <nav class="crumb" aria-label="Breadcrumb"><a href="risk.html">Risk Management</a> / Take 5</nav>
@@ -10,4 +167,4 @@
   <div class="notice"><strong>Workspace ready</strong><p style="margin:6px 0 0">The Take 5 form and assessment records will be added here.</p></div>
   <div class="actions"><a class="secondary" href="risk.html">Back to Risk Management</a><a class="secondary" href="safe-work-method-statement.html">Open Safe Work Method Statement →</a></div>
 </section></main></div></div>
-<script src="nav.js?v=20261020-task-risk"></script><script src="specific-risk-auth.js?v=20261020-suite"></script></body></html>
+<script src="specific-risk-auth.js?v=20261020-suite"></script></body></html>
