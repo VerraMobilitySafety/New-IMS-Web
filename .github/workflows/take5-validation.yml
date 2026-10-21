@@ -1,0 +1,20 @@
+name: Take 5 form validation
+on:
+  pull_request:
+    paths: ['take-5.html', 'take5.*', 'tests/take5.cjs', '.github/workflows/take5-validation.yml']
+  push:
+    branches: [main]
+    paths: ['take-5.html', 'take5.*', 'tests/take5.cjs', '.github/workflows/take5-validation.yml']
+permissions:
+  contents: read
+jobs:
+  take5:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --package-lock=false jsdom@26.1.0
+      - run: node --check take5.js
+      - run: node tests/take5.cjs
