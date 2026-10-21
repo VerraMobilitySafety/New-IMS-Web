@@ -21,6 +21,8 @@
 .insurance-register .panel-head { display:none; }
 .insurance-register .panel-body { padding:0; }
 .insurance-register .empty { margin:18px; }
+#insuranceOverviewResults { display:grid; gap:8px; margin-top:18px; }
+#insuranceOverviewResults button { text-align:left; overflow-wrap:anywhere; }
 .insurance-policy-table { table-layout:fixed; }
 .insurance-policy-table td,.insurance-policy-table th { overflow-wrap:anywhere; }
 .insurance-policy-table th:first-child { width:40%; }

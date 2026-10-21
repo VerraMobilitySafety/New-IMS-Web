@@ -13,7 +13,7 @@ for(const [timezoneId,instant,today] of cases){
  const context=await browser.newContext({timezoneId}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.clock.install({time:new Date(instant)});await require('./insurance-mock.cjs').mockInsurance(page);
  await page.goto('https://vero.test/insurance.html');
- await page.locator('#insuranceApiStatus').filter({hasText:'policies loaded.'}).waitFor();
+ await page.locator('#insuranceApiStatus[data-state=ready]').waitFor({state:'attached'});
  const dateAt=days=>new Date(Date.parse(today+'T00:00:00Z')+days*86400000).toISOString().slice(0,10);
  const rows=[['Expired',dateAt(-1)],['Today',today],['Within',dateAt(30)],['Day 90',dateAt(90)],['Day 91',dateAt(91)],['Invalid','not-a-date'],['Rolled date','2026-02-30'],['Empty',''],['Timestamp',today+'T00:00:00-07:00']].map(([name,expiry])=>({name,expiry,status:'Active',number:name}));
  await page.evaluate(rows=>{data.policies.splice(0,data.policies.length,...rows);tab='Policies';insuranceView='due';render()},rows);
