@@ -52,3 +52,5 @@
  .insurance-page .hero-tools { top:12px!important; right:18px!important; }
  .insurance-page .hero-content { top:58%!important; }
 }
+
+.insurance-view-picker[hidden] { display:none; }

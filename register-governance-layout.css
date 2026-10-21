@@ -58,6 +58,19 @@
 .chart-events-heading h3 { margin:0; }
 .chart-event-open { display:flex; flex-direction:column; gap:4px; text-align:left; width:100%; border:0; background:transparent; color:#126666; padding:0; }
 .chart-event-open span { font-weight:400; }
+.vr-page .status-chart-row { display:block; width:100%; text-align:left; padding:10px 0; border:0; background:transparent; font-weight:400; }
+.vr-page .status-chart-row[aria-pressed=true] { background:#edf2da; outline:2px solid #a9c23f; outline-offset:4px; }
+.chart-events .event-register-table th:first-child { width:110px; }
+.vr-page .chart-events { min-width:0; }
+.vr-page .chart-events .event-register-table { table-layout:fixed; min-width:680px; }
+.vr-page .chart-events .event-register-table th:first-child { width:100px; }
+.vr-page .chart-events .event-register-table th:nth-child(2) { width:auto; }
+.vr-page .chart-events .event-register-table th:nth-child(3) { width:120px; }
+.vr-page .chart-events .event-register-table th:nth-child(4) { width:190px; }
+.vr-page .chart-events .event-register-table td:last-child { white-space:normal; }
+.vr-page .chart-event-open { font-weight:600; line-height:1.5; overflow-wrap:anywhere; }
+.vr-page .event-list-sort { display:flex; align-items:center; gap:7px; width:100%; border:0; border-radius:0; background:transparent; padding:0; text-align:left; text-transform:inherit; font:inherit; }
+.event-list-sort span { color:#857874; }
 .vr-page[data-register-layout="incidents"] #incident-dashboard .vr-view-toolbar,
 .vr-page[data-register-layout="incidents"] #monthly-event-dashboard .vr-view-toolbar { margin:0!important; }
 .vr-page[data-register-layout="incidents"] #incident-dashboard .dashboard-panels,

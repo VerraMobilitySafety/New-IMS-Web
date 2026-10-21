@@ -24,7 +24,7 @@ try{for(const width of [1440,390]){
   assert.equal(await page.locator('#aiSummaryPanel').isHidden(),true);
   await page.locator('#generateAiSummary').click();await page.waitForFunction(()=>!document.querySelector('#copyAiSummary').disabled);
   assert.ok((await page.locator('#aiSummaryBody').textContent()).includes('Coverage and limitations'));
-  assert.ok((await page.locator('#aiSummaryBody').textContent()).includes('What needs attention'));
+  assert.ok((await page.locator('#aiSummaryBody').textContent()).includes('What Needs Attention'));
   assert.equal(await page.locator('.management-section').count(),3);assert.equal(await page.locator('.management-brand img').getAttribute('alt'),'Verra Mobility');assert.equal(await page.locator('#printAiSummary').isEnabled(),true);const request=aiRequests.at(-1);assert.equal(request.report,id);assert.ok(request.facts.length>0);assert.ok(request.coverage.length>0);
   assert.equal(Object.hasOwn(request,'events'),false);assert.equal(Object.hasOwn(request,'risks'),false);
   const target=await page.locator('#aiSummaryBody a').first().getAttribute('href');assert.equal(await page.locator(target).count(),1);

@@ -54,6 +54,8 @@ for(const width of [1440,1024,768,390])for(const file of ['records.html','risk.h
    await page.locator(tab==='overview'?'#incident-dashboard .vr-view-toolbar':'#monthly-event-dashboard .vr-view-toolbar').waitFor();
   }
   assert.equal(await page.locator('#new-report').evaluate(el=>getComputedStyle(el).height),'43px');
+  await page.locator('[data-status-chart="completed"]').click();await page.locator('.chart-events tbody tr').first().waitFor();
+  const columns=await page.locator('.chart-events th').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().width));assert(columns[1]>columns[2]&&columns[1]>columns[3],'Event description gets the widest column');
   assert.match(await page.locator('#new-report').innerText(),/\+ Report an Event/);
   assert.equal(await page.locator('.vr-actions .incident-admin-view').isVisible(),true);
   assert.equal(await page.locator('[data-report-tab="overview"]').innerText(),'Status');

@@ -105,7 +105,7 @@ render=function(){
    $('content').replaceChildren(empty);
   }
  }
- renderPolicyWorkflow();
+ // Keep the register focused on the policy list.
  renderDocuments();
 };
 let documentPolicy='',documentGeneration=0;
