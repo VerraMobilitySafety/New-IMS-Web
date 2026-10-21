@@ -1,0 +1,391 @@
+{
+  "id": "IMS.03.17.FRM.01",
+  "version": "2.1",
+  "issued": "2026-01-19",
+  "title": "Plant and Equipment Risk Assessment",
+  "matrix_version": "VERO-5x5-125",
+  "groups": [
+    {
+      "id": "g1",
+      "title": "Entanglement",
+      "source_heading": "Section 4.1: Engagement Risks",
+      "questions": [
+        {
+          "id": "g1-q1",
+          "text": "Can anyone’s hair, clothing, gloves necktie, jewellery, cleaning brushes, rags or other materials become entangled with moving parts of the plant or materials in motion?"
+        }
+      ]
+    },
+    {
+      "id": "g2",
+      "title": "Crushing",
+      "source_heading": "Section 4.2: Crushing Risks",
+      "questions": [
+        {
+          "id": "g2-q1",
+          "text": "Can anyone be crushed due to material falling off the plant?"
+        },
+        {
+          "id": "g2-q2",
+          "text": "Can anyone be crushed due to uncontrolled or unexpected movement of the plant or its load?"
+        },
+        {
+          "id": "g2-q3",
+          "text": "Can anyone be crushed due to a lack of capacity for the plant to be slowed, stopped, or immobilised?"
+        },
+        {
+          "id": "g2-q4",
+          "text": "Can anyone be crushed due to the plant tipping or rolling over?"
+        },
+        {
+          "id": "g2-q5",
+          "text": "Can anyone be crushed due to parts of the plant collapsing?"
+        },
+        {
+          "id": "g2-q6",
+          "text": "Can anyone be crushed due to coming into contact with moving parts of the plant during testing, inspection, operation, maintenance, cleaning, or repair?"
+        },
+        {
+          "id": "g2-q7",
+          "text": "Can anyone be crushed due to being thrown off or under the plant?"
+        },
+        {
+          "id": "g2-q8",
+          "text": "Can anyone be crushed due to being trapped between the plant and materials or fixed structures?"
+        },
+        {
+          "id": "g2-q9",
+          "text": "Can anyone be crushed due to other factors not otherwise identified?"
+        }
+      ]
+    },
+    {
+      "id": "g3",
+      "title": "Cut, stab or puncture",
+      "source_heading": "Section 4.3: Cut, Stab or Puncture Risks",
+      "questions": [
+        {
+          "id": "g3-q1",
+          "text": "Can anyone be cut, stabbed or punctured due to coming into contact with sharp or flying objects?"
+        },
+        {
+          "id": "g3-q2",
+          "text": "Can anyone be cut, stabbed or punctured due to coming into contact with moving parts of the plant during testing, inspection, operation, maintenance, cleaning, or repair?"
+        },
+        {
+          "id": "g3-q3",
+          "text": "Can anyone be cut, stabbed or punctured due to the plant, parts of the plant, or work pieces disintegrating?"
+        },
+        {
+          "id": "g3-q4",
+          "text": "Can anyone be cut, stabbed or punctured due to work pieces being ejected?"
+        },
+        {
+          "id": "g3-q5",
+          "text": "Can anyone be cut, stabbed or punctured due to the mobility of the plant?"
+        },
+        {
+          "id": "g3-q6",
+          "text": "Can anyone be cut, stabbed or punctured due to uncontrolled or unexpected movement of the plant?"
+        },
+        {
+          "id": "g3-q7",
+          "text": "Can anyone be cut, stabbed or punctured due to other factors not otherwise identified?"
+        }
+      ]
+    },
+    {
+      "id": "g4",
+      "title": "Shearing",
+      "source_heading": "Section 4.4: Shearing Risks",
+      "questions": [
+        {
+          "id": "g4-q1",
+          "text": "Can anyone’s body parts be sheared between two parts of the plant, or between a part of the plant and a work piece or structure?"
+        }
+      ]
+    },
+    {
+      "id": "g5",
+      "title": "Friction",
+      "source_heading": "Section 4.5: Friction Risks",
+      "questions": [
+        {
+          "id": "g5-q1",
+          "text": "Can anyone be burnt due to contact with moving parts or surfaces of the plant, or material handled by the plant?"
+        }
+      ]
+    },
+    {
+      "id": "g6",
+      "title": "Struck by moving objects",
+      "source_heading": "Section 4.6: Cut, Stab or Puncture Risks",
+      "questions": [
+        {
+          "id": "g6-q1",
+          "text": "Can anyone be struck by moving objects due to uncontrolled or unexpected movement of the plant or material handled by the plant?"
+        },
+        {
+          "id": "g6-q2",
+          "text": "Can anyone be struck by moving objects due to the plant, parts of the plant, or work pieces disintegrating?"
+        },
+        {
+          "id": "g6-q3",
+          "text": "Can anyone be struck by moving objects due to work pieces being ejected?"
+        },
+        {
+          "id": "g6-q4",
+          "text": "Can anyone be struck by moving objects due to the mobility of the plant?"
+        },
+        {
+          "id": "g6-q5",
+          "text": "Can anyone be struck by moving objects due to other factors not otherwise identified?"
+        }
+      ]
+    },
+    {
+      "id": "g7",
+      "title": "High pressure fluids",
+      "source_heading": "Section 4.7: High Pressure Fluid Risks",
+      "questions": [
+        {
+          "id": "g7-q1",
+          "text": "Can anyone come into contact with fluids under high pressure, due to plant failure of misuse of the plant?"
+        }
+      ]
+    },
+    {
+      "id": "g8",
+      "title": "Electrical",
+      "source_heading": "Section 4.8: Electrical Risks",
+      "questions": [
+        {
+          "id": "g8-q1",
+          "text": "Can anyone be injured by electrical shock or burnt due to the plant containing live electrical conductors?"
+        },
+        {
+          "id": "g8-q2",
+          "text": "Can anyone be injured by electrical shock or burnt due to the plant working in close proximity to electrical conductors?"
+        },
+        {
+          "id": "g8-q3",
+          "text": "Can anyone be injured by electrical shock or burnt due to overload of electrical circuits?"
+        },
+        {
+          "id": "g8-q4",
+          "text": "Can anyone be injured by electrical shock or burnt due to damaged or poorly maintained electrical leads and cables?"
+        },
+        {
+          "id": "g8-q5",
+          "text": "Can anyone be injured by electrical shock or burnt due to damaged electrical switches?"
+        },
+        {
+          "id": "g8-q6",
+          "text": "Can anyone be injured by electrical shock or burnt due to water near electrical equipment?"
+        },
+        {
+          "id": "g8-q7",
+          "text": "Can anyone be injured by electrical shock or burnt due to a lack of isolation procedures?"
+        },
+        {
+          "id": "g8-q8",
+          "text": "Can anyone be injured by electrical shock or burnt due to other factors not otherwise identified?"
+        }
+      ]
+    },
+    {
+      "id": "g9",
+      "title": "Explosion",
+      "source_heading": "Section 4.9: Explosion Risks",
+      "questions": [
+        {
+          "id": "g9-q1",
+          "text": "Can anyone be injured by explosion of gases, vapours, liquids, dusts, or other substance, triggered by the operation of the plant or by material handled by the plant?"
+        }
+      ]
+    },
+    {
+      "id": "g10",
+      "title": "Slips and trips",
+      "source_heading": "Section 4.10: Slips and Trips Risks",
+      "questions": [
+        {
+          "id": "g10-q1",
+          "text": "Can anyone using the plant, or in the vicinity of the plant, slip, trip, or fall due to uneven or slippery work surfaces?"
+        },
+        {
+          "id": "g10-q2",
+          "text": "Can anyone using the plant, or in the vicinity of the plant, slip, trip, or fall due to poor housekeeping (e.g. swarf in the vicinity of the plant)?"
+        },
+        {
+          "id": "g10-q3",
+          "text": "Can anyone using the plant, or in the vicinity of the plant, slip, trip, or fall due to other factors not otherwise identified?"
+        }
+      ]
+    },
+    {
+      "id": "g11",
+      "title": "Falls from height",
+      "source_heading": "Section 4.11: Falling Risks",
+      "questions": [
+        {
+          "id": "g11-q1",
+          "text": "Can anyone fall from a height due to a lack of a proper work platform?"
+        },
+        {
+          "id": "g11-q2",
+          "text": "Can anyone fall from a height due to a lack of proper stairs or ladders?"
+        },
+        {
+          "id": "g11-q3",
+          "text": "Can anyone fall from a height due to a lack of guardrails or other suitable edge protection?"
+        },
+        {
+          "id": "g11-q4",
+          "text": "Can anyone fall from a height due to unprotected holes, penetrations, or gaps?"
+        },
+        {
+          "id": "g11-q5",
+          "text": "Can anyone fall from a height due to poor floor or walking surfaces, such as a lack of slip- resistant surfaces?"
+        },
+        {
+          "id": "g11-q6",
+          "text": "Can anyone fall from a height due to steep walking surfaces?"
+        },
+        {
+          "id": "g11-q7",
+          "text": "Can anyone fall from a height due to collapse of the supporting structure?"
+        },
+        {
+          "id": "g11-q8",
+          "text": "Can anyone fall from a height due to other factors not otherwise identified?"
+        }
+      ]
+    },
+    {
+      "id": "g12",
+      "title": "Suffocation",
+      "source_heading": "Section 4.12: Suffocation Risks",
+      "questions": [
+        {
+          "id": "g12-q1",
+          "text": "Can anyone be suffocated due to lack of oxygen, or atmospheric contamination?"
+        }
+      ]
+    },
+    {
+      "id": "g13",
+      "title": "Hot surfaces",
+      "source_heading": "Section 4.12: Extreme Temperature Risks",
+      "questions": [
+        {
+          "id": "g13-q1",
+          "text": "Can anyone come into contact with objects at high temperatures?"
+        }
+      ]
+    },
+    {
+      "id": "g14",
+      "title": "Ergonomics",
+      "source_heading": "Section 4.13: Ergonomic Risks",
+      "questions": [
+        {
+          "id": "g14-q1",
+          "text": "Can anyone be injured due to poorly designed seating?"
+        },
+        {
+          "id": "g14-q2",
+          "text": "Can anyone be injured due to repetitive body movement?"
+        },
+        {
+          "id": "g14-q3",
+          "text": "Can anyone be injured due to constrained body posture or the need for excessive effort?"
+        },
+        {
+          "id": "g14-q4",
+          "text": "Can anyone be injured due to design deficiencies causing mental or psychological stress?"
+        },
+        {
+          "id": "g14-q5",
+          "text": "Can anyone be injured due to inadequate or poorly placed lighting?"
+        },
+        {
+          "id": "g14-q6",
+          "text": "Can anyone be injured due to a lack of consideration given to human error or human behaviour?"
+        },
+        {
+          "id": "g14-q7",
+          "text": "Can anyone be injured due to a mismatch between the plant and human traits or natural limitations?"
+        },
+        {
+          "id": "g14-q8",
+          "text": "Can anyone be injured due to other factors not otherwise identified?"
+        }
+      ]
+    },
+    {
+      "id": "g15",
+      "title": "Fire",
+      "source_heading": "Section 4.14: Fire Risks",
+      "questions": [
+        {
+          "id": "g15-q1",
+          "text": "Can anyone be injured by fire?"
+        }
+      ]
+    },
+    {
+      "id": "g16",
+      "title": "Temperature exposure",
+      "source_heading": "Section 4.15: Fire Risks",
+      "questions": [
+        {
+          "id": "g16-q1",
+          "text": "Can anyone suffer ill health due to exposure to high or low temperatures?"
+        }
+      ]
+    },
+    {
+      "id": "g17",
+      "title": "Other exposures",
+      "source_heading": "Section 4.16: Other Risks",
+      "questions": [
+        {
+          "id": "g17-q1",
+          "text": "Can anyone be injured or suffer ill-health from exposure to chemicals?"
+        },
+        {
+          "id": "g17-q2",
+          "text": "Can anyone be injured or suffer ill-health from exposure to toxic gases or vapours?"
+        },
+        {
+          "id": "g17-q3",
+          "text": "Can anyone be injured or suffer ill-health from exposure to fumes?"
+        },
+        {
+          "id": "g17-q4",
+          "text": "Can anyone be injured or suffer ill-health from exposure to dust?"
+        },
+        {
+          "id": "g17-q5",
+          "text": "Can anyone be injured or suffer ill-health from exposure to noise?"
+        },
+        {
+          "id": "g17-q6",
+          "text": "Can anyone be injured or suffer ill-health from exposure to vibration?"
+        },
+        {
+          "id": "g17-q7",
+          "text": "Can anyone be injured or suffer ill-health from exposure to radiation?"
+        }
+      ]
+    },
+    {
+      "id": "g18",
+      "title": "Additional hazards",
+      "source_heading": "Section 4.17: Other Risks",
+      "questions": []
+    }
+  ],
+  "source_sha256": "04e421ea998b8af43e08e2250a749e5e40ee84bd1aaee17fc598ac6eb59ab072"
+}
