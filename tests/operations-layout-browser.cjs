@@ -24,13 +24,15 @@ for(const width of [1440,1024,768,390])for(const file of ['maintenance-managemen
  });
  await page.goto('https://vero.test/'+file);await page.locator('.vr-summary').waitFor();
  await page.evaluate(()=>{for(const task of ['account','maintenance','actions'])window.VeroPageLoader?.ready(task)});
+ // The loading guard hides directory cards while async account rendering settles.
+ await page.locator('#veroPageLoader').waitFor({state:'hidden'});
  if(file==='maintenance-management.html'){
   await page.locator('#rows tr[data-id]').first().waitFor();await page.getByLabel('Filter contracts').selectOption('active');assert.equal(await page.locator('#rows tr[data-id]').count(),1);
   await page.getByLabel('Search customer contracts').fill('missing');assert.equal(await page.locator('#rows tr[data-id]').count(),0);await page.getByLabel('Search customer contracts').fill('');
   await page.locator('.lifecycle-card').first().click();assert.equal(await page.getByLabel('Filter contracts').inputValue(),'all');assert.equal(await page.locator('#rows tr[data-id]').count(),2);
   assert.match(await page.locator('#rows a').first().getAttribute('href'),/maintenance-workspace.html\?id=1/);
  }else if(file==='sites.html'){
-  await page.getByLabel('Search locations').fill('Auckland');assert.equal(await page.locator('.site-card:visible').count(),1);
+  await page.getByLabel('Search locations').fill('Auckland');await page.locator('.site-card[data-site="Auckland"]').waitFor({state:'visible'});assert.equal(await page.locator('.site-card:visible').count(),1);
   assert.match(await page.locator('.site-card:visible').getAttribute('href'),/site.html\?site=auckland/);
   await page.getByLabel('Search locations').fill('missing');assert.equal(await page.locator('.site-card:visible').count(),0);await page.getByLabel('Search locations').fill('');
  }else if(file==='users.html'){

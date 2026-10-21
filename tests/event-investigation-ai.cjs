@@ -1,0 +1,19 @@
+const {JSDOM}=require('jsdom'),fs=require('fs'),assert=require('node:assert/strict');
+(async()=>{
+ const dom=new JSDOM('<form><section><select data-risk-level></select></section></form>',{url:'https://example.invalid',runScripts:'outside-only'}),w=dom.window,d=w.document;
+ w.eval(fs.readFileSync('investigation-ai.js','utf8'));
+ const esc=s=>String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('"','&quot;');
+ const control={id:'verified',question:'Did the barrier work? <script>bad</script>',quote:'Install a barrier before work starts.',source:{title:'Approved heights procedure',href:'documents.html?document_id=9&page=2',summary:'Page 2 · Version 1'}};
+ const event={id:'test',can_request_ai:true,ai_job_status:'Sent',report:{ai_review:{status:'Suggested',risk_path:[4,3,2,1],risk_labels:['Safety','Physical','Height','Fall'],controls:[control],gaps:['Check applicability']}}};
+ let dirty=0,risk=null,requested=null,refreshed=0;
+ const bind=(e=event,initial=[])=>w.VeroInvestigationAI.bind({form:d.querySelector('form'),event:e,initial,esc,markDirty:()=>dirty++,api:async(path,data)=>{requested=path;return {status:'Pending'};},applyRisk:p=>risk=p,refresh:()=>refreshed++,isDirty:()=>false});
+ let bound=bind();assert.equal(risk,null,'AI cannot automatically classify');assert.equal(d.querySelector('script'),null);assert.match(d.body.textContent,/Version 1/);
+ d.querySelector('[data-use-ai-risk]').click();assert.deepEqual(Array.from(risk),[4,3,2,1]);assert.equal(dirty,1);
+ const select=d.querySelector('[data-ai-assessment]');select.value='failed';select.dispatchEvent(new w.Event('change',{bubbles:true}));assert.equal(d.querySelector('textarea').required,true);d.querySelector('textarea').value='The barrier was absent';
+ const saved=bound.collect();assert.equal(saved[0].evidence,'The barrier was absent');assert.equal(saved[0].assessment,'failed');assert.equal(saved[0].control,undefined,'Client cannot author source snapshots');
+ d.querySelector('[data-request-ai]').click();await new Promise(resolve=>setTimeout(resolve,10));assert.equal(requested,'/incidents/test/ai-review');assert(d.querySelector('[data-refresh-ai]'));d.querySelector('[data-refresh-ai]').click();assert.equal(refreshed,1);
+ d.querySelector('.investigation-ai').remove();bound=bind({...event,report:{ai_review:{...event.report.ai_review,status:'Stale — report changed',controls:[]}}},saved.map(a=>({...a,control})));
+ assert.equal(d.querySelector('[data-use-ai-risk]'),null);assert.equal(d.querySelector('textarea').value,'The barrier was absent','Previous evidence survives regenerated suggestions');
+ d.querySelector('.investigation-ai').remove();bound=bind({...event,report:{}},[{...saved[0],control:{id:'verified',unavailable:true}}]);assert.match(d.body.textContent,/Source changed/);assert.equal(d.querySelector('blockquote'),null);assert.equal(d.querySelector('textarea').value,'The barrier was absent');
+ console.log('PASS: human adoption, grounded citations, saved answers, revoked sources, stale reviews, escaping and AI-only request.');
+})().catch(e=>{console.error(e);process.exit(1);});
