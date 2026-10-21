@@ -1,6 +1,6 @@
 /* Asset Management uses the shared actions / four cards / register presentation. */
-.vr-page[data-register-layout="assets"] #vh main.main{padding:0 28px 35px!important}
-.vr-page[data-register-layout="assets"] #vh .global-hero{margin:0 -28px 24px}
+.vr-page[data-register-layout="assets"] main.main{padding:0 28px 35px!important}
+.vr-page[data-register-layout="assets"] .global-hero{margin:0 -28px 24px}
 .vr-page[data-register-layout="assets"] .asset-register-view>.vr-actions{justify-content:flex-start}
 .vr-page[data-register-layout="assets"] #vh .vr-actions>button,
 .vr-page[data-register-layout="assets"] #vh .vr-more summary{font:700 12px Montserrat,Verdana,Arial,sans-serif;border:1px solid #e5e1de;border-radius:8px;padding:12px 15px;background:#fff;color:#3d3935;line-height:normal}
@@ -27,8 +27,8 @@
 .vr-page[data-register-layout="assets"] .asset-dialog header>div{min-width:0}
 .vr-page[data-register-layout="assets"] .asset-dialog header h2{overflow-wrap:anywhere}
 @media(max-width:750px){
- .vr-page[data-register-layout="assets"] #vh main.main{padding:0 18px 30px!important}
- .vr-page[data-register-layout="assets"] #vh .global-hero{margin-left:-18px!important;margin-right:-18px!important}
+ .vr-page[data-register-layout="assets"] main.main{padding:0 18px 30px!important}
+ .vr-page[data-register-layout="assets"] .global-hero{margin-left:-18px!important;margin-right:-18px!important}
 }
 @media(max-width:900px){.vr-page[data-register-layout="assets"] #vh .vr-search{max-width:none}}
 @media(max-width:500px){.vr-page[data-register-layout="assets"] #vh .vr-filters select{width:100%!important;max-width:none!important}}
