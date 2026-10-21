@@ -3,7 +3,7 @@ const fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'..');
 function savedPolicy(v,id){
  const {coverage_limit,deductible_amount,insured_entity_name,...base}=v;
- return {...base,id,policy_scope:'Local',status:'Draft',
+ return {...base,id,policy_scope:'Local',status:v.status||'Draft',
   annual_premium:v.annual_premium,insured_entities:v.insured_entity_name?[v.insured_entity_name]:[],
   coverages:v.coverage_limit!=null||v.deductible_amount!=null?[{
    coverage_name:v.insurance_class,limit_amount:v.coverage_limit,deductible_amount:v.deductible_amount,
@@ -32,7 +32,7 @@ async function mockInsurance(page,options={}){
      if(server.postMode==='malformed')return route.fulfill({json:{status:'success'}});
      const p=savedPolicy(req.postDataJSON(),server.policies.length+1);server.policies.unshift(p);
      if(server.failReload)server.getMode='error';
-     return route.fulfill({status:201,json:{status:'success',id:p.id,policy_status:'Draft'}});
+     return route.fulfill({status:201,json:{status:'success',id:p.id,policy_status:p.status}});
     }
     if(server.getGate)await server.getGate;
     if(server.getMode==='error')return route.fulfill({status:503,json:{message:'Synthetic unavailable'}});
@@ -41,7 +41,7 @@ async function mockInsurance(page,options={}){
     return route.fulfill({json:{status:'success',policies,
      insurance_office:server.office,financial_access:server.financialAccess,
      financial_write_access:server.financialWriteAccess??server.financialAccess,
-     can_create_policies:!server.readOnly,read_only:Boolean(server.readOnly),
+     can_register_active:server.canRegisterActive===true,can_attach_to_new_policy:server.canUpload===true&&!server.readOnly,can_create_policies:!server.readOnly,read_only:Boolean(server.readOnly),
      can_link_parent_policies:server.linkingAccess,can_link_programmes:false,limited:Boolean(server.limited)}});
    }
    if(/^\/api\/insurance\/policies\/\d+\/decision$/.test(url.pathname)){

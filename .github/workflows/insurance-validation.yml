@@ -1,7 +1,7 @@
 name: Insurance persistence validation
 on:
   push:
-    branches: ['review/insurance-persistence-20261020', 'review/insurance-records-20261021']
+    branches: ['review/insurance-persistence-20261020', 'review/insurance-records-20261021', 'review/insurance-registration-20261021']
   pull_request:
     paths:
       - 'insurance.html'

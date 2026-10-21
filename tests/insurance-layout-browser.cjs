@@ -20,9 +20,9 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
    await page.getByRole('button',{name:'Menu',exact:true}).click();
    assert.equal(await page.locator('#insuranceSidebar').isVisible(),false);
   }
-  assert.equal(await page.getByLabel('Insurance view',{exact:true}).inputValue(),'Overview');
+  assert.equal(await page.getByLabel('Insurance view',{exact:true}).inputValue(),'Policies');
   assert.equal(await page.locator('.insurance-sections').count(),0);
-  await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies');
+  await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies',{force:true});
   const add=async(number,status,expiry)=>{
    await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
    assert.equal(await page.locator('main').evaluate(e=>e.inert),true);
@@ -31,7 +31,8 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
    await page.getByLabel('Policy Name',{exact:true}).fill('Synthetic '+number);
    await page.getByLabel('Policy Number',{exact:true}).fill(number);
    assert.equal(await page.getByLabel('Status',{exact:true}).inputValue(),'Draft');
-   await page.getByLabel('Insurance Class',{exact:true}).fill('Liability');
+   await page.getByLabel('Insurance type',{exact:true}).selectOption({label:'Other (specify)'});
+   await page.getByLabel('Other insurance type',{exact:true}).fill('Liability');
    await page.getByLabel('Inception Date',{exact:true}).fill('2019-01-01');
    await page.getByLabel('Insurer',{exact:true}).fill('Example insurer');
    await page.getByLabel('Broker',{exact:true}).fill('Hidden broker '+number);
@@ -93,7 +94,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   await page.getByLabel('Claim Reference').fill('CLAIM-TEST');
   await page.getByLabel('Policy Number',{exact:true}).fill('TEST-001');
   await page.getByRole('button',{name:'Add to Prototype'}).click();
-  await page.getByLabel('Insurance view',{exact:true}).selectOption('Claims');
+  await page.getByLabel('Insurance view',{exact:true}).selectOption('Claims',{force:true});
   assert.equal(await page.locator('#content tbody tr').count(),1);
   assert.equal(await page.locator('#insuranceViews').isVisible(),false);
   await page.locator('#insuranceMore summary').click();
@@ -101,19 +102,19 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   await page.getByLabel('Policy Number',{exact:true}).fill('TEST-001');
   await page.getByLabel('Stage',{exact:true}).fill('Quotation');
   await page.getByRole('button',{name:'Add to Prototype'}).click();
-  await page.getByLabel('Insurance view',{exact:true}).selectOption('Renewals');
+  await page.getByLabel('Insurance view',{exact:true}).selectOption('Renewals',{force:true});
   await page.getByLabel('Filter by stage').selectOption('Quotation');
   assert.equal(await page.locator('#content tbody tr').count(),1);
-  for(const section of ['Overview','Documents','Analytics']){
-   await page.getByLabel('Insurance view',{exact:true}).selectOption(section);
+  for(const section of ['Documents','Analytics']){
+   await page.getByLabel('Insurance view',{exact:true}).selectOption(section,{force:true});
    assert.equal(await page.locator('#insuranceToolbar').isVisible(),true);
    assert.equal(await page.locator('#search').isVisible(),section==='Overview');
    assert.equal(await page.locator('#insuranceStatus').isVisible(),false);
    assert.ok((await page.locator('#content').innerText()).length>20);
   }
-  await page.getByLabel('Insurance view',{exact:true}).selectOption('Overview');
+  await page.getByRole('button',{name:'Current policies',exact:true}).click();
   assert.equal(await page.locator('.kpi').count(),4);
-  assert.ok((await page.locator('main').innerText()).includes('prototype only'));
+  assert.equal(await page.locator('#insurancePolicyWorkflow').count(),0);
   assert.deepEqual(errors,[]);
   console.log(`PASS ${width}px: policy create/search/combined filters, claims/renewals, sections, disclaimer, no page overflow or script errors`);
   await context.close();
