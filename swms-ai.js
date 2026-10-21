@@ -25,7 +25,7 @@ window.VeroSwmsAssistant=(()=>{'use strict';
   renderChat();
   el('swmsManual').onclick=()=>showForm(true);
   el('swmsRestart').onclick=startAgain;
-  el('swmsBackToQuestions').onclick=()=>{el('swmsForm').hidden=true;el('swmsIntake').hidden=false;el('swmsIntakeContract').value=el('swmsContract').value;if(result&&Number(el('swmsIntakeContract').value)!==result.contractId)startAgain();el('swmsDialog').scrollTop=0;};
+  el('swmsBackToQuestions').onclick=()=>{const changed=el('swmsIntakeContract').value!==el('swmsContract').value;el('swmsForm').hidden=true;el('swmsIntake').hidden=false;el('swmsIntakeContract').value=el('swmsContract').value;if(changed)startAgain();el('swmsDialog').scrollTop=0;};
   el('swmsIntakeContract').onchange=()=>{el('swmsContract').value=el('swmsIntakeContract').value;startAgain();};
   el('swmsForm').addEventListener('input',event=>{if(!['swmsAiConfirmed','swmsReviewConfirmed'].includes(event.target.id)){el('swmsAiConfirmed').checked=false;el('swmsReviewConfirmed').checked=false;}});
   el('swmsDialog').addEventListener('close',()=>{if(active){ticket++;controller?.abort();setBusy(false);el('swmsAiStatus').textContent='AI request stopped. Your answers are retained.';}});
