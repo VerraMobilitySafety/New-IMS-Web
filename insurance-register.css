@@ -96,3 +96,14 @@
  .insurance-policy-drawer .dialog-actions { bottom:-16px; }
  .insurance-policy-drawer .fields { grid-template-columns:1fr; }
 }
+
+/* Insurance form pairs preserve explicit jurisdiction, date, cost and PDF rows. */
+.insurance-policy-drawer .insurance-form-pair,
+.insurance-policy-drawer .insurance-policy-pdf { grid-column:1 / -1; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px; }
+.insurance-policy-drawer .insurance-policy-pdf > .note { grid-column:1 / -1; margin:0; }
+.insurance-policy-drawer .insurance-form-pair > .field,
+.insurance-policy-drawer .insurance-policy-pdf > .field { min-width:0; }
+@media(max-width:500px) {
+ .insurance-policy-drawer .insurance-form-pair,
+ .insurance-policy-drawer .insurance-policy-pdf { grid-template-columns:minmax(0,1fr); }
+}

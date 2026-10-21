@@ -38,11 +38,23 @@ function policyView(p){
   .map(c=>c.currency===p.currency?c[key]:c.currency+' '+c[key]).join(' / ');
  const view={name:p.policy_name,number:p.policy_number,class:p.insurance_class,
   insurer:p.insurer_name,broker:p.broker_name||'',entity:(p.insured_entities||[]).join('; '),
-  country:p.country_code||'',inception:p.inception_date,expiry:p.expiry_date,
+  country:p.country_code||'',state:p.state_territory||'',inception:p.inception_date,expiry:p.expiry_date,
   currency:p.currency,status:p.status,parent_policy_id:p.parent_policy_id??null};
  if(financialAccess)Object.assign(view,{premium:p.annual_premium??'',
   limit:amounts('limit_amount'),excess:amounts('deductible_amount')});
  return view;
+}
+function jurisdictionState(value=''){
+ const previous=form.elements.state,country=form.elements.country.value;
+ const input=document.createElement(country==='AU'?'select':'input');
+ input.id='fstate';input.name='state';
+ if(country==='AU'){
+  for(const [code,label] of [['','Country-wide'],['ACT','Australian Capital Territory'],['NSW','New South Wales'],['NT','Northern Territory'],['QLD','Queensland'],['SA','South Australia'],['TAS','Tasmania'],['VIC','Victoria'],['WA','Western Australia']]){
+   const option=document.createElement('option');option.value=code;option.textContent=code?code+' — '+label:label;input.append(option);
+  }
+ }else{input.maxLength=100;input.placeholder=country?'Optional — blank means country-wide':'Choose a country first'}
+ input.disabled=!country;
+ previous.replaceWith(input);input.value=value;
 }
 function updateSubmit(){
  if(formType==='policies'){
@@ -314,6 +326,8 @@ openForm=function(type){
   const australia=document.createElement('option');australia.value='AU';australia.label='Australia';
   countries.append(australia);$('fields').append(countries);
   form.elements.country.setAttribute('list',countries.id);
+  jurisdictionState();
+  form.elements.country.addEventListener('input',()=>jurisdictionState());
   form.elements.status.value='Draft';form.elements.status.readOnly=true;
   formStatus.textContent='New policies are saved as Draft. Submit them for approval after saving.';
   if(canRegisterActive){
@@ -325,6 +339,7 @@ openForm=function(type){
    const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.name='purchased_in_force';
    label.append(check,document.createTextNode('I confirm this policy is already purchased and currently in force.'));confirmation.append(label);statusChoice.closest('.field').after(confirmation);
    statusChoice.onchange=()=>{confirmation.hidden=statusChoice.value!=='Active';check.required=statusChoice.value==='Active';check.checked=false;updateSubmit()};
+   statusChoice.value='Active';statusChoice.onchange();
    formStatus.textContent='Insurance Managers may register purchased policies as Active when today (UTC) is within their dates. Future or expired policies must use Draft. This records registration, not approval.';
   }
   if(canAttach){
@@ -332,9 +347,20 @@ openForm=function(type){
    const label=document.createElement('label');label.htmlFor='registrationPdf';label.textContent='Policy PDF (optional)';
    const file=document.createElement('input');file.type='file';file.id='registrationPdf';file.accept='application/pdf,.pdf';
    const note=document.createElement('p');note.className='note';note.textContent='PDF up to 25 MiB. Saved as a Policy Schedule Record with retention pending after the policy is saved. Open the saved PDF using View Policy in the policy list.';
-   field.append(label,file,note);$('fields').append(field);
+   const titleLabel=document.createElement('label');titleLabel.htmlFor='registrationFileTitle';titleLabel.textContent='File title';
+   const title=document.createElement('input');title.id='registrationFileTitle';title.name='registration_file_title';title.maxLength=255;title.placeholder='Optional - defaults to policy name';
+   field.classList.add('insurance-policy-pdf');
+   const fileField=document.createElement('div');fileField.className='field';fileField.append(label,file);
+   const titleField=document.createElement('div');titleField.className='field';titleField.append(titleLabel,title);
+   field.append(fileField,titleField,note);$('fields').append(field);
   }
 
+  for(const names of [['country','state'],['inception','expiry'],['limit','excess','premium','currency']]){
+   const fields=names.map(name=>form.elements[name]?.closest('.field')).filter(Boolean);
+   if(!fields.length)continue;
+   const group=document.createElement('div');group.className='insurance-form-pair';
+   fields[0].before(group);group.append(...fields);
+  }
   if(!financialWriteAccess)for(const name of financialFields){
    const input=form.elements[name];if(input){input.disabled=true;input.closest('.field').hidden=true}
   }
@@ -397,6 +423,7 @@ async function openPolicyEdit(id){
   const policy=result.policy,values=policyView(policy);
   editing={id,policy,revision:result.updated_at};
   for(const [name,value] of Object.entries(values))if(form.elements[name])form.elements[name].value=value??'';
+  jurisdictionState(values.state);
   // Links and lifecycle have separate rules; this editor never submits them.
   for(const name of ['status','parent_policy_id','purchased_in_force'])if(form.elements[name]){form.elements[name].disabled=true;form.elements[name].closest('.field').hidden=true}
   if(policy.insured_entities.length>1)form.elements.entity.disabled=true;
@@ -410,9 +437,10 @@ async function savePolicyEdit(){
  const current=editing,values=Object.fromEntries(new FormData(form).entries());
  if(documentUploads.get(String(current.id))?.pending){formStatus.textContent='Finish or reconcile the pending attachment before editing this policy.';return}
  if(form.elements.class.selectedOptions[0]?.dataset.custom==='true')values.class=(values.custom_insurance_type||'').trim();
- const mapping={name:'policy_name',number:'policy_number',class:'insurance_class',insurer:'insurer_name',broker:'broker_name',entity:'insured_entity_name',currency:'currency',inception:'inception_date',expiry:'expiry_date',country:'country_code',premium:'annual_premium',limit:'coverage_limit',excess:'deductible_amount'};
+ const mapping={name:'policy_name',number:'policy_number',class:'insurance_class',insurer:'insurer_name',broker:'broker_name',entity:'insured_entity_name',currency:'currency',inception:'inception_date',expiry:'expiry_date',country:'country_code',state:'state_territory',premium:'annual_premium',limit:'coverage_limit',excess:'deductible_amount'};
  const initial=policyView(current.policy),payload={expected_updated_at:current.revision};
  for(const [name,key] of Object.entries(mapping))if(!form.elements[name]?.disabled&&String(values[name]??'')!==String(initial[name]??''))payload[key]=values[name]||null;
+ if(payload.country_code!==undefined)payload.state_territory=values.state||null;
  const pdf=$('registrationPdf')?.files[0];
  if(pdf&&(!pdf.size||pdf.size>25*1024*1024||!pdf.name.toLowerCase().endsWith('.pdf'))){formStatus.textContent='Choose a non-empty PDF no larger than 25 MiB.';return}
  busy=true;updateSubmit();let saved=false;
@@ -420,7 +448,7 @@ async function savePolicyEdit(){
   const result=await request('/insurance/policies/'+current.id+'/edit',{method:'PATCH',body:JSON.stringify(payload)});
   if(result.id!==current.id||result.policy_status!==current.policy.status)throw new Error('Invalid edit confirmation.');
   saved=true;editing=null;
-  if(pdf){const pending=new FormData();pending.set('file',pdf);pending.set('record_title',values.name.slice(0,255));pending.set('attachment_type','Policy Schedule');pending.set('request_id',crypto.randomUUID());
+  if(pdf){const pending=new FormData();pending.set('file',pdf);pending.set('record_title',(values.registration_file_title||'').trim()||values.name.slice(0,255));pending.set('attachment_type','Policy Schedule');pending.set('request_id',crypto.randomUUID());
    registration={id:current.id};documentUploads.set(String(current.id),{pending,saving:false,message:''});
    for(const input of form.querySelectorAll('input,select,textarea'))input.disabled=true;
   }
@@ -445,7 +473,7 @@ form.onsubmit=async event=>{
  const payload={policy_name:values.name,policy_number:values.number,insurance_class:values.class,
   insurer_name:values.insurer,broker_name:values.broker,insured_entity_name:values.entity,
   currency:values.currency.toUpperCase(),inception_date:values.inception,expiry_date:values.expiry,
-  policy_scope:'Local',country_code:values.country||null,status:canRegisterActive&&values.status==='Active'?'Active':'Draft'};
+  policy_scope:'Local',country_code:values.country||null,state_territory:values.state||null,status:canRegisterActive&&values.status==='Active'?'Active':'Draft'};
  if(payload.status==='Active'){
   const today=new Date().toISOString().slice(0,10);
   if(!form.elements.purchased_in_force.checked||values.inception>today||values.expiry<today){formStatus.textContent='Confirm purchase and use dates covering today (UTC), or save as Draft.';return}
@@ -461,7 +489,7 @@ form.onsubmit=async event=>{
   if(!Number.isSafeInteger(result.id)||result.id<=0||result.policy_status!==payload.status)throw new Error('Invalid save confirmation.');
   saved=true;
   if(pdf){
-   const pending=new FormData();pending.set('file',pdf);pending.set('record_title',values.name.slice(0,255));
+   const pending=new FormData();pending.set('file',pdf);pending.set('record_title',(values.registration_file_title||'').trim()||values.name.slice(0,255));
    pending.set('attachment_type','Policy Schedule');pending.set('request_id',crypto.randomUUID());
    registration={id:result.id};documentUploads.set(String(result.id),{pending,saving:false,message:''});
    for(const input of form.querySelectorAll('input,select,textarea'))input.disabled=true;
