@@ -10,7 +10,7 @@ async function scenario(admin,deep=false,empty=false){
   else if(path==='/incidents/dashboard')value={as_of:'2026-10-20',metrics:empty?{}:{events:12,under_investigation:5,completed:4,awaiting_assignment:3,active_investigations:2,overdue:1,held:8}};
   else if(path==='/incidents')value={events:empty?[]:[event]};else if(path==='/incidents/test')value=event;else if(path.endsWith('/files'))value={files:[]};
   return {ok:!!value,status:value?200:404,json:async()=>value||{message:'Not found'}};
- };w.eval(script);await wait(()=>d.querySelector('#incident-dashboard'));
+ };w.eval(fs.readFileSync(__dirname+'/../incident-analytics.js','utf8'));w.eval(script);await wait(()=>d.querySelector('#incident-dashboard'));
  assert.equal(calls.includes('/incidents'),false,'Landing must not request the event register');assert.equal(d.querySelector('#event-rows'),null);
  assert.equal(d.querySelector('[data-metric=total]').textContent,empty?'0':'12');assert.equal(d.querySelector('[data-metric=active]').textContent,empty?'0':'2');
  assert.equal(d.querySelector('.dashboard-workspace'),null);assert.equal(d.querySelector('#dashboard-title'),null);assert.equal(d.querySelector('.dashboard-date'),null);
@@ -20,6 +20,7 @@ async function scenario(admin,deep=false,empty=false){
  assert.match(d.querySelector('.investigation-status-heading').textContent,/Recorded Investigation Status/);
  const overdue=[...d.querySelectorAll('.status-chart-row')].find(row=>row.textContent.includes('Overdue Investigations'));assert.equal(overdue.querySelector('strong').textContent,empty?'0':'1');
  assert.match(d.querySelector('.status-chart').textContent,/Under Investigation/);assert.match(d.querySelector('.status-chart').textContent,/Awaiting Assignment/);
+ if(!empty&&!deep){d.querySelector('[data-status-chart=completed]').click();await wait(()=>d.querySelector('[data-chart-event=test]'));assert(d.querySelector('#incident-dashboard'));assert.match(d.querySelector('.chart-events thead').textContent,/Ref Number/);assert.doesNotMatch(d.querySelector('.chart-events thead').textContent,/Due/);d.querySelector('[data-status-chart=completed]').click();await wait(()=>!d.querySelector('[data-chart-event=test]'));}
  if(deep){await wait(()=>d.querySelector('#event-backdrop'));assert(d.querySelector('#incident-dashboard'));d.querySelector('#event-close').click();assert.equal(d.querySelector('#event-backdrop'),null);assert.equal(d.querySelector('#event-rows'),null);}
  d.querySelector('#register').click();await wait(()=>d.querySelector('#event-rows'));assert(calls.includes('/incidents'));assert.equal(d.querySelector('#incident-dashboard'),null);assert.equal(new URL(w.location).searchParams.get('view'),'register');
  d.querySelector('#dashboard').click();await wait(()=>d.querySelector('#incident-dashboard'));assert.equal(d.querySelector('#event-rows'),null);dom.window.close();
