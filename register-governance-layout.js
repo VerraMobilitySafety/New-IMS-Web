@@ -64,7 +64,7 @@
    const register=$('#event-rows')?.closest('.card'),panel=register||content;
    if(register)add(register,'vr-register');
    const {bar,filters}=toolbar(panel,$('#event-register-search'));add(bar,'vr-view-toolbar');
-   const available=buttons.filter(b=>!b.hidden).map(b=>[b.id,b.textContent]);
+   const available=buttons.filter(b=>!b.hidden&&b.id!=='incident-actions').map(b=>[b.id,b.textContent]);
    action.querySelector('.incident-admin-view')?.remove();
    const view=viewControl(available,value=>$('#'+value).click());add(view.label,'incident-admin-view');
    view.label.hidden=document.body.dataset.incidentAdministrator!=='true';action.append(view.label);
