@@ -576,6 +576,7 @@
     <button class="action-filter" data-filter="incidents" onclick="setActionFilter('incidents',this)">Incidents</button>
     <button class="action-filter" data-filter="projects" onclick="setActionFilter('projects',this)">Projects</button>
     <button class="action-filter" data-filter="records" onclick="setActionFilter('records',this)">Records</button>
+    <button class="action-filter" data-filter="insurance" onclick="setActionFilter('insurance',this)">Insurance</button>
     </div>
    </div>
 
@@ -1097,6 +1098,15 @@ function dotClass(action){
  if(source==='records')return 'records';
  return '';
 }
+function isInsuranceRenewal(action){return action.source==='Insurance'&&action.action_type==='Insurance Renewal';}
+function insuranceDueText(action){
+ const day=action.due_date;
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(day||''))return '-';
+ const date=new Date(day+'T00:00:00Z');
+ if(Number.isNaN(date.getTime()))return '-';
+ const overdue=action.due_at&&Date.now()>=new Date(action.due_at).getTime();
+ return (overdue?'Overdue ':'Due ')+date.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'});
+}
 function filteredActions(){
  let actions=allActions;
 
@@ -1136,12 +1146,14 @@ function filteredActions(){
   );
  }
 
+ if(currentFilter==='insurance')actions=actions.filter(isInsuranceRenewal);
+
  if(currentFilter==='overdue'){
   const now=Date.now();
 
   actions=actions.filter(
    a=>a.due_at &&
-      new Date(a.due_at).getTime()<now
+      (isInsuranceRenewal(a)?new Date(a.due_at).getTime()<=now:new Date(a.due_at).getTime()<now)
   );
  }
 
@@ -1209,7 +1221,7 @@ function renderActions(){
     : (a.title||'Action required');
 
   const dateText=
-   a.due_at
+   isInsuranceRenewal(a)?insuranceDueText(a):a.due_at
     ? `${a.status==='Overdue'?'Overdue':'Due'} ${formatDate(a.due_at)}`
     : formatDate(a.created_at);
 
