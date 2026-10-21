@@ -1,0 +1,53 @@
+/* Read current authorised register metadata. File contents never enter this reader. */
+(()=>{'use strict';
+const modules={
+ risks:{name:'Risks',path:'/risks',key:'risks',page:'risk.html',title:'risk_title',code:'risk_code',owner:'risk_owner',type:'risk_type',date:'next_review_date',dateLabel:'review date'},
+ projects:{name:'Projects',path:'/projects',key:'projects',page:'project-management.html',title:'project_name',code:'project_code',owner:'project_owner',type:'project_type',date:'target_end_date',dateLabel:'target end date'},
+ events:{name:'Events',path:'/incidents',key:'events',page:'incident-management.html?view=register',title:'title',code:'event_code',owner:'owner',type:'event_type',date:'occurred_date',dateLabel:'occurrence date',pastFlag:false},
+ documents:{name:'Documents',path:'/documents',key:'documents',page:'documents.html',title:'document_title',code:'document_number',owner:'document_owner_name',ownerFallback:'document_owner',type:'document_type',date:'review_date',dateLabel:'review date'},
+ records:{name:'Records',path:'/records',key:'records',page:'records.html',title:'record_title',code:'record_code',type:'record_type',date:'retention.disposal_due_date',dateLabel:'disposal due date'},
+ compliance:{name:'Compliance obligations',path:'/compliance/obligations',key:'obligations',page:'compliance.html',title:'obligation_title',code:'obligation_code',owner:'owner_business_area',type:'compliance_type',date:'next_review_date',dateLabel:'review date',dedupe:true},
+ insurance:{name:'Insurance policies',path:'/insurance/policies',key:'policies',page:'insurance.html',title:'policy_name',code:'policy_number',owner:'owner_user_id',type:'insurance_class',country:'country_code',date:'expiry_date',dateLabel:'expiry date'},
+ contractors:{name:'Contractor companies',path:'/contractors',key:'data.contractors',page:'contractor-management.html',title:'company_name',code:'contractor_code',owner:'contract_owner',type:'service_type',country:'country'},
+ 'client-services':{name:'Client services contracts',path:'/maintenance-contracts',key:'contracts',page:'maintenance-management.html',title:'contract_name',code:'contract_code',owner:'owner_name',type:'customer_name'},
+ locations:{name:'Verra Mobility locations',path:'/risk/operational-contexts',key:'vm_locations',page:'sites.html',title:'name',code:'code'},
+ sites:{name:'Operational sites',path:'/risk/operational-contexts',key:'sites',page:'sites.html',title:'name',code:'code',type:'kind'},
+ actions:{name:'My Actions',path:'/my-actions',key:'actions',page:'my-actions.html',title:'title',code:'id',owner:'assigned_to_user_id',type:'source',date:'due_date',dateLabel:'due date'}
+};
+const read=(obj,path)=>path?.split('.').reduce((v,k)=>v?.[k],obj);
+const norm=v=>String(v??'').trim().toLowerCase();
+const value=v=>typeof v==='string'||typeof v==='number'?String(v):'';
+const clean=v=>value(v).slice(0,180);
+function selected(input='all'){const ids=input==='all'?Object.keys(modules):String(input).split(',');if(!ids.length||new Set(ids).size!==ids.length||ids.some(id=>!modules[id]))throw Error('Choose available reporting topics.');return ids;}
+function names(input){return selected(input).map(id=>modules[id].name).join(', ');}
+function date(v){if(typeof v!=='string'||!/^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(v))return '';const d=v.slice(0,10);return Number.isFinite(Date.parse(d))&&new Date(d).toISOString().slice(0,10)===d?d:'';}
+function row(item,id){const def=modules[id];let owner=read(item,def.owner)||read(item,def.ownerFallback);if(id==='records')owner=item.owner?.user_id;const record={id:item.id,title:clean(read(item,def.title)),code:clean(read(item,def.code)),status:clean(item.status),owner:clean(owner),type:clean(read(item,def.type)),country:clean(read(item,def.country)),date:date(read(item,def.date))};
+ if(id==='events'){record.title=clean(item.report?.title||item.title||item.event_title);record.type=clean(item.report?.classification?.summary);record.date=date(item.report?.occurred_date);}
+ return record;
+}
+async function load(input,get){return Promise.all(selected(input).map(async id=>{try{const payload=await get(modules[id].path),raw=read(payload,modules[id].key);if(!Array.isArray(raw)||raw.some(r=>!r||typeof r!=='object'||r.id===undefined))throw Error('Unexpected source response');const skipped=raw.filter(r=>r.restricted===true||r.can_view===false).length;const visible=raw.filter(r=>r.restricted!==true&&r.can_view!==false);const seen=new Set();const rows=visible.filter(r=>{const key=String(r.id);if(seen.has(key))return false;seen.add(key);return true;}).map(r=>row(r,id));return {id,rows,skipped,limited:payload.limited===true||(id==='events'&&raw.length>=500)};}catch(error){if(error.status===401||error.sessionChanged)throw error;return {id,error:error.status===403?'Access unavailable':'Source unavailable'};}}));}
+function analyse(sources,filters,now){const result=[];for(const source of sources){if(source.error){result.push(source);continue;}const search=norm(filters.search),status=norm(filters.status),rows=source.rows.filter(r=>(!status||norm(r.status)===status)&&(!search||[r.title,r.code,r.owner,r.type,r.country].some(v=>norm(v).includes(search))));const def=modules[source.id],group=filters.group_by||'status';if(!['status','owner','type','country'].includes(group))throw Error('Choose an available grouping.');const counts=new Map();for(const r of rows){const label=r[group]||'Not recorded';counts.set(label,(counts.get(label)||0)+1);}const groups=[...counts].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));const top=groups.slice(0,4),rest=groups.slice(4).reduce((n,r)=>n+r[1],0);if(rest)top.push(['Other recorded values',rest]);result.push({...source,rows,total:rows.length,missingOwner:def.owner||source.id==='records'?rows.filter(r=>!r.owner).length:null,missingDate:def.date?rows.filter(r=>!r.date).length:null,pastDate:def.date&&def.pastFlag!==false?rows.filter(r=>r.date&&r.date<now).length:null,groups:top,group});}return result;}
+function render(sources,filters,ui,now){const results=analyse(sources,filters,now),available=results.filter(s=>!s.error);if(!available.length)throw Error('None of the selected reporting sources is available within this session. Try another topic or open its source page.');const html=[],csv=[['Module','Matching records','Missing owner','Missing date','Recorded date before snapshot']];
+ html.push(ui.kpis([['Reporting topics selected',results.length],['Sources available',available.length],['Sources unavailable',results.length-available.length],['Snapshot date',now]]));
+ const coverage=['Current authorised register metadata as of '+now+'. Counts describe separate populations; they must not be added into a business total. No file contents or historical snapshots are read.'];
+ const limitations=[];
+ for(const source of results){const def=modules[source.id];if(source.error){html.push(ui.table(def.name+' — source coverage',['Coverage'],[[source.error+'; no count available']]));limitations.push(def.name+': '+source.error+'.');continue;}
+ const stats=[source.total,source.missingOwner??'Not supplied',source.missingDate??'Not supplied',source.pastDate??'Not applicable'];csv.push([def.name,...stats]);html.push('<p class="structured-source"><a href="'+def.page+'">Open '+def.name+' ↗</a></p>'+ui.table(def.name+' — current register',['Module','Matching records','Missing owner','Missing '+(def.dateLabel||'date'),'Recorded '+(def.dateLabel||'date')+' before '+now],[[def.name,...stats]]));
+ if(source.groups.length){html.push(ui.table(def.name+' — by '+source.group,['Recorded '+source.group,'Matching records'],source.groups));csv.push([''],[def.name+' — by '+source.group,'Matching records'],...source.groups);}
+ if(source.limited)limitations.push(def.name+': source is capped at the most recent 500 records; older entries may be omitted.');
+ if(source.skipped)limitations.push(def.name+': '+source.skipped+' restricted metadata rows excluded from analysis.');
+ if(source.id==='compliance')limitations.push('Compliance: unique active obligations; repeated applicability rows counted once. Counts do not establish legal compliance.');
+ if(source.id==='actions')limitations.push('My Actions: only the signed-in user’s personal action list, not an organisation-wide backlog.');
+ if(source.id==='records')limitations.push('Records: a disposal due date does not authorise disposal; holds and approval requirements still apply.');
+ if(source.id==='locations')limitations.push('Locations: Verra Mobility locations in the authorised operational-context register; not all client or project sites.');
+ }
+ const samples=available.flatMap(s=>s.rows.map(r=>[modules[s.id].name,r.code||'Not recorded',r.title||'Not recorded',r.status||'Not recorded',r.owner||'Not supplied',r.date||'Not supplied']));
+ if(samples.length){html.push(ui.table('Matching register entries — first 20 only',['Module','Reference','Name','Status','Owner','Recorded date'],samples.slice(0,20)));csv.push([''],['Module','Reference','Name','Status','Owner','Recorded date'],...samples.slice(0,20));}
+ coverage.push('Filtering: '+(filters.search?'names/codes/owners/types/countries contain “'+filters.search+'”':'no text filter')+'; '+(filters.status?'exact status “'+filters.status+'”':'all returned lifecycle statuses')+'. Grouped by '+(filters.group_by||'status')+'. The same search is applied independently to each selected register, not a relationship join.');
+ coverage.push('Date flags use each module’s recorded '+available.filter(s=>modules[s.id].date).map(s=>modules[s.id].name+': '+modules[s.id].dateLabel).join('; ')+'. A past date is a flag for review, not proof of overdue work, expired cover or failed controls. A date not supplied is not inferred.');
+ coverage.push('Detail entries show the first 20 matching records; totals and groups use all returned matching records. Groupings show four leading values and a combined remainder. Owner values are recorded names or account IDs; IDs are not resolved to invented names.');
+ if(limitations.length)coverage.push(limitations.join(' ').slice(0,1450));
+ return {html:html.join('')+coverage.map(s=>ui.note(s)).join(''),csv,available:available.length};
+}
+window.VeroSystemReports={modules,selected,names,load,analyse,render};
+})();
