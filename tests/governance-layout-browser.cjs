@@ -49,6 +49,7 @@ for(const width of [1440,1024,768,390])for(const file of ['records.html','risk.h
     return {separate:time.parentElement===el&&!filters.contains(time),left:getComputedStyle(filters).justifyContent,gap:getComputedStyle(el.parentElement).gap};
    });assert.deepEqual(alignment,{separate:true,left:'flex-start',gap:'12px'});
    await page.locator('[data-report-tab="'+tab+'"]').click();
+   await page.locator('#content:not([aria-busy])').waitFor();
    await page.locator(tab==='overview'?'#incident-dashboard .vr-view-toolbar':'#monthly-event-dashboard .vr-view-toolbar').waitFor();
   }
   assert.equal(await page.locator('#new-report').evaluate(el=>getComputedStyle(el).height),'43px');
