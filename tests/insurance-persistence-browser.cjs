@@ -51,29 +51,23 @@ async function ready(page){
    assert.equal(server.posts[0].insurance_class,'Special custom cover');
    assert.equal(server.posts[0].status,'Draft');
   });
-  await check('overview search preserves cards and hides routine success controls',{policies:[savedPolicy(payload,81)]},async page=>{
-   await ready(page);
-   assert.equal(await page.locator('#insuranceApiStatus').isVisible(),false);
-   assert.equal(await page.locator('#insuranceApiStatus').innerText(),'');
+  await check('current policy list preserves upstream layout and search',{policies:[savedPolicy(payload,81)]},async page=>{
+   await ready(page);assert.equal(await page.locator('#insuranceApiStatus').isVisible(),false);
    assert.equal(await page.locator('#insuranceRefresh').isVisible(),false);
-   assert.equal(await page.locator('#heading').isVisible(),false);
-   assert.equal(await page.locator('#content .tile').count(),4);
+   assert.equal(await page.locator('#content .tile').count(),0);
    await page.getByLabel('Search insurance register').fill('Example broker');
-   assert.equal(await page.locator('#content .tile').count(),4);
-   await page.locator('#insuranceOverviewResults button').click();
-   assert.match(await page.locator('#policyDetails').innerText(),/Synthetic policy/);
-   await page.keyboard.press('Escape');
-   await page.getByLabel('Search insurance register').fill('no-match');
-   assert.match(await page.locator('#insuranceOverviewResults').innerText(),/No policies match/);
-   await page.getByLabel('Search insurance register').fill('');
-   assert.equal(await page.locator('#insuranceOverviewResults').count(),0);
+   await page.locator('#content tbody tr').click();assert.match(await page.locator('#policyDetails').innerText(),/Synthetic policy/);
+   await page.keyboard.press('Escape');await page.getByLabel('Search insurance register').fill('no-match');
+   assert.equal(await page.locator('#content tbody tr').count(),0);
+   await page.getByRole('button',{name:'Policy files',exact:true}).click();await page.getByText('No accessible files attached.',{exact:true}).waitFor();
+   await page.getByRole('button',{name:'Current policies',exact:true}).click();
   });
   await check('Leadership and Finance view financial details without mutation controls',{
    financialAccess:true,financialWriteAccess:false,readOnly:true,policies:[savedPolicy(payload,81)]
   },async(page,server)=>{
    await ready(page);
    assert.equal(await page.getByRole('button',{name:'+ Register Policy',exact:true}).count(),0);
-   await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies');
+   await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies',{force:true});
    assert.equal(await page.locator('#insurancePolicyWorkflow').count(),0);
    await page.locator('#content tbody tr').first().click();
    assert.match(await page.locator('#policyDetails').innerText(),/1234.56/);
@@ -109,13 +103,13 @@ async function ready(page){
    await page.locator('#modal.open').waitFor({state:'hidden'});await ready(page);
    assert.deepEqual(server.posts,[{...payload,parent_policy_id:81}]);
    await page.reload();await ready(page);
-   await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies');
+   await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies',{force:true});
    await page.locator('#content tbody tr').first().click();
    assert.equal(await page.locator('#policyDetails dt').last().innerText(),'Parent policy');
    assert.equal(await page.locator('#policyDetails dd').last().innerText(),'TEST-001 - Synthetic policy');
    await page.keyboard.press('Escape');server.policies=server.policies.filter(p=>p.id!==81);
    await page.reload();await ready(page);
-   await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies');
+   await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies',{force:true});
    await page.locator('#content tbody tr').click();
    assert.equal(await page.locator('#policyDetails dd').last().innerText(),'Linked policy (not in the loaded register)');
   });
@@ -139,7 +133,7 @@ async function ready(page){
    await ready(page);
    assert.equal(await page.locator('#premium').innerText(),'Restricted');
    assert.equal(await page.evaluate(()=>Object.hasOwn(data.policies[0],'premium')),false);
-   await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies');
+   await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies',{force:true});
    await page.locator('#content tbody tr').click();
    const details=await page.locator('#policyDetails').innerText();
    for(const value of ['Annual Premium','Coverage Limit','Deductible / Excess','987654.32','1000000'])assert.ok(!details.includes(value));
@@ -159,7 +153,7 @@ async function ready(page){
   await check('financial access removal clears loaded detail and derived totals',{
    policies:[savedPolicy(payload,1)]
   },async(page,server)=>{
-   await ready(page);await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies');
+   await ready(page);await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies',{force:true});
    await page.locator('#content tbody tr').click();
    assert.match(await page.locator('#policyDetails').innerText(),/1234.56/);
    server.financialAccess=false;
@@ -187,7 +181,7 @@ async function ready(page){
   });
   let release;
   await check('loading, empty, error, retry and malformed list states',{getGate:new Promise(r=>release=r)},async(page,server)=>{
-   await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies');
+   await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies',{force:true});
    assert.match(await page.locator('#content').innerText(),/Loading policies/);
    assert.equal(await page.locator('#active').innerText(),'—');
    await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
@@ -216,22 +210,17 @@ async function ready(page){
    finish();await page.locator('#modal.open').waitFor({state:'hidden'});
    await ready(page);assert.deepEqual(server.posts,[payload]);
    assert.equal(await page.locator('#content tbody tr').count(),1);
-   assert.equal(await page.locator('#insurancePolicyWorkflow').count(),1);
+   assert.equal(await page.locator('#insurancePolicyWorkflow').count(),0);
    await page.locator('#content tbody tr').click();
    const details=await page.locator('#policyDetails').innerText();
    for(const value of ['Example entity','1000000','1234.56','Draft'])assert.ok(details.includes(value));
    const excess=await page.locator('#policyDetails dd').nth(10).innerText();assert.equal(excess,'0');
    await page.keyboard.press('Escape');
    await page.reload();await ready(page);
-   await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies');
+   await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies',{force:true});
    assert.equal(await page.locator('#content tbody tr').count(),1);
-   assert.equal(await page.locator('#insurancePolicyWorkflow').count(),1);
-   await page.getByRole('button',{name:'Submit',exact:true}).click();
-   await page.locator('#insuranceApiStatus[data-state=ready]').waitFor({state:'attached'});
-   await page.waitForFunction(()=>document.querySelector('#insurancePolicyWorkflow button')?.disabled===false);
-   assert.deepEqual(server.decisions,[{action:'Submit'}]);
-   assert.equal(await page.locator('#insurancePolicyWorkflow').count(),1);
-   assert.equal(await page.getByRole('button',{name:'Approve',exact:true}).count(),0);
+   assert.equal(await page.locator('#insurancePolicyWorkflow').count(),0);
+   assert.equal(await page.getByRole('button',{name:'Submit',exact:true}).count(),0);
   });
   for(const mode of ['error','network','malformed']){
    await check('failed '+mode+' save never adds an in-memory row',{postMode:mode},async(page,server)=>{

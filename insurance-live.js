@@ -110,6 +110,12 @@ render=function(){
 };
 let documentPolicy='',documentGeneration=0;
 const documentUploads=new Map();
+// Keep the upstream policy-list layout while exposing existing file management.
+const documentsButton=document.createElement('button');documentsButton.type='button';documentsButton.textContent='Policy files';
+documentsButton.onclick=()=>{tab='Documents';render()};
+const policiesButton=document.createElement('button');policiesButton.type='button';policiesButton.textContent='Current policies';
+policiesButton.onclick=()=>{tab='Policies';render()};
+$('insuranceToolbar').append(policiesButton,documentsButton);
 function renderDocuments(){
  if(tab!=='Documents')return;
  const host=$('content');host.replaceChildren();
