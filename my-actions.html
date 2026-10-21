@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="vero-shell.css?v=20261021-arrow-align"><script src="nav.js?v=20261021-assets"></script><style id="vero-loading-guard">html[data-vero-loading] .main>:not(.global-hero):not(.workspace-hero){visibility:hidden!important}html[data-vero-loading] .main{background:#f4f6f8}</style><script>document.documentElement.setAttribute('data-vero-loading','');window.__veroLoaderDeadline=setTimeout(function(){document.documentElement.removeAttribute('data-vero-loading');window.VeroPageLoader?.dismiss();},12000);</script><link rel="stylesheet" href="risk-page-loader.css?v=20261021-clean-camera"><script src="risk-page-loader.js?v=20261021-clean-camera" data-tasks="account actions"></script><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png">
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="vero-shell.css?v=20261021-arrow-align"><script src="nav.js?v=20261022-improvement"></script><style id="vero-loading-guard">html[data-vero-loading] .main>:not(.global-hero):not(.workspace-hero){visibility:hidden!important}html[data-vero-loading] .main{background:#f4f6f8}</style><script>document.documentElement.setAttribute('data-vero-loading','');window.__veroLoaderDeadline=setTimeout(function(){document.documentElement.removeAttribute('data-vero-loading');window.VeroPageLoader?.dismiss();},12000);</script><link rel="stylesheet" href="risk-page-loader.css?v=20261021-clean-camera"><script src="risk-page-loader.js?v=20261021-clean-camera" data-tasks="account actions"></script><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -366,7 +366,7 @@
  <img class="chev c1" src="verra-chevron.png" alt="">
  <img class="chev c2" src="verra-chevron.png" alt="">
  <img class="chev c3" src="verra-chevron.png" alt="">
- <nav class="nav"><div id="vero-nav" data-vero-nav="20261021-assets">
+ <nav class="nav"><div id="vero-nav" data-vero-nav="20261022-improvement">
     <div class="nav-section">
       <a class=""
          href="index.html">
@@ -457,6 +457,11 @@
 
     <div class="nav-section">
       <div class="nav-label">Governance Management</div>
+
+      <a class="" href="continual-improvement-management.html" >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 0 1 15-6l3 3M21 3v5h-5M21 13a9 9 0 0 1-15 6l-3-3M3 21v-5h5"/></svg>
+        <span>Continual Improvement Management</span>
+      </a>
 
       <a class=""
          href="documents.html">
@@ -1353,6 +1358,7 @@ document.getElementById('assignRecordReviewerBtn')
 
 function openActionDetail(index){
  const action=allActions[index]; if(!action)return;
+ if(action.source==='Risks'&&/^Site Risk (Review|Correction|Treatment|Treatment Verification)$/.test(action.action_type||'')&&Number.isSafeInteger(Number(action.site_id))&&Number(action.site_id)>0&&Number.isSafeInteger(Number(action.risk_id))&&Number(action.risk_id)>0){location.href='client-services-site.html?'+new URLSearchParams({id:String(action.site_id),risk_id:String(action.risk_id)});return;}
  if(action.source==='Insurance'&&action.action_type==='Insurance Renewal'){location.href='insurance.html?renewals=1';return;}
  if(action.source==='Incidents' && /^[0-9a-f-]{36}$/i.test(String(action.source_id||''))){location.href='incident-management.html?'+(action.action_type==='Investigation'?'event=':'action=')+encodeURIComponent(action.source_id);return;}
 

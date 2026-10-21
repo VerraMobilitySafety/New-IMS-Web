@@ -32,6 +32,15 @@ test('site rows open by pointer and keyboard, while Edit keeps its existing acti
  await page.goto('https://vero.test/client-services-sites.html');await page.locator('[data-site-open]').focus();await page.keyboard.press('Enter');await page.waitForURL('**/client-services-site.html?id=123');assert.deepEqual(errors,[]);
  }finally{await page.close();}
 });
+test('My Actions opens a site review using its validated site and risk identity',async()=>{
+ const {page}=await setup();try{
+ await page.goto('https://vero.test/client-services-site.html?id=123');
+ const source=fs.readFileSync(path.join(root,'my-actions.html'),'utf8');const begin=source.indexOf('function openActionDetail(index){'),end=source.indexOf(' currentAction=action;',begin);
+ const handler=source.slice(begin,end)+'}';
+ await page.evaluate(handler=>{window.allActions=[{source:'Risks',action_type:'Site Risk Review',site_id:123,risk_id:201}];(0,eval)(handler);openActionDetail(0);},handler);
+ await page.waitForURL('**/client-services-site.html?id=123&risk_id=201');await page.getByRole('heading',{name:'Submitted Site Risk',exact:true}).waitFor();
+ }finally{await page.close();}
+});
 test('unlinked site assessment retains its fields after failure, retries once and stays pending review',async()=>{
  for(const width of [1440,390]){const {page,errors,posts,succeed}=await setup(width);try{
  await page.goto('https://vero.test/client-services-site.html?id=123');await page.getByRole('button',{name:'Add risk assessment',exact:true}).click();const form=page.locator('#siteRiskCreateOverlay');
@@ -45,3 +54,4 @@ test('unlinked site assessment retains its fields after failure, retries once an
  await page.screenshot({path:path.join(__dirname,'site-container-'+width+'.png'),fullPage:true});
  }finally{await page.close();}}
 });
+
