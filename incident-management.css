@@ -127,3 +127,33 @@ th{background:#f8f7f6;color:#706660;font-size:10px;font-weight:800;text-transfor
 #report-backdrop #tfnsw-report fieldset,#report-backdrop #uk-report fieldset{padding:10px 0;margin:8px 0}
 #report-backdrop .check-label{gap:8px;line-height:1.5}
 @media(max-width:650px){#report-backdrop .report-section{padding:14px 16px}#report-backdrop .report-footer{padding:14px 16px}}
+
+/* Compact investigation form with the same rhythm as Report an Event. */
+.event-drawer .event-body{padding:16px 20px}
+.event-drawer .investigation-overview{padding-bottom:16px}
+.event-drawer .investigation-overview h2{margin-bottom:12px}
+.event-drawer .investigation-facts{gap:12px}
+.event-drawer .investigation-facts small{margin-bottom:3px}
+.event-drawer .investigation-section{padding:16px 0}
+.event-drawer .investigation-section>h3{margin-bottom:10px}
+.event-drawer .investigation-section>p{margin:6px 0 10px}
+.event-drawer .investigation-questionnaire label{margin:8px 0}
+.event-drawer .investigation-questionnaire input,.event-drawer .investigation-questionnaire select,.event-drawer .investigation-questionnaire textarea{margin-top:4px}
+.event-drawer .investigation-questionnaire textarea{min-height:76px}
+.event-drawer .investigation-questionnaire fieldset{margin:12px 0;padding:12px}
+.event-drawer .investigation-methods{gap:10px}
+.event-drawer .investigation-methods label{padding:12px;margin:4px 0}
+.event-drawer .investigation-methods small{margin-top:3px}
+.event-drawer .investigation-checks{gap:4px 12px}
+.event-drawer .investigation-check{margin:3px 0;padding:5px}
+.event-drawer .investigation-risk-path{gap:4px 16px}
+.event-drawer .investigation-factor-group{padding:0 0 10px 12px;margin-top:12px}
+.event-drawer .investigation-factor-row{margin-bottom:10px;padding-bottom:10px}
+.event-drawer .investigation-action-row{padding:12px;margin:10px 0}
+.event-drawer .investigation-save-bar{gap:8px;padding:14px 0}
+.event-drawer .investigation-reported{padding:14px 0}
+.event-drawer .investigation-value{margin:10px 0}
+.event-drawer .investigation-value p{margin:4px 0}
+.event-drawer .investigation-tracked-action{padding:10px 0}
+.event-drawer .investigation-tracked-action p{margin:4px 0}
+@media(max-width:650px){.event-drawer .event-body{padding:14px 16px}.event-drawer .investigation-section{padding:14px 0}}
