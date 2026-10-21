@@ -16,3 +16,5 @@
 .action-owner-table th,.action-owner-table td{padding:12px;text-align:left;white-space:normal;overflow-wrap:anywhere}
 .report-export-format{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:600}.report-export-format select{font:inherit;padding:9px;border:1px solid #dfe4de;border-radius:6px;background:white;color:#343b3e}
 .investigation-site-table{min-width:720px}.investigation-site-table th,.investigation-site-table td{overflow-wrap:normal;word-break:normal}.investigation-site-table th:first-child{min-width:150px}
+
+.risk-coverage-table th,.risk-coverage-table td{overflow-wrap:normal;word-break:normal}.risk-coverage-table th:first-child{width:54%}.risk-coverage-table th:nth-child(2){width:20%}
