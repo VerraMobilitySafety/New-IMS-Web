@@ -327,7 +327,9 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;font-size:12px}.main{paddin
  </div>
 </section><div class="project-content"><div class="project-toolbar"><div></div><div class="project-tools"><input class="project-search" id="search" placeholder="Search customer contracts..." oninput="render()"><button class="btn green" onclick="openContract()">+ New Maintenance Contract</button></div></div><section class="lifecycle-grid"><button class="lifecycle-card active" onclick="filterMaintenance('all',this)"><b id="all">—</b><span>All Contracts</span></button><button class="lifecycle-card" onclick="filterMaintenance('active',this)"><b id="active">—</b><span>Active Contracts</span></button><button class="lifecycle-card" onclick="filterMaintenance('renew',this)"><b id="renew">—</b><span>Renewal Due within 90 Days</span></button><button class="lifecycle-card" onclick="filterMaintenance('attention',this)"><b id="attention">—</b><span>Requires Attention</span></button></section><section class="panel project-list"><div class="table-wrap"><table class="table project-table"><thead><tr><th>Contract / Service</th><th>Customer</th><th>Owner</th><th>Location / Scope</th><th>Status</th><th>Compliance</th><th>Risk</th><th>Renewal</th></tr></thead><tbody id="rows"></tbody></table></div></section><footer class="footer"><span>© Verra Mobility 2026</span><span>VERRA | VERO • Contracts Management • v1.1</span></footer></div></main></div>
 <script src="linked-documents.js?v=20261022"></script>
-<script src="customer-contracts.js"></script><script>load().finally(()=>window.VeroPageLoader?.ready('maintenance'));</script><script>
+<script src="project-document-viewer.js?v=20261022-maintenance"></script>
+<script src="maintenance-documents.js?v=20261022"></script>
+<script src="customer-contracts.js?v=20261022-maintenance-documents"></script><script>load().finally(()=>window.VeroPageLoader?.ready('maintenance'));</script><script>
 /* VERO GLOBAL ACCOUNT MENU */
 (()=>{
  const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
