@@ -4,15 +4,15 @@ const {mockInsurance,savedPolicy}=require('./insurance-mock.cjs');
  const browser=await chromium.launch({headless:true,...(process.env.INSURANCE_BROWSER?{executablePath:process.env.INSURANCE_BROWSER}:{})});
  const record={record_id:9,record_code:'REC-9',title:'Policy',attachment_type:'Policy Schedule',status:'Active',file_name:'policy.pdf'};
  try{
-  for(const scenario of ['none','single','multiple','superseded','nonpdf','denied']){
+  for(const scenario of ['none','single','certificate','multiple','superseded','nonpdf','denied']){
    const context=await browser.newContext(),page=await context.newPage();
-   const records=scenario==='none'?[]:scenario==='multiple'?[record,{...record,record_id:10,record_code:'REC-10'}]:[{...record,...(scenario==='superseded'?{status:'Superseded'}:scenario==='nonpdf'?{file_name:'policy.docx'}:{})}];
+   const records=scenario==='none'?[]:scenario==='multiple'?[record,{...record,record_id:10,record_code:'REC-10'}]:[{...record,...(scenario==='certificate'?{attachment_type:'Certificate of Currency'}:scenario==='superseded'?{status:'Superseded'}:scenario==='nonpdf'?{file_name:'policy.docx'}:{})}];
    const server=await mockInsurance(page,{policies:[savedPolicy({policy_name:'Synthetic',policy_number:'TEST',insurance_class:'Cyber',currency:'AUD'},1)],records,recordsMode:scenario==='denied'?'error':'ok'});
    let destination=null;await page.route('**/records.html?**',route=>{destination=route.request().url();return route.fulfill({contentType:'text/html',body:'Controlled Records destination'})});
    await page.goto('https://vero.test/insurance.html');await page.getByRole('link',{name:'View Policy',exact:true}).waitFor();
    assert.equal(await page.getByRole('button',{name:'Policy files',exact:true}).count(),0);
    await page.getByRole('link',{name:'View Policy',exact:true}).click();
-   if(scenario==='single'){
+   if(scenario==='single'||scenario==='certificate'){
     await page.waitForURL('**/records.html?record_id=9&preview=1');assert.match(destination,/record_id=9&preview=1$/);
    }else if(scenario==='multiple'){
     await page.getByText('Multiple active policy PDFs - choose:',{exact:false}).waitFor();

@@ -387,15 +387,17 @@ function registerMatches(record,now,end){
 }
 // Sum stored decimal amounts without converting NUMERIC(20,2) to floating point.
 function insurancePremiumTotal(policies){
- const totals=new Map();
+ const totals=new Map();let unknown=0;
  for(const policy of policies){
   if(policy.premium===null||policy.premium===undefined||policy.premium==='')continue;
   const value=String(policy.premium),match=/^(\d+)(?:\.(\d{1,2}))?$/.exec(value);
   if(!match)return 'Unavailable';
   const cents=BigInt(match[1])*100n+BigInt((match[2]||'').padEnd(2,'0'));
-  const currency=policy.currency||'AUD';totals.set(currency,(totals.get(currency)||0n)+cents);
+  const currency=policy.currency;if(!currency){unknown++;continue}totals.set(currency,(totals.get(currency)||0n)+cents);
  }
- return [...totals].map(([currency,cents])=>currency+' '+(cents/100n).toLocaleString('en-AU')+'.'+String(cents%100n).padStart(2,'0')).join(' / ')||'—';
+ const values=[...totals].map(([currency,cents])=>currency+' '+(cents/100n).toLocaleString('en-AU')+'.'+String(cents%100n).padStart(2,'0'));
+ if(unknown)values.push(unknown+' premium'+(unknown===1?'':'s')+' with currency unstated (not totalled)');
+ return values.join(' / ')||'\u2014';
 }
 function render(){const {start:now,end}=insuranceRenewalWindow();$('active').textContent=data.policies.filter(x=>x.status.toLowerCase()==='active').length;$('premium').textContent=insurancePremiumTotal(data.policies);$('upcoming').textContent=data.policies.filter(x=>insuranceDue(x.expiry,now,end)).length;$('open').textContent=data.claims.filter(x=>!['closed','settled','declined'].includes(x.status.toLowerCase())).length;$('heading').textContent=tab==='Overview'?'Insurance Overview':tab;$('search').style.display=['Policies','Renewals','Claims'].includes(tab)?'block':'none';const isRegister=['Policies','Renewals','Claims'].includes(tab);
 $('insurancePanel').classList.toggle('insurance-register',isRegister);
