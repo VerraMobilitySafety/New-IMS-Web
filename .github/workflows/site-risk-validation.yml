@@ -1,0 +1,21 @@
+name: Site risk browser validation
+on:
+  pull_request:
+    paths:
+      - 'client-services-site*'
+      - 'site-risk-*.js'
+      - 'risk-review-policy.js'
+      - 'tests/site-risk-browser.cjs'
+      - '.github/workflows/site-risk-validation.yml'
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node --test tests/site-risk-browser.cjs
+
