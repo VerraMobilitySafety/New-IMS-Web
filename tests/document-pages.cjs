@@ -2,13 +2,24 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const {JSDOM}=require('jsdom');
 const source=name=>fs.readFileSync(path.join(__dirname,'..',name),'utf8');
 const tick=()=>new Promise(r=>setImmediate(r));
-test('all five governance pages mount related documents beside their primary action',()=>{
+test('asset type view keeps the same related-document menu beside its primary button',async()=>{
+ const dom=new JSDOM('<main><section id="assetRegisterView"><div class="vr-actions"><button id="assetAdd">Add asset</button></div></section><section id="assetTypesDialog" hidden><div class="vr-actions"><button>Add asset type</button></div></section></main>',{url:'https://vero.example/asset-management.html',runScripts:'outside-only'}),w=dom.window;
+ w.eval(source('page-related-documents.js'));w.document.dispatchEvent(new w.Event('DOMContentLoaded'));
+ const types=w.document.querySelector('#assetTypesDialog'),register=w.document.querySelector('#assetRegisterView'),menu=w.document.querySelector('.vero-related-documents');
+ types.hidden=false;register.hidden=true;await tick();assert.ok(types.contains(menu));
+ types.hidden=true;register.hidden=false;await tick();assert.ok(register.contains(menu));assert.equal(w.document.querySelectorAll('.vero-related-documents').length,1);dom.window.close();
+});
+test('all nine management pages mount related documents beside their primary action',()=>{
  const fixtures={
   'continual-improvement-management.html':'<div id="vh"><div class="improvement-actions"><button>Add Action</button></div></div>',
   'documents.html':'<div class="actions document-actions"><button>Request Document Action</button></div>',
   'records.html':'<div class="dashboard-content"><section class="records-toolbar"><button>Add Record</button></section></div>',
   'risk.html':'<div id="veroCompactFilterBarV3"><div class="vero-risk-primary-actions"><button>Add Risk</button></div></div>',
   'incident-management.html':'<div class="toolbar"><button id="new-report">Report an Event</button></div>'
+  ,'project-management.html':'<div class="project-content"><div class="project-toolbar"><button>New Project</button></div></div>'
+  ,'maintenance-management.html':'<div class="project-content"><div class="project-toolbar"><button>New Contract</button></div></div>'
+  ,'asset-management.html':'<div id="vh"><section id="assetRegisterView"><div class="vr-actions"><button id="assetAdd">Add asset</button></div></section><section id="assetTypesDialog" hidden><div class="vr-actions"><button>Add asset type</button></div></section></div>'
+  ,'client-services-sites.html':'<div id="siteRegister"><div class="site-register-actions"><button>Add site</button></div></div>'
  };
  for(const [page,html] of Object.entries(fixtures)){
   const dom=new JSDOM('<main>'+html+'</main>',{url:'https://vero.example/'+page,runScripts:'outside-only'}),w=dom.window;
