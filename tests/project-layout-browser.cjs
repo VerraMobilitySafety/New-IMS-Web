@@ -19,6 +19,8 @@ for(const width of [1440,1024,768,390]){
  const file=path.resolve(root,'.'+decodeURIComponent(u.pathname));if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});return route.fulfill({body:fs.readFileSync(file),contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css','.png':'image/png'})[path.extname(file)]||'application/octet-stream'});
  });
  await page.goto('https://vero.test/project-management.html');await page.locator('#projectTableBody tr.project-row').first().waitFor();await page.locator('.vr-toolbar').waitFor();
+ // Counts may exist but remain hidden until all initial tasks have settled.
+ await page.locator('#veroPageLoader').waitFor({state:'hidden'});
  assert.equal(await page.locator('#lifeAll').innerText(),'4');assert.equal(await page.locator('#lifeInitiation').innerText(),'2');assert.equal(await page.locator('#lifeExecution').innerText(),'1');assert.equal(await page.locator('#lifeCompletion').innerText(),'1');
  await page.getByLabel('Filter project lifecycle').selectOption('execution');assert.equal(await page.locator('.project-row:visible').count(),1);
  await page.getByLabel('Search projects',{exact:true}).fill('missing');assert.equal(await page.locator('.project-row:visible').count(),0);await page.getByLabel('Search projects',{exact:true}).fill('');
