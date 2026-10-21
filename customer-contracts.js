@@ -36,7 +36,7 @@ async function openContract(c){
  if(!c)return openImport();
  if(!workspace){location.href='maintenance-workspace.html?id='+encodeURIComponent(c.id);return;}
  selected=c;contractDetails=null;tab='Overview';document.getElementById('heroName').textContent=c.contract_name;document.title='VERO — '+c.contract_name;document.getElementById('heroCustomer').textContent=[c.contract_code,c.customer_name].filter(Boolean).join(' · ');document.getElementById('contractSummary').innerHTML=[['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Renewal',date(c.expiry_date)],['Linked requirements',c.requirement_count??0]].map(([label,value])=>'<div class="kpi"><b>'+esc(value??'—')+'</b><span>'+label+'</span></div>').join('');drawTab();
- try{const details=await request('/maintenance-contracts/'+c.id+'/details');if(selected?.id===c.id){contractDetails=details;drawTab();}}catch(e){if(selected?.id===c.id){document.getElementById('tabContent').textContent=e.message;addContractRetry(()=>openContract(c));}}
+ try{const details=await request('/maintenance-contracts/'+c.id+'/details');if(selected?.id===c.id){contractDetails=details;if(!['Documents','Client Documents'].includes(tab))drawTab();}}catch(e){if(selected?.id===c.id){if(['Documents','Client Documents'].includes(tab))return;document.getElementById('tabContent').textContent=e.message;addContractRetry(()=>openContract(c));}}
 }
 function closeContract(){}
 async function editContractOwner(c){
@@ -93,7 +93,7 @@ function drawTab(){
  if(tab==='Risks'){void drawContractRisks(c);return;}
  if(tab==='Sites'){void window.VeroContractActivity.sites(c,el,request);return;}
  if(tab==='Events'){void window.VeroContractActivity.events(c,el,request);return;}
- if(tab==='Documents'){void VeroLinkedDocuments.mount(el,{type:'Contract',id:Number(c.id)},null,API,request);return;}
+ if(tab==='Documents'){void VeroMaintenanceDocuments.mount(el,c,request,API);return;}
  if(tab==='Client Documents'){void VeroLinkedDocuments.mount(el,{type:'Client',name:c.customer_name,label:c.customer_name},null,API,request);return;}
  if(tab==='Overview'){
   el.innerHTML='<div class="fields">'+[['Contract reference',c.contract_code],['Customer',c.customer_name],['Contract type','Customer'],['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Compliance','Not assessed'],['Source files',c.source_count],['Linked requirements',c.requirement_count],['Scope',c.scope],['Notes',c.notes]].map(([label,value])=>'<div class="field"><label>'+esc(label)+'</label><p>'+esc(value||'—')+'</p>'+(label==='Owner'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractOwnerEdit">Edit owner</button>':'')+(label==='Status'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractStatusEdit">Edit status</button>':'')+'</div>').join('')+'</div>';document.getElementById('contractOwnerEdit')?.addEventListener('click',()=>editContractOwner(c));document.getElementById('contractStatusEdit')?.addEventListener('click',()=>editContractStatus(c));return;
