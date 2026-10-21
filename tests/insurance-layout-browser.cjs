@@ -104,13 +104,10 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   assert.equal(await page.locator('#content tbody tr').count(),1);
   assert.equal(await page.locator('#insuranceViews').isVisible(),false);
   await page.locator('#insuranceMore summary').click();
-  await page.getByRole('button',{name:'+ Plan Renewal',exact:true}).click();
-  await page.getByLabel('Policy Number',{exact:true}).fill('TEST-001');
-  await page.getByLabel('Stage',{exact:true}).fill('Quotation');
-  await page.getByRole('button',{name:'Add to Prototype'}).click();
-  await page.getByLabel('Insurance view',{exact:true}).selectOption('Renewals',{force:true});
-  await page.getByLabel('Filter by stage').selectOption('Quotation');
-  assert.equal(await page.locator('#content tbody tr').count(),1);
+  await page.getByRole('button',{name:'Renewal tracking',exact:true}).click();
+  await page.getByText('No accessible renewal cycles.',{exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Add to Prototype'}).count(),0);
+  await page.keyboard.press('Escape');
   for(const section of ['Documents','Analytics']){
    await page.getByLabel('Insurance view',{exact:true}).selectOption(section,{force:true});
    assert.equal(await page.locator('#insuranceToolbar').isVisible(),true);

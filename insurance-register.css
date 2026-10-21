@@ -116,3 +116,5 @@
 .insurance-access-pending .main > :not(.global-hero):not(#insuranceApiStatus):not(#insuranceRefresh),
 .insurance-access-denied .main > :not(.global-hero):not(#insuranceApiStatus):not(#insuranceRefresh){display:none!important}
 .insurance-access-denied #modal{display:none!important}
+
+.insurance-renewal-cycle{border-bottom:1px solid #dfe3e7;padding:12px 0}.insurance-renewal-cycle h3{margin:0 0 8px}.insurance-renewal-cycle button{margin:4px 8px 4px 0}

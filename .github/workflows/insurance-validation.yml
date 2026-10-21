@@ -1,7 +1,7 @@
 name: Insurance persistence validation
 on:
   push:
-    branches: ['review/insurance-audience-20261021', 'review/insurance-programmes-20261021', 'review/insurance-jurisdiction-20261021', 'review/insurance-persistence-20261020', 'review/insurance-records-20261021', 'review/insurance-registration-20261021', 'review/insurance-policy-preview-20261021', 'review/insurance-saved-policy-edit-20261021', 'review/insurance-drawer-20261021']
+    branches: ['review/insurance-renewals-20261021', 'review/insurance-audience-20261021', 'review/insurance-programmes-20261021', 'review/insurance-jurisdiction-20261021', 'review/insurance-persistence-20261020', 'review/insurance-records-20261021', 'review/insurance-registration-20261021', 'review/insurance-policy-preview-20261021', 'review/insurance-saved-policy-edit-20261021', 'review/insurance-drawer-20261021']
   pull_request:
     paths:
       - 'insurance.html'
@@ -32,6 +32,7 @@ jobs:
       - run: node tests/insurance-geography-browser.cjs
       - run: node tests/insurance-programmes-browser.cjs
       - run: node tests/insurance-audience-browser.cjs
+      - run: node tests/insurance-renewals-browser.cjs
       - run: node tests/insurance-list-metadata-browser.cjs
       - run: node tests/insurance-drawer-browser.cjs
       - run: node tests/insurance-layout-browser.cjs
