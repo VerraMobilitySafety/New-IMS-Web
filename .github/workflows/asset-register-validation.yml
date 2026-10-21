@@ -1,0 +1,20 @@
+name: Asset register browser validation
+on:
+  push:
+    branches: [main]
+    paths: ['asset-management.html', 'asset-management.js', 'asset-management.css', 'tests/asset-management.cjs', '.github/workflows/asset-register-validation.yml']
+  pull_request:
+    paths: ['asset-management.html', 'asset-management.js', 'asset-management.css', 'tests/asset-management.cjs', '.github/workflows/asset-register-validation.yml']
+permissions:
+  contents: read
+jobs:
+  asset-register:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/asset-management.cjs
