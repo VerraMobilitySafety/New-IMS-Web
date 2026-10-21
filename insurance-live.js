@@ -173,25 +173,29 @@ function renderDocuments(target=null,selectedPolicy=null){
    if(!body.isConnected||generation!==documentGeneration)return;
    if(!Array.isArray(result.records)||!Array.isArray(result.attachment_types))throw new Error('Invalid file list.');
    body.replaceChildren();
-   const list=document.createElement('ul');
+   const list=document.createElement('ul');list.className='insurance-file-list';
    for(const record of result.records){
     if(!Number.isSafeInteger(record.record_id)||record.record_id<=0)throw new Error('Invalid record reference.');
-    const item=document.createElement('li'),link=document.createElement('a');
+    const item=document.createElement('li'),link=document.createElement('a');item.className='insurance-file-card';
     link.href='records.html?record_id='+record.record_id;link.textContent=record.record_code+' - '+record.title;
     item.append(link,document.createTextNode(' · '+record.attachment_type+(record.retention_pending?' · Retention pending':'')));list.append(item);
    }
    if(!result.records.length){const empty=document.createElement('p');empty.textContent='No accessible files attached.';body.append(empty)}
    body.append(list);
-   const refresh=document.createElement('button');refresh.type='button';refresh.textContent='Refresh files';refresh.onclick=loadDocuments;body.append(refresh);
+   const refresh=document.createElement('button');refresh.className='insurance-file-refresh';refresh.type='button';refresh.textContent='Refresh files';refresh.onclick=loadDocuments;body.append(refresh);
    if(result.can_upload===true){
-    const upload=document.createElement('form');upload.id='insuranceUpload';
+    const upload=document.createElement('form');upload.id='insuranceUpload';upload.className='insurance-file-upload';
+    const uploadHeading=document.createElement('h4');uploadHeading.textContent='Add a PDF';upload.append(uploadHeading);
     const title=document.createElement('input');title.name='record_title';title.required=true;title.maxLength=255;title.setAttribute('aria-label','File title');
     const type=document.createElement('select');type.name='attachment_type';type.setAttribute('aria-label','Attachment type');
     for(const name of result.attachment_types){const option=document.createElement('option');option.textContent=name;option.value=name;type.append(option)}
     const file=document.createElement('input');file.type='file';file.name='file';file.accept='application/pdf,.pdf';file.required=true;file.setAttribute('aria-label','PDF file');
     const save=document.createElement('button');save.type='submit';save.textContent='Save file as Record';
     const feedback=document.createElement('p');feedback.setAttribute('role','status');
-    upload.append(title,type,file,save,feedback);body.append(upload);
+    for(const [control,text] of [[title,'File title'],[type,'Attachment type'],[file,'PDF file']]){
+     const label=document.createElement('label');label.className='insurance-upload-field';label.append(document.createTextNode(text),control);upload.append(label);
+    }
+    save.className='primary';upload.append(save,feedback);body.append(upload);
     const operation=documentUploads.get(pid)||{pending:null,saving:false,message:''};
     documentUploads.set(pid,operation);
     if(operation.pending){
@@ -267,9 +271,9 @@ openPolicyDetails=function(index){
  ++editGeneration;oldDetails(index);
  const policy=livePolicies[index];
  if(policy){
-  if(canEdit){const edit=document.createElement('button');edit.type='button';edit.textContent='Edit policy';edit.onclick=()=>openPolicyEdit(policy.id);$('policyDetails').append(edit)}
+  if(canEdit){const edit=document.createElement('button');edit.type='button';edit.textContent='Edit policy';edit.onclick=()=>openPolicyEdit(policy.id);edit.className='primary';$('insuranceDetailActions').append(edit)}
   const files=document.createElement('section');const heading=document.createElement('h3');heading.textContent='Policy files';
-  files.append(heading);const body=document.createElement('div');files.append(body);$('policyDetails').append(files);renderDocuments(body,policy.id);
+  files.append(heading);const body=document.createElement('div');files.className='insurance-files-section';files.append(body);$('insuranceDetailActions').before(files);renderDocuments(body,policy.id);
  }
  const record=data.policies[index];if(record?.parent_policy_id==null)return;
  const parent=livePolicies.find(p=>p.id===record.parent_policy_id);

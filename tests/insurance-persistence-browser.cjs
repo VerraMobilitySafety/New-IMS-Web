@@ -105,7 +105,7 @@ async function ready(page){
    await page.reload();await ready(page);
    await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies',{force:true});
    await page.locator('#content tbody tr').first().click();
-   assert.equal(await page.locator('#policyDetails dt').last().innerText(),'Parent policy');
+   assert.equal(await page.locator('#policyDetails dt').last().textContent(),'Parent policy');
    assert.equal(await page.locator('#policyDetails dd').last().innerText(),'TEST-001 - Synthetic policy');
    await page.keyboard.press('Escape');server.policies=server.policies.filter(p=>p.id!==81);
    await page.reload();await ready(page);
