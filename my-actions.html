@@ -606,6 +606,7 @@
   <div class="action-detail-body">
    <div class="action-status" id="actionDetailStatus">Submitted</div>
    <div class="action-detail-grid" id="actionDetailGrid"></div>
+   <div class="action-detail-section" id="actionDocumentContext" hidden></div>
    <div class="action-detail-section"><h3>Business reason</h3><div class="detail-copy" id="actionDetailReason">—</div></div>
    <div class="action-detail-section"><h3>Additional information</h3><div class="detail-copy" id="actionDetailAdditional">—</div></div>
    <div class="action-draft-card" id="actionDraftCard"><div class="action-draft-icon">📄</div><div class="action-draft-info"><label>Completed Word Draft</label><strong id="actionDraftName">—</strong><small id="actionDraftMeta"></small></div><button class="action-draft-open" id="actionDraftOpen" type="button" onclick="openDocumentDraft()">Open Draft Document</button></div>
@@ -791,7 +792,7 @@
         <option value="Management Plan">Management Plan</option>
         <option value="Form">Form</option>
         <option value="Template">Template</option>
-        <option value="Guideline">Guideline</option>
+        <option value="Guideline">Guideline</option><option value="Bill of Materials">Bill of Materials</option><option value="Safety Management Plan">Safety Management Plan</option>
        </select>
       </div>
 
@@ -1363,6 +1364,7 @@ function openActionDetail(index){
  if(action.source==='Incidents' && /^[0-9a-f-]{36}$/i.test(String(action.source_id||''))){location.href='incident-management.html?'+(action.action_type==='Investigation'?'event=':'action=')+encodeURIComponent(action.source_id);return;}
 
  currentAction=action; resetDecisionUI();
+ loadDocumentActionContext(action);
 
  const isRecordAssignment=
   action.source==='Records' &&
@@ -2136,6 +2138,25 @@ function openProjectAction(){
  if(!action||action.source!=='Projects'||!action.source_id)return;
  location.href=`project-workspace.html?id=${encodeURIComponent(action.source_id)}`;
 }
+async function loadDocumentActionContext(action){
+ const panel=document.getElementById('actionDocumentContext');panel.hidden=true;panel.replaceChildren();
+ const input=document.getElementById('reviewRevisionDraft');if(input)input.accept='.docx';
+ if(action.source!=='Documents')return;
+ const requestId=action.source_id;
+ const isReview=action.action_type==='Document Review';
+ if(!requestId)return;
+ panel.hidden=false;panel.textContent='Loading document category and links…';
+ try{
+  const r=await fetch(API+(isReview?'/documents/'+encodeURIComponent(requestId)+'/metadata':'/document-requests/'+encodeURIComponent(requestId)+'/context'),{headers:{Authorization:'Bearer '+localStorage.getItem(TOKEN_KEY)},cache:'no-store'});
+  if(!r.ok)throw Error('Unable to load document category and links. Reopen this action to retry.');
+  const data=await r.json();if(currentAction!==action)return;
+  action.document_category=data.entity_type;
+  const label=document.querySelector('label[for="reviewRevisionDraft"]');if(label)label.textContent=data.entity_type==='Operational'?'Revised draft (.docx or .xlsx) *':'Revised Word Draft (.docx) *';
+  panel.textContent=data.entity_type+(data.document_links.length?' · '+data.document_links.map(x=>x.type+': '+x.label).join(' · '):'');
+  if(input)input.accept=data.entity_type==='Operational'?'.docx,.xlsx':'.docx';
+ }catch(e){if(currentAction===action)panel.textContent=e.message;}
+}
+
 async function openDocumentDraft(){const action=currentAction,token=localStorage.getItem(TOKEN_KEY);if(!action||action.source!=='Documents'||!['Document Request','Document Approval'].includes(action.action_type)||!action.source_id||!token)return;const btn=document.getElementById('actionDraftOpen');if(btn)btn.disabled=true;try{const r=await fetch(`${API}/document-requests/${encodeURIComponent(action.source_id)}/draft`,{headers:{Authorization:'Bearer '+token},cache:'no-store'});if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.message||'Unable to open draft document');}const blob=await r.blob();const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=action.draft_file_name||'document-draft.docx';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}catch(e){showDecisionMessage(e.message||'Unable to open draft document.','error');}finally{if(btn)btn.disabled=false;}}
 function prepareActionDecision(decision){
  const note=document.getElementById('actionDecisionNote'), confirm=document.getElementById('actionDecisionConfirm');
@@ -2307,15 +2328,15 @@ async function completeDocumentReview(){
  }
 
  if(outcome==='Revision Required'&&!revisionDraft){
-  showReviewMessage('Upload the revised Word draft.','error');
+  showReviewMessage('Upload the revised draft.','error');
   return;
  }
 
  if(
   outcome==='Revision Required' &&
-  !revisionDraft.name.toLowerCase().endsWith('.docx')
+  !revisionDraft.name.toLowerCase().endsWith(currentAction?.document_category==='Operational'?'.xlsx':'.docx') && !revisionDraft.name.toLowerCase().endsWith('.docx')
  ){
-  showReviewMessage('The revised draft must be a .docx Word document.','error');
+  showReviewMessage('Use a Word .docx draft, or Excel .xlsx for operational documents.','error');
   return;
  }
 

@@ -597,6 +597,7 @@
  <section id="compliance" class="ws-view"><div class="panel"><div class="panel-head"><h2>Project Compliance</h2><div><button type="button" class="btn green" onclick="createProjectCompliance()">Add Requirement</button> <span id="projectComplianceCount">Loading…</span></div></div><div id="projectComplianceList" class="empty-state">Loading applicable obligations…</div></div></section>
 
  <section id="documents" class="ws-view">
+ <div class="panel" id="projectControlledDocuments" style="padding:18px;margin-bottom:16px"></div>
  <div id="projectTeam" class="panel"></div>
  <form id="projectContractUpload" class="panel" hidden onsubmit="uploadProjectContract(event)" style="padding:18px;margin-bottom:16px">
   <h2 style="font-size:18px;margin-top:0">Add Master Services Contract</h2>
@@ -626,6 +627,7 @@
  </section>
 </div>
 
+<script src="linked-documents.js?v=20261022"></script>
 <script>
 function showTab(id,btn){document.querySelectorAll('.ws-view').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.ws-tab').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');}
 
@@ -721,6 +723,7 @@ async function refreshProjectWorkflow(){
 function renderNoRequest(){currentRequest=null;renderProjectWorkflow();}
 function renderMilestoneOverview(){const panel=document.querySelector('#overview .overview-grid .panel:nth-child(2)');if(!panel)return;const upcoming=currentMilestones.slice().sort((a,b)=>(a.target_date||'9999').localeCompare(b.target_date||'9999')).slice(0,5);panel.innerHTML='<div class="panel-head"><h2>Upcoming Milestones</h2><span>Project milestones</span></div>'+(upcoming.length?`<div class="milestones">${upcoming.map(m=>`<div class="milestone"><i></i><div><b>${esc(m.milestone_name)}</b><small>${esc(m.milestone_type||'Milestone')}</small></div><time>${esc(fmtDate(m.target_date))}</time></div>`).join('')}</div>`:'<div class="empty-state" style="margin:18px"><b>No live milestones connected yet.</b><br><br>Milestones linked to this project will appear here.</div>');}
 async function loadProjectDocuments(projectId){
+ void VeroLinkedDocuments.mount(document.getElementById('projectControlledDocuments'),{type:'Project',id:Number(projectId)},apiFetch,API_BASE);
  const list=document.getElementById('projectDocumentsList'),count=document.getElementById('projectDocumentCount');
  if(!list)return;
  try{
