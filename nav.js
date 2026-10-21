@@ -1,7 +1,7 @@
 /* Shared navigation: prerender markup with scripts/build-navigation.cjs; hydrate without replacing it. */
 /* Inline navigation icons: Lucide 0.456.0, ISC licence (vendor/lucide-LICENSE). */
 (function(){'use strict';
- const VERSION='20261022-improvement';
+ const VERSION='20261022-improvement-register';
  function renderNavigation(path){  /* CURRENT PAGE */
   path=(path||'index.html').toLowerCase();
 
@@ -119,7 +119,7 @@
     <div class="nav-section">
       <div class="nav-label">Governance Management</div>
 
-      <a class="${isActive('continual-improvement-management.html') ? 'active' : ''}" href="continual-improvement-management.html" ${isActive('continual-improvement-management.html') ? 'aria-current="page"' : ''}>
+      <a id="continualImprovementNav" hidden style="display:none!important" class="${isActive('continual-improvement-management.html') ? 'active' : ''}" href="continual-improvement-management.html" ${isActive('continual-improvement-management.html') ? 'aria-current="page"' : ''}>
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 0 1 15-6l3 3M21 3v5h-5M21 13a9 9 0 0 1-15 6l-3-3M3 21v-5h5"/></svg>
         <span>Continual Improvement Management</span>
       </a>
@@ -231,6 +231,8 @@
   if(navSession&&insuranceLink)fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/insurance/access',{headers:{Authorization:'Bearer '+navSession,Accept:'application/json'},cache:'no-store'}).then(async response=>{if(!response.ok)return;const data=await response.json();if(data.status==='success'&&data.allowed===true){insuranceLink.dataset.insuranceAdmitted='true';insuranceLink.hidden=false;insuranceLink.style.display='';}}).catch(()=>{});
   if(navSession)fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/auth/me',{headers:{Authorization:'Bearer '+navSession,Accept:'application/json'},cache:'no-store'}).then(async response=>{if(!response.ok)return;const data=await response.json();if((data.user||data).vero_role==='Administrator'){for(const control of [siteListNav,siteListExpand]){control.hidden=false;control.style.display='flex';}}}).catch(()=>{});
 
+  const improvementLink=nav.querySelector('#continualImprovementNav');
+  if(improvementLink&&navSession)fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/continual-improvement/access',{headers:{Authorization:'Bearer '+navSession},cache:'no-store'}).then(async response=>{if(!response.ok)return;const data=await response.json();if(data.can_manage===true){improvementLink.hidden=false;improvementLink.style.removeProperty('display');}}).catch(()=>{});
   /* Consistent Lucide line icons, loaded once for all VERO pages. */
   const lucideScriptId = 'vero-lucide-script';
   function renderNavIcons() {

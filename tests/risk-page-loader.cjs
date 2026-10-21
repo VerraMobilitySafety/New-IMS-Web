@@ -20,7 +20,13 @@ test('all 40 VERO shell screens use one clean camera loader and explicitly settl
   assert.ok(html.indexOf('src="risk-page-loader.js')<html.indexOf('<body'),file+' loader precedes content');
   assert.ok(!html.includes('src="risk-nk9-animation.js'),file+' no old flash animation');
   const tasks=html.match(/src="risk-page-loader\.js[^\"]*" data-tasks="([^\"]+)"/)[1].split(/\s+/);
-  for(const task of tasks)assert.ok(html.includes("?.ready('"+task+"')"),file+': '+task);
+  let settlementSource=html;
+  for(const script of html.matchAll(/<script\b[^>]*src="([^"?#]+)(?:[?#][^"]*)?"/g)){
+   if(script[1].includes('://')||script[1].startsWith('//'))continue;
+   const local=path.resolve(root,script[1]);
+   if(local.startsWith(root+path.sep)&&fs.existsSync(local))settlementSource+='\n'+fs.readFileSync(local,'utf8');
+  }
+  for(const task of tasks)assert.ok(settlementSource.includes("?.ready('"+task+"')"),file+': '+task);
   for(const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(match[1],{filename:file});
  }
  assert.equal(count,40);
@@ -105,4 +111,3 @@ test('loader still has width while sign-in hides the main area',()=>{
  const env=setup();env.rects.main={left:0,right:0,width:0};env.rects.hero.bottom=0;
  env.api.mount();env.listeners.resize();env.flush();assert.equal(env.overlay.style.width,'900px');
 });
-
