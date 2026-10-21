@@ -4,7 +4,7 @@ const source=fs.readFileSync('nav.js','utf8');
  for(const state of ['Administrator','User','missing-role','unauthenticated','denied','failed','pending']){
   const dom=new JSDOM('<aside class="sidebar"><nav id="vero-nav"></nav></aside><main class="main"></main>',{url:'https://vero.test/client-services-sites.html',runScripts:'outside-only'}),w=dom.window;
   if(state!=='unauthenticated')w.localStorage.setItem('vero_session_token','synthetic');
-  let calls=0;w.fetch=async()=>{calls++;if(state==='failed')throw Error('offline');if(state==='pending')return new Promise(()=>{});return{ok:state!=='denied',json:async()=>({user:state==='missing-role'?{}:{vero_role:state}})}};
+  let calls=0;w.fetch=async url=>{if(!url.endsWith('/auth/me'))return {ok:true,json:async()=>({actions:[]})};calls++;if(state==='failed')throw Error('offline');if(state==='pending')return new Promise(()=>{});return{ok:state!=='denied',json:async()=>({user:state==='missing-role'?{}:{vero_role:state}})}};
   w.eval(source);await new Promise(r=>setTimeout(r,0));
   const d=w.document,link=d.getElementById('clientServicesSiteNav'),expand=d.getElementById('clientServicesSiteExpand'),group=d.getElementById('clientServicesNavGroup');
   assert.ok(link&&expand);assert.equal(link.getAttribute('href'),'client-services-sites.html');
