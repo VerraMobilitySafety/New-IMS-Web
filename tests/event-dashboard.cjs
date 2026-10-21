@@ -16,7 +16,10 @@ async function scenario(admin,deep=false,empty=false){
  assert.equal(d.querySelector('.dashboard-workspace'),null);assert.equal(d.querySelector('#dashboard-title'),null);assert.equal(d.querySelector('.dashboard-date'),null);
  assert.equal(d.querySelector('#incident-dashboard').textContent.includes('Private event narrative'),false);
  assert.equal(d.querySelector('#incident-dashboard').textContent.includes('NaN'),false);
- if(!empty)assert.match(d.querySelector('#incident-dashboard').textContent,/8 historical events on hold/);
+ assert.doesNotMatch(d.querySelector('#incident-dashboard').textContent,/historical events on hold/);
+ assert.match(d.querySelector('.investigation-status-heading').textContent,/Recorded Investigation Status/);
+ const overdue=[...d.querySelectorAll('.status-chart-row')].find(row=>row.textContent.includes('Overdue Investigations'));assert.equal(overdue.querySelector('strong').textContent,empty?'0':'1');
+ assert.match(d.querySelector('.status-chart').textContent,/Under Investigation/);assert.match(d.querySelector('.status-chart').textContent,/Awaiting Assignment/);
  if(deep){await wait(()=>d.querySelector('#event-backdrop'));assert(d.querySelector('#incident-dashboard'));d.querySelector('#event-close').click();assert.equal(d.querySelector('#event-backdrop'),null);assert.equal(d.querySelector('#event-rows'),null);}
  d.querySelector('#register').click();await wait(()=>d.querySelector('#event-rows'));assert(calls.includes('/incidents'));assert.equal(d.querySelector('#incident-dashboard'),null);assert.equal(new URL(w.location).searchParams.get('view'),'register');
  d.querySelector('#dashboard').click();await wait(()=>d.querySelector('#incident-dashboard'));assert.equal(d.querySelector('#event-rows'),null);dom.window.close();

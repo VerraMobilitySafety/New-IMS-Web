@@ -1,10 +1,10 @@
 name: Reporting summary validation
 on:
   pull_request:
-    paths: ['reports.*', 'saved-reports.js', 'tests/saved-reports-browser.cjs', 'report-conversation.js', 'tests/report-conversation-browser.cjs', 'report-ai-summary.js', 'tests/report-ai-summary-browser.cjs', 'nav.js', 'tests/reports-browser.cjs', '.github/workflows/reports-validation.yml']
+    paths: ['system-reports.js', 'tests/system-reports.cjs', 'tests/system-reports-browser.cjs', 'reports.*', 'saved-reports.js', 'tests/saved-reports-browser.cjs', 'report-conversation.js', 'tests/report-conversation-browser.cjs', 'report-ai-summary.js', 'tests/report-ai-summary-browser.cjs', 'nav.js', 'tests/reports-browser.cjs', '.github/workflows/reports-validation.yml']
   push:
     branches: [main]
-    paths: ['reports.*', 'saved-reports.js', 'tests/saved-reports-browser.cjs', 'report-conversation.js', 'tests/report-conversation-browser.cjs', 'report-ai-summary.js', 'tests/report-ai-summary-browser.cjs', 'nav.js', 'tests/reports-browser.cjs', '.github/workflows/reports-validation.yml']
+    paths: ['system-reports.js', 'tests/system-reports.cjs', 'tests/system-reports-browser.cjs', 'reports.*', 'saved-reports.js', 'tests/saved-reports-browser.cjs', 'report-conversation.js', 'tests/report-conversation-browser.cjs', 'report-ai-summary.js', 'tests/report-ai-summary-browser.cjs', 'nav.js', 'tests/reports-browser.cjs', '.github/workflows/reports-validation.yml']
 permissions:
   contents: read
 jobs:
@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --check reports.js && node --check report-ai-summary.js
+      - run: node --check reports.js && node --check report-ai-summary.js && node --check system-reports.js
       - run: npm install --no-save playwright@1.56.1
       - run: npx playwright install --with-deps chromium
       - run: node tests/reports-browser.cjs
@@ -25,3 +25,6 @@ jobs:
       - run: node tests/report-conversation-browser.cjs
 
       - run: node tests/saved-reports-browser.cjs
+
+      - run: node --test tests/system-reports.cjs
+      - run: node tests/system-reports-browser.cjs

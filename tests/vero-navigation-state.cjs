@@ -1,0 +1,13 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),{JSDOM}=require('jsdom');
+const {renderNavigation,VERSION}=require('../nav.js'),source=fs.readFileSync(path.join(__dirname,'../nav.js'),'utf8');
+const tick=()=>new Promise(r=>setTimeout(r,0));
+function setup(token='session-a',saved={}){const dom=new JSDOM('<aside class="sidebar"><nav class="nav"><div id="vero-nav" data-vero-nav="'+VERSION+'">'+renderNavigation('index.html')+'</div></nav></aside>',{url:'https://vero.test/index.html',runScripts:'outside-only'}),w=dom.window;w.localStorage.setItem('vero_session_token',token);for(const[k,v]of Object.entries(saved))w.sessionStorage.setItem(k,v);w.console.warn=()=>{};return dom;}
+test('hydration keeps static nodes, refreshes count, and restores only a count from the same session',async()=>{
+ const a=setup(),w=a.window;w.fetch=async url=>({ok:true,json:async()=>url.endsWith('/my-actions')?{actions:Array(8).fill({})}:{user:{vero_role:'User'}}});const first=w.document.querySelector('#vero-nav a');w.eval(source);await tick();assert.equal(w.document.querySelector('#vero-nav a'),first);assert.equal(w.document.querySelector('#vero-my-actions-count').textContent,'8');
+ const saved=Object.fromEntries(Object.keys(w.sessionStorage).map(k=>[k,w.sessionStorage.getItem(k)]));a.window.close();
+ for(const token of ['session-a','session-b']){const b=setup(token,saved),v=b.window;v.fetch=()=>new Promise(()=>{});v.eval(source);v.VeroNav.restore(v.document.querySelector('#vero-nav'));const badge=v.document.querySelector('#vero-my-actions-count');assert.equal(badge.hidden,token!=='session-a');if(token==='session-a')assert.equal(badge.textContent,'8');assert.equal(v.document.querySelector('#clientServicesSiteNav').hidden,true,'display cache never authorizes restricted navigation');b.window.close();}
+});
+test('badge error clears saved count and storage being unavailable does not block navigation',async()=>{
+ const a=setup(),w=a.window;w.fetch=async url=>({ok:true,json:async()=>url.endsWith('/my-actions')?{actions:[{}]}:{user:{vero_role:'User'}}});w.eval(source);await tick();assert.ok(w.sessionStorage.getItem('vero-nav-badge'));w.fetch=async()=>({ok:false,status:503});w.dispatchEvent(new w.Event('focus'));await tick();assert.equal(w.document.querySelector('#vero-my-actions-count').hidden,true);assert.equal(w.sessionStorage.getItem('vero-nav-badge'),null);
+ Object.defineProperty(w,'sessionStorage',{get(){throw Error('Disabled');}});assert.doesNotThrow(()=>w.VeroNav.restore(w.document.querySelector('#vero-nav')));a.window.close();
+});

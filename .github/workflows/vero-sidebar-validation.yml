@@ -1,0 +1,24 @@
+name: VERO first-paint sidebar validation
+on:
+  push:
+    branches: [main]
+    paths: ['*.html', 'nav.js', 'vero-shell.css', 'nav.css', 'scripts/build-navigation.cjs', 'tests/vero-*.cjs', '.github/workflows/vero-sidebar-validation.yml']
+  pull_request:
+    paths: ['*.html', 'nav.js', 'vero-shell.css', 'nav.css', 'scripts/build-navigation.cjs', 'tests/vero-*.cjs', '.github/workflows/vero-sidebar-validation.yml']
+permissions:
+  contents: read
+jobs:
+  sidebar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/vero-navigation.cjs tests/risk-page-loader.cjs
+      - run: npm install --no-save --package-lock=false playwright@1.62.1 jsdom@26.1.0
+      - run: node --test tests/vero-navigation-state.cjs
+      - run: node tests/client-services-nav.cjs
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/vero-sidebar-browser.cjs
+      - run: node tests/vero-sidebar-first-paint.cjs

@@ -1,65 +1,9 @@
-
-/* VERO shared navigation — single source of truth */
-(function () {
-  const nav = document.getElementById('vero-nav');
-  if (!nav) return;
-
-  /* SIDEBAR CONFIGURATION */
-  const SIDEBAR_WIDTH = '300px';
-
-  document.documentElement.style.setProperty(
-    '--vero-sidebar-width',
-    SIDEBAR_WIDTH
-  );
-
-  const sidebar = document.querySelector('.sidebar');
-  const main = document.querySelector('.main');
-
-  if (sidebar) {
-    sidebar.style.width = SIDEBAR_WIDTH;
-    sidebar.style.display = 'flex';
-    sidebar.style.flexDirection = 'column';
-    sidebar.style.height = '100vh';
-    sidebar.style.overflow = 'hidden';
-
-    // Keep logo fixed and move Home closer to it.
-    const brand = sidebar.querySelector('.brand');
-    if (brand) {
-      brand.style.flexShrink = '0';
-      brand.style.marginBottom = '12px';
-    }
-
-    // Navigation scrolls independently.
-    const navContainer = nav.closest('nav') || nav;
-
-    navContainer.style.flex = '1 1 auto';
-    navContainer.style.minHeight = '0';
-    navContainer.style.overflowY = 'auto';
-    navContainer.style.overflowX = 'auto';
-    navContainer.style.scrollbarWidth = 'thin';
-    navContainer.style.scrollbarColor =
-      'rgba(255,255,255,.35) transparent';
-
-    // Keep footer fixed at bottom.
-    const footer = sidebar.querySelector('.side-foot');
-    if (footer) {
-      footer.style.position = 'relative';
-      footer.style.left = 'auto';
-      footer.style.bottom = 'auto';
-      footer.style.flexShrink = '0';
-      footer.style.paddingTop = '12px';
-    }
-  }
-
-  if (main) {
-    main.style.marginLeft = SIDEBAR_WIDTH;
-    main.style.width = `calc(100% - ${SIDEBAR_WIDTH})`;
-  }
-
-  /* CURRENT PAGE */
-  const path = (
-    location.pathname.split('/').pop() || 'index.html'
-  ).toLowerCase();
+/* Shared navigation: prerender markup with scripts/build-navigation.cjs; hydrate without replacing it. */
+/* Inline navigation icons: Lucide 0.456.0, ISC licence (vendor/lucide-LICENSE). */
+(function(){'use strict';
+ const VERSION='20261021-stable';
+ function renderNavigation(path){  /* CURRENT PAGE */
+  path=(path||'index.html').toLowerCase();
 
   const isActive = (href) => {
     const target = href.toLowerCase();
@@ -83,23 +27,23 @@
     path === 'business-continuity.html';
 
   /* NAVIGATION */
-  nav.innerHTML = `
+  return `
     <div class="nav-section">
       <a class="${isActive('index.html') ? 'active' : ''}"
          href="index.html">
-        <span class="ico" data-lucide="house"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
         <span>Home</span>
       </a>
 
       <a class="${isActive('my-actions.html') ? 'active' : ''}"
          href="my-actions.html">
-        <span class="ico" data-lucide="list-checks"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="m3 17 2 2 4-4"></path><path d="m3 7 2 2 4-4"></path><path d="M13 6h8"></path><path d="M13 12h8"></path><path d="M13 18h8"></path></svg>
         <span>My Actions</span>
-        <span id="vero-my-actions-count" class="vero-actions-count" hidden aria-label="Outstanding actions"></span>
+        <span class="vero-actions-slot"><span id="vero-my-actions-count" class="vero-actions-count" hidden aria-label="Outstanding actions"></span></span>
       </a>
 
       <a class="${isActive('reports.html') ? 'active' : ''}" href="reports.html">
-        <span class="ico" data-lucide="chart-no-axes-column"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><line x1="18" x2="18" y1="20" y2="10"></line><line x1="12" x2="12" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="14"></line></svg>
         <span>My Reports</span>
       </a>
     </div>
@@ -109,20 +53,20 @@
 
       <a class="${isActive('sites.html') ? 'active' : ''}"
          href="sites.html">
-        <span class="ico" data-lucide="map-pin"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
         <span>Verra Mobility Locations</span>
       </a>
 
       <a class="${projectActive ? 'active' : ''}"
          href="project-management.html">
-        <span class="ico" data-lucide="folder-kanban"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path><path d="M8 10v4"></path><path d="M12 10v2"></path><path d="M16 10v6"></path></svg>
         <span>Project Management</span>
       </a>
 
       <div class="vero-nav-group ${isActive('client-services-sites.html') ? 'open' : ''}" id="clientServicesNavGroup">
         <div class="vero-nav-parent">
           <a class="${maintenanceActive ? 'active' : ''}" href="maintenance-management.html">
-            <span class="ico" data-lucide="file-signature"></span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2"></path><path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"></path><path d="M8 18h1"></path></svg>
             <span>Client Services Management</span>
           </a>
           <button id="clientServicesSiteExpand" hidden style="display:none!important" class="vero-nav-expand" type="button" aria-label="Expand Client Services Site List" aria-expanded="${isActive('client-services-sites.html') ? 'true' : 'false'}"><span>›</span></button>
@@ -133,7 +77,7 @@
       </div>
 
       <a class="${isActive('contractor-management.html') ? 'active' : ''}" href="contractor-management.html">
-        <span class="ico" data-lucide="hard-hat"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"></path><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"></path><path d="M4 15v-3a6 6 0 0 1 6-6"></path><path d="M14 6a6 6 0 0 1 6 6v3"></path></svg>
         <span>Contractor Management</span>
       </a>
     </div>
@@ -141,7 +85,7 @@
     <div class="nav-section">
       <div class="nav-label">Specific Risk Management Systems</div>
 
-      <details class="vero-risk-navigation" ${["alcohol-and-other-drugs.html","driving.html","electrical-works.html","emergency-management.html","ergonomics-and-sedentary-work.html","extreme-temperatures.html","fatigue.html","hazardous-substances-and-dangerous-goods.html","manual-handling.html","personal-protective-equipment.html","plant-and-equipment.html","psychosocial-risk.html","public-interaction.html","visitors.html","working-at-heights.html","working-from-home.html","working-near-traffic.html"].includes(path) ? 'open' : ''}><summary><span class="ico" data-lucide="shield-alert"></span><span>Safety Risks</span></summary><a class="${isActive('alcohol-and-other-drugs.html') ? 'active' : ''}" href="alcohol-and-other-drugs.html">Alcohol and Other Drugs</a>
+      <details class="vero-risk-navigation" ${["alcohol-and-other-drugs.html","driving.html","electrical-works.html","emergency-management.html","ergonomics-and-sedentary-work.html","extreme-temperatures.html","fatigue.html","hazardous-substances-and-dangerous-goods.html","manual-handling.html","personal-protective-equipment.html","plant-and-equipment.html","psychosocial-risk.html","public-interaction.html","visitors.html","working-at-heights.html","working-from-home.html","working-near-traffic.html"].includes(path) ? 'open' : ''}><summary><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg><span>Safety Risks</span></summary><a class="${isActive('alcohol-and-other-drugs.html') ? 'active' : ''}" href="alcohol-and-other-drugs.html">Alcohol and Other Drugs</a>
 <a class="${isActive('driving.html') ? 'active' : ''}" href="driving.html">Driving</a>
 <a class="${isActive('electrical-works.html') ? 'active' : ''}" href="electrical-works.html">Electrical Works</a>
 <a class="${isActive('emergency-management.html') ? 'active' : ''}" href="emergency-management.html">Emergency Management</a>
@@ -160,11 +104,11 @@
 <a class="${isActive('working-near-traffic.html') ? 'active' : ''}" href="working-near-traffic.html">Working Near Traffic</a></details>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico" data-lucide="badge-check"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>
         <span>Quality Risks</span>
       </a>
 
-      <details class="vero-risk-navigation" ${["waste-management.html"].includes(path) ? 'open' : ''}><summary><span class="ico" data-lucide="leaf"></span><span>Environment Risks</span></summary><a class="${isActive('waste-management.html') ? 'active' : ''}" href="waste-management.html">Waste Management</a></details>
+      <details class="vero-risk-navigation" ${["waste-management.html"].includes(path) ? 'open' : ''}><summary><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg><span>Environment Risks</span></summary><a class="${isActive('waste-management.html') ? 'active' : ''}" href="waste-management.html">Waste Management</a></details>
     </div>
 
     <div class="nav-section">
@@ -172,20 +116,20 @@
 
       <a class="${isActive('documents.html') ? 'active' : ''}"
          href="documents.html">
-        <span class="ico" data-lucide="files"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M20 7h-3a2 2 0 0 1-2-2V2"></path><path d="M9 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h7l4 4v10a2 2 0 0 1-2 2Z"></path><path d="M3 7.6v12.8A1.6 1.6 0 0 0 4.6 22h9.8"></path></svg>
         <span>Document Management</span>
       </a>
 
       <a class="${isActive('records.html') ? 'active' : ''}"
          href="records.html">
-        <span class="ico" data-lucide="archive"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg>
         <span>Records Management</span>
       </a>
 
       <div class="vero-nav-group ${['risk.html', 'safe-work-method-statement.html', 'take-5.html'].includes(path) ? 'open' : ''}" id="riskNavGroup">
         <div class="vero-nav-parent">
           <a class="${isActive('risk.html') ? 'active' : ''}" href="risk.html">
-            <span class="ico" data-lucide="triangle-alert"></span><span>Risk Management</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>Risk Management</span>
           </a>
           <button class="vero-nav-expand" type="button" aria-label="Expand Risk Management" aria-controls="riskNavChildren" aria-expanded="${['risk.html', 'safe-work-method-statement.html', 'take-5.html'].includes(path) ? 'true' : 'false'}"><span>›</span></button>
         </div>
@@ -196,13 +140,13 @@
       </div>
 
       <a class="${isActive('insurance.html') ? 'active' : ''}" href="insurance.html">
-        <span class="ico" data-lucide="shield-check"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>
         <span>Insurance Management</span>
       </a>
 
       <a class="${isActive('compliance.html') ? 'active' : ''}"
          href="compliance.html">
-        <span class="ico" data-lucide="scale"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path><path d="M7 21h10"></path><path d="M12 3v18"></path><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path></svg>
         <span>Compliance Management</span>
       </a>
 
@@ -214,7 +158,7 @@
           <a class="${incidentActive ? 'active' : ''}"
              href="incident-management.html"
              >
-            <span class="ico" data-lucide="siren"></span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M7 18v-6a5 5 0 1 1 10 0v6"></path><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"></path><path d="M21 12h1"></path><path d="M18.5 4.5 18 5"></path><path d="M2 12h1"></path><path d="M12 2v1"></path><path d="m4.929 4.929.707.707"></path><path d="M12 12v6"></path></svg>
             <span>Incident Management</span>
           </a>
 
@@ -236,13 +180,38 @@
       </div>
 
       <a class="placeholder" href="#" onclick="return false">
-        <span class="ico" data-lucide="clipboard-check"></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="m9 14 2 2 4-4"></path></svg>
         <span>Assurance Management</span>
       </a>
     </div>
   `;
 
-  // Resolve the current role from the authenticated service; stay hidden on error.
+
+ }
+
+  // Display cache only. Role-restricted links still require the live auth response.
+  function sessionKey(){try{const token=localStorage.getItem('vero_session_token');if(!token)return '';let hash=2166136261;for(const c of token)hash=Math.imul(hash^c.charCodeAt(0),16777619);return String(hash>>>0);}catch{return '';}}
+  function saveBadge(count){try{sessionStorage.setItem('vero-nav-badge',JSON.stringify({session:sessionKey(),count,at:Date.now()}));}catch{}}
+  function restoreNavigation(nav){
+    if(!nav)return;
+    try{const data=JSON.parse(sessionStorage.getItem('vero-nav-badge')||'null'),badge=nav.querySelector('#vero-my-actions-count'),session=sessionKey();
+      if(badge&&session&&data?.session===session&&Date.now()-data.at<300000&&Number.isInteger(data.count)&&data.count>=0){badge.textContent=data.count>99?'99+':String(data.count);badge.setAttribute('aria-label',data.count+' outstanding actions');badge.hidden=data.count===0;}
+      const state=JSON.parse(sessionStorage.getItem('vero-nav-state')||'null');
+      if(state?.version===1){for(const [id,open]of Object.entries(state.groups||{})){const group=document.getElementById(id);if(!group||!nav.contains(group))continue;group.classList.toggle('open',open===true);group.querySelector('.vero-nav-expand')?.setAttribute('aria-expanded',String(open===true));}
+        nav.querySelectorAll('.vero-risk-navigation').forEach((el,i)=>{if(typeof state.details?.[i]==='boolean')el.open=state.details[i];});
+        if(Number.isFinite(state.scroll))nav.closest('nav').scrollTop=Math.max(0,state.scroll);
+      }
+    }catch{}
+  }
+  function rememberNavigation(nav){try{const groups={};nav.querySelectorAll('.vero-nav-group[id]').forEach(el=>groups[el.id]=el.classList.contains('open'));sessionStorage.setItem('vero-nav-state',JSON.stringify({version:1,groups,details:[...nav.querySelectorAll('.vero-risk-navigation')].map(el=>el.open),scroll:nav.closest('nav').scrollTop}));}catch{}}
+
+ if(typeof module!=='undefined'&&module.exports){module.exports={renderNavigation,VERSION};return;}
+ window.VeroNav={restore:restoreNavigation};
+ function init(){
+  const nav=document.getElementById('vero-nav');if(!nav)return;
+  if(nav.dataset.veroNav!==VERSION){nav.innerHTML=renderNavigation(location.pathname.split('/').pop());nav.dataset.veroNav=VERSION;}
+  restoreNavigation(nav);
+   // Resolve the current role from the authenticated service; stay hidden on error.
   const siteListNav=document.getElementById('clientServicesSiteNav');
   const siteListExpand=document.getElementById('clientServicesSiteExpand');
   const navSession=localStorage.getItem('vero_session_token');
@@ -264,91 +233,6 @@
     script.onload = renderNavIcons;
     script.onerror = () => console.warn('VERO navigation icons could not be loaded');
     document.head.appendChild(script);
-  }
-
-  /* DROPDOWN STYLING */
-  const styleId = 'vero-nav-dropdown-style';
-
-  if (!document.getElementById(styleId)) {
-    const style = document.createElement('style');
-    style.id = styleId;
-
-    style.textContent = `
-      #vero-nav .vero-risk-navigation summary { display:flex; align-items:center; gap:11px; padding:9px 12px; font-size:12px; border-left:3px solid transparent; border-radius:7px; cursor:pointer; color:#f7f7f6; }
-      #vero-nav .vero-risk-navigation summary::after {content:'›';margin-left:auto}
-      #vero-nav .vero-risk-navigation[open] summary::after {transform:rotate(90deg)}
-      #vero-nav .vero-risk-navigation[open] summary {background:rgba(255,255,255,.08);border-left-color:#A9C23F}
-      #vero-nav .vero-risk-navigation > a {margin-left:34px!important;font-size:11px!important}
-      #vero-nav .ico { width:20px;min-width:20px;display:inline-flex;align-items:center;justify-content:center; }
-      #vero-nav .ico svg { width:17px;height:17px;display:block;stroke:currentColor; }
-      #vero-nav .vero-actions-count {
-        margin-left:auto;
-        flex:0 0 auto;
-        min-width:22px;
-        height:22px;
-        padding:0 6px;
-        border-radius:999px;
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        background:#A9C23F;
-        color:#252321;
-        font:800 11px Montserrat,Verdana,Arial,sans-serif;
-        line-height:1;
-      }
-      #vero-nav .vero-actions-count[hidden] { display:none; }
-      #vero-nav a:has(.vero-actions-count) { min-width:0; }
-      #vero-nav .vero-actions-count { white-space:nowrap; }
-      #vero-nav .vero-nav-parent {
-        display: flex;
-        align-items: center;
-      }
-
-      #vero-nav .vero-nav-parent > a {
-        flex: 1;
-        min-width: 0;
-      }
-
-      #vero-nav .vero-nav-expand {
-        background: transparent;
-        border: 0;
-        color: #f7f7f6;
-        padding: 9px 10px;
-        cursor: pointer;
-        font-size: 17px;
-      }
-
-      #vero-nav .vero-nav-expand span {
-        display: inline-block;
-        transition: transform .2s ease;
-      }
-
-      #vero-nav .vero-nav-group.open
-      .vero-nav-expand span {
-        transform: rotate(90deg);
-      }
-
-      #vero-nav .vero-nav-children {
-        display: none;
-        padding-left: 34px;
-        margin: 2px 0 6px;
-      }
-
-      #vero-nav .vero-nav-group.open
-      .vero-nav-children {
-        display: block;
-      }
-
-      #vero-nav .vero-nav-children a {
-        display: block;
-        padding: 8px 10px;
-        font-size: 10px;
-        line-height: 1.5;
-        white-space: normal;
-      }
-    `;
-
-    document.head.appendChild(style);
   }
 
   /* DROPDOWN BEHAVIOUR */
@@ -393,8 +277,10 @@
       badge.textContent = count > 99 ? '99+' : String(count);
       badge.setAttribute('aria-label', count + ' outstanding actions');
       badge.hidden = count === 0;
+      saveBadge(count);
     } catch (error) {
       badge.hidden = true;
+      try { sessionStorage.removeItem('vero-nav-badge'); } catch {}
       console.warn('VERO could not refresh the My Actions count', error);
     }
   }
@@ -402,13 +288,10 @@
   window.addEventListener('pageshow', updateMyActionsBadge);
   window.addEventListener('focus', updateMyActionsBadge);
 
-  /* Prevent main navigation labels wrapping */
-  nav.querySelectorAll(
-    '.nav-section > a > span:last-child'
-  ).forEach(label => {
-    label.style.whiteSpace = 'nowrap';
-  });
+
+  window.addEventListener('pagehide',()=>rememberNavigation(nav));
+  nav.addEventListener('click',()=>rememberNavigation(nav));
+  nav.addEventListener('toggle',()=>rememberNavigation(nav),true);
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
-
-
-

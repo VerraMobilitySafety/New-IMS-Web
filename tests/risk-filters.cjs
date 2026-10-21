@@ -229,7 +229,7 @@ test('applicability decision invalidates cache and removes a withdrawn assignmen
 });
 
 test('shipped applicability submit invalidates after success even when drawer has closed',async()=>{
- const code=fs.readFileSync(path.join(root,'risk-operational.js'),'utf8');
+ const code=fs.readFileSync(path.join(root,'risk-operational.js'),'utf8').replaceAll('\r\n','\n');
  const prefix="form.addEventListener('submit',";
  const start=code.indexOf(prefix)+prefix.length;
  const end=code.indexOf(');\n    governance.appendChild(form);',start);

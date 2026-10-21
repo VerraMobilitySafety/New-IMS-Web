@@ -49,6 +49,15 @@
 .vr-page[data-register-layout="incidents"] #monthly-event-dashboard .dashboard-kpi { height:144px; min-height:144px; display:grid; grid-template-rows:28px 34px 28px; gap:4px; }
 .vr-page[data-register-layout="incidents"] #content .dashboard-kpi h3,
 .vr-page[data-register-layout="incidents"] #content .dashboard-kpi p { margin:0; }
+.vr-page[data-register-layout="incidents"] .investigation-status-heading { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 16px; }
+.vr-page[data-register-layout="incidents"] .investigation-status-heading h3,
+.vr-page[data-register-layout="incidents"] .investigation-status-heading p { margin:0; }
+.vr-page[data-register-layout="incidents"] .status-track .overdue { background:#b5802b; }
+.month-column[aria-pressed=true] { background:#edf2da; outline:2px solid #a9c23f; outline-offset:-2px; }
+.chart-events-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.chart-events-heading h3 { margin:0; }
+.chart-event-open { display:flex; flex-direction:column; gap:4px; text-align:left; width:100%; border:0; background:transparent; color:#126666; padding:0; }
+.chart-event-open span { font-weight:400; }
 .vr-page[data-register-layout="incidents"] #incident-dashboard .vr-view-toolbar,
 .vr-page[data-register-layout="incidents"] #monthly-event-dashboard .vr-view-toolbar { margin:0!important; }
 .vr-page[data-register-layout="incidents"] #incident-dashboard .dashboard-panels,
