@@ -1,0 +1,17 @@
+name: Operational document screens
+on:
+  pull_request:
+    paths: ['documents.html', 'document-context.js', 'linked-documents.js', 'my-actions.html', 'project-workspace.html', 'customer-contracts.js', 'maintenance-contract-activity.js', 'tests/operational-documents.cjs', '.github/workflows/operational-documents-validation.yml']
+permissions:
+  contents: read
+jobs:
+  document-screens:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --ignore-scripts jsdom
+      - run: node --test tests/operational-documents.cjs tests/project-document-viewer.cjs

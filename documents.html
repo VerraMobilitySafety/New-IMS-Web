@@ -371,7 +371,7 @@
 
 <section class="global-hero">
   <div class="hero-content">
-    <div class="hero-kicker">Governance</div>
+    <div class="hero-kicker">Document Management</div>
     <h1>Document Management</h1>
     <p>Find, control and govern Verra's current controlled documents.</p>
     <div class="hero-rule"></div>
@@ -399,6 +399,8 @@
      <button type="button" class="document-view" data-view="review" title="Overdue or due within the next 60 days" onclick="setDocumentView('review',this)">Due for Review</button>
     </div>
 
+    <select id="documentCategoryFilter" onchange="applyDocumentFilters()" aria-label="Document category"><option value="">Governance &amp; Operational</option><option>Governance</option><option>Operational</option></select>
+    <select id="documentLinkFilter" onchange="applyDocumentFilters()" aria-label="Linked client, project, contract or site"><option value="">All clients and jobs</option></select>
     <select id="documentTypeFilter" onchange="applyDocumentFilters()" aria-label="Filter by document type">
      <option value="">All Types</option>
     </select>
@@ -491,6 +493,8 @@
    </select>
   </div>
 
+  <div class="detail" style="margin-top:12px"><label for="reqCategory">Document category *</label><select id="reqCategory" onchange="VeroDocumentContext.categoryChanged()"><option>Governance</option><option>Operational</option></select></div>
+  <div id="requestLinksField" class="detail" style="margin-top:12px" hidden><label for="reqLinks">Linked client, project, contract or site *</label><input id="reqLinkSearch" type="search" placeholder="Find a client or job…" oninput="VeroDocumentContext.searchOptions(this.value)"><select id="reqLinks" multiple size="7" aria-describedby="requestLinkHint"></select><small id="requestLinkHint">Select one or more items. Use Ctrl to select multiple items. Revisions retain existing links.</small><p id="requestLinkStatus" role="status"></p></div>
   <div id="existingDocumentField" class="detail" style="display:none;margin-top:12px">
    <label id="existingDocumentLabel">Existing Document *</label>
    <select id="reqExistingDocument" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;background:#fff;font:13px Montserrat,Verdana,Arial,sans-serif">
@@ -516,7 +520,7 @@
   </div>
 
   <div id="requestFileField" class="detail" style="margin-top:12px">
-   <label>Completed Word Draft (.docx) *</label>
+   <label id="requestDraftLabel">Completed Word Draft (.docx) *</label>
    <input id="reqFile" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="width:100%;border:1px solid var(--line);border-radius:7px;padding:10px;background:#fff;font:13px Montserrat,Verdana,Arial,sans-serif">
    <div style="font-size:10px;color:var(--grey);line-height:1.5;margin-top:7px">Upload the completed draft for Document Control and approval review.</div>
   </div>
@@ -586,7 +590,7 @@
  </div>
  <script>
 const API_BASE='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
-const DOCUMENTS_API=API_BASE+'/documents?entity_type=Governance';
+const DOCUMENTS_API=API_BASE+'/documents';
 const TOKEN_KEY='vero_session_token';
 let liveDocuments=[];
 let documentLoadState="loading",documentIdentity=null;
@@ -599,14 +603,15 @@ function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;'
 function fmtDate(value){if(!value)return '—';const d=new Date(value);return Number.isNaN(d.getTime())?String(value):d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'});}
 function statusClass(status){const s=(status||'').toLowerCase();if(s==='current')return 'current';if(s.includes('review'))return 'review';if(s.includes('approval')||s.includes('approved'))return 'approval';if(s.includes('draft'))return 'draft';if(s.includes('overdue'))return 'overdue';return 'draft';}
 function displayStatus(status){return status||'Draft';}
-function documentTypeShort(type){const map={'Procedure':'PRO','Policy':'POL','Standard':'STD','Work Instruction':'WI','Management Plan':'MP','Form':'FRM','Template':'TMP','Guideline':'GUI'};return map[type]||type||'—';}
-function normaliseDocument(r){return {id:r.id,documentNumber:r.document_number||'—',documentTitle:r.document_title||r.file_name||'Untitled document',documentType:r.document_type||'—',documentOwnerUserId:r.document_owner_user_id??null,documentOwner:r.document_owner_name||r.document_owner||'—',documentOwnerEmail:r.document_owner_email||'',documentAuthor:r.uploaded_by||'—',workflowStatus:r.status||'Draft',controlledVersion:r.version_number||'—',approvalDate:r.approval_date||null,effectiveDate:r.effective_date||null,nextReviewDate:r.review_date||null,changeSummary:r.description||'',purpose:r.description||'Controlled document managed in VERO.',fileName:r.file_name||'',contentType:r.content_type||'',aiSearchable:!!r.ai_searchable,allowView:r.allow_view!==false,allowDownload:!!r.allow_download,accessLevel:r.access_level||'Internal',createdAt:r.created_at||null,updatedAt:r.updated_at||null};}
+function documentTypeShort(type){const map={'Procedure':'PRO','Policy':'POL','Standard':'STD','Work Instruction':'WI','Management Plan':'MP','Form':'FRM','Template':'TMP','Guideline':'GUI','Bill of Materials':'BOM','Safety Management Plan':'SMP'};return map[type]||type||'—';}
+function normaliseDocument(r){return {id:r.id,category:r.entity_type||'Governance',documentLinks:r.document_links||[],documentNumber:r.document_number||'—',documentTitle:r.document_title||r.file_name||'Untitled document',documentType:r.document_type||'—',documentOwnerUserId:r.document_owner_user_id??null,documentOwner:r.document_owner_name||r.document_owner||'—',documentOwnerEmail:r.document_owner_email||'',documentAuthor:r.uploaded_by||'—',workflowStatus:r.status||'Draft',controlledVersion:r.version_number||'—',approvalDate:r.approval_date||null,effectiveDate:r.effective_date||null,nextReviewDate:r.review_date||null,changeSummary:r.description||'',purpose:r.description||'Controlled document managed in VERO.',fileName:r.file_name||'',contentType:r.content_type||'',aiSearchable:!!r.ai_searchable,allowView:r.allow_view!==false,allowDownload:!!r.allow_download,accessLevel:r.access_level||'Internal',createdAt:r.created_at||null,updatedAt:r.updated_at||null};}
 
 function openDocById(id){
  const d=liveDocuments.find(x=>String(x.id)===String(id));if(!d)return;selectedDocument=d;
  document.getElementById('dNo').textContent=d.documentNumber;
  document.getElementById('dTitle').textContent=d.documentTitle;
  document.getElementById('dType').textContent=d.documentType;
+ VeroDocumentContext.showDocument(d);
  document.getElementById('dOwner').textContent=d.documentOwner;
  document.getElementById('dAuthor').textContent=d.documentAuthor;
  document.getElementById('dVersion').textContent=d.controlledVersion;
@@ -824,6 +829,10 @@ function applyDocumentFilters(){
   .toLowerCase();
 
  let docs=currentDocuments();
+ const category=document.getElementById('documentCategoryFilter').value;
+ const link=document.getElementById('documentLinkFilter').value;
+ if(category)docs=docs.filter(d=>d.category===category);
+ if(link)docs=docs.filter(d=>d.documentLinks.some(x=>VeroDocumentContext.key(x)===link));
 
  if(search){
   docs=docs.filter(d=>
@@ -831,7 +840,8 @@ function applyDocumentFilters(){
     d.documentNumber,
     d.documentTitle,
     d.documentType,
-    d.documentOwner
+    d.documentOwner,
+    ...d.documentLinks.map(x=>x.label)
    ]
     .filter(Boolean)
     .some(value=>String(value).toLowerCase().includes(search))
@@ -873,7 +883,7 @@ function renderDocuments(documents=currentDocuments()){
   <tr class="data" onclick="openDocById('${esc(d.id)}')">
    <td>
     <span class="docno">${esc(d.documentNumber)}</span>
-    <span class="title"> ${esc(d.documentTitle)}</span>
+    <span class="title"> ${esc(d.documentTitle)}</span><div class="meta">${esc(d.category)}${d.documentLinks.length?' · '+esc(d.documentLinks.map(x=>x.label).join(', ')):''}</div>
    </td>
    <td>v${esc(d.controlledVersion)}</td>
    <td>${esc(d.documentOwner)}</td>
@@ -912,6 +922,7 @@ async function loadDocuments(){
   documentLoadState="ready";
 
   liveDocuments=rows.map(normaliseDocument);
+  VeroDocumentContext.populateFilters();
   populateDocumentTypeFilter();
   applyDocumentFilters();
   const linkedDocumentId=new URLSearchParams(location.search).get('document');
@@ -1047,7 +1058,7 @@ function populateDocumentRequestSelectors(){
  multi.innerHTML='';
 
  liveDocuments
-  .filter(doc=>(doc.workflowStatus||'').toLowerCase()==='current')
+  .filter(doc=>(doc.workflowStatus||'').toLowerCase()==='current' && doc.category===document.getElementById('reqCategory').value)
   .forEach(doc=>{
   const id=doc.id;
   const number=doc.documentNumber||doc.document_number||'No number';
@@ -1070,6 +1081,7 @@ function populateDocumentRequestSelectors(){
 
 function openRequest(){
  document.getElementById('reqType').value='New Document';
+ VeroDocumentContext.resetRequest();
  document.getElementById('reqTitle').value='';
  document.getElementById('reqFile').value='';
  document.getElementById('reqReason').value='';
@@ -1092,6 +1104,7 @@ function openRequest(){
 
 function updateRequestType(){
  const type=document.getElementById('reqType').value;
+ VeroDocumentContext.updateRequest();
 
  const existingField=document.getElementById('existingDocumentField');
  const replacementField=document.getElementById('replacementDocumentsField');
@@ -1108,7 +1121,7 @@ function updateRequestType(){
 
  if(type==='New Document'){
   document.getElementById('requestTitle').textContent='Request New Document';
-  document.getElementById('requestSubtitle').textContent='Submit a completed Word draft for Document Control review.';
+  document.getElementById('requestSubtitle').textContent=document.getElementById('reqCategory').value==='Operational'?'Submit a completed Word or Excel draft for Document Control review.':'Submit a completed Word draft for Document Control review.';
   titleField.style.display='block';
   fileField.style.display='block';
   reasonLabel.textContent='Why is this document required? *';
@@ -1116,7 +1129,7 @@ function updateRequestType(){
 
  if(type==='Revise Existing Document'){
   document.getElementById('requestTitle').textContent='Request Document Revision';
-  document.getElementById('requestSubtitle').textContent='Submit a revised Word draft for an existing controlled document.';
+  document.getElementById('requestSubtitle').textContent=document.getElementById('reqCategory').value==='Operational'?'Submit a revised Word or Excel draft for an existing controlled document.':'Submit a revised Word draft for an existing controlled document.';
   document.getElementById('existingDocumentLabel').textContent='Document Being Revised *';
   existingField.style.display='block';
   fileField.style.display='block';
@@ -1197,8 +1210,8 @@ async function submitRequest(){
   return;
  }
 
- if(file&&!file.name.toLowerCase().endsWith('.docx')){
-  setRequestMessage('The completed draft must be a .docx Word document.');
+ if(file&&!VeroDocumentContext.accepts(file)){
+  setRequestMessage('Use a Word .docx draft, or Excel .xlsx for operational documents.');
   document.getElementById('reqFile').value='';
   document.getElementById('reqFile').focus();
   return;
@@ -1210,12 +1223,14 @@ async function submitRequest(){
   return;
  }
 
+ if(!VeroDocumentContext.validateRequest())return;
  const btn=document.getElementById('submitRequestBtn');
  btn.disabled=true;
  btn.textContent='Submitting…';
 
  const form=new FormData();
  form.append('request_type',type);
+ VeroDocumentContext.appendRequest(form);
  form.append('business_reason',reason);
  form.append('additional_information',additional);
 
@@ -1327,6 +1342,7 @@ document.addEventListener('DOMContentLoaded',()=>{loadDocuments().finally(()=>wi
 </dialog>
 <script src="approved-document-import.js?v=20261016-dates"></script>
 <link rel="stylesheet" href="documents-table.css?v=20261016">
+<script src="document-context.js?v=20261022"></script>
 <script src="documents-table.js?v=20261020-title-az"></script>
 <script src="document-metadata-editor.js?v=20261020"></script>
 <link rel="stylesheet" href="register-layout.css"><script src="register-layout.js?v=20261020-documents-summary"></script><link rel="stylesheet" href="documents-summary.css?v=20261020-ownership-font"><script src="documents-summary.js?v=20261020-ownership-font"></script></body></html>
