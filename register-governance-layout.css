@@ -101,3 +101,6 @@
 @media(min-width:751px) and (max-width:850px){
  .vr-page[data-register-layout="incidents"] .main { margin-left:300px!important; width:calc(100% - 300px)!important; }
 }
+
+.event-list-search { display:flex; flex-direction:column; gap:6px; max-width:480px; margin-bottom:12px; font-weight:600; }
+.event-list-search input { width:100%; }
