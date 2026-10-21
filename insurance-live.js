@@ -7,6 +7,7 @@ const status=$('insuranceApiStatus'),form=$('form'),submit=form.querySelector('[
 const formStatus=$('insuranceFormStatus');
 let livePolicies=[],office=false,state='loading',busy=false,financialAccess=false,linkingAccess=false;
 let readOnly=true,financialWriteAccess=false,canCreate=false;
+let canAttach=false,canRegisterActive=false,registration=null;
 const allPolicyFields=config.policies.slice(),financialFields=new Set(['limit','excess','premium']);
 function setFinancialAccess(allowed){
  financialAccess=allowed===true;
@@ -45,8 +46,8 @@ function policyView(p){
 }
 function updateSubmit(){
  if(formType==='policies'){
-  submit.textContent=busy?'Saving…':'Save Draft';
-  submit.disabled=busy||state!=='ready';
+  submit.textContent=busy?'Saving…':registration?.id?'Retry attachment':form.elements.status?.value==='Active'?'Register Active policy':'Save Draft';
+  submit.disabled=busy||(!registration?.id&&state!=='ready');
  }else{submit.textContent='Add to Prototype';submit.disabled=busy}
 }
 function renderPolicyWorkflow(){
@@ -207,6 +208,8 @@ async function load(prefix=''){
   readOnly=result.read_only!==false;
   financialWriteAccess=result.financial_write_access===true;
   canCreate=result.can_create_policies===true;
+  canAttach=result.can_attach_to_new_policy===true;
+  canRegisterActive=result.can_register_active===true;
   setFinancialAccess(result.financial_access);
   linkingAccess=result.can_link_parent_policies===true;
   livePolicies=result.policies;office=Boolean(result.insurance_office);
@@ -235,9 +238,24 @@ openForm=function(type){
   message(state==='loading'?'Loading policies…':'Policies must load successfully before creating a draft. Retry loading policies.');return;
  }
  if(type==='policies'&&!canCreate){message('Your Insurance access is view-only.');return}
- oldOpen(type);updateSubmit();
+ registration=null;oldOpen(type);updateSubmit();
  if(type==='policies'){
   $('formTitle').textContent='Register policy draft';
+  const previousClass=form.elements.class;
+  const type=document.createElement('select');type.id='fclass';type.name='class';type.required=true;
+  const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Select insurance type';type.append(placeholder);
+  const commonTypes=['Public Liability','Professional Indemnity','Property','Motor','Workers Compensation','Management Liability','Cyber','Business Travel'];
+  const existingTypes=livePolicies.map(p=>p.insurance_class).filter(v=>typeof v==='string'&&v.trim());
+  for(const value of [...new Set([...commonTypes,...existingTypes])].sort((a,b)=>a.localeCompare(b))){
+   const option=document.createElement('option');option.value=value;option.textContent=value;type.append(option);
+  }
+  const other=document.createElement('option');other.value='';other.textContent='Other (specify)';other.dataset.custom='true';type.append(other);
+  previousClass.closest('.field').querySelector('label').textContent='Insurance type';previousClass.replaceWith(type);
+  const customField=document.createElement('div');customField.className='field';customField.hidden=true;
+  const customLabel=document.createElement('label');customLabel.htmlFor='insuranceCustomType';customLabel.textContent='Other insurance type';
+  const custom=document.createElement('input');custom.id='insuranceCustomType';custom.name='custom_insurance_type';custom.maxLength=100;custom.disabled=true;
+  customField.append(customLabel,custom);type.closest('.field').after(customField);
+  type.onchange=()=>{const isOther=type.selectedOptions[0]?.dataset.custom==='true';customField.hidden=!isOther;custom.disabled=!isOther;custom.required=isOther;type.required=!isOther;};
   for(const name of ['class','insurer','currency','inception','expiry'])form.elements[name].required=true;
   form.elements.currency.value='AUD';form.elements.currency.maxLength=3;
   form.elements.country.maxLength=3;
@@ -248,6 +266,25 @@ openForm=function(type){
   form.elements.country.setAttribute('list',countries.id);
   form.elements.status.value='Draft';form.elements.status.readOnly=true;
   formStatus.textContent='New policies are saved as Draft. Submit them for approval after saving.';
+  if(canRegisterActive){
+   $('formTitle').textContent='Register policy';
+   const statusChoice=document.createElement('select');statusChoice.id='fstatus';statusChoice.name='status';
+   for(const value of ['Draft','Active']){const option=document.createElement('option');option.value=value;option.textContent=value==='Active'?'Active - already purchased and currently in force':'Draft - submit for approval';statusChoice.append(option)}
+   form.elements.status.replaceWith(statusChoice);
+   const confirmation=document.createElement('div');confirmation.className='field';confirmation.hidden=true;
+   const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.name='purchased_in_force';
+   label.append(check,document.createTextNode('I confirm this policy is already purchased and currently in force.'));confirmation.append(label);statusChoice.closest('.field').after(confirmation);
+   statusChoice.onchange=()=>{confirmation.hidden=statusChoice.value!=='Active';check.required=statusChoice.value==='Active';check.checked=false;updateSubmit()};
+   formStatus.textContent='Insurance Managers may register purchased policies as Active when today (UTC) is within their dates. Future or expired policies must use Draft. This records registration, not approval.';
+  }
+  if(canAttach){
+   const field=document.createElement('div');field.className='field';
+   const label=document.createElement('label');label.htmlFor='registrationPdf';label.textContent='Policy PDF (optional)';
+   const file=document.createElement('input');file.type='file';file.id='registrationPdf';file.accept='application/pdf,.pdf';
+   const note=document.createElement('p');note.className='note';note.textContent='PDF up to 25 MiB. Saved as a Policy Schedule Record with retention pending after the policy is saved. Add other files in Documents.';
+   field.append(label,file,note);$('fields').append(field);
+  }
+
   if(!financialWriteAccess)for(const name of financialFields){
    const input=form.elements[name];if(input){input.disabled=true;input.closest('.field').hidden=true}
   }
@@ -266,19 +303,58 @@ openForm=function(type){
   }
  }
 };
-closeForm=function(){if(!busy)oldClose()};
+closeForm=function(){if(!busy){
+ if(registration?.id){documentPolicy=String(registration.id);registration=null;oldClose();tab='Documents';load('Policy saved. Attachment confirmation is pending. ');return}
+ registration=null;oldClose();
+}};
+async function saveRegistrationAttachment(){
+ const pid=String(registration.id),operation=documentUploads.get(pid);
+ if(registration.rejected){
+  const pdf=$('registrationPdf')?.files[0];
+  if(!pdf||!pdf.size||pdf.size>25*1024*1024||!pdf.name.toLowerCase().endsWith('.pdf')){formStatus.textContent='Policy is saved. Choose a non-empty PDF no larger than 25 MiB.';return}
+  const pending=new FormData();pending.set('file',pdf);pending.set('record_title',operation.pending.get('record_title'));
+  pending.set('attachment_type','Policy Schedule');pending.set('request_id',crypto.randomUUID());operation.pending=pending;
+  registration.rejected=false;$('registrationPdf').disabled=true;
+ }
+ busy=true;updateSubmit();formStatus.textContent='Policy saved. Saving PDF as a Record.';
+ try{
+  const access=await request('/insurance/policies/'+pid+'/records');
+  if(access.can_upload!==true)throw new Error('File upload is no longer permitted.');
+  const result=await request('/insurance/policies/'+pid+'/records',{method:'POST',body:operation.pending});
+  if(!Number.isSafeInteger(result.record_id)||result.record_id<=0)throw new Error('Invalid save confirmation.');
+  documentUploads.delete(pid);registration=null;oldClose();tab='Policies';$('search').value='';insuranceView='all';$('insuranceStatus').value='';
+  await load('Policy and PDF saved. ');
+ }catch(error){
+  operation.message='Policy '+pid+' is saved. Attachment not confirmed: '+error.message+' Retry attaches the same file to this policy; it does not create another policy.';
+  if([400,413].includes(error.status)){
+   registration.rejected=true;$('registrationPdf').disabled=false;
+   operation.message='Policy '+pid+' is saved. PDF rejected: '+error.message+' Choose a corrected PDF and retry the attachment.';
+  }
+  formStatus.textContent=operation.message;
+ }finally{busy=false;updateSubmit()}
+}
 const oldSubmit=form.onsubmit;
 form.onsubmit=async event=>{
  if(formType!=='policies'){oldSubmit(event);return}
  event.preventDefault();
+ if(registration?.id){if(!busy)await saveRegistrationAttachment();return}
  if(!canCreate){formStatus.textContent='Your Insurance access is view-only.';return}
  if(busy)return;
  if(state!=='ready'){formStatus.textContent='Load policies successfully before saving.';return}
  const values=Object.fromEntries(new FormData(form).entries());
+ if(form.elements.class.selectedOptions[0]?.dataset.custom==='true')values.class=(values.custom_insurance_type||'').trim();
+ if(!values.class){formStatus.textContent='Choose an insurance type or specify Other.';return}
+ const pdf=$('registrationPdf')?.files[0];
+ if(pdf&&(pdf.size>25*1024*1024||!pdf.size||!pdf.name.toLowerCase().endsWith('.pdf'))){formStatus.textContent='Choose a non-empty PDF no larger than 25 MiB.';return}
  const payload={policy_name:values.name,policy_number:values.number,insurance_class:values.class,
   insurer_name:values.insurer,broker_name:values.broker,insured_entity_name:values.entity,
   currency:values.currency.toUpperCase(),inception_date:values.inception,expiry_date:values.expiry,
-  policy_scope:'Local',country_code:values.country||null,status:'Draft'};
+  policy_scope:'Local',country_code:values.country||null,status:canRegisterActive&&values.status==='Active'?'Active':'Draft'};
+ if(payload.status==='Active'){
+  const today=new Date().toISOString().slice(0,10);
+  if(!form.elements.purchased_in_force.checked||values.inception>today||values.expiry<today){formStatus.textContent='Confirm purchase and use dates covering today (UTC), or save as Draft.';return}
+  payload.purchased_in_force=true;
+ }
  if(linkingAccess&&values.parent_policy_id)payload.parent_policy_id=Number(values.parent_policy_id);
  if(financialWriteAccess)Object.assign(payload,{
   coverage_limit:values.limit||null,deductible_amount:values.excess||null,annual_premium:values.premium||null});
@@ -286,13 +362,20 @@ form.onsubmit=async event=>{
  let saved=false;
  try{
   const result=await request('/insurance/policies',{method:'POST',body:JSON.stringify(payload)});
-  if(!result.id||result.policy_status!=='Draft')throw new Error('Invalid save confirmation.');
+  if(!Number.isSafeInteger(result.id)||result.id<=0||result.policy_status!==payload.status)throw new Error('Invalid save confirmation.');
   saved=true;
+  if(pdf){
+   const pending=new FormData();pending.set('file',pdf);pending.set('record_title',values.name.slice(0,255));
+   pending.set('attachment_type','Policy Schedule');pending.set('request_id',crypto.randomUUID());
+   registration={id:result.id};documentUploads.set(String(result.id),{pending,saving:false,message:''});
+   for(const input of form.querySelectorAll('input,select,textarea'))input.disabled=true;
+  }
  }catch(error){
   formStatus.textContent='Save could not be confirmed: '+error.message+
    ' Your entries remain here. Refresh policies before retrying if the connection was interrupted.';
  }finally{busy=false;updateSubmit()}
  if(saved){
+  if(registration?.id){await saveRegistrationAttachment();return}
   oldClose();tab='Policies';$('search').value='';insuranceView='all';$('insuranceStatus').value='';
   await load('Policy saved. ');
  }

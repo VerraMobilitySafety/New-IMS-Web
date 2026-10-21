@@ -31,7 +31,8 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
    await page.getByLabel('Policy Name',{exact:true}).fill('Synthetic '+number);
    await page.getByLabel('Policy Number',{exact:true}).fill(number);
    assert.equal(await page.getByLabel('Status',{exact:true}).inputValue(),'Draft');
-   await page.getByLabel('Insurance Class',{exact:true}).fill('Liability');
+   await page.getByLabel('Insurance type',{exact:true}).selectOption({label:'Other (specify)'});
+   await page.getByLabel('Other insurance type',{exact:true}).fill('Liability');
    await page.getByLabel('Inception Date',{exact:true}).fill('2019-01-01');
    await page.getByLabel('Insurer',{exact:true}).fill('Example insurer');
    await page.getByLabel('Broker',{exact:true}).fill('Hidden broker '+number);

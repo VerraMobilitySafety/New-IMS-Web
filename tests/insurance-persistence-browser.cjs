@@ -11,7 +11,7 @@ async function fill(page){
  await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
  assert.equal(await page.locator('#insuranceJurisdictions option').getAttribute('value'),'AU');
  assert.equal(await page.locator('#insuranceJurisdictions option').getAttribute('label'),'Australia');
- for(const [key,value] of Object.entries(fields))await page.locator('#f'+key).fill(value);
+ for(const [key,value] of Object.entries(fields)){if(key==='class'){await page.locator('#fclass').selectOption({label:'Other (specify)'});await page.getByLabel('Other insurance type',{exact:true}).fill(value)}else await page.locator('#f'+key).fill(value);}
  assert.equal(await page.locator('#fstatus').inputValue(),'Draft');
  assert.equal(await page.locator('#fstatus').getAttribute('readonly'),'');
 }
@@ -29,6 +29,28 @@ async function ready(page){
   finally{await context.close()}
  };
  try{
+  await check('empty register offers common Insurance types and Other',{},async(page,server)=>{
+   await ready(page);await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
+   const values=await page.locator('#fclass option').allTextContents();
+   for(const name of ['Public Liability','Professional Indemnity','Property','Motor','Workers Compensation','Management Liability','Cyber','Business Travel','Other (specify)'])assert.ok(values.includes(name),name);
+   assert.equal(values.length,10); // Placeholder, eight conveniences, Other.
+   await page.getByLabel('Insurance type',{exact:true}).selectOption('Cyber');
+   assert.equal(await page.getByLabel('Other insurance type',{exact:true}).isVisible(),false);
+   assert.equal(server.posts.length,0);
+  });
+  await check('Insurance type preserves custom stored values and Other validation',{policies:[savedPolicy({...payload,insurance_class:'Special custom cover'},81)]},async(page,server)=>{
+   await ready(page);await fill(page);
+   const dropdown=page.getByLabel('Insurance type',{exact:true});
+   await dropdown.selectOption('Special custom cover');
+   assert.equal(await page.getByLabel('Other insurance type',{exact:true}).isVisible(),false);
+   await dropdown.selectOption({label:'Other (specify)'});await page.getByLabel('Other insurance type',{exact:true}).fill('   ');
+   await page.getByRole('button',{name:'Save Draft',exact:true}).click();
+   assert.equal(server.posts.length,0);
+   await dropdown.selectOption('Special custom cover');
+   await page.getByRole('button',{name:'Save Draft',exact:true}).click();await page.locator('#modal.open').waitFor({state:'hidden'});
+   assert.equal(server.posts[0].insurance_class,'Special custom cover');
+   assert.equal(server.posts[0].status,'Draft');
+  });
   await check('overview search preserves cards and hides routine success controls',{policies:[savedPolicy(payload,81)]},async page=>{
    await ready(page);
    assert.equal(await page.locator('#insuranceApiStatus').isVisible(),false);
@@ -126,7 +148,7 @@ async function ready(page){
    await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
    for(const [key,value] of Object.entries(fields)){
     if(['limit','excess','premium'].includes(key)){assert.equal(await page.locator('#f'+key).count(),0);continue}
-    await page.locator('#f'+key).fill(value);
+    {if(key==='class'){await page.locator('#fclass').selectOption({label:'Other (specify)'});await page.getByLabel('Other insurance type',{exact:true}).fill(value)}else await page.locator('#f'+key).fill(value);}
    }
    await page.getByRole('button',{name:'Save Draft',exact:true}).click();
    await page.locator('#modal.open').waitFor({state:'hidden'});await ready(page);
@@ -206,6 +228,7 @@ async function ready(page){
    assert.equal(await page.locator('#insurancePolicyWorkflow').count(),1);
    await page.getByRole('button',{name:'Submit',exact:true}).click();
    await page.locator('#insuranceApiStatus[data-state=ready]').waitFor({state:'attached'});
+   await page.waitForFunction(()=>document.querySelector('#insurancePolicyWorkflow button')?.disabled===false);
    assert.deepEqual(server.decisions,[{action:'Submit'}]);
    assert.equal(await page.locator('#insurancePolicyWorkflow').count(),1);
    assert.equal(await page.getByRole('button',{name:'Approve',exact:true}).count(),0);
