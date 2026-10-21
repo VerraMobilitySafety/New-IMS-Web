@@ -160,4 +160,4 @@ async function loadContractWorkspace(){
 const initialContract=new URLSearchParams(location.search).get('contract_id');
 if(initialContract&&!workspace)location.replace('maintenance-workspace.html?id='+encodeURIComponent(initialContract));
 
-
+
