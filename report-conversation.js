@@ -19,7 +19,7 @@ $('newReport').addEventListener('click',startNew);
 // Manual scope changes invalidate the conversational draft so refinements never use stale figures.
 for(const target of [$('reportSelect'),$('filterFields')])target.addEventListener('change',()=>{current=null;draft=[];scope.hidden=true;state(false);});
 $('resetFilters').addEventListener('click',()=>{current=null;draft=[];scope.hidden=true;state(false);});
-$('filters').addEventListener('submit',()=>{current=null;draft=[];message('Vero','The scope has been applied. Describe the report you would like using these figures.');});
+$('filters').addEventListener('submit',()=>{current=null;draft=[];$('reportWelcome').hidden=true;document.body.classList.remove('conversation-start');message('Vero','The scope has been applied. Describe the report you would like using these figures.');});
 window.VeroReportConversation={
  getState:()=>({schema:1,current,draft,requests:requests.slice(-6),messages:[...log.querySelectorAll('.conversation-message')].map(el=>({who:el.querySelector('strong').textContent,text:el.querySelector('p').textContent})),pending_request:input.value}),
  isBusy:()=>busy,
