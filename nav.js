@@ -144,7 +144,7 @@
         </div>
       </div>
 
-      <a class="${isActive('insurance.html') ? 'active' : ''}" href="insurance.html">
+      <a class="${isActive('insurance.html') ? 'active' : ''}" href="insurance.html" hidden style="display:none">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>
         <span>Insurance Management</span>
       </a>
@@ -211,6 +211,7 @@
   function rememberNavigation(nav){try{const groups={};nav.querySelectorAll('.vero-nav-group[id]').forEach(el=>groups[el.id]=el.classList.contains('open'));sessionStorage.setItem('vero-nav-state',JSON.stringify({version:1,groups,details:[...nav.querySelectorAll('.vero-risk-navigation')].map(el=>el.open),scroll:nav.closest('nav').scrollTop}));}catch{}}
 
  if(typeof module!=='undefined'&&module.exports){module.exports={renderNavigation,VERSION};return;}
+ const insuranceNavGuard=document.createElement('style');insuranceNavGuard.textContent='a[href="insurance.html"]:not([data-insurance-admitted]){display:none!important}';document.head.append(insuranceNavGuard);
  window.VeroNav={restore:restoreNavigation};
  function init(){
   const nav=document.getElementById('vero-nav');if(!nav)return;
@@ -219,7 +220,10 @@
    // Resolve the current role from the authenticated service; stay hidden on error.
   const siteListNav=document.getElementById('clientServicesSiteNav');
   const siteListExpand=document.getElementById('clientServicesSiteExpand');
+  const insuranceLink=nav.querySelector('a[href="insurance.html"]');
+  if(insuranceLink){insuranceLink.hidden=true;insuranceLink.style.display='none';}
   const navSession=localStorage.getItem('vero_session_token');
+  if(navSession&&insuranceLink)fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/insurance/access',{headers:{Authorization:'Bearer '+navSession,Accept:'application/json'},cache:'no-store'}).then(async response=>{if(!response.ok)return;const data=await response.json();if(data.status==='success'&&data.allowed===true){insuranceLink.dataset.insuranceAdmitted='true';insuranceLink.hidden=false;insuranceLink.style.display='';}}).catch(()=>{});
   if(navSession)fetch('https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api/auth/me',{headers:{Authorization:'Bearer '+navSession,Accept:'application/json'},cache:'no-store'}).then(async response=>{if(!response.ok)return;const data=await response.json();if((data.user||data).vero_role==='Administrator'){for(const control of [siteListNav,siteListExpand]){control.hidden=false;control.style.display='flex';}}}).catch(()=>{});
 
   /* Consistent Lucide line icons, loaded once for all VERO pages. */
