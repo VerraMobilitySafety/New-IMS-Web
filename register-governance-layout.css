@@ -106,3 +106,18 @@
 .event-list-search input { width:100%; }
 
 .event-list-pagination { display:flex; align-items:center; justify-content:flex-end; gap:12px; margin-top:12px; flex-wrap:wrap; }
+/* Compact Events header: heading, count and search stay together. */
+.vr-page .chart-events { display:grid; grid-template-columns:auto auto minmax(280px,1fr) auto; align-items:center; column-gap:16px; row-gap:12px; }
+.chart-events .chart-events-heading { display:contents; }
+.chart-events .chart-events-heading h3 { grid-column:1; grid-row:1; margin:0; }
+.chart-events .chart-events-heading button { grid-column:4; grid-row:1; }
+.chart-events > p { grid-column:2; grid-row:1; margin:0; white-space:nowrap; }
+.chart-events .chart-event-results, .chart-events .status-event-results { display:contents; }
+.chart-events .event-list-search { grid-column:3; grid-row:1; flex-direction:row; align-items:center; justify-self:end; width:min(100%,620px); max-width:none; margin:0; white-space:nowrap; gap:10px; }
+.chart-events .event-list-search input { min-width:0; flex:1; }
+.chart-events .event-list-table, .chart-events .event-search-count { grid-column:1 / -1; min-width:0; }
+@media(max-width:800px) {
+ .vr-page .chart-events { grid-template-columns:auto 1fr auto; }
+ .chart-events .chart-events-heading button { grid-column:3; }
+ .chart-events .event-list-search { grid-column:1 / -1; grid-row:2; width:100%; justify-self:stretch; }
+}
