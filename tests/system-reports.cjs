@@ -68,3 +68,12 @@ coverageTest('unassessed risk query uses assessment state independently of lifec
  const tables=[];api.render(sources,filters,{kpis:()=>'',note:()=>'',table:(title,headers,rows)=>{tables.push({title,headers,rows});return '';}},'2026-10-21');
  assert.ok(tables.find(t=>t.title.includes('requested details')).rows[0].includes('Unassessed open risk'));
 });
+
+test('compound grouping keeps record type and security classification separate without duplicating totals',async()=>{
+ const sources=await api.load('records',async()=>({records:[{id:1,record_type:'Form',security_classification:'Internal'},{id:2,record_type:'Form',security_classification:'Restricted'},{id:3,record_type:'Form',security_classification:'Internal'}]}));
+ const result=api.analyse(sources,{group_by:'record_type,security_classification'},'2026-10-21')[0];assert.equal(result.total,3);assert.equal(result.groups.length,2);assert.equal(result.groups.reduce((n,g)=>n+g[1],0),3);assert.ok(result.groups.some(g=>g[0]==='Form · Internal'&&g[1]===2));
+});
+test('an empty filter result preserves the population read from the source',async()=>{
+ const sources=await api.load('insurance',async()=>({policies:[{id:1,policy_name:'Future cover',expiry_date:'2027-06-30'}]}));const tables=[];const filters={where:JSON.stringify([{source:'insurance',field:'expiry_date',op:'before',value:'2026-10-21'}])};
+ const result=api.analyse(sources,filters,'2026-10-21')[0];assert.equal(result.total,0);assert.equal(result.recordsRead,1);api.render(sources,filters,{kpis:()=>'',note:()=>'',table:(title,headers,rows)=>{tables.push({title,headers,rows});return '';}},'2026-10-21');assert.ok(tables[0].headers.includes('Records Read Before Filters'));assert.equal(tables[0].rows[0][tables[0].headers.indexOf('Records Read Before Filters')],1);
+});
