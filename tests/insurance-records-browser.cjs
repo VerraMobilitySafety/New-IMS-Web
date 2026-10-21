@@ -57,6 +57,7 @@ const {mockInsurance,savedPolicy}=require('./insurance-mock.cjs');
     await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
     for(const [key,value] of Object.entries({name:'Combined policy',number:'COMBINED',class:'Liability',insurer:'Example',inception:'2026-01-01',expiry:'2027-01-01'})){if(key==='class'){await page.locator('#fclass').selectOption({label:'Other (specify)'});await page.getByLabel('Other insurance type',{exact:true}).fill(value)}else await page.locator('#f'+key).fill(value);}
     await page.getByLabel('Policy PDF (optional)',{exact:true}).setInputFiles({name:'policy.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.4 synthetic')});
+    await page.getByLabel('File title',{exact:true}).fill('Chosen registration title');
     if(scenario==='active retry'){
      await page.locator('#fstatus').selectOption('Active');
      await page.getByLabel('I confirm this policy is already purchased and currently in force.',{exact:true}).check();
@@ -93,6 +94,8 @@ const {mockInsurance,savedPolicy}=require('./insurance-mock.cjs');
       }
      }
     }
+    for(const body of server.uploads||[])assert.ok(body.includes('Chosen registration title'));
+    if(server.uploads?.length)assert.ok(server.uploads[0].includes('filename="policy.pdf"'));
     console.log('PASS combined registration '+scenario);
    }finally{await context.close()}
   }

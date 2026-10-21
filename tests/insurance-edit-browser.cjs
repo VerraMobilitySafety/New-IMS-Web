@@ -18,12 +18,12 @@ for(const scenario of ['edit','conflict','observer','later PDF','edit PDF retry'
   if(scenario==='multiple')for(const name of ['entity','limit','excess','currency'])assert.equal(await page.locator('#f'+name).isDisabled(),true);
   await page.locator('#fname').fill('Corrected');
   if(scenario==='cancel'){await page.getByRole('button',{name:'Cancel',exact:true}).click();assert.equal((server.edits||[]).length,0)}else{
-   if(scenario==='edit PDF retry')await page.getByLabel('Policy PDF (optional)',{exact:true}).setInputFiles({name:'policy.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.4 mock')});
+   if(scenario==='edit PDF retry'){await page.locator('#form').getByLabel('File title',{exact:true}).fill('My chosen policy title');await page.getByLabel('Policy PDF (optional)',{exact:true}).setInputFiles({name:'policy.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.4 mock')});}
    await page.getByRole('button',{name:'Save policy changes',exact:true}).click();
    if(scenario==='conflict'){await page.locator('#insuranceFormStatus').filter({hasText:'Changes not confirmed'}).waitFor();assert.equal(await page.locator('#fname').inputValue(),'Corrected')}
    else if(scenario==='edit PDF retry'){
     await page.getByRole('button',{name:'Retry attachment',exact:true}).waitFor();server.uploadMode='ok';await page.getByRole('button',{name:'Retry attachment',exact:true}).click();await page.waitForFunction(()=>!document.querySelector('#modal').classList.contains('open'));
-    assert.equal(server.edits.length,1);assert.equal(server.uploads.length,2);const key=s=>s.match(/name="request_id"\r\n\r\n([^\r]+)/)[1];assert.equal(key(server.uploads[0]),key(server.uploads[1]));
+    assert.equal(server.edits.length,1);assert.equal(server.uploads.length,2);for(const body of server.uploads){assert.ok(body.includes('My chosen policy title'));assert.ok(body.includes('filename="policy.pdf"'));}const key=s=>s.match(/name="request_id"\r\n\r\n([^\r]+)/)[1];assert.equal(key(server.uploads[0]),key(server.uploads[1]));
    }else await page.waitForFunction(()=>!document.querySelector('#modal').classList.contains('open'));
    assert.deepEqual(server.edits[0],{expected_updated_at:'revision-1',policy_name:'Corrected'});
   }

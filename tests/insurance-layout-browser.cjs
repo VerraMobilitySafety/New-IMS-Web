@@ -57,7 +57,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   assert.equal(await page.locator('#content tbody tr').count(),1,'search retains fields removed from table');
   await page.locator('#content tbody tr').click();
   assert.match(await page.locator('#policyDetails').innerText(),/Hidden broker TEST-002/);
-  assert.equal(await page.locator('#policyDetails dt').count(),14);
+  assert.equal(await page.locator('#policyDetails dt').count(),15);
   // File loading adds focusable controls asynchronously; test the settled drawer.
   await page.locator('#policyDetails').getByRole('button',{name:'Refresh files',exact:true}).waitFor();
   for(const key of ['Tab','Shift+Tab','Tab']){await page.keyboard.press(key);assert.equal(await page.locator('#modal').evaluate(e=>e.contains(document.activeElement)),true)}

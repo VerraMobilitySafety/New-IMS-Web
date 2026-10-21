@@ -6,7 +6,7 @@ const fields={name:'Synthetic policy',number:'TEST-001',class:'Liability',insure
 const payload={policy_name:fields.name,policy_number:fields.number,insurance_class:fields.class,
  insurer_name:fields.insurer,broker_name:fields.broker,insured_entity_name:fields.entity,
  currency:'AUD',inception_date:fields.inception,expiry_date:fields.expiry,policy_scope:'Local',
- country_code:'AU',status:'Draft',coverage_limit:'1000000',deductible_amount:'0',annual_premium:'1234.56'};
+ country_code:'AU',state_territory:null,status:'Draft',coverage_limit:'1000000',deductible_amount:'0',annual_premium:'1234.56'};
 async function fill(page){
  await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
  assert.equal(await page.locator('#insuranceJurisdictions option').getAttribute('value'),'AU');
@@ -214,7 +214,7 @@ async function ready(page){
    await page.locator('#content tbody tr').click();
    const details=await page.locator('#policyDetails').innerText();
    for(const value of ['Example entity','1000000','1234.56','Draft'])assert.ok(details.includes(value));
-   const excess=await page.locator('#policyDetails dd').nth(10).innerText();assert.equal(excess,'0');
+   const excess=await page.locator('#policyDetails dl > div').filter({has:page.locator('dt',{hasText:'Deductible / Excess'})}).locator('dd').innerText();assert.equal(excess,'0');
    await page.keyboard.press('Escape');
    await page.reload();await ready(page);
    await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies',{force:true});
