@@ -84,3 +84,13 @@ th{background:#f8f7f6;color:#706660;font-size:10px;font-weight:800;text-transfor
 .investigation-prefill-note{padding:20px;margin:20px 0;border-left:3px solid #A9C23F;background:#f7f8f1;border-radius:0 8px 8px 0}.investigation-prefill-note h3{font-size:14px;margin:0 0 10px}.investigation-prefill-note p{line-height:1.7;font-size:12px}.investigation-prefill-note summary{font-weight:700}.investigation-prefill-note ul{padding-left:20px}.investigation-prefill-note li{padding:12px 0;border-bottom:1px solid #deded6}.original-answer-value{white-space:pre-wrap;overflow-wrap:anywhere;color:#524a40}
 
 .event-register-table td{vertical-align:top}.event-register-table th:first-child{width:54%}.event-register-table td:first-child a{display:block;line-height:1.5}.event-register-table td:first-child strong{display:block;font-size:11px;color:#6d6660;margin-bottom:3px}.event-register-table td:first-child span{display:block;overflow-wrap:anywhere}.event-register-table th:nth-child(2){width:12%}.event-register-table th:nth-child(3){width:19%}.event-register-table td:last-child{white-space:nowrap}.event-state{display:inline-block;padding:4px 10px;border-radius:14px;font-weight:600;font-size:11px}.event-state-open{background:#e8f2f1;color:#175b59}.event-state-overdue{background:#fff0e5;color:#8c3d08}.event-state-closed{background:#edf0e4;color:#45521e}
+
+/* Report-only container uses the Vero palette without narrowing investigation drawers. */
+#report-backdrop .report-container.report-drawer{width:min(640px,95vw)}
+#report-backdrop .report-heading{background:linear-gradient(115deg,#f1f5df,#f0f7f8);border-top:5px solid var(--green);border-bottom:1px solid #dce5c5}
+#report-backdrop .report-heading small{color:#2c7f8e;letter-spacing:1px}
+#report-backdrop .report-section h3{border-left:4px solid var(--green);padding-left:10px;color:#3d3935}
+#report-backdrop .report-section:nth-child(even){background:#fafbf8}
+#report-backdrop .report-person{background:#eef5f6;color:#246a77;border-radius:8px;padding:12px 14px}
+#report-backdrop .report-footer{background:#f1f5df}
+@media(max-width:650px){#report-backdrop .report-container.report-drawer{width:100vw}}
