@@ -53,7 +53,7 @@ async function mockInsurance(page,options={}){
      (server.uploads??=[]).push(req.postData());
      if(server.uploadMode==='invalid')return route.fulfill({status:400,json:{message:'Synthetic unreadable PDF'}});
      if(server.uploadMode==='error')return route.fulfill({status:503,json:{message:'Synthetic uncertain commit'}});
-     server.records=[{record_id:9,record_code:'REC-000009',title:'Synthetic attachment',attachment_type:'Policy Schedule',retention_pending:true,status:'Active'}];
+     server.records=[{record_id:9,file_name:'policy.pdf',record_code:'REC-000009',title:'Synthetic attachment',attachment_type:'Policy Schedule',retention_pending:true,status:'Active'}];
      return route.fulfill({status:201,json:{status:'success',record_id:9,retention_pending:true,reused:false}});
     }
     if(server.recordsGate)await server.recordsGate;

@@ -4264,6 +4264,11 @@ body[data-records-manager="false"]
      isPdf && r.status !== 'Disposed'
       ? 'inline-flex'
       : 'none';
+    // Explicit cross-module preview links reuse this existing controlled viewer.
+    const previewLink = new URLSearchParams(window.location.search);
+    if(current() && previewLink.get('preview') === '1' &&
+       previewLink.get('record_id') === String(r.id) &&
+       isPdf && r.status !== 'Disposed') viewButton.click();
    }
 
    // Resolve Document Controller permission independently.

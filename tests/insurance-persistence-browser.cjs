@@ -59,7 +59,7 @@ async function ready(page){
    await page.locator('#content tbody tr').click();assert.match(await page.locator('#policyDetails').innerText(),/Synthetic policy/);
    await page.keyboard.press('Escape');await page.getByLabel('Search insurance register').fill('no-match');
    assert.equal(await page.locator('#content tbody tr').count(),0);
-   await page.getByRole('button',{name:'Policy files',exact:true}).click();await page.getByText('No accessible files attached.',{exact:true}).waitFor();
+   await page.getByLabel('Insurance view',{exact:true}).selectOption('Documents',{force:true});await page.getByText('No accessible files attached.',{exact:true}).waitFor();
    await page.getByRole('button',{name:'Current policies',exact:true}).click();
   });
   await check('Leadership and Finance view financial details without mutation controls',{
