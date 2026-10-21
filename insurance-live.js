@@ -137,7 +137,7 @@ function renderPolicyLinks(){
   cell.addEventListener('click',event=>event.stopPropagation());cell.addEventListener('keydown',event=>event.stopPropagation());
   const view=document.createElement('span');cell.append(view);
   const link=document.createElement('a');link.href='#';link.textContent='View Policy';view.append(link);
-  if(documentUploads.has(String(policy.id))){
+  if(documentUploads.get(String(policy.id))?.pending){
    const retry=document.createElement('button');retry.type='button';retry.textContent='Retry attachment';
    retry.onclick=()=>{documentPolicy=String(policy.id);tab='Documents';render()};cell.append(document.createTextNode(' '),retry);
   }

@@ -26,7 +26,15 @@ for(const scenario of ['edit','conflict','observer','later PDF','edit PDF retry'
     assert.equal(server.edits.length,1);assert.equal(server.uploads.length,2);for(const body of server.uploads){assert.ok(body.includes('My chosen policy title'));assert.ok(body.includes('filename="policy.pdf"'));}const key=s=>s.match(/name="request_id"\r\n\r\n([^\r]+)/)[1];assert.equal(key(server.uploads[0]),key(server.uploads[1]));
    }else await page.waitForFunction(()=>!document.querySelector('#modal').classList.contains('open'));
    assert.deepEqual(server.edits[0],{expected_updated_at:'revision-1',policy_name:'Corrected'});
+   if(scenario!=='conflict')assert.equal(await page.getByRole('button',{name:'Retry attachment',exact:true}).count(),0,'no false recovery button after confirmed edit/upload');
   }
+ }
+ if(['edit','later PDF','edit PDF retry','cancel','multiple'].includes(scenario)){
+  await page.keyboard.press('Escape');await page.evaluate(()=>render());
+  assert.equal(await page.getByRole('button',{name:'Retry attachment',exact:true}).count(),0);
+  await page.locator('tr[data-policy-index]').first().click();await page.getByRole('button',{name:'Refresh files',exact:true}).waitFor();
+  await page.keyboard.press('Escape');await page.evaluate(()=>render());
+  assert.equal(await page.getByRole('button',{name:'Retry attachment',exact:true}).count(),0,'open/close cannot manufacture recovery');
  }
  assert.equal(server.posts.length,0);assert.deepEqual(errors,[]);console.log('PASS saved policy '+scenario);await context.close();
 }
