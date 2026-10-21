@@ -45,6 +45,10 @@
 .vr-page[data-register-layout="incidents"] #monthly-event-dashboard { display:grid; gap:12px; }
 .vr-page[data-register-layout="incidents"] .vr-actions { margin-bottom:12px!important; }
 .vr-page[data-register-layout="incidents"] #content .dashboard-kpis { margin:0!important; gap:12px!important; }
+.vr-page[data-register-layout="incidents"] #incident-dashboard .dashboard-kpi,
+.vr-page[data-register-layout="incidents"] #monthly-event-dashboard .dashboard-kpi { height:144px; min-height:144px; display:grid; grid-template-rows:28px 34px 28px; gap:4px; }
+.vr-page[data-register-layout="incidents"] #content .dashboard-kpi h3,
+.vr-page[data-register-layout="incidents"] #content .dashboard-kpi p { margin:0; }
 .vr-page[data-register-layout="incidents"] #incident-dashboard .vr-view-toolbar,
 .vr-page[data-register-layout="incidents"] #monthly-event-dashboard .vr-view-toolbar { margin:0!important; }
 .vr-page[data-register-layout="incidents"] #incident-dashboard .dashboard-panels,
