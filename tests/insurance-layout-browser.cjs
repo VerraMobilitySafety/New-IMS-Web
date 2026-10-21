@@ -50,7 +50,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   await add('TEST-001','Active',due.toISOString().slice(0,10));
   await add('TEST-002','Expired','2020-01-01');
   assert.equal(await page.locator('#content tbody tr').count(),2);
-  assert.deepEqual(await page.locator('#content th').allTextContents(),['Policy','Insurer','Expiry Date','Status']);
+  assert.deepEqual(await page.locator('#content th').allTextContents(),['Policy','Insurer','Expiry Date','Status','Policy document']);
   await page.getByLabel('Search insurance register').fill('Hidden broker TEST-002');
   assert.equal(await page.locator('#content tbody tr').count(),1,'search retains fields removed from table');
   await page.locator('#content tbody tr').click();

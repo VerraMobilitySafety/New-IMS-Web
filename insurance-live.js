@@ -106,16 +106,46 @@ render=function(){
   }
  }
  // Keep the register focused on the policy list.
+ renderPolicyLinks();
  renderDocuments();
 };
 let documentPolicy='',documentGeneration=0;
 const documentUploads=new Map();
 // Keep the upstream policy-list layout while exposing existing file management.
-const documentsButton=document.createElement('button');documentsButton.type='button';documentsButton.textContent='Policy files';
-documentsButton.onclick=()=>{tab='Documents';render()};
 const policiesButton=document.createElement('button');policiesButton.type='button';policiesButton.textContent='Current policies';
 policiesButton.onclick=()=>{tab='Policies';render()};
-$('insuranceToolbar').append(policiesButton,documentsButton);
+$('insuranceToolbar').append(policiesButton);
+function renderPolicyLinks(){
+ if(tab!=='Policies'||state!=='ready')return;
+ const table=$('content').querySelector('table');if(!table)return;
+ const heading=document.createElement('th');heading.scope='col';heading.textContent='Policy document';table.querySelector('thead tr').append(heading);
+ for(const row of table.querySelectorAll('tbody tr[data-policy-index]')){
+  const policy=livePolicies[Number(row.dataset.policyIndex)];if(!policy)continue;
+  const cell=document.createElement('td');row.append(cell);
+  cell.addEventListener('click',event=>event.stopPropagation());cell.addEventListener('keydown',event=>event.stopPropagation());
+  const view=document.createElement('span');cell.append(view);
+  const link=document.createElement('a');link.href='#';link.textContent='View Policy';view.append(link);
+  if(documentUploads.has(String(policy.id))){
+   const retry=document.createElement('button');retry.type='button';retry.textContent='Retry attachment';
+   retry.onclick=()=>{documentPolicy=String(policy.id);tab='Documents';render()};cell.append(document.createTextNode(' '),retry);
+  }
+  link.onclick=async event=>{
+   event.preventDefault();if(link.dataset.loading)return;link.dataset.loading='true';link.textContent='Checking policy PDF...';
+   try{
+    const result=await request('/insurance/policies/'+encodeURIComponent(policy.id)+'/records');
+    if(!cell.isConnected)return;
+    if(!Array.isArray(result.records))throw new Error('Invalid file list.');
+    const candidates=result.records.filter(r=>r.attachment_type==='Policy Schedule'&&r.status==='Active'&&
+     typeof r.file_name==='string'&&r.file_name.toLowerCase().endsWith('.pdf')&&Number.isSafeInteger(r.record_id)&&r.record_id>0);
+    if(!candidates.length){view.textContent='Policy PDF unavailable';return}
+    const url=id=>'records.html?record_id='+id+'&preview=1';
+    if(candidates.length===1){window.location.assign(url(candidates[0].record_id));return}
+    view.textContent='Multiple active policy PDFs - choose: ';
+    for(const record of candidates){const choice=document.createElement('a');choice.href=url(record.record_id);choice.textContent=record.record_code+' - '+record.title;view.append(choice,document.createElement('br'))}
+   }catch(error){link.textContent='Retry View Policy';link.removeAttribute('data-loading');link.title='Policy PDF could not be checked: '+error.message}
+  };
+ }
+}
 function renderDocuments(){
  if(tab!=='Documents')return;
  const host=$('content');host.replaceChildren();
@@ -287,7 +317,7 @@ openForm=function(type){
    const field=document.createElement('div');field.className='field';
    const label=document.createElement('label');label.htmlFor='registrationPdf';label.textContent='Policy PDF (optional)';
    const file=document.createElement('input');file.type='file';file.id='registrationPdf';file.accept='application/pdf,.pdf';
-   const note=document.createElement('p');note.className='note';note.textContent='PDF up to 25 MiB. Saved as a Policy Schedule Record with retention pending after the policy is saved. Add other files in Documents.';
+   const note=document.createElement('p');note.className='note';note.textContent='PDF up to 25 MiB. Saved as a Policy Schedule Record with retention pending after the policy is saved. Open the saved PDF using View Policy in the policy list.';
    field.append(label,file,note);$('fields').append(field);
   }
 
