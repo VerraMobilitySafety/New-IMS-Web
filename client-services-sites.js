@@ -1,4 +1,12 @@
 'use strict';
+function siteRiskSummary(summary){
+ if(!summary)return '<span class="site-risk-missing">Unavailable</span>';
+ const pending=summary.awaiting_assessment?'<span class="site-risk-detail">'+siteEscape(summary.awaiting_assessment)+' awaiting assessment</span>':'';
+ if(!summary.highest)return '<span class="site-risk-missing">Not assessed</span>'+pending;
+ const band=summary.highest.rating,classes={Low:'low',Moderate:'moderate',High:'high',Significant:'significant'};
+ if(!classes[band])return '<span class="site-risk-missing">Unavailable</span>';
+ return '<span class="site-risk-badge site-risk-'+classes[band]+'" title="Highest approved residual risk">'+siteEscape(band)+'</span><span class="site-risk-detail">Average '+siteEscape(summary.average_residual_score)+' / 125 · '+siteEscape(summary.assessed_risks)+' assessed</span>'+pending;
+}
 const siteEl=id=>document.getElementById(id);
 let allSites=[],sitePage=0,siteOptions={contracts:[],users:[]};
 const siteEscape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -8,8 +16,7 @@ function drawSites(){
  const sites=allSites.filter(s=>(!status||s.status===status)&&(!contract||(contract==='unlinked'?!s.contracts.length:s.contracts.some(c=>String(c.id)===contract)))&&(!history||(history==='reported'?s.event_summary?.recent>0:history==='open'?s.event_summary?.open>0:s.event_summary?.recent===0))&&(!query||[s.site_code,s.site_name,s.address,s.owner_name,...s.source_groups,...s.contracts.flatMap(c=>[c.code,c.name])].some(v=>String(v||'').toLowerCase().includes(query))));
  sites.sort((a,b)=>(sort==='events'?(b.event_summary?.recent??-1)-(a.event_summary?.recent??-1):sort==='open'?(b.event_summary?.open??-1)-(a.event_summary?.open??-1):sort==='impact'?(b.event_summary?.highest_score??-1)-(a.event_summary?.highest_score??-1):0)||a.site_code.localeCompare(b.site_code));
  const pages=Math.max(1,Math.ceil(sites.length/50));sitePage=Math.min(sitePage,pages-1);
- siteEl('siteRows').innerHTML=sites.slice(sitePage*50,sitePage*50+50).map(s=>'<tr data-site-open="'+s.id+'" tabindex="0"><td><a class="site-open-link" href="client-services-site.html?id='+encodeURIComponent(s.id)+'">'+siteEscape(s.site_code)+'</a></td><td>'+siteEscape(s.site_name)+'</td><td class="site-event-count">'+(s.event_summary?'<strong>'+s.event_summary.recent+'</strong>':'Unavailable')+'</td><td>'+siteEscape(s.address||'—')+'</td><td>'+(s.contracts.length?s.contracts.map(c=>'<a href="maintenance-workspace.html?id='+encodeURIComponent(c.id)+'">'+siteEscape(c.code)+' · '+siteEscape(c.name)+'</a>').join('<br>'):'<span class="site-unlinked">Awaiting contract link</span>')+'</td><td>'+siteEscape(s.source_groups.join(', ')||'—')+'</td><td><span class="pill">'+siteEscape(s.status)+'</span></td><td><button class="btn" data-site-edit="'+s.id+'" aria-label="Edit site '+siteEscape(s.site_code)+'">Edit</button></td></tr>').join('')||'<tr><td colspan="8">No sites match these filters.</td></tr>';
- siteEl('siteRows').querySelectorAll('[data-site-edit]').forEach(button=>button.onclick=()=>openSiteEditor(allSites.find(s=>String(s.id)===button.dataset.siteEdit)));
+ siteEl('siteRows').innerHTML=sites.slice(sitePage*50,sitePage*50+50).map(s=>'<tr data-site-open="'+s.id+'" tabindex="0"><td><a class="site-open-link" href="client-services-site.html?id='+encodeURIComponent(s.id)+'">'+siteEscape(s.site_code)+'</a></td><td>'+siteEscape(s.site_name)+'</td><td class="site-risk-summary">'+siteRiskSummary(s.risk_summary)+'</td><td class="site-event-count">'+(s.event_summary?'<strong>'+s.event_summary.recent+'</strong>':'Unavailable')+'</td><td>'+siteEscape(s.address||'—')+'</td><td>'+(s.contracts.length?s.contracts.map(c=>'<a href="maintenance-workspace.html?id='+encodeURIComponent(c.id)+'">'+siteEscape(c.code)+' · '+siteEscape(c.name)+'</a>').join('<br>'):'<span class="site-unlinked">Awaiting contract link</span>')+'</td><td>'+siteEscape(s.source_groups.join(', ')||'—')+'</td><td><span class="pill">'+siteEscape(s.status)+'</span></td></tr>').join('')||'<tr><td colspan="8">No sites match these filters.</td></tr>';
  siteEl('siteRows').querySelectorAll('[data-site-open]').forEach(row=>{
   const open=()=>location.assign('client-services-site.html?id='+encodeURIComponent(row.dataset.siteOpen));
   row.addEventListener('click',event=>{if(!event.target.closest('a,button,input,select,textarea'))open();});
