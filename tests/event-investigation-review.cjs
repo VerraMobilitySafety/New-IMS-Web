@@ -37,5 +37,11 @@ const wait=async fn=>{for(let i=0;i<100;i++){if(fn())return;await new Promise(r=
  const complete=w.VeroInvestigationReview.render(payload.questionnaire.review,esc);assert.ok(complete.includes('&lt;script>'));assert.match(w.VeroInvestigationReview.render(null,esc),/have not been inferred/);
  bind({...event,investigation_review_basis:{score:3,label:'Moderate Event'}});assert.equal(root.querySelector('[data-review-question="similar_events"]').hidden,false);assert.equal(root.querySelector('[data-review-question="control_verification"]').hidden,true);
  bind({...event,investigation_review_basis:{score:null,label:'Unverified'}});assert.match(root.querySelector('[data-review-scope]').textContent,/Comprehensive.*unverified/);
+ options.investigation_form.questions.review={...review,systems:['Planning and risk assessment','Procedures and work design','Training and competence','Equipment and maintenance','Supervision and assurance','Communication and handover','Change and organisational conditions']};
+ bind(event);assert.equal(root.querySelectorAll('.system-checklist>[data-review-system]').length,3);assert.equal(root.querySelectorAll('.system-extra [data-review-system]').length,4);assert.equal(root.querySelector('.system-extra').open,false);
+ bind({...event,investigation:{draft:{questionnaire:{review:{version:3,systems:[{system:'Change and organisational conditions',assessment:'effective',explanation:'Prior organisational evidence'}]}}}}});
+ const kept=root.querySelector('[data-review-system="6"]');assert.equal(kept.closest('.system-extra'),null,'Saved optional assessment stays in the visible checklist');assert.equal(kept.querySelector('[data-system-evidence]').hidden,false);assert.equal(kept.querySelector('textarea').value,'Prior organisational evidence');
+ bind({...event,investigation_review_basis:{score:3,label:'Moderate'}});assert.equal(root.querySelectorAll('[data-system-assessment]:required').length,3);
+ bind({...event,investigation_review_basis:{score:4,label:'Major'}});assert.equal(root.querySelectorAll('[data-system-assessment]:required').length,7);assert.equal(root.querySelector('.system-extra'),null);
  dom.window.close();console.log('PASS: adaptive depth, unknown severity, system follow-ups, retained evidence, linked existing/new actions, persistence and escaping.');
 })().catch(e=>{console.error(e);process.exitCode=1});
