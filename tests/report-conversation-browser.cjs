@@ -21,7 +21,7 @@ try{for(const width of [1440,390]){
  const ready=()=>page.waitForFunction(()=>document.querySelector('#reportStatus').textContent.startsWith('Report updated'));
  await page.goto('https://vero.test/reports.html');await ready();if(output)await page.screenshot({path:path.join(output,'conversation-start-'+width+'.png'),fullPage:true});
  assert.equal(await page.locator('#reportWelcome').isVisible(),true);assert.equal(await page.locator('#sendReportRequest').isVisible(),true);assert.equal(await page.locator('#filters').isVisible(),false);
- await page.getByRole('button',{name:'Risk review priorities'}).click();assert.ok((await page.locator('#reportRequest').inputValue()).includes('risk review'));
+ assert.equal(await page.locator('.report-examples').count(),0);await page.locator('#reportRequest').fill('Create a risk review report');
  await page.locator('#sendReportRequest').click();await page.waitForFunction(()=>document.querySelectorAll('.management-section').length===3&&!document.querySelector('#sendReportRequest').disabled);
  assert.equal(plans.at(-1).current,null);assert.equal(aiRequests.at(-1).report,'risk-reviews');assert.ok((await page.locator('#reportConversation').textContent()).includes('Your management report is ready'));
  await page.locator('#reportRequest').fill('Make it shorter for the leadership team');await page.locator('#sendReportRequest').click();await page.waitForFunction(()=>document.querySelector('.management-section').textContent.includes('Shorter overview')&&!document.querySelector('#sendReportRequest').disabled);
