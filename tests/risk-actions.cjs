@@ -215,3 +215,10 @@ test('maintenance work uses contract identifiers and the maintenance workspace',
  assert.equal(context.window.VeroRiskActions.destination({...action,contract_id:null,project_id:42}),null);
  assert.equal(context.window.VeroRiskActions.destination({...action,contract_id:'javascript:bad'}),null);
 });
+
+test('asset type review opens only the server-assigned assessment with validated identifiers',()=>{
+ const {api}=setup();
+ const action={source:'Risks',action_type:'Asset Type Assessment Review',assessment_id:7,target:'https://unsafe.example'};
+ assert.equal(api.destination(action).href,'asset-management.html?assessment=7');
+ for(const id of [null,0,-1,true,'7&admin=1','https://unsafe.example'])assert.equal(api.destination({...action,assessment_id:id}),null);
+});
