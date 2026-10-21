@@ -41,8 +41,17 @@ async function mockInsurance(page,options={}){
     return route.fulfill({json:{status:'success',policies,
      insurance_office:server.office,financial_access:server.financialAccess,
      financial_write_access:server.financialWriteAccess??server.financialAccess,
-     can_register_active:server.canRegisterActive===true,can_attach_to_new_policy:server.canUpload===true&&!server.readOnly,can_create_policies:!server.readOnly,read_only:Boolean(server.readOnly),
+     can_edit_policies:server.canEdit===true,can_register_active:server.canRegisterActive===true,can_attach_to_new_policy:server.canUpload===true&&!server.readOnly,can_create_policies:!server.readOnly,read_only:Boolean(server.readOnly),
      can_link_parent_policies:server.linkingAccess,can_link_programmes:false,limited:Boolean(server.limited)}});
+   }
+   if(/^\/api\/insurance\/policies\/\d+\/edit$/.test(url.pathname)){
+    const p=server.policies.find(p=>p.id===Number(url.pathname.split('/')[4]));
+    if(!server.canEdit)return route.fulfill({status:403,json:{message:'Edit permission denied'}});
+    if(req.method()==='GET'){if(server.editGate)await server.editGate;return route.fulfill({json:{status:'success',policy:p,updated_at:'revision-1'}})}
+    (server.edits??=[]).push(req.postDataJSON());
+    if(server.editMode==='error')return route.fulfill({status:409,json:{message:'Policy changed. Reopen it.'}});
+    const {expected_updated_at,...changes}=req.postDataJSON();Object.assign(p,changes);
+    return route.fulfill({json:{status:'success',id:p.id,policy_status:p.status}});
    }
    if(/^\/api\/insurance\/policies\/\d+\/decision$/.test(url.pathname)){
     server.decisions.push(req.postDataJSON());
@@ -51,6 +60,7 @@ async function mockInsurance(page,options={}){
    if(/^\/api\/insurance\/policies\/\d+\/records$/.test(url.pathname)){
     if(req.method()==='POST'){
      (server.uploads??=[]).push(req.postData());
+     if(server.uploadGate)await server.uploadGate;
      if(server.uploadMode==='invalid')return route.fulfill({status:400,json:{message:'Synthetic unreadable PDF'}});
      if(server.uploadMode==='error')return route.fulfill({status:503,json:{message:'Synthetic uncertain commit'}});
      server.records=[{record_id:9,file_name:'policy.pdf',record_code:'REC-000009',title:'Synthetic attachment',attachment_type:'Policy Schedule',retention_pending:true,status:'Active'}];
