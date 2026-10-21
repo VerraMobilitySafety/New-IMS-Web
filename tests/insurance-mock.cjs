@@ -68,7 +68,7 @@ async function mockInsurance(page,options={}){
     }
     if(server.recordsGate)await server.recordsGate;
     if(server.recordsMode==='error')return route.fulfill({status:503,json:{message:'Synthetic files unavailable'}});
-    return route.fulfill({json:{status:'success',records:server.records||[],can_upload:server.canUpload===true,attachment_types:['Policy Schedule']}});
+    return route.fulfill({json:{status:'success',records:server.records||[],can_upload:server.canUpload===true,can_remove:server.canRemove===true,attachment_types:['Policy Schedule']}});
    }
    return route.abort();
   }

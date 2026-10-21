@@ -23,9 +23,9 @@
 .insurance-register .empty { margin:18px; }
 #insuranceOverviewResults { display:grid; gap:8px; margin-top:18px; }
 #insuranceOverviewResults button { text-align:left; overflow-wrap:anywhere; }
-.insurance-policy-table { table-layout:fixed; }
+.insurance-policy-table { table-layout:fixed; min-width:760px; }
 .insurance-policy-table td,.insurance-policy-table th { overflow-wrap:anywhere; }
-.insurance-policy-table th:first-child { width:40%; }
+.insurance-policy-table th:first-child { width:28%; }
 .insurance-policy-table tr[data-policy-index] { cursor:pointer; }
 .insurance-policy-table tr[data-policy-index]:hover { background:#f5f7ed; }
 .insurance-policy-table tr[data-policy-index]:focus-visible { outline:2px solid var(--charcoal); outline-offset:-2px; }

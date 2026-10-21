@@ -25,9 +25,11 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: node tests/insurance-persistence-browser.cjs
       - run: node tests/insurance-records-browser.cjs
+      - run: node tests/insurance-unlink-browser.cjs
       - run: node tests/insurance-policy-preview-browser.cjs
       - run: node tests/insurance-edit-browser.cjs
       - run: node tests/insurance-jurisdiction-browser.cjs
+      - run: node tests/insurance-list-metadata-browser.cjs
       - run: node tests/insurance-drawer-browser.cjs
       - run: node tests/insurance-layout-browser.cjs
       - run: node tests/insurance-boundaries-browser.cjs

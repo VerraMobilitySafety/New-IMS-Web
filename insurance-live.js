@@ -39,6 +39,8 @@ function policyView(p){
  const view={name:p.policy_name,number:p.policy_number,class:p.insurance_class,
   insurer:p.insurer_name,broker:p.broker_name||'',entity:(p.insured_entities||[]).join('; '),
   country:p.country_code||'',state:p.state_territory||'',inception:p.inception_date,expiry:p.expiry_date,
+  owner:p.owner_name||(p.owner_user_id?'Name unavailable':'Unassigned'),
+  jurisdiction:[p.country_code,p.state_territory].filter(Boolean).join(' / ')||'Not specified',
   currency:p.currency,status:p.status,parent_policy_id:p.parent_policy_id??null};
  if(financialAccess)Object.assign(view,{premium:p.annual_premium??'',
   limit:amounts('limit_amount'),excess:amounts('deductible_amount')});
@@ -130,10 +132,11 @@ $('insuranceToolbar').append(policiesButton);
 function renderPolicyLinks(){
  if(tab!=='Policies'||state!=='ready')return;
  const table=$('content').querySelector('table');if(!table)return;
- const heading=document.createElement('th');heading.scope='col';heading.textContent='Policy document';table.querySelector('thead tr').append(heading);
+ table.querySelectorAll('[data-insurance-document-cell]').forEach(cell=>cell.remove());
+ const heading=document.createElement('th');heading.dataset.insuranceDocumentCell='';heading.scope='col';heading.textContent='Policy document';table.querySelector('thead tr').append(heading);
  for(const row of table.querySelectorAll('tbody tr[data-policy-index]')){
   const policy=livePolicies[Number(row.dataset.policyIndex)];if(!policy)continue;
-  const cell=document.createElement('td');row.append(cell);
+  const cell=document.createElement('td');cell.dataset.insuranceDocumentCell='';row.append(cell);
   cell.addEventListener('click',event=>event.stopPropagation());cell.addEventListener('keydown',event=>event.stopPropagation());
   const view=document.createElement('span');cell.append(view);
   const link=document.createElement('a');link.href='#';link.textContent='View Policy';view.append(link);
@@ -191,6 +194,25 @@ function renderDocuments(target=null,selectedPolicy=null){
     const item=document.createElement('li'),link=document.createElement('a');item.className='insurance-file-card';
     link.href='records.html?record_id='+record.record_id;link.textContent=record.record_code+' - '+record.title;
     item.append(link,document.createTextNode(' · '+record.attachment_type+(record.retention_pending?' · Retention pending':'')));list.append(item);
+    if(result.can_remove===true&&Number.isSafeInteger(record.link_id)&&record.link_id>0){
+     const remove=document.createElement('button');remove.type='button';remove.className='insurance-file-refresh';remove.textContent='Remove from this policy';
+     remove.onclick=async()=>{
+      const selected=livePolicies.find(p=>String(p.id)===String(pid));
+      if(!window.confirm('Remove '+record.record_code+' - '+record.title+' from '+(selected?.policy_name||'this policy')+'? The Record, PDF and other policy links will be kept.'))return;
+      const reason=window.prompt('Reason for removing this policy association:','Attached to the wrong policy');
+      if(reason===null)return;
+      if(!reason.trim()||reason.trim().length>500){window.alert('Enter a reason of up to 500 characters.');return}
+      remove.disabled=true;remove.textContent='Removing association...';
+      try{
+       const saved=await request('/insurance/policies/'+encodeURIComponent(pid)+'/record-links/'+record.link_id,
+        {method:'DELETE',body:JSON.stringify({record_id:record.record_id,record_code:record.record_code,reason:reason.trim()})});
+       if(saved.removed_link_id!==record.link_id||saved.record_id!==record.record_id||saved.record_preserved!==true)throw new Error('Invalid removal confirmation.');
+       await loadDocuments();renderPolicyLinks();
+      }catch(error){remove.disabled=false;remove.textContent='Remove from this policy';
+       const notice=document.createElement('p');notice.setAttribute('role','alert');notice.textContent='Removal not confirmed: '+error.message+' Refresh files before trying again.';item.append(notice)}
+     };
+     item.append(remove);
+    }
    }
    if(!result.records.length){const empty=document.createElement('p');empty.textContent='No accessible files attached.';body.append(empty)}
    body.append(list);
