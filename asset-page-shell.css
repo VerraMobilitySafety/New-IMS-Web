@@ -1,0 +1,21 @@
+/* Asset page shell. The banner uses header.css independently of session loading. */
+*{box-sizing:border-box}body{margin:0;background:#f7f8f7;color:#292725;font-family:Montserrat,Arial,sans-serif;font-size:12px}button{font:700 12px Montserrat,Arial,sans-serif;cursor:pointer;border:1px solid #e5e1de;border-radius:8px;padding:12px 15px;background:#fff;color:#3d3935}#vh[hidden],#vh [hidden]{display:none!important}#vh{font:14px/1.55 Montserrat,Verdana,Arial,sans-serif;color:#292725}#vh .secondary{border:1px solid #e5e1de;border-radius:6px;padding:8px 12px;background:#fff}#vh button:focus-visible{outline:3px solid #53691c;outline-offset:3px}#heights-auth-status{padding:24px 0;font-size:12px}.avatar{width:38px;height:38px;border-radius:50%;background:#3d3935;color:#fff;display:grid;place-items:center;font-weight:800}
+/* CANONICAL ACCOUNT */
+/* VERO GLOBAL ACCOUNT MENU */
+.vero-account{position:relative;z-index:50}
+.vero-account-trigger{display:flex;align-items:center;gap:9px;border:0;background:transparent;padding:0;cursor:pointer;font-family:inherit;color:inherit}
+.vero-account-trigger .avatar{cursor:pointer}
+.vero-account-name{font-size:11px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.22);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vero-account-caret{font-size:9px;color:rgba(255,255,255,.9);transition:transform .16s ease}
+.vero-account.open .vero-account-caret{transform:rotate(180deg)}
+.vero-account-menu{position:absolute;right:0;top:48px;width:250px;background:#fff;border:1px solid rgba(61,57,53,.12);border-radius:11px;box-shadow:0 16px 38px rgba(30,28,26,.18);overflow:hidden;display:none;text-align:left;color:#292725}
+.vero-account.open .vero-account-menu{display:block}
+.vero-account-profile{padding:15px 16px 13px;border-bottom:1px solid #E5E1DE}
+.vero-account-profile b{display:block;font-size:12px;color:#3D3935;margin-bottom:4px}
+.vero-account-profile small{display:block;font-size:9px;color:#857874;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vero-account-item{width:100%;display:flex;align-items:center;gap:9px;border:0;background:#fff;padding:12px 16px;font:700 10px Montserrat,Verdana,Arial,sans-serif;color:#3D3935;text-decoration:none;cursor:pointer}
+.vero-account-item:hover{background:#F7F8F7}
+.vero-account-item.admin{display:none}
+.vero-account-item.signout{border-top:1px solid #E5E1DE;color:#8f2929}
+.vero-account-icon{width:18px;text-align:center;font-size:13px}
+@media(max-width:720px){.vero-account-name{display:none}.vero-account-menu{right:0;width:230px}}

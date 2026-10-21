@@ -2,9 +2,9 @@ name: Asset register browser validation
 on:
   push:
     branches: [main]
-    paths: ['asset-management.html', 'asset-management.js', 'asset-management.css', 'tests/asset-management.cjs', 'asset-type-risk.js', 'asset-type-risk.css', 'tests/asset-type-risk.cjs', '.github/workflows/asset-register-validation.yml']
+    paths: ['asset-management.html', 'asset-management.js', 'asset-management.css', 'asset-page-shell.css', 'asset-page-auth.js', 'tests/asset-header.cjs', 'asset-register-layout.css', 'tests/asset-layout.cjs', 'tests/asset-management.cjs', 'asset-type-risk.js', 'asset-type-risk.css', 'tests/asset-type-risk.cjs', '.github/workflows/asset-register-validation.yml']
   pull_request:
-    paths: ['asset-management.html', 'asset-management.js', 'asset-management.css', 'tests/asset-management.cjs', 'asset-type-risk.js', 'asset-type-risk.css', 'tests/asset-type-risk.cjs', '.github/workflows/asset-register-validation.yml']
+    paths: ['asset-management.html', 'asset-management.js', 'asset-management.css', 'asset-page-shell.css', 'asset-page-auth.js', 'tests/asset-header.cjs', 'asset-register-layout.css', 'tests/asset-layout.cjs', 'tests/asset-management.cjs', 'asset-type-risk.js', 'asset-type-risk.css', 'tests/asset-type-risk.cjs', '.github/workflows/asset-register-validation.yml']
 permissions:
   contents: read
 jobs:
@@ -19,3 +19,5 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: node tests/asset-management.cjs
       - run: node tests/asset-type-risk.cjs
+      - run: node tests/asset-layout.cjs
+      - run: node tests/asset-header.cjs

@@ -1,10 +1,10 @@
 name: Reporting summary validation
 on:
   pull_request:
-    paths: ['report-catalogue.js', 'report-query.js', 'report-powerpoint.js', 'vendor/pptxgenjs-*', 'action-owner-report.js', 'tests/action-owner-report-browser.cjs', 'system-reports.js', 'tests/system-reports.cjs', 'tests/system-reports-browser.cjs', 'reports.*', 'saved-reports.js', 'tests/saved-reports-browser.cjs', 'report-conversation.js', 'tests/report-conversation-browser.cjs', 'report-ai-summary.js', 'tests/report-ai-summary-browser.cjs', 'nav.js', 'tests/reports-browser.cjs', '.github/workflows/reports-validation.yml']
+    paths: ['report-ai-request.js', 'tests/report-ai-request.cjs', 'report-catalogue.js', 'report-query.js', 'report-powerpoint.js', 'vendor/pptxgenjs-*', 'action-owner-report.js', 'tests/action-owner-report-browser.cjs', 'system-reports.js', 'tests/system-reports.cjs', 'tests/system-reports-browser.cjs', 'reports.*', 'saved-reports.js', 'tests/saved-reports-browser.cjs', 'report-conversation.js', 'tests/report-conversation-browser.cjs', 'report-ai-summary.js', 'tests/report-ai-summary-browser.cjs', 'nav.js', 'tests/reports-browser.cjs', '.github/workflows/reports-validation.yml']
   push:
     branches: [main]
-    paths: ['report-catalogue.js', 'report-query.js', 'report-powerpoint.js', 'vendor/pptxgenjs-*', 'action-owner-report.js', 'tests/action-owner-report-browser.cjs', 'system-reports.js', 'tests/system-reports.cjs', 'tests/system-reports-browser.cjs', 'reports.*', 'saved-reports.js', 'tests/saved-reports-browser.cjs', 'report-conversation.js', 'tests/report-conversation-browser.cjs', 'report-ai-summary.js', 'tests/report-ai-summary-browser.cjs', 'nav.js', 'tests/reports-browser.cjs', '.github/workflows/reports-validation.yml']
+    paths: ['report-ai-request.js', 'tests/report-ai-request.cjs', 'report-catalogue.js', 'report-query.js', 'report-powerpoint.js', 'vendor/pptxgenjs-*', 'action-owner-report.js', 'tests/action-owner-report-browser.cjs', 'system-reports.js', 'tests/system-reports.cjs', 'tests/system-reports-browser.cjs', 'reports.*', 'saved-reports.js', 'tests/saved-reports-browser.cjs', 'report-conversation.js', 'tests/report-conversation-browser.cjs', 'report-ai-summary.js', 'tests/report-ai-summary-browser.cjs', 'nav.js', 'tests/reports-browser.cjs', '.github/workflows/reports-validation.yml']
 permissions:
   contents: read
 jobs:
@@ -26,7 +26,7 @@ jobs:
 
       - run: node tests/saved-reports-browser.cjs
 
-      - run: node --test tests/system-reports.cjs
+      - run: node --test tests/report-ai-request.cjs tests/system-reports.cjs
       - run: node tests/system-reports-browser.cjs
 
       - run: node tests/action-owner-report-browser.cjs
