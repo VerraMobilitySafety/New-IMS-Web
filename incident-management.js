@@ -56,7 +56,7 @@ function finishDashboardUpdate(update){
 }
 async function monthlyDashboard(){
  message('');const page=location.href,update=beginDashboardUpdate();
- try{const d=await api(eventDataPath('/incidents/analytics',true));if(location.href!==page||update.request!==dashboardRequest)return;update.scroll={x:window.scrollX,y:window.scrollY};window.VeroMonthlyReports.render({data:d,content,esc,tabs:reportTabs(),period:periodControl(),navigate,bind:()=>{bindReportTabs();bindPeriodControl();},periodParams});}
+ try{const d=await api(eventDataPath('/incidents/analytics',true));if(location.href!==page||update.request!==dashboardRequest)return;update.scroll={x:window.scrollX,y:window.scrollY};window.VeroMonthlyReports.render({data:d,content,esc,api,users:options.users,openEvent:eventView,tabs:reportTabs(),period:periodControl(),navigate,bind:()=>{bindReportTabs();bindPeriodControl();},periodParams});}
  catch(error){if(location.href!==page||update.request!==dashboardRequest)return;if(content.querySelector('#monthly-event-dashboard,#incident-dashboard'))message('The dashboard could not be updated. The previous results are still shown. '+error.message,true);else{content.innerHTML=reportTabs()+'<section class="card"><h2>Monthly reporting is temporarily unavailable</h2><p>'+esc(error.message)+'</p><button type="button" id="retry-monthly-report">Try again</button></section>';bindReportTabs();$('retry-monthly-report').onclick=monthlyDashboard;}}
  finally{finishDashboardUpdate(update);}
 }
