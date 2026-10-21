@@ -5,7 +5,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 const root=path.join(__dirname,'..');
 const code=fs.readFileSync(path.join(root,'risk-page-loader.js'),'utf8');
-test('all 38 VERO shell screens use one clean camera loader and explicitly settle initial tasks',()=>{
+test('all 39 VERO shell screens use one clean camera loader and explicitly settle initial tasks',()=>{
  let count=0;
  for(const file of fs.readdirSync(root).filter(f=>f.endsWith('.html'))){
   const html=fs.readFileSync(path.join(root,file),'utf8');
@@ -20,10 +20,16 @@ test('all 38 VERO shell screens use one clean camera loader and explicitly settl
   assert.ok(html.indexOf('src="risk-page-loader.js')<html.indexOf('<body'),file+' loader precedes content');
   assert.ok(!html.includes('src="risk-nk9-animation.js'),file+' no old flash animation');
   const tasks=html.match(/src="risk-page-loader\.js[^\"]*" data-tasks="([^\"]+)"/)[1].split(/\s+/);
-  for(const task of tasks)assert.ok(html.includes("?.ready('"+task+"')"),file+': '+task);
+  let settlementSource=html;
+  for(const script of html.matchAll(/<script\b[^>]*src="([^"?#]+)(?:[?#][^"]*)?"/g)){
+   if(script[1].includes('://')||script[1].startsWith('//'))continue;
+   const local=path.resolve(root,script[1]);
+   if(local.startsWith(root+path.sep)&&fs.existsSync(local))settlementSource+='\n'+fs.readFileSync(local,'utf8');
+  }
+  for(const task of tasks)assert.ok(settlementSource.includes("?.ready('"+task+"')"),file+': '+task);
   for(const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g))new vm.Script(match[1],{filename:file});
  }
- assert.equal(count,38);
+ assert.equal(count,39);
  const css=fs.readFileSync(path.join(root,'risk-page-loader.css'),'utf8');
  assert.match(css,/prefers-reduced-motion:reduce/);
  assert.match(fs.readFileSync(path.join(root,'risk-nk9-animation.css'),'utf8'),/nk9-flash,\.vero-page-loader::after\{display:none\}/);
