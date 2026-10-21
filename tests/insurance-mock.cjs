@@ -17,6 +17,7 @@ async function mockInsurance(page,options={}){
   if(url.hostname==='verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net'){
    if(url.pathname==='/api/auth/me')return route.fulfill({json:{user:{
     first_name:'Synthetic',last_name:'Tester',email:'synthetic@example.test',vero_role:'User'}}});
+   if(url.pathname==='/api/insurance/renewals')return route.fulfill({json:{status:'success',enabled:false,renewals:[]}});
    if(url.pathname==='/api/insurance/access')return route.fulfill(server.audienceDenied?{status:403,json:{message:'Insurance access is not permitted.'}}:{json:{status:'success',allowed:true}});
    if(url.pathname==='/api/insurance/policies'){
     if(server.audienceDenied)return route.fulfill({status:403,json:{message:'Insurance access is not permitted.'}});
