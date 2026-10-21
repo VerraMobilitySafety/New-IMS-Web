@@ -90,6 +90,7 @@
     const monthly=dashboard.querySelector('.monthly-filters');
     if(monthly){filters.append(...monthly.children);monthly.remove()}
     dashboard.querySelector('.monthly-heading')?.remove();
+    const contextFilters=dashboard.querySelector('.event-context-filters');if(contextFilters){filters.append(...contextFilters.children);contextFilters.remove()}
    }
   }
   new MutationObserver(render).observe(content,{childList:true});render();
