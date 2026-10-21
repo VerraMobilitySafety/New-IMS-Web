@@ -8,13 +8,54 @@ function siteRiskSummary(summary){
  return '<span class="site-risk-badge site-risk-'+classes[band]+'" title="Highest approved residual risk">'+siteEscape(band)+'</span><span class="site-risk-detail">Average '+siteEscape(summary.average_residual_score)+' / 125 · '+siteEscape(summary.assessed_risks)+' assessed</span>'+pending;
 }
 const siteEl=id=>document.getElementById(id);
-let allSites=[],sitePage=0,siteOptions={contracts:[],users:[]};
+let allSites=[],sitePage=0,siteOptions={contracts:[],users:[]},siteSort={key:'reference',direction:'asc'};
 const siteEscape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const siteSortText=new Intl.Collator(undefined,{numeric:true,sensitivity:'base'});
+const siteRiskOrder={Low:0,Moderate:1,High:2,Significant:3};
+function siteSortValue(site,key){
+ switch(key){
+  case 'reference':return site.site_code;
+  case 'site':return site.site_name;
+  case 'risk':{
+   const risk=site.risk_summary?.highest;
+   return risk&&Object.hasOwn(siteRiskOrder,risk.rating)?[siteRiskOrder[risk.rating],risk.score,site.risk_summary.average_residual_score]:null;
+  }
+  case 'events':return site.event_summary?.recent??null;
+  case 'address':return site.address||null;
+  case 'contract':return site.contracts.length?site.contracts.map(c=>c.code+' · '+c.name).join('; '):null;
+  case 'source':return site.source_groups.join(', ')||null;
+  case 'status':return site.status||null;
+ }
+ return null;
+}
+function compareSites(a,b){
+ const av=siteSortValue(a,siteSort.key),bv=siteSortValue(b,siteSort.key);
+ const missing=v=>v===null||v===undefined||v==='';
+ // Missing assessments, unavailable event counts and blank values stay last in both directions.
+ if(missing(av)!==missing(bv))return missing(av)?1:-1;
+ let result=0;
+ if(!missing(av)){
+  if(Array.isArray(av)){for(let i=0;i<av.length&&!result;i++)result=(av[i]??0)-(bv[i]??0);}
+  else result=typeof av==='number'?av-bv:siteSortText.compare(av,bv);
+ }
+ return result*(siteSort.direction==='asc'?1:-1)||siteSortText.compare(a.site_code,b.site_code)||a.id-b.id;
+}
+function updateSiteSortHeaders(){
+ document.querySelectorAll('[data-site-sort]').forEach(button=>{
+  const active=button.dataset.siteSort===siteSort.key,numeric=['risk','events'].includes(button.dataset.siteSort);
+  button.closest('th').setAttribute('aria-sort',active?(siteSort.direction==='asc'?'ascending':'descending'):'none');
+  button.querySelector('.site-sort-indicator').textContent=active?(siteSort.direction==='asc'?'↑':'↓'):'↕';
+  const next=active?(siteSort.direction==='asc'?'desc':'asc'):(numeric?'desc':'asc');
+  button.title=numeric?(next==='desc'?'Sort highest to lowest':'Sort lowest to highest'):(next==='asc'?'Sort A–Z':'Sort Z–A');
+ });
+}
+
 function drawSites(){
  const query=siteEl('siteSearch').value.trim().toLowerCase(),contract=siteEl('siteContract').value,status=siteEl('siteStatus').value;
- const history=siteEl('siteEventFilter').value,sort=siteEl('siteSort').value;
+ const history=siteEl('siteEventFilter').value;
  const sites=allSites.filter(s=>(!status||s.status===status)&&(!contract||(contract==='unlinked'?!s.contracts.length:s.contracts.some(c=>String(c.id)===contract)))&&(!history||(history==='reported'?s.event_summary?.recent>0:history==='open'?s.event_summary?.open>0:s.event_summary?.recent===0))&&(!query||[s.site_code,s.site_name,s.address,s.owner_name,...s.source_groups,...s.contracts.flatMap(c=>[c.code,c.name])].some(v=>String(v||'').toLowerCase().includes(query))));
- sites.sort((a,b)=>(sort==='events'?(b.event_summary?.recent??-1)-(a.event_summary?.recent??-1):sort==='open'?(b.event_summary?.open??-1)-(a.event_summary?.open??-1):sort==='impact'?(b.event_summary?.highest_score??-1)-(a.event_summary?.highest_score??-1):0)||a.site_code.localeCompare(b.site_code));
+ sites.sort(compareSites);updateSiteSortHeaders();
  const pages=Math.max(1,Math.ceil(sites.length/50));sitePage=Math.min(sitePage,pages-1);
  siteEl('siteRows').innerHTML=sites.slice(sitePage*50,sitePage*50+50).map(s=>'<tr data-site-open="'+s.id+'" tabindex="0"><td><a class="site-open-link" href="client-services-site.html?id='+encodeURIComponent(s.id)+'">'+siteEscape(s.site_code)+'</a></td><td>'+siteEscape(s.site_name)+'</td><td class="site-risk-summary">'+siteRiskSummary(s.risk_summary)+'</td><td class="site-event-count">'+(s.event_summary?'<strong>'+s.event_summary.recent+'</strong>':'Unavailable')+'</td><td>'+siteEscape(s.address||'—')+'</td><td>'+(s.contracts.length?s.contracts.map(c=>'<a href="maintenance-workspace.html?id='+encodeURIComponent(c.id)+'">'+siteEscape(c.code)+' · '+siteEscape(c.name)+'</a>').join('<br>'):'<span class="site-unlinked">Awaiting contract link</span>')+'</td><td>'+siteEscape(s.source_groups.join(', ')||'—')+'</td><td><span class="pill">'+siteEscape(s.status)+'</span></td></tr>').join('')||'<tr><td colspan="8">No sites match these filters.</td></tr>';
  siteEl('siteRows').querySelectorAll('[data-site-open]').forEach(row=>{
@@ -41,7 +82,13 @@ async function loadSites(){
   siteEl('siteRegister').hidden=false;siteEl('siteMessage').textContent='';drawSites();return true;
  }catch(e){siteEl('siteMessage').textContent=e.message;siteEl('siteRetry').hidden=false;}
 }
-for(const id of ['siteSearch','siteContract','siteStatus','siteEventFilter','siteSort'])siteEl(id).addEventListener(id==='siteSearch'?'input':'change',()=>{sitePage=0;drawSites();});
+for(const id of ['siteSearch','siteContract','siteStatus','siteEventFilter'])siteEl(id).addEventListener(id==='siteSearch'?'input':'change',()=>{sitePage=0;drawSites();});
+document.querySelectorAll('[data-site-sort]').forEach(button=>button.addEventListener('click',()=>{
+ const key=button.dataset.siteSort;
+ siteSort={key,direction:key===siteSort.key?(siteSort.direction==='asc'?'desc':'asc'):(['risk','events'].includes(key)?'desc':'asc')};
+ sitePage=0;drawSites();
+}));
+updateSiteSortHeaders();
 siteEl('sitePrevious').onclick=()=>{sitePage--;drawSites();};siteEl('siteNext').onclick=()=>{sitePage++;drawSites();};siteEl('siteRetry').onclick=()=>{siteEl('siteRetry').hidden=true;void loadSites();};
 siteEl('siteAdd').onclick=()=>openSiteEditor(null);
 siteEl('siteMatchHistory').onclick=()=>openHistoricalMatches();

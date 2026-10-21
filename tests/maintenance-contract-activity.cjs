@@ -271,10 +271,10 @@ test('site event history distinguishes missing coverage, counts and impact and s
   assert.equal(await rows.nth(0).locator('.site-event-count strong').innerText(),'0');
   assert.equal(await rows.nth(1).locator('.site-event-count strong').innerText(),'1');
   assert.match(await rows.nth(2).innerText(),/Unavailable/);
-  await page.getByLabel('Sort by',{exact:true}).selectOption('events');
+  await page.getByRole('button',{name:'Sort by Events (last 12 months)',exact:true}).click();
   assert.equal(await rows.first().locator('td').first().innerText(),'B');
-  await page.getByLabel('Sort by',{exact:true}).selectOption('impact');
-  assert.equal(await rows.first().locator('td').first().innerText(),'D');
+  await page.getByRole('button',{name:'Sort by Events (last 12 months)',exact:true}).click();
+  assert.equal(await rows.first().locator('td').first().innerText(),'A');
   await page.getByLabel('Event history',{exact:true}).selectOption('open');
   assert.equal(await rows.count(),1);assert.equal(await rows.first().locator('td').first().innerText(),'B');
   await page.getByLabel('Search sites',{exact:true}).fill('No such site');
