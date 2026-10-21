@@ -33,5 +33,5 @@ test('investigation sites use recorded Verra context, retain every site and sepa
  const sources=await api.load('investigations',async path=>{assert.equal(path,'/incidents?reporting=monthly');return {events};});
  const result=api.analyse(sources,{group_by:'site'},'2026-10-21')[0];assert.equal(result.total,9);assert.equal(result.groups.length,8);assert.ok(!JSON.stringify(result).includes('Client Must Not Become Verra Site'));assert.ok(result.rows.some(r=>r.status==='Historical Hold'));assert.ok(result.groups.some(g=>g[0]==='Verra Site Not Recorded'));
  const tables=[];api.render(sources,{group_by:'site'},{kpis:()=>'',note:()=>'',table:(title,headers,rows)=>{tables.push({title,headers,rows});return '';}},'2026-10-21');
- const sites=tables.find(t=>t.title==='Investigations by Verra Mobility Site');assert.equal(sites.rows.length,8);assert.deepEqual(Array.from(sites.rows.find(r=>r[0]==='Site 0')),['Site 0',2,1,0,0,1,0]);
+ const sites=tables.find(t=>t.title==='Investigations by Verra Mobility Site');assert.equal(sites.rows.length,8);assert.ok(!tables.some(t=>t.title.startsWith('Matching register entries')));assert.deepEqual(Array.from(sites.rows.find(r=>r[0]==='Site 0')),['Site 0',2,1,0,0,1,0]);
 });
