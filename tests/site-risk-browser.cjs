@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const {chromium}=require('playwright');
 const root=path.join(__dirname,'..');
-const site={id:123,site_code:'SITE-123',site_name:'Harbour service site',status:'Active',address:'Example street',notes:'Shared site',owner_name:'Example Owner',contracts:[],source_groups:[],event_summary:{recent:0,open:0}};
+const site={id:123,site_code:'SITE-123',site_name:'Harbour service site',status:'Active',address:'Example street',notes:'Shared site',owner_name:'Example Owner',contracts:[],source_groups:[],event_summary:{recent:0,open:0},risk_summary:{highest:{rating:'Significant',score:75},average_residual_score:67.5,assessed_risks:2,awaiting_assessment:1}};
 const options={can_submit:true,schema_ready:true,classification_categories:[{id:8,tier:2,name:'Delivery'},{id:9,tier:1,name:'Traffic Interaction'}],classification_relationships:[{parent_id:8,child_id:9}],users:[{id:11,name:'Example Owner',email:'owner@example.test'}],documents:[{id:4,code:'DOC-4',title:'Traffic Procedure',version:'2'}],controls:[],treatment_owners:[{id:11,name:'Example Owner'}],review_policy:{reference_date:'2026-10-22',context:'Site'}};
 let browser;
 test.before(async()=>{browser=await chromium.launch({headless:true,...(process.env.SITE_RISK_BROWSER?{executablePath:process.env.SITE_RISK_BROWSER}:{})});});
@@ -25,9 +25,9 @@ async function setup(width=1440){
  });
  return {page,errors,posts,succeed:()=>fail=false};
 }
-test('site rows open by pointer and keyboard, while Edit keeps its existing action',async()=>{
+test('site rows open by pointer and keyboard, with aggregate risk before Events and no edit actions',async()=>{
  const {page,errors}=await setup();try{
- await page.goto('https://vero.test/client-services-sites.html');await page.getByRole('button',{name:'Edit site SITE-123'}).click();assert.equal(await page.locator('#globalSiteDialog').isVisible(),true);await page.getByRole('button',{name:'Cancel',exact:true}).click();assert.match(page.url(),/client-services-sites.html$/);
+ await page.goto('https://vero.test/client-services-sites.html');await page.getByRole('cell',{name:site.site_name,exact:true}).waitFor();assert.deepEqual(await page.locator('.global-site-table th').allTextContents(),['Reference','Site','Aggregate risk','Events (last 12 months)','Address','Contract','Source group','Status']);assert.equal(await page.locator('[data-site-edit]').count(),0);assert.equal(await page.getByRole('columnheader',{name:'Actions',exact:true}).count(),0);assert.match(await page.locator('.site-risk-summary').innerText(),/Significant/);assert.match(await page.locator('.site-risk-summary').innerText(),/Average 67.5 \/ 125 · 2 assessed/);assert.match(await page.locator('.site-risk-summary').innerText(),/1 awaiting assessment/);
  await page.locator('[data-site-open] td').nth(1).click();await page.waitForURL('**/client-services-site.html?id=123');await page.getByRole('heading',{name:site.site_name}).waitFor();
  await page.goto('https://vero.test/client-services-sites.html');await page.locator('[data-site-open]').focus();await page.keyboard.press('Enter');await page.waitForURL('**/client-services-site.html?id=123');assert.deepEqual(errors,[]);
  }finally{await page.close();}
@@ -55,3 +55,13 @@ test('unlinked site assessment retains its fields after failure, retries once an
  }finally{await page.close();}}
 });
 
+
+test('aggregate cells distinguish unassessed, unavailable and approved bands at desktop and mobile widths',async()=>{
+ for(const width of [1440,390]){const {page,errors}=await setup(width);try{
+ await page.goto('https://vero.test/client-services-sites.html');await page.locator('.site-risk-badge').waitFor();
+ for(const [summary,expected] of [[null,'Unavailable'],[{highest:null,assessed_risks:0,average_residual_score:null,awaiting_assessment:0},'Not assessed'],[{highest:{rating:'Low'},assessed_risks:1,average_residual_score:5,awaiting_assessment:0},'Low']]){
+ await page.evaluate(summary=>{allSites[0].risk_summary=summary;drawSites();},summary);assert.match(await page.locator('.site-risk-summary').innerText(),new RegExp(expected));}
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),true);assert.deepEqual(errors,[]);
+ await page.screenshot({path:path.join(__dirname,'site-aggregate-'+width+'.png'),fullPage:true});
+ }finally{await page.close();}}
+});
