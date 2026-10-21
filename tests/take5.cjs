@@ -2,7 +2,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
 const {JSDOM}=require('jsdom'),root=path.join(__dirname,'..');
 const html=fs.readFileSync(path.join(root,'take-5.html'),'utf8'),script=fs.readFileSync(path.join(root,'take5.js'),'utf8');
 const wait=()=>new Promise(r=>setTimeout(r,15));
-async function test(){
+async function test(preReady=false){
  const dom=new JSDOM(html,{url:'https://vero.test/take-5.html',runScripts:'outside-only'}),w=dom.window,d=w.document,calls=[];
  w.HTMLCanvasElement.prototype.getContext=()=>({clearRect(){},drawImage(){},beginPath(){},moveTo(){},lineTo(){},stroke(){}});
  w.HTMLCanvasElement.prototype.setPointerCapture=()=>{};
@@ -15,7 +15,8 @@ async function test(){
   if(url.endsWith('/take5'))return{ok:true,json:async()=>({assessments:saved?[{...saved,task:saved.payload.task,site:saved.payload.site,updated_at:'2026-10-22T00:00:00Z'}]:[]})};
   return{ok:true,json:async()=>({assessment:saved})};
  };
- w.eval(script);assert.equal(calls.length,0,'wait for authenticated ready event');w.dispatchEvent(new w.Event('vero-risk-auth-ready'));await wait();
+ if(preReady)d.getElementById('vh').hidden=false;
+ w.eval(script);if(!preReady)assert.equal(calls.length,0,'wait for authenticated ready event');w.dispatchEvent(new w.Event('vero-risk-auth-ready'));await wait();
  const input=(el,value)=>{el.value=value;el.dispatchEvent(new w.Event(el.tagName==='SELECT'?'change':'input',{bubbles:true}));};
  assert.equal(d.querySelectorAll('.t5-check input').length,9);assert.equal(d.querySelectorAll('#take5Hazards img').length,0,'hazard names render safely');
  input(d.getElementById('take5_task'),'Inspect road equipment');input(d.getElementById('take5_site'),'Test site');
@@ -39,4 +40,4 @@ async function test(){
  const before=calls.filter(c=>c.init.method==='PUT').length;d.getElementById('take5Form').dispatchEvent(new w.Event('submit',{cancelable:true}));await wait();assert.equal(calls.filter(c=>c.init.method==='PUT').length,before,'incomplete submissions never sent');
  dom.window.close();console.log('PASS Take 5: auth gate, exact scoring, checks, repeaters, signature invalidation, retry, save, submit, read-only records, required fields and safe text.');
 }
-test().catch(e=>{console.error(e);process.exitCode=1;});
+test().then(()=>test(true)).catch(e=>{console.error(e);process.exitCode=1;});
