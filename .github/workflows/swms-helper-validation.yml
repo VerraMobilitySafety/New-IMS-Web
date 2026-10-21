@@ -1,7 +1,7 @@
 name: SWMS helper browser validation
 on:
   pull_request:
-    paths: ['swms-helper.*', 'swms-service-documents.js', 'safe-work-method-statement.html', 'customer-contracts.js', 'maintenance-workspace.html', 'tests/swms-helper-browser.cjs', '.github/workflows/swms-helper-validation.yml']
+    paths: ['swms-helper.*', 'swms-ai.js', 'swms-service-documents.js', 'safe-work-method-statement.html', 'customer-contracts.js', 'maintenance-workspace.html', 'tests/swms-helper-browser.cjs', '.github/workflows/swms-helper-validation.yml']
 permissions:
   contents: read
 jobs:

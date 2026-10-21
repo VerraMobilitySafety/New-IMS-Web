@@ -48,6 +48,8 @@ function addStep(value={}){
  }
  const remove=node('button','Remove step');remove.type='button';remove.className='secondary';remove.onclick=()=>{fieldset.remove();[...host.children].forEach((f,i)=>f.querySelector('legend').textContent='Work step '+(i+1));};fieldset.append(remove);host.append(fieldset);
 }
+window.VeroSwmsApplyDraft=data=>{for(const [key,value] of Object.entries(data)){if(key==='steps')continue;const field=el('swmsForm').elements.namedItem(key);if(field)field.value=value||'';}el('swmsSteps').replaceChildren();for(const step of data.steps||[])addStep(step);};
+window.VeroSwmsAssistant.init();
 el('swmsGenerate').onclick=()=>{el('swmsFormStatus').textContent='';el('swmsDialog').showModal();};
 el('swmsClose').onclick=()=>{if(!busy)el('swmsDialog').close();};el('swmsDialog').addEventListener('cancel',e=>{if(busy)e.preventDefault();});
 el('swmsAddStep').onclick=()=>{if(el('swmsSteps').children.length<30)addStep();};addStep();
@@ -55,17 +57,18 @@ el('swmsForm').onsubmit=async event=>{
  event.preventDefault();if(busy||!el('swmsForm').reportValidity())return;
  if(!el('swmsSteps').children.length){el('swmsFormStatus').textContent='Add at least one work step.';return;}
  const data=Object.fromEntries(new FormData(el('swmsForm')));data.contract_id=Number(data.contract_id);data.review_confirmed=el('swmsReviewConfirmed').checked;
+ try{window.VeroSwmsAssistant.append(data);}catch(error){el('swmsFormStatus').textContent=error.message;return;}
  data.steps=[...el('swmsSteps').children].map(f=>Object.fromEntries([...f.querySelectorAll('[data-field]')].map(i=>[i.dataset.field,i.value])));
  busy=true;el('swmsSubmit').disabled=true;el('swmsClose').disabled=true;el('swmsFormStatus').textContent='Generating and saving to Operational Documents…';
  try{const result=await request('/swms',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-  el('swmsDialog').close();el('swmsForm').reset();el('swmsSteps').replaceChildren();addStep();if(contextId)el('swmsContract').value=contextId;
+  el('swmsDialog').close();el('swmsForm').reset();window.VeroSwmsAssistant.reset();el('swmsSteps').replaceChildren();addStep();if(contextId)el('swmsContract').value=contextId;
   el('swmsSaved').hidden=false;el('swmsSaved').textContent='SWMS saved as Document Request #'+result.request.id+'. It is linked to the selected client service and awaits Document Control review.';await load();
  }catch(e){el('swmsFormStatus').textContent=e.message+' Your entered details are still here. If the connection failed, close this window and refresh the register before resubmitting.';}
  finally{busy=false;el('swmsSubmit').disabled=false;el('swmsClose').disabled=false;}
 };
 el('swmsRefresh').onclick=load;for(const id of ['swmsSearch','swmsServiceFilter','swmsStateFilter'])el(id).addEventListener(id==='swmsSearch'?'input':'change',()=>{if(loaded)render();});
 window.addEventListener('vero-risk-auth-ready',async()=>{
- try{const data=await request('/documents/link-options');services=(data.options||[]).filter(x=>x.type==='Contract');el('swmsContract').replaceChildren(new Option('Select a client service…',''));for(const s of services)el('swmsContract').add(new Option(s.label+(s.client?' · '+s.client:''),s.id));el('swmsContract').value=contextId;el('swmsGenerate').disabled=!services.length;el('swmsGenerate').title=services.length?'':'No accessible client services are available.';await load();}
+ try{const data=await request('/documents/link-options');services=(data.options||[]).filter(x=>x.type==='Contract');window.VeroSwmsAssistant.services(services,contextId);el('swmsContract').replaceChildren(new Option('Select a client service…',''));for(const s of services)el('swmsContract').add(new Option(s.label+(s.client?' · '+s.client:''),s.id));el('swmsContract').value=contextId;el('swmsGenerate').disabled=!services.length;el('swmsGenerate').title=services.length?'':'No accessible client services are available.';await load();}
  catch(e){el('swmsStatus').textContent=e.message;}
  finally{window.dispatchEvent(new Event('vero-risk-resources-settled'));}
 },{once:true});
