@@ -35,12 +35,13 @@ async function request(path,options={}){
 }
 function policyView(p){
  const amounts=key=>(p.coverages||[]).filter(c=>c[key]!=null)
-  .map(c=>c.currency===p.currency?c[key]:c.currency+' '+c[key]).join(' / ');
+  .map(c=>c.currency===p.currency?c[key]:(c.currency||'Currency unstated')+' '+c[key]).join(' / ');
  const view={name:p.policy_name,number:p.policy_number,class:p.insurance_class,
   insurer:p.insurer_name,broker:p.broker_name||'',entity:(p.insured_entities||[]).join('; '),
   country:p.country_code||'',state:p.state_territory||'',inception:p.inception_date,expiry:p.expiry_date,
   owner:p.owner_name||(p.owner_user_id?'Name unavailable':'Unassigned'),
   jurisdiction:[p.country_code,p.state_territory].filter(Boolean).join(' / ')||'Not specified',
+  coverage:p.coverage_geography?.scope==='Countries'?p.coverage_geography.countries.map(c=>c.country_code+(c.states?.length?' / '+c.states.join(', '):'')).join('; '):p.coverage_geography?.scope||'Unspecified',
   currency:p.currency,status:p.status,parent_policy_id:p.parent_policy_id??null};
  if(financialAccess)Object.assign(view,{premium:p.annual_premium??'',
   limit:amounts('limit_amount'),excess:amounts('deductible_amount')});
@@ -150,7 +151,7 @@ function renderPolicyLinks(){
     const result=await request('/insurance/policies/'+encodeURIComponent(policy.id)+'/records');
     if(!cell.isConnected)return;
     if(!Array.isArray(result.records))throw new Error('Invalid file list.');
-    const candidates=result.records.filter(r=>r.attachment_type==='Policy Schedule'&&r.status==='Active'&&
+    const candidates=result.records.filter(r=>['Policy Schedule','Certificate of Currency'].includes(r.attachment_type)&&r.status==='Active'&&
      typeof r.file_name==='string'&&r.file_name.toLowerCase().endsWith('.pdf')&&Number.isSafeInteger(r.record_id)&&r.record_id>0);
     if(!candidates.length){view.textContent='Policy PDF unavailable';return}
     const url=id=>'records.html?record_id='+id+'&preview=1';
@@ -306,6 +307,11 @@ openPolicyDetails=function(index){
  const policy=livePolicies[index];
  if(policy){
   if(canEdit){const edit=document.createElement('button');edit.type='button';edit.textContent='Edit policy';edit.onclick=()=>openPolicyEdit(policy.id);edit.className='primary';$('insuranceDetailActions').append(edit)}
+  const metadata=document.createElement('section');metadata.className='insurance-files-section';
+  const metaHeading=document.createElement('h3');metaHeading.textContent='Coverage and source';
+  const coverage=document.createElement('p');coverage.textContent='Coverage geography: '+policyView(policy).coverage;
+  const wording=document.createElement('p');wording.textContent=policy.source_term_text||'Certificate term wording not recorded.';
+  metadata.append(metaHeading,coverage,wording);$('insuranceDetailActions').before(metadata);
   const files=document.createElement('section');const heading=document.createElement('h3');heading.textContent='Policy files';
   files.append(heading);const body=document.createElement('div');files.className='insurance-files-section';files.append(body);$('insuranceDetailActions').before(files);renderDocuments(body,policy.id);
  }
@@ -316,7 +322,112 @@ openPolicyDetails=function(index){
  value.textContent=parent?parent.policy_number+' - '+parent.policy_name:'Linked policy (not in the loaded register)';
  row.append(label,value);$('policyDetails').querySelector('dl').append(row);
 };
+function coverageControls(initial={scope:'Unspecified',countries:[]}){
+ const group=document.createElement('section');group.className='field insurance-coverage-fields';
+ const heading=document.createElement('h3');heading.textContent='Coverage geography';
+ const note=document.createElement('p');note.className='note';note.textContent='Describes where cover applies. It does not change the access jurisdiction or who can see this policy.';
+ const scope=document.createElement('select');scope.id='coverageScope';scope.setAttribute('aria-label','Coverage geography');
+ for(const value of ['Unspecified','Worldwide','Countries']){const option=document.createElement('option');option.value=value;option.textContent=value;scope.append(option)}
+ scope.value=initial.scope||'Unspecified';
+ const rows=document.createElement('div'),add=document.createElement('button');add.type='button';add.textContent='Add covered country';
+ const entries=[];
+ function append(entry={country_code:'',states:[]}){
+  const row=document.createElement('div');row.className='insurance-form-pair';
+  const country=document.createElement('input');country.value=entry.country_code;country.maxLength=2;country.placeholder='AU, NZ';country.setAttribute('aria-label','Covered country code');
+  const states=document.createElement('input');states.value=(entry.states||[]).join(', ');states.placeholder='Blank means whole country';states.setAttribute('aria-label','Covered states or territories');
+  const countryField=document.createElement('label');countryField.textContent='Country code';countryField.append(country);
+  const stateField=document.createElement('label');stateField.textContent='States / territories (comma separated)';stateField.append(states);
+  const remove=document.createElement('button');remove.type='button';remove.textContent='Remove covered country';
+  const item={row,country,states};entries.push(item);remove.onclick=()=>{entries.splice(entries.indexOf(item),1);row.remove()};
+  row.append(countryField,stateField,remove);rows.append(row);
+ }
+ for(const entry of initial.countries||[])append(entry);
+ add.onclick=()=>append();
+ const sync=()=>{rows.hidden=add.hidden=scope.value!=='Countries';};scope.onchange=sync;sync();
+ group.append(heading,note,scope,rows,add);$('fields').append(group);
+ form.insuranceCoverage=()=>{
+  if(scope.value!=='Countries')return {scope:scope.value,countries:[]};
+  const countries=entries.map(({country,states})=>({country_code:country.value.trim().toUpperCase(),states:states.value.split(',').map(x=>x.trim()).filter(Boolean).sort()})).sort((a,b)=>a.country_code.localeCompare(b.country_code));
+  if(!countries.length||countries.some(c=>! /^[A-Z]{2}$/.test(c.country_code))||new Set(countries.map(c=>c.country_code)).size!==countries.length)throw new Error('Enter distinct two-letter covered country codes.');
+  for(const c of countries){if(new Set(c.states).size!==c.states.length||c.states.some(v=>v.length>100)||c.country_code==='AU'&&c.states.some(v=>!['ACT','NSW','NT','QLD','SA','TAS','VIC','WA'].includes(v)))throw new Error('Use distinct state codes; Australian states are ACT, NSW, NT, QLD, SA, TAS, VIC and WA.');}
+  return {scope:'Countries',countries};
+ };
+}
+function sourceControls(policy){
+ const field=document.createElement('div');field.className='field';
+ const label=document.createElement('label');label.htmlFor='sourceTermText';label.textContent='Certificate term wording (optional)';
+ const input=document.createElement('textarea');input.id='sourceTermText';input.name='source_term_text';input.maxLength=2000;input.placeholder='For example: 4 pm local, as stated in the certificate';input.value=policy?.source_term_text||'';field.append(label,input);$('fields').append(field);
+ const ownerField=document.createElement('div');ownerField.className='field';const ownerLabel=document.createElement('label');ownerLabel.htmlFor='registrationOwner';ownerLabel.textContent='Policy owner';
+ const owner=document.createElement('select');owner.id='registrationOwner';owner.name='owner_choice';
+ for(const [value,text] of [['unknown','Unknown / unassigned'],['creator','I am the policy owner']]){const option=document.createElement('option');option.value=value;option.textContent=text;owner.append(option)}
+ ownerField.append(ownerLabel,owner);$('fields').append(ownerField);
+ if(policy){ownerField.hidden=true;owner.disabled=true;}
+}
 const oldOpen=openForm,oldClose=closeForm;
+const programmes=document.createElement('button');programmes.type='button';programmes.textContent='Insurance programmes';
+$('insuranceMore').querySelector('.insurance-more-menu').append(programmes);
+function programmeHost(title){
+ ++editGeneration;editing=null;registration=null;formType='';form.hidden=true;
+ const host=$('policyDetails');host.hidden=false;host.replaceChildren();$('modal').classList.add('insurance-policy-drawer');$('formTitle').textContent=title;
+ showModal($('modal').querySelector('.insurance-drawer-close'),programmes);return host;
+}
+function programmeField(container,label,name,value='',type='text'){
+ const field=document.createElement('label');field.className='field';field.textContent=label;
+ const input=document.createElement('input');input.name=name;input.type=type;if(type==='number')input.step='.01';input.value=value??'';field.append(input);container.append(field);return input;
+}
+function programmeButton(host,label,action){const button=document.createElement('button');button.type='button';button.textContent=label;button.onclick=action;host.append(button);return button;}
+async function programmeList(){
+ const host=programmeHost('Insurance programmes'),generation=editGeneration;host.textContent='Loading programmes.';
+ try{const data=await request('/insurance/programmes');if(generation!==editGeneration||!$('modal').classList.contains('open'))return;host.replaceChildren();
+  if(!data.programmes.length){const empty=document.createElement('p');empty.textContent='No accessible programmes.';host.append(empty)}
+  for(const p of data.programmes)programmeButton(host,p.programme_code+' - '+p.name,()=>programmeDetail(p.id));
+  if(data.can_create)programmeButton(host,'Register programme',()=>programmeCreate(data.can_link));
+ }catch(error){if(generation!==editGeneration)return;host.textContent='Programmes could not be loaded: '+error.message;programmeButton(host,'Retry programmes',programmeList)}
+}
+programmes.onclick=programmeList;
+function programmeCreate(canLink){
+ const host=programmeHost('Register programme'),generation=editGeneration,editor=document.createElement('form');editor.className='fields';host.append(editor);
+ programmeField(editor,'Programme code','programme_code').required=true;programmeField(editor,'Programme name','name').required=true;
+ const type=document.createElement('select');type.name='programme_type';type.setAttribute('aria-label','Programme type');for(const v of ['Global','Regional','Local']){const option=document.createElement('option');option.value=v;option.textContent=v;type.append(option)}editor.append(type);
+ programmeField(editor,'Stated programme limit (optional)','stated_limit','', 'number').step='.01';programmeField(editor,'Currency (blank if unstated)','currency');
+ const members=document.createElement('fieldset');const legend=document.createElement('legend');legend.textContent='Member policies';members.append(legend);editor.append(members);
+ if(canLink)for(const p of livePolicies.filter(p=>p.programme_id==null)){const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.value=p.id;check.name='member';label.append(check,document.createTextNode(p.policy_number+' - '+p.policy_name));members.append(label)}
+ const note=document.createElement('p');note.textContent='Only loaded, accessible standalone policies are offered. Empty programmes are Administrator-only. Membership is not a parent-policy hierarchy.';editor.append(note);
+ const status=document.createElement('p');status.setAttribute('role','status');editor.append(status);const save=document.createElement('button');save.type='submit';save.textContent='Save programme';editor.append(save);
+ editor.onsubmit=async e=>{e.preventDefault();const values=Object.fromEntries(new FormData(editor));const payload={programme_code:values.programme_code,name:values.name,programme_type:values.programme_type,stated_limit:values.stated_limit||null,currency:values.currency?.toUpperCase()||null,policy_ids:[...members.querySelectorAll('input:checked')].map(e=>Number(e.value)),coverage_geography:{scope:'Unspecified'}};save.disabled=true;
+  try{const result=await request('/insurance/programmes',{method:'POST',body:JSON.stringify(payload)});if(generation!==editGeneration)return;const refresh=load(),refreshGeneration=editGeneration;await refresh;if(refreshGeneration!==editGeneration)return;await programmeDetail(result.id)}catch(error){if(generation!==editGeneration)return;status.textContent='Programme save not confirmed: '+error.message+' Return to the programme list before retrying.';programmeButton(editor,'Check programmes',programmeList)}
+ };
+}
+async function programmeDetail(id){
+ const host=programmeHost('Programme'),generation=editGeneration;host.textContent='Loading programme.';
+ try{const result=await request('/insurance/programmes/'+id),p=result.programme;if(generation!==editGeneration||!$('modal').classList.contains('open'))return;host.replaceChildren();$('formTitle').textContent=p.name;
+  const info=document.createElement('p');info.textContent=p.programme_code+' - '+p.programme_type;host.append(info);
+  const meta=document.createElement('form');meta.className='fields';host.append(meta);programmeField(meta,'Programme name','name',p.name).disabled=!p.can_edit;
+  if(p.financial_access){programmeField(meta,'Stated programme limit','stated_limit',p.stated_limit,'number').disabled=!p.can_edit;programmeField(meta,'Programme currency','currency',p.currency).disabled=!p.can_edit}
+  const scope=document.createElement('select');scope.name='coverage_scope';scope.setAttribute('aria-label','Programme coverage scope');for(const v of ['Unspecified','Worldwide','Countries']){const o=document.createElement('option');o.value=v;o.textContent=v;scope.append(o)}scope.value=p.coverage_geography.scope;scope.disabled=!p.can_edit;meta.append(scope);
+  const countries=programmeField(meta,'Covered country codes (comma separated)','countries',p.coverage_geography.countries.map(c=>c.country_code).join(', '));countries.disabled=!p.can_edit||p.coverage_geography.countries.some(c=>c.states.length);
+  const feedback=document.createElement('p');feedback.setAttribute('role','status');host.append(feedback);
+  async function save(path,method,payload,button){button.disabled=true;try{await request('/insurance/programmes/'+id+path,{method,body:JSON.stringify({...payload,expected_updated_at:p.updated_at})});if(generation!==editGeneration)return;const refresh=load(),refreshGeneration=editGeneration;await refresh;if(refreshGeneration!==editGeneration)return;await programmeDetail(id)}catch(error){if(generation!==editGeneration)return;feedback.textContent='Changes not confirmed: '+error.message+' Reopen the programme before retrying.';programmeButton(host,'Reopen programme',()=>programmeDetail(id))}}
+  if(p.can_edit){const submit=document.createElement('button');submit.type='submit';submit.textContent='Save programme details';meta.append(submit);meta.onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(meta)),payload={name:v.name};if(p.financial_access){payload.stated_limit=v.stated_limit||null;payload.currency=v.currency?.toUpperCase()||null}if(scope.value!==p.coverage_geography.scope||!countries.disabled&&countries.value!==p.coverage_geography.countries.map(c=>c.country_code).join(', '))payload.coverage_geography={scope:scope.value,countries:scope.value==='Countries'?countries.value.split(',').map(c=>({country_code:c.trim().toUpperCase(),states:[]})):[]};save('','PATCH',payload,submit)}}
+  const layers=document.createElement('section');layers.className='insurance-files-section';host.append(layers);const lh=document.createElement('h3');lh.textContent='Policy layers';layers.append(lh);
+  for(const pid of p.policy_ids){const policy=livePolicies.find(v=>v.id===pid),layer=p.layers.find(v=>v.policy_id===pid)||{},row=document.createElement('form');row.className='fields';layers.append(row);const name=document.createElement('p');name.textContent=policy?policy.policy_number+' - '+policy.policy_name:'Policy '+pid;row.append(name);programmeField(row,'Layer label','layer_label',layer.layer_label).disabled=!p.can_link;programmeField(row,'Display order','display_order',layer.display_order,'number').disabled=!p.can_link;
+   if(policy)programmeButton(row,'Open policy / upload certificate',()=>{closeForm();openPolicyDetails(livePolicies.indexOf(policy))});
+   if(p.can_link){const button=document.createElement('button');button.type='submit';button.textContent='Save layer';row.append(button);row.onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(row));save('/layers','PATCH',{policy_id:pid,layer_label:v.layer_label||null,display_order:v.display_order===''?null:Number(v.display_order)},button)};programmeButton(row,'Remove member',e=>{if(confirm('Remove this programme membership? Existing policy and files are preserved.'))save('/layers','DELETE',{policy_id:pid},e.currentTarget)})}
+  }
+  if(p.can_link){const select=document.createElement('select');select.setAttribute('aria-label','Policy to add to programme');for(const policy of livePolicies.filter(v=>v.programme_id==null)){const o=document.createElement('option');o.value=policy.id;o.textContent=policy.policy_number+' - '+policy.policy_name;select.append(o)}layers.append(select);programmeButton(layers,'Add member policy',e=>{if(select.value)save('/layers','POST',{policy_id:Number(select.value)},e.currentTarget)})}
+  const certs=document.createElement('section');certs.className='insurance-files-section';host.append(certs);const ch=document.createElement('h3');ch.textContent='Certificate variants';certs.append(ch);
+  for(const c of p.certificates){const row=document.createElement('p'),link=document.createElement('a');link.textContent=c.variant_name;link.href='records.html?record_id='+c.record_id+'&preview=1';row.append(link,document.createTextNode(' - policies '+c.policy_ids.join(', ')+(p.financial_access?' - '+(c.currency||'Currency unstated')+' '+(c.stated_limit??'Limit unstated'):'')+(c.insured_entity_text?' - '+c.insured_entity_text:'')));certs.append(row)}
+  if(p.can_link){const editor=document.createElement('form');editor.className='fields';certs.append(editor);programmeField(editor,'Certificate variant name','variant_name').required=true;programmeField(editor,'Stated certificate limit','stated_limit','', 'number').step='.01';programmeField(editor,'Certificate currency (blank if unstated)','currency');programmeField(editor,'Insured entity scope','insured_entity_text');
+   const records=document.createElement('select');records.name='record_id';records.required=true;records.setAttribute('aria-label','Existing certificate Record');editor.append(records);
+   const note=document.createElement('p');note.textContent='Reuse an existing PDF Record. To upload once, open a member policy above and add its Certificate of Currency; then return here. Do not upload one copy per layer.';editor.append(note);
+   const choices=document.createElement('fieldset');editor.append(choices);for(const pid of p.policy_ids){const l=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.value=pid;l.append(check,document.createTextNode(livePolicies.find(v=>v.id===pid)?.policy_number||'Policy '+pid));choices.append(l)}
+   const seen=new Set();for(const pid of p.policy_ids){try{const files=await request('/insurance/policies/'+pid+'/records');if(generation!==editGeneration)return;for(const r of files.records){if(seen.has(r.record_id)||r.status!=='Active'||!r.file_name?.toLowerCase().endsWith('.pdf'))continue;seen.add(r.record_id);const o=document.createElement('option');o.value=r.record_id;o.textContent=r.record_code+' - '+r.title;records.append(o)}}catch(error){if(generation!==editGeneration)return;feedback.textContent='Some member files could not be loaded: '+error.message}}
+   const submit=document.createElement('button');submit.type='submit';submit.textContent='Link certificate variant';submit.disabled=!records.options.length;editor.append(submit);editor.onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(editor));save('/certificates','POST',{record_id:Number(v.record_id),variant_name:v.variant_name,stated_limit:v.stated_limit||null,currency:v.currency?.toUpperCase()||null,insured_entity_text:v.insured_entity_text||null,policy_ids:[...choices.querySelectorAll('input:checked')].map(x=>Number(x.value))},submit)};
+  }
+  programmeButton(host,'Back to programmes',programmeList);
+ }catch(error){if(generation!==editGeneration)return;host.textContent='Programme unavailable: '+error.message;programmeButton(host,'Back to programmes',programmeList)}
+}
+
 openForm=function(type){
  if(type==='policies'&&state!=='ready'){
   message(state==='loading'?'Loading policies…':'Policies must load successfully before creating a draft. Retry loading policies.');return;
@@ -341,7 +452,13 @@ openForm=function(type){
   customField.append(customLabel,custom);type.closest('.field').after(customField);
   type.onchange=()=>{const isOther=type.selectedOptions[0]?.dataset.custom==='true';customField.hidden=!isOther;custom.disabled=!isOther;custom.required=isOther;type.required=!isOther;};
   for(const name of ['class','insurer','currency','inception','expiry'])form.elements[name].required=true;
-  form.elements.currency.value='AUD';form.elements.currency.maxLength=3;
+  form.elements.currency.value='';form.elements.currency.maxLength=3;
+  const unknown=document.createElement('input');unknown.type='checkbox';unknown.name='currency_unknown';unknown.checked=true;
+  const unknownLabel=document.createElement('label');unknownLabel.append(unknown,document.createTextNode('Currency not stated in source'));
+  form.elements.currency.closest('.field').append(unknownLabel);form.elements.currency.required=false;
+  unknown.onchange=()=>{form.elements.currency.required=!unknown.checked;if(unknown.checked)form.elements.currency.value='';};
+  form.elements.currency.oninput=()=>{unknown.checked=!form.elements.currency.value.trim();form.elements.currency.required=!unknown.checked;};
+  coverageControls();sourceControls();
   form.elements.country.maxLength=3;
   form.elements.country.placeholder='AU for Australia';
   const countries=document.createElement('datalist');countries.id='insuranceJurisdictions';
@@ -368,13 +485,18 @@ openForm=function(type){
    const field=document.createElement('div');field.className='field';
    const label=document.createElement('label');label.htmlFor='registrationPdf';label.textContent='Policy PDF (optional)';
    const file=document.createElement('input');file.type='file';file.id='registrationPdf';file.accept='application/pdf,.pdf';
-   const note=document.createElement('p');note.className='note';note.textContent='PDF up to 25 MiB. Saved as a Policy Schedule Record with retention pending after the policy is saved. Open the saved PDF using View Policy in the policy list.';
+   const note=document.createElement('p');note.className='note';note.textContent='PDF up to 25 MiB. Saved using the selected document type as a Record with retention pending after the policy is saved. Open the saved PDF using View Policy in the policy list.';
    const titleLabel=document.createElement('label');titleLabel.htmlFor='registrationFileTitle';titleLabel.textContent='File title';
    const title=document.createElement('input');title.id='registrationFileTitle';title.name='registration_file_title';title.maxLength=255;title.placeholder='Optional - defaults to policy name';
    field.classList.add('insurance-policy-pdf');
    const fileField=document.createElement('div');fileField.className='field';fileField.append(label,file);
    const titleField=document.createElement('div');titleField.className='field';titleField.append(titleLabel,title);
-   field.append(fileField,titleField,note);$('fields').append(field);
+   const typeField=document.createElement('div');typeField.className='field';
+   const typeLabel=document.createElement('label');typeLabel.htmlFor='registrationDocumentType';typeLabel.textContent='Document type';
+   const documentType=document.createElement('select');documentType.id='registrationDocumentType';documentType.name='registration_document_type';
+   for(const value of ['Policy Schedule','Certificate of Currency']){const option=document.createElement('option');option.value=value;option.textContent=value;documentType.append(option)}
+   typeField.append(typeLabel,documentType);
+   field.append(fileField,titleField,typeField,note);$('fields').append(field);
   }
 
   for(const names of [['country','state'],['inception','expiry'],['limit','excess','premium','currency']]){
@@ -397,7 +519,7 @@ openForm=function(type){
     option.textContent=policy.policy_number+' — '+policy.policy_name;select.append(option);
    }
    field.append(label,select);$('fields').append(field);
-   formStatus.textContent+=' Parent choices are limited to loaded policies you can view. Programme linking is not yet available.';
+   formStatus.textContent+=' Parent choices are limited to loaded policies you can view. Programme membership is managed in Insurance programmes.';
   }
  }
 };
@@ -412,7 +534,7 @@ async function saveRegistrationAttachment(){
   const pdf=$('registrationPdf')?.files[0];
   if(!pdf||!pdf.size||pdf.size>25*1024*1024||!pdf.name.toLowerCase().endsWith('.pdf')){formStatus.textContent='Policy is saved. Choose a non-empty PDF no larger than 25 MiB.';return}
   const pending=new FormData();pending.set('file',pdf);pending.set('record_title',operation.pending.get('record_title'));
-  pending.set('attachment_type','Policy Schedule');pending.set('request_id',crypto.randomUUID());operation.pending=pending;
+  pending.set('attachment_type',operation.pending.get('attachment_type'));pending.set('request_id',crypto.randomUUID());operation.pending=pending;
   registration.rejected=false;$('registrationPdf').disabled=true;
  }
  busy=true;updateSubmit();formStatus.textContent='Policy saved. Saving PDF as a Record.';
@@ -446,6 +568,11 @@ async function openPolicyEdit(id){
   editing={id,policy,revision:result.updated_at};
   for(const [name,value] of Object.entries(values))if(form.elements[name])form.elements[name].value=value??'';
   jurisdictionState(values.state);
+  $('fields').querySelector('.insurance-coverage-fields').remove();coverageControls(policy.coverage_geography);
+  form.elements.source_term_text.value=policy.source_term_text||'';
+  form.elements.owner_choice.disabled=true;form.elements.owner_choice.closest('.field').hidden=true;
+  form.elements.currency_unknown.checked=policy.currency==null;
+  form.elements.currency.required=policy.currency!=null;
   // Links and lifecycle have separate rules; this editor never submits them.
   for(const name of ['status','parent_policy_id','purchased_in_force'])if(form.elements[name]){form.elements[name].disabled=true;form.elements[name].closest('.field').hidden=true}
   if(policy.insured_entities.length>1)form.elements.entity.disabled=true;
@@ -463,6 +590,10 @@ async function savePolicyEdit(){
  const initial=policyView(current.policy),payload={expected_updated_at:current.revision};
  for(const [name,key] of Object.entries(mapping))if(!form.elements[name]?.disabled&&String(values[name]??'')!==String(initial[name]??''))payload[key]=values[name]||null;
  if(payload.country_code!==undefined)payload.state_territory=values.state||null;
+ let geography;try{geography=form.insuranceCoverage()}catch(error){formStatus.textContent=error.message;return}
+ if(JSON.stringify(geography)!==JSON.stringify(current.policy.coverage_geography||{scope:'Unspecified',countries:[]}))payload.coverage_geography=geography;
+ if((values.source_term_text||'')!==(current.policy.source_term_text||''))payload.source_term_text=values.source_term_text||null;
+ if('currency' in payload&&payload.currency===null)payload.currency_unknown=form.elements.currency_unknown.checked;
  const pdf=$('registrationPdf')?.files[0];
  if(pdf&&(!pdf.size||pdf.size>25*1024*1024||!pdf.name.toLowerCase().endsWith('.pdf'))){formStatus.textContent='Choose a non-empty PDF no larger than 25 MiB.';return}
  busy=true;updateSubmit();let saved=false;
@@ -470,7 +601,7 @@ async function savePolicyEdit(){
   const result=await request('/insurance/policies/'+current.id+'/edit',{method:'PATCH',body:JSON.stringify(payload)});
   if(result.id!==current.id||result.policy_status!==current.policy.status)throw new Error('Invalid edit confirmation.');
   saved=true;editing=null;
-  if(pdf){const pending=new FormData();pending.set('file',pdf);pending.set('record_title',(values.registration_file_title||'').trim()||values.name.slice(0,255));pending.set('attachment_type','Policy Schedule');pending.set('request_id',crypto.randomUUID());
+  if(pdf){const pending=new FormData();pending.set('file',pdf);pending.set('record_title',(values.registration_file_title||'').trim()||values.name.slice(0,255));pending.set('attachment_type',values.registration_document_type);pending.set('request_id',crypto.randomUUID());
    registration={id:current.id};documentUploads.set(String(current.id),{pending,saving:false,message:''});
    for(const input of form.querySelectorAll('input,select,textarea'))input.disabled=true;
   }
@@ -494,8 +625,9 @@ form.onsubmit=async event=>{
  if(pdf&&(pdf.size>25*1024*1024||!pdf.size||!pdf.name.toLowerCase().endsWith('.pdf'))){formStatus.textContent='Choose a non-empty PDF no larger than 25 MiB.';return}
  const payload={policy_name:values.name,policy_number:values.number,insurance_class:values.class,
   insurer_name:values.insurer,broker_name:values.broker,insured_entity_name:values.entity,
-  currency:values.currency.toUpperCase(),inception_date:values.inception,expiry_date:values.expiry,
+  currency:values.currency?.toUpperCase()||null,currency_unknown:form.elements.currency_unknown.checked,owner_unknown:values.owner_choice==='unknown',source_term_text:values.source_term_text||null,inception_date:values.inception,expiry_date:values.expiry,
   policy_scope:'Local',country_code:values.country||null,state_territory:values.state||null,status:canRegisterActive&&values.status==='Active'?'Active':'Draft'};
+ try{payload.coverage_geography=form.insuranceCoverage()}catch(error){formStatus.textContent=error.message;return}
  if(payload.status==='Active'){
   const today=new Date().toISOString().slice(0,10);
   if(!form.elements.purchased_in_force.checked||values.inception>today||values.expiry<today){formStatus.textContent='Confirm purchase and use dates covering today (UTC), or save as Draft.';return}
@@ -512,7 +644,7 @@ form.onsubmit=async event=>{
   saved=true;
   if(pdf){
    const pending=new FormData();pending.set('file',pdf);pending.set('record_title',(values.registration_file_title||'').trim()||values.name.slice(0,255));
-   pending.set('attachment_type','Policy Schedule');pending.set('request_id',crypto.randomUUID());
+   pending.set('attachment_type',values.registration_document_type);pending.set('request_id',crypto.randomUUID());
    registration={id:result.id};documentUploads.set(String(result.id),{pending,saving:false,message:''});
    for(const input of form.querySelectorAll('input,select,textarea'))input.disabled=true;
   }

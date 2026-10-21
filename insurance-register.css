@@ -107,3 +107,7 @@
  .insurance-policy-drawer .insurance-form-pair,
  .insurance-policy-drawer .insurance-policy-pdf { grid-template-columns:minmax(0,1fr); }
 }
+
+.insurance-policy-drawer .insurance-coverage-fields { grid-column:1 / -1; }
+.insurance-policy-drawer .insurance-coverage-fields label { min-width:0; display:grid; gap:6px; }
+.insurance-policy-drawer .insurance-coverage-fields input { width:100%; box-sizing:border-box; }

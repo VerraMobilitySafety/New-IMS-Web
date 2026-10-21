@@ -5,7 +5,7 @@ const fields={name:'Synthetic policy',number:'TEST-001',class:'Liability',insure
  expiry:'2027-01-01',limit:'1000000',excess:'0',premium:'1234.56',currency:'AUD'};
 const payload={policy_name:fields.name,policy_number:fields.number,insurance_class:fields.class,
  insurer_name:fields.insurer,broker_name:fields.broker,insured_entity_name:fields.entity,
- currency:'AUD',inception_date:fields.inception,expiry_date:fields.expiry,policy_scope:'Local',
+ currency:'AUD',currency_unknown:false,owner_unknown:true,source_term_text:null,coverage_geography:{scope:'Unspecified',countries:[]},inception_date:fields.inception,expiry_date:fields.expiry,policy_scope:'Local',
  country_code:'AU',state_territory:null,status:'Draft',coverage_limit:'1000000',deductible_amount:'0',annual_premium:'1234.56'};
 async function fill(page){
  await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
@@ -176,14 +176,14 @@ async function ready(page){
    await ready(page);
    assert.equal(await page.locator('#premium').innerText(),
     'AUD 1,000,000,000,000,000,000.00 / USD 0.30 / NZD 0.00');
-   assert.equal(await page.evaluate(()=>insurancePremiumTotal([{currency:'AUD',premium:null}])),'—');
+   assert.equal(await page.evaluate(()=>insurancePremiumTotal([{currency:'AUD',premium:null}])),'\u2014');
    assert.equal(await page.evaluate(()=>insurancePremiumTotal([{currency:'AUD',premium:'invalid'}])),'Unavailable');
   });
   let release;
   await check('loading, empty, error, retry and malformed list states',{getGate:new Promise(r=>release=r)},async(page,server)=>{
    await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies',{force:true});
    assert.match(await page.locator('#content').innerText(),/Loading policies/);
-   assert.equal(await page.locator('#active').innerText(),'—');
+   assert.equal(await page.locator('#active').innerText(),'\u2014');
    await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
    assert.equal(await page.locator('#modal.open').count(),0,'do not build incomplete financial form before access resolves');
    release();server.getGate=null;await ready(page);
@@ -195,7 +195,7 @@ async function ready(page){
    server.getMode='error';await page.evaluate(()=>document.getElementById('insuranceRefresh').click());
    await page.locator('#insuranceApiStatus').filter({hasText:'Synthetic unavailable'}).waitFor();
    assert.match(await page.locator('#content').innerText(),/could not be loaded/);
-   assert.equal(await page.locator('#active').innerText(),'—');
+   assert.equal(await page.locator('#active').innerText(),'\u2014');
    server.getMode='malformed';await page.getByRole('button',{name:'Retry loading policies',exact:true}).click();
    await page.locator('#insuranceApiStatus').filter({hasText:'Invalid policy list'}).waitFor();
    server.getMode='ok';await page.getByRole('button',{name:'Retry loading policies',exact:true}).click();await ready(page);
