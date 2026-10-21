@@ -2,6 +2,24 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const {JSDOM}=require('jsdom');
 const source=name=>fs.readFileSync(path.join(__dirname,'..',name),'utf8');
 const tick=()=>new Promise(r=>setImmediate(r));
+test('all five governance pages mount related documents beside their primary action',()=>{
+ const fixtures={
+  'continual-improvement-management.html':'<div id="vh"><div class="improvement-actions"><button>Add Action</button></div></div>',
+  'documents.html':'<div class="actions document-actions"><button>Request Document Action</button></div>',
+  'records.html':'<div class="dashboard-content"><section class="records-toolbar"><button>Add Record</button></section></div>',
+  'risk.html':'<div id="veroCompactFilterBarV3"><div class="vero-risk-primary-actions"><button>Add Risk</button></div></div>',
+  'incident-management.html':'<div class="toolbar"><button id="new-report">Report an Event</button></div>'
+ };
+ for(const [page,html] of Object.entries(fixtures)){
+  const dom=new JSDOM('<main>'+html+'</main>',{url:'https://vero.example/'+page,runScripts:'outside-only'}),w=dom.window;
+  w.eval(source('page-related-documents.js'));w.document.dispatchEvent(new w.Event('DOMContentLoaded'));
+  const menu=w.document.querySelector('.vero-related-documents'),button=w.document.querySelector('button');
+  assert.equal(menu.parentElement,button.parentElement,page);assert.ok(menu.parentElement.classList.contains('vero-related-action-row'));
+  assert.equal(w.document.querySelectorAll('.vero-related-documents').length,1);
+  if(page==='risk.html')assert.equal(w.document.querySelector('#veroCompactFilterBarV3').contains(menu),false);
+  dom.window.close();
+ }
+});
 test('page menu is on the action row, loads current links, escapes titles and handles errors',async()=>{
  const dom=new JSDOM('<main><section class="global-hero"></section><div class="actions"><button>Register policy</button></div></main>',{url:'https://vero.example/insurance.html',runScripts:'outside-only'}),w=dom.window;
  w.localStorage.setItem('vero_session_token','fixture');let fail=false,url;
