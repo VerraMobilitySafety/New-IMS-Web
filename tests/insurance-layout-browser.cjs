@@ -56,8 +56,10 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   await page.locator('#content tbody tr').click();
   assert.match(await page.locator('#policyDetails').innerText(),/Hidden broker TEST-002/);
   assert.equal(await page.locator('#policyDetails dt').count(),14);
-  for(const key of ['Tab','Shift+Tab','Tab']){await page.keyboard.press(key);assert.equal(await page.getByRole('button',{name:'Close',exact:true}).evaluate(e=>e===document.activeElement),true)}
-  await page.evaluate(()=>document.querySelector('#search').focus());assert.equal(await page.getByRole('button',{name:'Close',exact:true}).evaluate(e=>e===document.activeElement),true);
+  for(const key of ['Tab','Shift+Tab','Tab']){await page.keyboard.press(key);assert.equal(await page.locator('#modal').evaluate(e=>e.contains(document.activeElement)),true)}
+  await page.evaluate(()=>modalFocusables().at(-1).focus());await page.keyboard.press('Tab');assert.equal(await page.evaluate(()=>document.activeElement===modalFocusables()[0]),true);
+  await page.keyboard.press('Shift+Tab');assert.equal(await page.evaluate(()=>document.activeElement===modalFocusables().at(-1)),true);
+  await page.evaluate(()=>document.querySelector('#search').focus());assert.equal(await page.locator('#modal').evaluate(e=>e.contains(document.activeElement)),true);
   assert.equal(await page.locator('main').evaluate(e=>e.inert),true);
   await page.getByRole('button',{name:'Close',exact:true}).click();
   await page.getByLabel('Search insurance register').fill('');

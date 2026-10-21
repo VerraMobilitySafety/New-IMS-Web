@@ -6,7 +6,7 @@ const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.n
 const status=$('insuranceApiStatus'),form=$('form'),submit=form.querySelector('[type="submit"]');
 const formStatus=$('insuranceFormStatus');
 let livePolicies=[],office=false,state='loading',busy=false,financialAccess=false,linkingAccess=false;
-let readOnly=true,financialWriteAccess=false,canCreate=false;
+let readOnly=true,financialWriteAccess=false,canCreate=false,canEdit=false,editing=null,editGeneration=0;
 let canAttach=false,canRegisterActive=false,registration=null;
 const allPolicyFields=config.policies.slice(),financialFields=new Set(['limit','excess','premium']);
 function setFinancialAccess(allowed){
@@ -46,7 +46,7 @@ function policyView(p){
 }
 function updateSubmit(){
  if(formType==='policies'){
-  submit.textContent=busy?'Saving…':registration?.id?'Retry attachment':form.elements.status?.value==='Active'?'Register Active policy':'Save Draft';
+  submit.textContent=busy?'Saving…':registration?.id?'Retry attachment':editing?'Save policy changes':form.elements.status?.value==='Active'?'Register Active policy':'Save Draft';
   submit.disabled=busy||(!registration?.id&&state!=='ready');
  }else{submit.textContent='Add to Prototype';submit.disabled=busy}
 }
@@ -146,9 +146,9 @@ function renderPolicyLinks(){
   };
  }
 }
-function renderDocuments(){
- if(tab!=='Documents')return;
- const host=$('content');host.replaceChildren();
+function renderDocuments(target=null,selectedPolicy=null){
+ if(!target&&tab!=='Documents')return;
+ const host=target||$('content');host.replaceChildren();
  const note=document.createElement('p');note.textContent=state!=='ready'?'Load policies before viewing files.':
   'Files are controlled Records. New uploads await retention assignment and have no disposal date.';
  host.append(note);
@@ -159,7 +159,9 @@ function renderDocuments(){
  const picker=document.createElement('select');picker.setAttribute('aria-label','Policy for documents');
  for(const p of livePolicies){const option=document.createElement('option');option.value=p.id;
   option.textContent=p.policy_number+' - '+p.policy_name;picker.append(option)}
+ if(selectedPolicy)documentPolicy=String(selectedPolicy);
  if(livePolicies.some(p=>String(p.id)===documentPolicy))picker.value=documentPolicy;
+ if(selectedPolicy)picker.hidden=true;
  documentPolicy=picker.value;
  const body=document.createElement('div');host.append(picker,body);
  picker.onchange=()=>{documentPolicy=picker.value;loadDocuments()};
@@ -233,6 +235,7 @@ function renderDocuments(){
 $('search').oninput=()=>render();
 $('insuranceStatus').onchange=()=>render();
 async function load(prefix=''){
+ ++editGeneration;
  if(state==='loading'&&load.pending)return;
  state='loading';load.pending=true;linkingAccess=false;readOnly=true;financialWriteAccess=false;canCreate=false;setFinancialAccess(false);message(prefix+'Loading policies…');render();updateSubmit();
  if(!$('policyDetails').hidden)oldClose();
@@ -244,6 +247,7 @@ async function load(prefix=''){
   readOnly=result.read_only!==false;
   financialWriteAccess=result.financial_write_access===true;
   canCreate=result.can_create_policies===true;
+  canEdit=result.can_edit_policies===true;
   canAttach=result.can_attach_to_new_policy===true;
   canRegisterActive=result.can_register_active===true;
   setFinancialAccess(result.financial_access);
@@ -260,7 +264,13 @@ async function load(prefix=''){
 }
 const oldDetails=openPolicyDetails;
 openPolicyDetails=function(index){
- oldDetails(index);
+ ++editGeneration;oldDetails(index);
+ const policy=livePolicies[index];
+ if(policy){
+  if(canEdit){const edit=document.createElement('button');edit.type='button';edit.textContent='Edit policy';edit.onclick=()=>openPolicyEdit(policy.id);$('policyDetails').append(edit)}
+  const files=document.createElement('section');const heading=document.createElement('h3');heading.textContent='Policy files';
+  files.append(heading);const body=document.createElement('div');files.append(body);$('policyDetails').append(files);renderDocuments(body,policy.id);
+ }
  const record=data.policies[index];if(record?.parent_policy_id==null)return;
  const parent=livePolicies.find(p=>p.id===record.parent_policy_id);
  const row=document.createElement('div'),label=document.createElement('dt'),value=document.createElement('dd');
@@ -274,7 +284,7 @@ openForm=function(type){
   message(state==='loading'?'Loading policies…':'Policies must load successfully before creating a draft. Retry loading policies.');return;
  }
  if(type==='policies'&&!canCreate){message('Your Insurance access is view-only.');return}
- registration=null;oldOpen(type);updateSubmit();
+ ++editGeneration;editing=null;registration=null;oldOpen(type);updateSubmit();
  if(type==='policies'){
   $('formTitle').textContent='Register policy draft';
   const previousClass=form.elements.class;
@@ -340,8 +350,9 @@ openForm=function(type){
  }
 };
 closeForm=function(){if(!busy){
+ ++editGeneration;editing=null;
  if(registration?.id){documentPolicy=String(registration.id);registration=null;oldClose();tab='Documents';load('Policy saved. Attachment confirmation is pending. ');return}
- registration=null;oldClose();
+ registration=null;oldClose();$('policyDetails').replaceChildren();
 }};
 async function saveRegistrationAttachment(){
  const pid=String(registration.id),operation=documentUploads.get(pid);
@@ -369,11 +380,56 @@ async function saveRegistrationAttachment(){
   formStatus.textContent=operation.message;
  }finally{busy=false;updateSubmit()}
 }
+async function openPolicyEdit(id){
+ if(busy)return;
+ if(documentUploads.get(String(id))?.pending){message('Finish or reconcile the pending attachment before editing this policy.');return}
+ const generation=++editGeneration;
+ try{
+  const result=await request('/insurance/policies/'+id+'/edit');
+  if(generation!==editGeneration||!$('modal').classList.contains('open'))return;
+  if(documentUploads.get(String(id))?.pending){message('Finish or reconcile the pending attachment before editing this policy.');return}
+  if(!result.policy||!result.updated_at)throw new Error('Invalid edit response.');
+  openForm('policies');
+  const policy=result.policy,values=policyView(policy);
+  editing={id,policy,revision:result.updated_at};
+  for(const [name,value] of Object.entries(values))if(form.elements[name])form.elements[name].value=value??'';
+  // Links and lifecycle have separate rules; this editor never submits them.
+  for(const name of ['status','parent_policy_id','purchased_in_force'])if(form.elements[name]){form.elements[name].disabled=true;form.elements[name].closest('.field').hidden=true}
+  if(policy.insured_entities.length>1)form.elements.entity.disabled=true;
+  if(policy.coverages.length>1||policy.coverages.some(c=>c.currency!==policy.currency))for(const name of ['limit','excess','currency'])form.elements[name].disabled=true;
+  $('formTitle').textContent='Edit policy';
+  formStatus.textContent='Status, approval and policy links remain unchanged. An optional PDF adds a Record; it does not replace existing files.';
+  updateSubmit();
+ }catch(error){if(generation===editGeneration)message('Policy could not be opened for editing: '+error.message)}
+}
+async function savePolicyEdit(){
+ const current=editing,values=Object.fromEntries(new FormData(form).entries());
+ if(documentUploads.get(String(current.id))?.pending){formStatus.textContent='Finish or reconcile the pending attachment before editing this policy.';return}
+ if(form.elements.class.selectedOptions[0]?.dataset.custom==='true')values.class=(values.custom_insurance_type||'').trim();
+ const mapping={name:'policy_name',number:'policy_number',class:'insurance_class',insurer:'insurer_name',broker:'broker_name',entity:'insured_entity_name',currency:'currency',inception:'inception_date',expiry:'expiry_date',country:'country_code',premium:'annual_premium',limit:'coverage_limit',excess:'deductible_amount'};
+ const initial=policyView(current.policy),payload={expected_updated_at:current.revision};
+ for(const [name,key] of Object.entries(mapping))if(!form.elements[name]?.disabled&&String(values[name]??'')!==String(initial[name]??''))payload[key]=values[name]||null;
+ const pdf=$('registrationPdf')?.files[0];
+ if(pdf&&(!pdf.size||pdf.size>25*1024*1024||!pdf.name.toLowerCase().endsWith('.pdf'))){formStatus.textContent='Choose a non-empty PDF no larger than 25 MiB.';return}
+ busy=true;updateSubmit();let saved=false;
+ try{
+  const result=await request('/insurance/policies/'+current.id+'/edit',{method:'PATCH',body:JSON.stringify(payload)});
+  if(result.id!==current.id||result.policy_status!==current.policy.status)throw new Error('Invalid edit confirmation.');
+  saved=true;editing=null;
+  if(pdf){const pending=new FormData();pending.set('file',pdf);pending.set('record_title',values.name.slice(0,255));pending.set('attachment_type','Policy Schedule');pending.set('request_id',crypto.randomUUID());
+   registration={id:current.id};documentUploads.set(String(current.id),{pending,saving:false,message:''});
+   for(const input of form.querySelectorAll('input,select,textarea'))input.disabled=true;
+  }
+ }catch(error){formStatus.textContent='Changes not confirmed: '+error.message+' Your entries remain here. Reopen the policy to reconcile before retrying.'}
+ finally{busy=false;updateSubmit()}
+ if(saved){if(registration?.id){await saveRegistrationAttachment();return}oldClose();await load()}
+}
 const oldSubmit=form.onsubmit;
 form.onsubmit=async event=>{
  if(formType!=='policies'){oldSubmit(event);return}
  event.preventDefault();
  if(registration?.id){if(!busy)await saveRegistrationAttachment();return}
+ if(editing){if(!busy)await savePolicyEdit();return}
  if(!canCreate){formStatus.textContent='Your Insurance access is view-only.';return}
  if(busy)return;
  if(state!=='ready'){formStatus.textContent='Load policies successfully before saving.';return}
