@@ -6,6 +6,7 @@ async function test(preReady=false){
  const dom=new JSDOM(html,{url:'https://vero.test/take-5.html',runScripts:'outside-only'}),w=dom.window,d=w.document,calls=[];
  w.HTMLCanvasElement.prototype.getContext=()=>({clearRect(){},drawImage(){},beginPath(){},moveTo(){},lineTo(){},stroke(){}});
  w.HTMLCanvasElement.prototype.setPointerCapture=()=>{};
+ w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};w.requestAnimationFrame=fn=>fn();
  w.HTMLCanvasElement.prototype.toDataURL=()=> 'data:image/png;base64,iVBORw0KGgo=';
  w.HTMLElement.prototype.scrollIntoView=()=>{};w.confirm=()=>true;w.structuredClone=structuredClone;
  w.localStorage.setItem('vero_session_token','isolated-test');
@@ -17,6 +18,7 @@ async function test(preReady=false){
  };
  if(preReady)d.getElementById('vh').hidden=false;
  w.eval(script);if(!preReady)assert.equal(calls.length,0,'wait for authenticated ready event');w.dispatchEvent(new w.Event('vero-risk-auth-ready'));await wait();
+ assert.equal(d.getElementById('take5Drawer').open,false,'register opens without a form');assert.equal(d.getElementById('take5Total').textContent,'0');d.getElementById('take5New').click();assert.equal(d.getElementById('take5Drawer').open,true);assert.equal(w.document.body.style.overflow,'hidden');
  const input=(el,value)=>{el.value=value;el.dispatchEvent(new w.Event(el.tagName==='SELECT'?'change':'input',{bubbles:true}));};
  assert.equal(d.querySelectorAll('.t5-check input').length,9);assert.equal(d.querySelectorAll('#take5Hazards img').length,0,'hazard names render safely');
  input(d.getElementById('take5_task'),'Inspect road equipment');input(d.getElementById('take5_site'),'Test site');
@@ -35,9 +37,12 @@ async function test(preReady=false){
  fail=true;d.getElementById('take5Save').click();await wait();assert.match(d.getElementById('take5Status').textContent,/Save unavailable/);assert.equal(d.getElementById('take5Save').disabled,false);
  fail=false;d.getElementById('take5Save').click();await wait();assert.match(d.getElementById('take5Status').textContent,/Draft saved/);
  const puts=calls.filter(c=>c.init.method==='PUT');assert.equal(puts[0].url,puts[1].url,'retry uses same assessment ID');
- d.getElementById('take5Form').dispatchEvent(new w.Event('submit',{cancelable:true}));await wait();assert.match(d.getElementById('take5Status').textContent,/submitted and saved/);assert.equal(d.getElementById('take5Fields').disabled,true);assert.equal(d.getElementById('take5Save').hidden,true);assert.equal(d.querySelectorAll('.t5-record').length,1);
+ d.getElementById('take5Form').dispatchEvent(new w.Event('submit',{cancelable:true}));await wait();assert.match(d.getElementById('take5Status').textContent,/submitted and saved/);assert.equal(d.getElementById('take5Fields').disabled,true);assert.equal(d.getElementById('take5Save').hidden,true);assert.equal(d.querySelectorAll('.t5-register-row').length,1);assert.equal(d.getElementById('take5Submitted').textContent,'1');
+ d.getElementById('take5Close').click();assert.equal(d.getElementById('take5Drawer').open,false);assert.equal(w.document.body.style.overflow,'');
+ input(d.getElementById('take5Search'),'no match');assert.equal(d.querySelectorAll('.t5-register-row').length,0);d.getElementById('take5ClearFilters').click();const row=d.querySelector('.t5-register-row');row.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));await wait();assert.equal(d.getElementById('take5Drawer').open,true);assert.equal(d.getElementById('take5Fields').disabled,true,'row reopens submitted assessment read-only');d.getElementById('take5Close').click();
  d.getElementById('take5New').click();assert.equal(d.getElementById('take5Fields').disabled,false);assert.equal(d.getElementById('take5_task').value,'');
  const before=calls.filter(c=>c.init.method==='PUT').length;d.getElementById('take5Form').dispatchEvent(new w.Event('submit',{cancelable:true}));await wait();assert.equal(calls.filter(c=>c.init.method==='PUT').length,before,'incomplete submissions never sent');
+ input(d.getElementById('take5_task'),'Unsaved task');w.confirm=()=>false;d.getElementById('take5Close').click();assert.equal(d.getElementById('take5Drawer').open,true,'cancel preserves unsaved work');w.confirm=()=>true;d.getElementById('take5Drawer').dispatchEvent(new w.Event('cancel',{cancelable:true}));assert.equal(d.getElementById('take5Drawer').open,false,'Escape closes after discard confirmation');
  dom.window.close();console.log('PASS Take 5: auth gate, exact scoring, checks, repeaters, signature invalidation, retry, save, submit, read-only records, required fields and safe text.');
 }
 test().then(()=>test(true)).catch(e=>{console.error(e);process.exitCode=1;});
