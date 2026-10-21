@@ -12,7 +12,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   page.on('pageerror',e=>errors.push(e.message));
   const server=await require('./insurance-mock.cjs').mockInsurance(page);
   await page.goto('https://vero.test/insurance.html');
-  await page.locator('#insuranceApiStatus').filter({hasText:'policies loaded.'}).waitFor();
+  await page.locator('#insuranceApiStatus[data-state=ready]').waitFor({state:'attached'});
   await page.evaluate(()=>window.VeroPageLoader?.ready('account'));
   if(width<750){
    await page.getByRole('button',{name:'Menu',exact:true}).click();
@@ -38,12 +38,12 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
    await page.getByLabel('Expiry Date',{exact:true}).fill(expiry);
    await page.getByRole('button',{name:'Save Draft'}).click();
    await page.locator('#modal.open').waitFor({state:'hidden'});
-   await page.locator('#insuranceApiStatus').filter({hasText:'policies loaded.'}).waitFor();
+   await page.locator('#insuranceApiStatus[data-state=ready]').waitFor({state:'attached'});
     assert.equal(await page.getByRole('button',{name:'+ Register Policy',exact:true}).evaluate(e=>e===document.activeElement),true);
     assert.equal(await page.locator('main').evaluate(e=>e.inert),false);
    server.policies.find(p=>p.policy_number===number).status=status;
-   await page.getByRole('button',{name:'Refresh policies',exact:true}).click();
-   await page.locator('#insuranceApiStatus').filter({hasText:'policies loaded.'}).waitFor();
+   await page.evaluate(()=>document.getElementById('insuranceRefresh').click());
+   await page.locator('#insuranceApiStatus[data-state=ready]').waitFor({state:'attached'});
   };
   const due=new Date();due.setDate(due.getDate()+30);
   await add('TEST-001','Active',due.toISOString().slice(0,10));
@@ -107,7 +107,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   for(const section of ['Overview','Documents','Analytics']){
    await page.getByLabel('Insurance view',{exact:true}).selectOption(section);
    assert.equal(await page.locator('#insuranceToolbar').isVisible(),true);
-   assert.equal(await page.locator('#search').isVisible(),false);
+   assert.equal(await page.locator('#search').isVisible(),section==='Overview');
    assert.equal(await page.locator('#insuranceStatus').isVisible(),false);
    assert.ok((await page.locator('#content').innerText()).length>20);
   }

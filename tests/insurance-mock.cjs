@@ -40,11 +40,25 @@ async function mockInsurance(page,options={}){
     const policies=server.policies.map(p=>{const copy={...p};if(!server.financialAccess){delete copy.annual_premium;delete copy.coverages}return copy});
     return route.fulfill({json:{status:'success',policies,
      insurance_office:server.office,financial_access:server.financialAccess,
+     financial_write_access:server.financialWriteAccess??server.financialAccess,
+     can_create_policies:!server.readOnly,read_only:Boolean(server.readOnly),
      can_link_parent_policies:server.linkingAccess,can_link_programmes:false,limited:Boolean(server.limited)}});
    }
    if(/^\/api\/insurance\/policies\/\d+\/decision$/.test(url.pathname)){
     server.decisions.push(req.postDataJSON());
     return route.fulfill({json:{status:'success',policy_id:1,policy_status:'Submitted'}});
+   }
+   if(/^\/api\/insurance\/policies\/\d+\/records$/.test(url.pathname)){
+    if(req.method()==='POST'){
+     (server.uploads??=[]).push(req.postData());
+     if(server.uploadMode==='invalid')return route.fulfill({status:400,json:{message:'Synthetic unreadable PDF'}});
+     if(server.uploadMode==='error')return route.fulfill({status:503,json:{message:'Synthetic uncertain commit'}});
+     server.records=[{record_id:9,record_code:'REC-000009',title:'Synthetic attachment',attachment_type:'Policy Schedule',retention_pending:true,status:'Active'}];
+     return route.fulfill({status:201,json:{status:'success',record_id:9,retention_pending:true,reused:false}});
+    }
+    if(server.recordsGate)await server.recordsGate;
+    if(server.recordsMode==='error')return route.fulfill({status:503,json:{message:'Synthetic files unavailable'}});
+    return route.fulfill({json:{status:'success',records:server.records||[],can_upload:server.canUpload===true,attachment_types:['Policy Schedule']}});
    }
    return route.abort();
   }

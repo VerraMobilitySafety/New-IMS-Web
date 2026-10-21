@@ -1,7 +1,7 @@
 name: Insurance persistence validation
 on:
   push:
-    branches: ['review/insurance-persistence-20261020']
+    branches: ['review/insurance-persistence-20261020', 'review/insurance-records-20261021']
   pull_request:
     paths:
       - 'insurance.html'
@@ -24,5 +24,6 @@ jobs:
       - run: npm install --no-save playwright@1.56.1
       - run: npx playwright install --with-deps chromium
       - run: node tests/insurance-persistence-browser.cjs
+      - run: node tests/insurance-records-browser.cjs
       - run: node tests/insurance-layout-browser.cjs
       - run: node tests/insurance-boundaries-browser.cjs

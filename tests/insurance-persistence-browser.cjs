@@ -16,7 +16,7 @@ async function fill(page){
  assert.equal(await page.locator('#fstatus').getAttribute('readonly'),'');
 }
 async function ready(page){
- await page.locator('#insuranceApiStatus').filter({hasText:'policies loaded.'}).waitFor();
+ await page.locator('#insuranceApiStatus[data-state=ready]').waitFor({state:'attached'});
 }
 (async()=>{
  const browser=await chromium.launch({headless:true,...(process.env.INSURANCE_BROWSER?{executablePath:process.env.INSURANCE_BROWSER}:{})});
@@ -29,12 +29,52 @@ async function ready(page){
   finally{await context.close()}
  };
  try{
+  await check('overview search preserves cards and hides routine success controls',{policies:[savedPolicy(payload,81)]},async page=>{
+   await ready(page);
+   assert.equal(await page.locator('#insuranceApiStatus').isVisible(),false);
+   assert.equal(await page.locator('#insuranceApiStatus').innerText(),'');
+   assert.equal(await page.locator('#insuranceRefresh').isVisible(),false);
+   assert.equal(await page.locator('#heading').isVisible(),false);
+   assert.equal(await page.locator('#content .tile').count(),4);
+   await page.getByLabel('Search insurance register').fill('Example broker');
+   assert.equal(await page.locator('#content .tile').count(),4);
+   await page.locator('#insuranceOverviewResults button').click();
+   assert.match(await page.locator('#policyDetails').innerText(),/Synthetic policy/);
+   await page.keyboard.press('Escape');
+   await page.getByLabel('Search insurance register').fill('no-match');
+   assert.match(await page.locator('#insuranceOverviewResults').innerText(),/No policies match/);
+   await page.getByLabel('Search insurance register').fill('');
+   assert.equal(await page.locator('#insuranceOverviewResults').count(),0);
+  });
+  await check('Leadership and Finance view financial details without mutation controls',{
+   financialAccess:true,financialWriteAccess:false,readOnly:true,policies:[savedPolicy(payload,81)]
+  },async(page,server)=>{
+   await ready(page);
+   assert.equal(await page.getByRole('button',{name:'+ Register Policy',exact:true}).count(),0);
+   await page.getByLabel('Insurance view',{exact:true}).selectOption('Policies');
+   assert.equal(await page.locator('#insurancePolicyWorkflow').count(),0);
+   await page.locator('#content tbody tr').first().click();
+   assert.match(await page.locator('#policyDetails').innerText(),/1234.56/);
+   await page.keyboard.press('Escape');await page.evaluate(()=>openForm('policies'));
+   assert.equal(await page.locator('#modal.open').count(),0);
+   assert.deepEqual(server.posts,[]);assert.deepEqual(server.decisions,[]);
+  });
   await check('Administrator financial access alone does not expose link controls',{
    office:true,financialAccess:true,linkingAccess:false,policies:[savedPolicy(payload,81)]
   },async page=>{
    await ready(page);await fill(page);
    assert.equal(await page.locator('#fparent_policy_id').count(),0);
    assert.equal(await page.locator('[name="programme_id"]').count(),0);
+  });
+  await check('Office plus observer retains nonfinancial form without writable financial fields on refresh',{
+   office:true,financialAccess:true,financialWriteAccess:false,readOnly:false
+  },async(page,server)=>{
+   await ready(page);await page.getByRole('button',{name:'+ Register Policy',exact:true}).click();
+   assert.equal(await page.locator('#fpremium').isDisabled(),true);
+   await page.evaluate(()=>document.querySelector('#insuranceRefresh').click());await ready(page);
+   assert.equal(await page.locator('#fpremium').isDisabled(),true);
+   assert.equal(await page.locator('#fpremium').isVisible(),false);
+   assert.deepEqual(server.posts,[]);
   });
   await check('manager links only a loaded visible parent during creation',{
    linkingAccess:true,policies:[savedPolicy(payload,81)]
@@ -136,13 +176,13 @@ async function ready(page){
    await page.keyboard.press('Escape');
    assert.match(await page.locator('#content').innerText(),/No records found/);
    assert.equal(await page.locator('#active').innerText(),'0');
-   server.getMode='error';await page.getByRole('button',{name:'Refresh policies',exact:true}).click();
+   server.getMode='error';await page.evaluate(()=>document.getElementById('insuranceRefresh').click());
    await page.locator('#insuranceApiStatus').filter({hasText:'Synthetic unavailable'}).waitFor();
    assert.match(await page.locator('#content').innerText(),/could not be loaded/);
    assert.equal(await page.locator('#active').innerText(),'—');
-   server.getMode='malformed';await page.getByRole('button',{name:'Refresh policies',exact:true}).click();
+   server.getMode='malformed';await page.getByRole('button',{name:'Retry loading policies',exact:true}).click();
    await page.locator('#insuranceApiStatus').filter({hasText:'Invalid policy list'}).waitFor();
-   server.getMode='ok';await page.getByRole('button',{name:'Refresh policies',exact:true}).click();await ready(page);
+   server.getMode='ok';await page.getByRole('button',{name:'Retry loading policies',exact:true}).click();await ready(page);
   });
   await check('complete save payload, single POST, reload round trip and single workflow',{},async(page,server)=>{
    await ready(page);await fill(page);
@@ -165,7 +205,7 @@ async function ready(page){
    assert.equal(await page.locator('#content tbody tr').count(),1);
    assert.equal(await page.locator('#insurancePolicyWorkflow').count(),1);
    await page.getByRole('button',{name:'Submit',exact:true}).click();
-   await page.locator('#insuranceApiStatus').filter({hasText:'Decision saved. 1 policies loaded.'}).waitFor();
+   await page.locator('#insuranceApiStatus[data-state=ready]').waitFor({state:'attached'});
    assert.deepEqual(server.decisions,[{action:'Submit'}]);
    assert.equal(await page.locator('#insurancePolicyWorkflow').count(),1);
    assert.equal(await page.getByRole('button',{name:'Approve',exact:true}).count(),0);
