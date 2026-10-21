@@ -1,7 +1,7 @@
 /* Shared navigation: prerender markup with scripts/build-navigation.cjs; hydrate without replacing it. */
 /* Inline navigation icons: Lucide 0.456.0, ISC licence (vendor/lucide-LICENSE). */
 (function(){'use strict';
- const VERSION='20261021-assets';
+ const VERSION='20261022-improvement';
  function renderNavigation(path){  /* CURRENT PAGE */
   path=(path||'index.html').toLowerCase();
 
@@ -118,6 +118,11 @@
 
     <div class="nav-section">
       <div class="nav-label">Governance Management</div>
+
+      <a class="${isActive('continual-improvement-management.html') ? 'active' : ''}" href="continual-improvement-management.html" ${isActive('continual-improvement-management.html') ? 'aria-current="page"' : ''}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 0 1 15-6l3 3M21 3v5h-5M21 13a9 9 0 0 1-15 6l-3-3M3 21v-5h5"/></svg>
+        <span>Continual Improvement Management</span>
+      </a>
 
       <a class="${isActive('documents.html') ? 'active' : ''}"
          href="documents.html">
