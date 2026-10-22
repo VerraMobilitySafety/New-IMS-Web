@@ -4,9 +4,9 @@ window.VeroSwmsAssistant=(()=>{'use strict';
  const first='What work are you planning?';
  let messages=[{role:'assistant',content:first}],result=null,active=false,ticket=0,controller=null;
  const node=(tag,text)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;return n;};
- function renderChat(){const log=el('swmsConversation');log.replaceChildren();for(const m of messages){const item=node('article'),label=node('strong',m.role==='assistant'?'Vero':'You'),text=node('p',m.content);item.className='swms-chat-message '+m.role;item.append(label,text);log.append(item);}}
+ function renderChat(){const log=el('swmsConversation');log.replaceChildren();for(const m of messages){const item=node('article'),label=node('strong',m.role==='assistant'?'Vero':'You'),text=node('p',m.content);item.className='swms-chat-message '+m.role;item.append(label,text);log.append(item);}log.scrollTop=log.scrollHeight;requestAnimationFrame(()=>{log.scrollTop=log.scrollHeight;});}
  function setBusy(value){active=value;for(const id of ['swmsAsk','swmsIntakeContract','swmsAnswer','swmsManual','swmsRestart'])el(id).disabled=value;el('swmsAsk').textContent=value?'Preparing response…':'Send answer';}
- function context(data){const host=el('swmsAiContext');host.replaceChildren();host.hidden=false;
+ function context(data){const host=el('swmsAiContext');host.replaceChildren();host.hidden=data.stage==='question';if(host.hidden)return;
   host.append(node('h3','DMS sources and review points'));if(data.jurisdiction)host.append(node('p','Work jurisdiction: '+data.jurisdiction));
   if(!data.sources?.length)host.append(node('p','No supporting DMS passages were selected for this response.'));
   for(const source of data.sources||[]){const details=node('details'),summary=node('summary',source.title+' · Version '+(source.version||'—')),p=node('p',source.excerpt||''),a=node('a','Open controlled document');a.href='documents.html?document='+encodeURIComponent(source.document_id);a.target='_blank';a.rel='noopener';details.append(summary,p,a);host.append(details);}
