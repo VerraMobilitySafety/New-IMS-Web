@@ -5,7 +5,7 @@ window.VeroSwmsDocument=(()=>{'use strict';
  const labels={title:'SWMS title',location:'Work location',responsible_person:'Responsible person',scope:'Scope of work',high_risk_work:'High risk work',site_conditions:'Site conditions and interfaces',consultation:'Worker consultation',resources:'Training, equipment and permits',emergency:'Emergency arrangements',monitoring:'Monitoring and review'};
  const isNote=()=>(current?.document_type||current?.fields?.document_type)==='Practice Note';
  const extraLabels={jurisdiction:'Jurisdiction',emergency_number:'Emergency number',non_emergency_number:'Non-emergency number',organisation_address:'Organisation address',organisation_contact_name:'Organisation contact',organisation_contact_phone:'Contact phone',organisation_contact_email:'Contact email',ppe:'PPE requirements (one item per line)',competencies:'Competency requirements (one item per line)'};
- const stepLabels={activity:'Work activity',action:'Action',hazards:'Hazards and associated risks',controls:'Control measures',implementation:'Implementation and monitoring',owner:'Responsible person'};
+
  async function request(path,options={}){const r=await fetch(API+path,{...options,headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json',...options.headers},cache:'no-store'});if(!r.ok){const data=await r.json().catch(()=>({}));throw Error(data.message||'Unable to load SWMS.');}return r;}
  function button(text,action){const b=node('button',text);b.type='button';b.addEventListener('click',action);return b;}
  function clear(){controller?.abort();}
@@ -29,7 +29,7 @@ window.VeroSwmsDocument=(()=>{'use strict';
   for(const [i,step] of (data.steps||[]).entries()){
    const risks=isNote()?[step]:step.risks?.length?step.risks:[step];
    for(const [index,risk] of risks.entries()){
-    const row=node('tr');if(index===0){row.className='swms-work-step-start';const cell=node('td');cell.rowSpan=risks.length;cell.className='swms-step-cell';cell.append(node('strong',(i+1)+'. '+(step.activity||'Not recorded')));if(!isNote()&&step.action)cell.append(node('p',step.action));for(const key of ['implementation','owner'])if(step[key])cell.append(node('p',stepLabels[key]+': '+step[key]));row.append(cell);}
+    const row=node('tr');if(index===0){row.className='swms-work-step-start';const cell=node('td');cell.rowSpan=risks.length;cell.className='swms-step-cell';cell.append(node('strong',(i+1)+'. '+(step.activity||'Not recorded')));row.append(cell);}
     if(isNote())row.append(node('td',step.action||'Not recorded'));
     else {const initial=node('td'),residual=node('td');rating(initial,risk,'initial');rating(residual,risk,'residual');row.append(node('td',risk.hazards||'Not recorded'),initial,node('td',risk.controls||'Not recorded'),residual);}
     matrix.rows.append(row);
@@ -69,7 +69,7 @@ window.VeroSwmsDocument=(()=>{'use strict';
    if(isNote()){
     const row=node('tr'),action=node('td');field(action,'action','Action',data.action,3000).dataset.step='action';row.append(stepCell,action);matrix.rows.append(row);
    }else{
-    field(stepCell,'action','Action',data.action,3000).dataset.step='action';
+
     const risks=matrix.rows;risks.className='swms-digital-risks';
     function synchronise(){stepCell.rowSpan=risks.children.length;risks.firstElementChild?.prepend(stepCell);[...risks.children].forEach((r,i)=>{r.setAttribute('aria-label','Risk '+(i+1));r.querySelector('.swms-remove-risk').disabled=risks.children.length===1;});}
     function addRisk(value={}){
@@ -84,7 +84,7 @@ window.VeroSwmsDocument=(()=>{'use strict';
     for(const risk of data.risks?.length?data.risks:[data])addRisk(risk);
     f.append(button('+ Add risk',()=>addRisk()));
    }
-   const responsibilities=node('div');responsibilities.className='swms-edit-contact-fields';for(const key of ['implementation','owner']){const input=field(responsibilities,key,stepLabels[key],data[key],3000,!isNote());input.dataset.step=key;}f.append(responsibilities);
+
    f.append(button('Remove step',()=>{f.remove();[...steps.children].forEach((s,i)=>s.querySelector('legend').textContent='Work step '+(i+1));}));steps.append(f);
   }
   for(const step of current.fields?.steps||[{}])addStep(step);assessment.append(button('+ Add work step',()=>addStep()));const review=section('6','Implementation and review');editField(review,'monitoring');review.append(node('h4','Submit for Document Control review'));field(review,'change_reason','Changes and reason','',3000);
