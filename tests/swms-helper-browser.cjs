@@ -139,7 +139,8 @@ test('legacy SWMS has an in-drawer original preview and verified conversion fiel
  const s=await screen(390);try{const p=s.page;
  await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'Legacy SWMS',version:'7.0',status:'Current',can_edit:true,fields:null,conversion_required:true,history:[]}}));
  await p.route('**/swms/documents/10/content',route=>route.fulfill({contentType:'application/pdf',body:'%PDF-1.4 example'}));
- await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.locator('#swmsDocumentDialog iframe').waitFor({state:'attached'});assert.match(p.url(),/safe-work-method-statement/);
+ await p.route('**/vendor/pdfjs/pdf.mjs',route=>route.fulfill({contentType:'application/javascript',body:`export const GlobalWorkerOptions={};export function getDocument(){return {promise:Promise.resolve({numPages:2,destroy:async()=>{},getPage:async n=>({getViewport:({scale})=>({width:500*scale,height:700*scale}),render:()=>({promise:Promise.resolve()}),getTextContent:async()=>({items:[{str:'Original SWMS page '+n}]})})})};}`}));
+ await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.getByText('Page 1 of 2',{exact:true}).waitFor();await p.getByRole('button',{name:'Next page',exact:true}).click();await p.getByText('Page 2 of 2',{exact:true}).waitFor();assert.match(p.url(),/safe-work-method-statement/);
  await p.getByRole('button',{name:'Create digital revision',exact:true}).click();assert.equal(await p.locator('#swmsDocumentDialog input[type=checkbox]').count(),2);assert.equal(await p.locator('#swmsDocumentDialog [name=scope]').inputValue(),'');
  const rect=await p.locator('#swmsDocumentDialog').boundingBox();assert.equal(rect.x+rect.width,390);assert.equal(rect.height,1000);
  if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-digital-edit-mobile.png')});

@@ -31,3 +31,5 @@
 .swms-document-body,.swms-document-body form,.swms-document-body label{font-family:Montserrat,Arial,sans-serif}
 
 .swms-document-body select{display:block;width:100%;padding:10px;margin-top:7px;font:inherit;border:1px solid #c9c5c1;border-radius:6px}
+
+.swms-pdf-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.swms-pdf-text{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
