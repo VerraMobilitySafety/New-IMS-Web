@@ -24,7 +24,7 @@ function render(){
  for(const [id,count] of [['swmsTotal',scoped.length],['swmsCurrent',scoped.filter(x=>x.kind==='document'&&x.status==='Current').length],['swmsPending',scoped.filter(pending).length],['swmsDue',scoped.filter(due).length]])el(id).textContent=count;
  const q=el('swmsSearch').value.trim().toLowerCase(),state=el('swmsStateFilter').value;
  const rows=scoped.filter(x=>(!q||[x.title,x.reference,...(x.document_links||[]).map(l=>l.label)].some(v=>String(v||'').toLowerCase().includes(q)))&&(!state||(state==='pending'?pending(x):state==='due'?due(x):state==='current'?x.kind==='document'&&x.status==='Current':x.status===state)));
- const body=el('swmsRows');body.replaceChildren();el('swmsStatus').textContent=rows.length+' of '+scoped.length+' documents';
+ const body=el('swmsRows');body.replaceChildren();el('swmsStatus').textContent='';
  if(!rows.length){const tr=node('tr'),td=node('td',scoped.length?'No SWMS match these filters.':'No SWMS saved yet. Generate a SWMS to get started.');td.colSpan=5;tr.append(td);body.append(tr);return;}
  for(const item of rows){
   const tr=node('tr'),cell=node('td'),title=node('div'),a=node('button',item.title||'Untitled SWMS');title.className='swms-row-title';a.type='button';a.className='swms-title-button';a.title=item.title||'Untitled SWMS';titleContent(a,a.title);a.addEventListener('click',event=>{event.preventDefault();window.VeroSwmsDocument.open(item,load);});title.append(a);cell.append(title);tr.append(cell);
