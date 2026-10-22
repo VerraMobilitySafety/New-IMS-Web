@@ -26,3 +26,7 @@
 @media(max-width:650px){#changeDrawer .change-grid{grid-template-columns:1fr}#changeDrawer .change-compose .actions{flex-wrap:wrap}#changeDrawer .change-message{max-width:94%}}
 
 #vh #heights-auth-status{margin-left:0;padding:24px 0}
+#changeApproval{display:grid;gap:12px;margin-bottom:24px}
+#changeApproval p{margin:0}
+#changeApproval a{display:block;width:fit-content;color:#315a3d;font-weight:600}
+#changeApproval label{display:grid;gap:8px}
