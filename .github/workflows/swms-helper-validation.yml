@@ -13,5 +13,11 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-save playwright
-      - run: npx playwright install --with-deps chromium
+      - name: Use installed Chrome or install Chromium
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            echo "VERO_CHROME_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            npx playwright install --with-deps chromium
+          fi
       - run: node --test tests/swms-helper-browser.cjs
