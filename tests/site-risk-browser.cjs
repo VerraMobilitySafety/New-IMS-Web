@@ -147,3 +147,22 @@ test('a confirmed submission stays visible and opens for review even if refreshi
  assert.deepEqual(errors,[]);
  }finally{await page.close();}
 });
+
+test('an authorised officer sees explicit self-review approval with no automatic decision',async()=>{
+ const {page,errors}=await setup();let decisions=0;
+ try{
+ await page.route('**/site-submission',route=>route.fulfill({json:{available:true,approval_state:'Submitted',is_live:false,risk_status:'Draft',
+ submission:{risk_id:201,site_id:123,status:'Submitted',version:1,package_hash:'test-hash',submitted_by_user_id:1,
+ risk:{risk_code:'SR-TEST',risk_title:'My own risk'},proposed_assessment:{owner_user_id:1},documents:[],treatment_actions:[],proposed_controls:[]},
+ capabilities:{can_approve:true,can_complete:true,can_request_changes:true,is_self_review:true},
+ reviewer_routing:{ready:true,definition_reviewer_count:1,assessment_reviewer_count:1}}}));
+ await page.route('**/site-submission/decision',route=>{decisions++;return route.fulfill({json:{}});});
+ await page.goto('https://vero.test/client-services-site.html?id=123&risk_id=201');
+ await page.getByRole('button',{name:'Approve risk and assessment',exact:true}).waitFor();
+ await page.getByText('You can review your own submission as an authorised Risk Officer. Your approval and rationale will be recorded as a self-review.',{exact:true}).waitFor();
+ assert.equal(decisions,0);
+ page.on('dialog',dialog=>dialog.dismiss());
+ await page.getByRole('button',{name:'Approve risk and assessment',exact:true}).click();
+ assert.equal(decisions,0);assert.deepEqual(errors,[]);
+ }finally{await page.close();}
+});
