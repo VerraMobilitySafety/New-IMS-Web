@@ -302,3 +302,28 @@ test('failed approved-assessment read is unavailable, never a successful zero',a
  assert.ok(app.cells().every(cell=>cell.disabled));
 });
 
+
+test('Site context finds saved D33 submission while approved totals remain zero',async()=>{
+ const app=setup(route=>{
+  if(route==='/risk/operational-contexts')return response({...contexts,context_types:[...contexts.context_types,'Site'],sites:[{id:4944,code:'D33',name:'Radar pole'}]});
+  if(route==='/risks/2/applicability')return response({assignments:[],pending_contexts:[{context_type:'Site',context_id:4944,status:'Pending',submission_status:'Submitted'}]});
+  if(route==='/risk/approved-matrix-positions')return response({positions:[]});
+ });
+ await settle();app.change('veroContextTypeFilter','Site');await settle();
+ assert.match(app.el('veroApplicationFilter').textContent,/D33/);
+ app.change('veroApplicationFilter',4944);await settle();
+ assert.match(app.table(),/Beta/);assert.doesNotMatch(app.table(),/Alpha|Gamma/);
+ assert.equal(app.el('veroMatrixStatus').textContent,'0');
+ assert.match(app.el('veroContextStatus').textContent,/awaiting Risk Officer approval/);
+});
+
+test('Site filter includes approved applicability and narrows approved coordinates to the chosen site',async()=>{
+ const app=setup(route=>{
+  if(route==='/risk/operational-contexts')return response({...contexts,context_types:['Site'],sites:[{id:4944,code:'D33',name:'Radar pole'},{id:7,code:'D34',name:'Other site'}]});
+  if(route==='/risks/2/applicability')return response({assignments:[{id:2,context_type:'Site',context_id:4944,status:'Applicable'}]});
+  if(route==='/risk/approved-matrix-positions')return response({positions:[{assessment_id:276,risk_id:2,context_type:'Site',context_id:4944,residual_likelihood:5,residual_impact:5}]});
+ });
+ await settle();app.change('veroContextTypeFilter','Site');await settle();app.change('veroApplicationFilter',4944);await settle();
+ assert.match(app.table(),/Beta/);assert.equal(app.el('veroMatrixStatus').textContent,'1');
+ app.change('veroApplicationFilter',7);await settle();assert.doesNotMatch(app.table(),/Beta/);assert.equal(app.el('veroMatrixStatus').textContent,'0');
+});

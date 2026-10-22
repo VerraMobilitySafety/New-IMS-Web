@@ -868,7 +868,7 @@ async function loadProjectAssessmentHistory(applicabilityId,selectedId){
    for(const [label,key] of [['Status','status'],['Inherent likelihood','inherent_likelihood'],['Inherent consequence','inherent_impact'],['Residual likelihood','residual_likelihood'],['Residual consequence','residual_impact'],['Current controls','controls_summary'],['Further treatments','treatments_summary'],['Assessment owner','owner_user_id'],['Approved by','approved_by_user_id'],['Approved at','approved_at']]){const row=document.createElement('p'),name=document.createElement('strong');name.textContent=label+': ';row.append(name,document.createTextNode(item[key]==null?'Not recorded':String(item[key])));detail.appendChild(row);}
    if(item.status==='Returned'&&(Number(item.owner_user_id)===userId||administratorOverride)&&capability.can_create){
     const revise=document.createElement('button');revise.type='button';revise.className='btn green';revise.textContent='Revise returned assessment';
-    revise.onclick=()=>{for(const [id,key] of [['projectAssessIL','inherent_likelihood'],['projectAssessIC','inherent_impact'],['projectAssessRL','residual_likelihood'],['projectAssessRC','residual_impact'],['projectAssessControls','controls_summary'],['projectAssessTreatments','treatments_summary']])overlay.querySelector('#'+id).value=item[key]??'';overlay.dataset.returnedAssessmentId=String(item.id);form.hidden=false;overlay.querySelector('#projectAssessmentMessage').textContent='A new draft revision will retain this returned assessment in history. Save the correction, then submit it for independent approval.';};detail.appendChild(revise);
+    revise.onclick=()=>{for(const [id,key] of [['projectAssessIL','inherent_likelihood'],['projectAssessIC','inherent_impact'],['projectAssessRL','residual_likelihood'],['projectAssessRC','residual_impact'],['projectAssessControls','controls_summary'],['projectAssessTreatments','treatments_summary']])overlay.querySelector('#'+id).value=item[key]??'';overlay.dataset.returnedAssessmentId=String(item.id);form.hidden=false;overlay.querySelector('#projectAssessmentMessage').textContent='A new draft revision will retain this returned assessment in history. Save the correction, then submit it for Risk Officer approval.';};detail.appendChild(revise);
    }
   }
   const requestedId=Number(selectedId||overlay.dataset.selectedAssessmentId),selected=rows.find(item=>Number(item.id)===requestedId);
@@ -885,7 +885,7 @@ async function loadProjectAssessmentHistory(applicabilityId,selectedId){
    [item.revision,item.status,(item.residual_likelihood&&item.residual_impact)?item.residual_likelihood*item.residual_impact:'—'].forEach(value=>{tr.insertCell().textContent=String(value)});
    const cell=tr.insertCell();
    const own=Number(item.owner_user_id)===userId;
-   const decision=item.status==='Draft'&&(own||administratorOverride)&&capability.can_create?'Submit':item.status==='Submitted'&&(!own||administratorOverride)&&capability.can_approve?'Approve':null;
+   const decision=item.status==='Draft'&&(own||administratorOverride)&&capability.can_create?'Submit':item.status==='Submitted'&&capability.can_approve?'Approve':null;
    if(decision){
     const button=document.createElement('button');button.type='button';button.className='btn outline';
     button.textContent=decision;
@@ -971,7 +971,7 @@ async function openProjectAssessment(applicabilityId,riskTitle,assessmentId){
     });
     const result=await response.json().catch(()=>({}));
     if(!response.ok)throw Error(result.message||'Unable to save assessment');
-    status.textContent='Draft assessment saved. Submission and independent approval are required before enterprise reporting.';
+    status.textContent='Draft assessment saved. Submission and Risk Officer approval are required before enterprise reporting.';
     await loadProjectRisks(currentProject.id);
     delete overlay.dataset.returnedAssessmentId;
     await loadProjectAssessmentHistory(overlay.dataset.applicabilityId,result.id);
