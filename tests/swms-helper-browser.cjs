@@ -16,6 +16,7 @@ async function screen(width=1440,holdAuth=false){
    const type=file.endsWith('.html')?'text/html':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'image/png';return route.fulfill({body:fs.readFileSync(file),contentType:type});
   }
   if(u.pathname.endsWith('/auth/me')){await authGate;return route.fulfill({json:{user:{id:3,first_name:'Sam',last_name:'Taylor',vero_role:'Administrator'}}});}
+  if(u.pathname.endsWith('/users/active'))return route.fulfill({json:{users:[{id:3,name:'Sam Taylor',email:'sam@example.com'},{id:4,name:'Casey Lee',email:'casey@example.com'}]}});
   if(u.pathname.endsWith('/documents/link-options'))return route.fulfill({json:{options:[contract]}});
   if(u.pathname.endsWith('/swms/assist')){
    assistCalls++;if(failAi)return route.fulfill({status:503,json:{message:'AI temporarily unavailable.'}});
@@ -198,5 +199,23 @@ test('SWMS drawer aligns each hazard with its own initial rating, controls and r
  let posted;await p.route('**/swms/documents/10/revisions',route=>{posted=route.request().postDataJSON();return route.fulfill({status:201,json:{request:{id:88}}});});
  await p.locator('#swmsDocumentDialog [name=change_reason]').fill('Review each risk separately');await p.locator('#swmsDocumentDialog input[type=checkbox]').check();await p.getByRole('button',{name:'Submit revision for review',exact:true}).click();await p.getByText('Revision submitted for review.',{exact:true}).waitFor();
  assert.equal(posted.steps.length,1);assert.equal(posted.steps[0].risks.length,2);assert.equal(posted.steps[0].risks[0].controls,'Separate work area');assert.equal(posted.steps[0].risks[1].controls,'Inspect access path');assert.equal(posted.steps[0].risks[1].residual_impact,3);
+ }finally{await s.browser.close();}
+});
+
+
+test('responsible person uses current users, retains saved names and retries without losing edits',async()=>{
+ const s=await screen();try{const p=s.page;let fail=true,posted;
+ await p.route('**/users/active',route=>route.fulfill(fail?{status:503,json:{message:'Unavailable'}}:{json:{users:[{id:3,name:'Sam Taylor',email:'sam@example.com'},{id:4,name:'Casey Lee',email:'casey@example.com'},{id:5,name:'Inactive User',active:false}]}}));
+ await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'SWMS deployment',version:'7.0',status:'Current',can_edit:true,fields:digitalFields(),history:[]}}));
+ await p.route('**/swms/documents/10/revisions',route=>{posted=route.request().postDataJSON();return route.fulfill({status:201,json:{request:{id:88}}});});
+ await p.locator('#swmsRows tr').first().click();await p.getByRole('button',{name:'Edit SWMS',exact:true}).click();
+ const picker=p.locator('select[name=responsible_person]');assert.equal(await picker.inputValue(),'Recorded responsible_person');
+ await p.getByRole('button',{name:'Retry users',exact:true}).waitFor({state:'visible'});await p.locator('#swmsDocumentDialog [name=scope]').fill('Updated scope remains');
+ fail=false;await p.getByRole('button',{name:'Retry users',exact:true}).click();await picker.locator('option').filter({hasText:'Casey Lee'}).waitFor({state:'attached'});
+ assert.equal(await picker.inputValue(),'Recorded responsible_person');assert.equal(await picker.locator('option').filter({hasText:'Inactive User'}).count(),0);
+ assert.equal(await p.locator('#swmsDocumentDialog [name=scope]').inputValue(),'Updated scope remains');await picker.selectOption('Casey Lee');
+ if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-responsible-user-preview.png')});
+ await p.locator('#swmsDocumentDialog [name=change_reason]').fill('Assign responsible person');await p.locator('#swmsDocumentDialog input[type=checkbox]').check();await p.getByRole('button',{name:'Submit revision for review',exact:true}).click();
+ await p.getByText('Revision submitted for review.',{exact:true}).waitFor();assert.equal(posted.responsible_person,'Casey Lee');assert.equal(posted.expected_version,'7.0');
  }finally{await s.browser.close();}
 });
