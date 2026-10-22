@@ -1,0 +1,18 @@
+name: Project documents and records
+on:
+  pull_request:
+    paths: ['project-documents.js', 'project-workspace.html', 'tests/project-documents*.cjs', '.github/workflows/project-documents-validation.yml']
+permissions:
+  contents: read
+jobs:
+  project-documents:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save jsdom playwright@1.62.1
+      - run: npx playwright install --with-deps chromium
+      - run: node --test tests/project-documents.cjs tests/project-documents-browser.cjs tests/project-document-viewer.cjs tests/project-first-fixes.cjs

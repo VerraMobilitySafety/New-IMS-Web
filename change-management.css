@@ -1,0 +1,65 @@
+#vh{font-family:Montserrat,VeroSidebar,Arial,sans-serif}
+#changeDrawer{width:min(1080px,100vw)}
+#vh #changeDrawer .t5-top{background:#3d3935;color:#fff;border-bottom:3px solid #a9c23f}
+#vh #changeDrawer .t5-top h2,#vh #changeDrawer .t5-close{color:#fff}
+#vh #changeDrawer .t5-top .overline{color:#c8db87}
+#vh #changeDrawer .t5-top p{color:#e5e1de}
+#vh #changeDrawer .primary{background:#a9c23f;border-color:#a9c23f;color:#292725}
+#vh #changeDrawer .primary:hover{background:#bed45a;border-color:#bed45a}
+#changeDrawer .t5-editor{min-height:100%;box-sizing:border-box}
+#changeDrawer .change-intro{font-size:13px;line-height:1.8;color:#625e59;max-width:650px}
+#changeDrawer .change-chat{height:min(47dvh,420px);min-height:180px;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:14px;padding:12px 5px 18px;margin-bottom:18px}
+#changeDrawer .change-message{max-width:85%;padding:15px 18px;border-radius:12px;background:#f1f4e9;flex-shrink:0;line-height:1.8}
+#changeDrawer .change-message.user{background:#edf3f5;align-self:flex-end}
+#changeDrawer .change-message strong{font-size:11px}#changeDrawer .change-message p{margin:4px 0 0;white-space:pre-wrap}
+#changeDrawer .change-compose{display:grid;gap:14px}#changeDrawer .change-compose textarea{width:100%;box-sizing:border-box;min-height:100px;padding:14px;border:1px solid #d6d2cf;border-radius:8px;font:inherit;resize:vertical}
+#changeDrawer .change-compose .actions{justify-content:space-between}
+#changeDrawer .change-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:18px 0}
+#changeDrawer .change-grid label{display:grid;gap:7px;font-weight:600;line-height:1.7}
+#changeDrawer .change-grid input,#changeDrawer .change-grid textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #d6d2cf;border-radius:6px;font:inherit;font-weight:400;resize:vertical;min-width:0}
+#changeDrawer .change-grid textarea{min-height:85px}#changeDrawer .change-full{grid-column:1/-1}
+#changeDrawer .change-section{border-top:1px solid #e5e1de;margin-top:24px;padding-top:22px}#changeDrawer .change-section h3{font-size:17px}
+#changeDrawer .vero-central{padding:0}#changeDrawer .change-confirm{display:flex;gap:10px;line-height:1.8;margin:20px 0}#changeDrawer .change-confirm input{width:18px;height:18px;flex-shrink:0;accent-color:#53691c}
+#changeSources{background:#f4f6ed;border:1px solid #dce4c9;border-radius:8px;padding:18px;line-height:1.8;margin-bottom:20px}#changeSources p{white-space:pre-wrap}#changeSources a{color:#53691c}
+#changeStatus,#changeAiStatus{line-height:1.8}#changeRegisterStatus{padding:0 18px;font-size:12px;line-height:1.8}#changeRegisterStatus:empty{display:none}#changeRegisterStatus button{margin-left:12px}
+#changeDrawer [hidden]{display:none!important}#changeDrawer button:focus-visible,#changeDrawer input:focus-visible,#changeDrawer textarea:focus-visible{outline:3px solid #21869b;outline-offset:3px}
+@media(max-width:650px){#changeDrawer .change-grid{grid-template-columns:1fr}#changeDrawer .change-compose .actions{flex-wrap:wrap}#changeDrawer .change-message{max-width:94%}}
+
+#vh #heights-auth-status{margin-left:0;padding:24px 0}
+#changeApproval{display:grid;gap:12px;margin-bottom:24px}
+#changeApproval p{margin:0}
+#changeApproval a{display:block;width:fit-content;color:#315a3d;font-weight:600}
+#changeApproval label{display:grid;gap:8px}
+
+/* Document-style change assessment, using the shared assessment values and policy. */
+#changeDrawer .change-sheet-heading{border:1px solid #b7b3ad;border-top:5px solid #3d3935;padding:20px 22px;margin:24px 0 0;background:#fff}
+#changeDrawer .change-sheet-heading p{font-size:10px;font-weight:800;letter-spacing:1.6px;color:#625e59;margin:0 0 6px}
+#changeDrawer .change-sheet-heading h3{font-size:23px;margin:0 0 8px;color:#3d3935}
+#changeDrawer .change-sheet-heading>span{font-size:12px;line-height:1.7;color:#625e59}
+#changeDrawer .change-section-title{display:flex;align-items:center;gap:12px;background:#3d3935;color:#fff;font-size:14px;padding:12px 16px;margin:24px 0 0}
+#changeDrawer .change-section-title>span{color:#c8db87;font-size:12px;letter-spacing:1px}
+#changeDrawer .change-grid{gap:0;padding:0;border-left:1px solid #b7b3ad;border-top:1px solid #b7b3ad}
+#changeDrawer .change-grid>label{padding:14px 16px;border-right:1px solid #b7b3ad;border-bottom:1px solid #b7b3ad;background:#fafaf8;font-size:12px}
+#changeDrawer .change-grid input,#changeDrawer .change-grid textarea{border-radius:2px;background:#fff;line-height:1.7}
+#changeDrawer .change-section{border-top:0;padding-top:0}
+#changeDrawer .risk-worksheet .fields,#changeDrawer .risk-worksheet .tiers{gap:0;border-top:1px solid #b7b3ad;border-left:1px solid #b7b3ad;margin:18px 0}
+#changeDrawer .risk-worksheet .fields>div,#changeDrawer .risk-worksheet .tiers>div{padding:14px 16px;border-bottom:1px solid #b7b3ad;border-right:1px solid #b7b3ad;background:#fafaf8;min-width:0}
+#changeDrawer .risk-worksheet .tiers>.full{padding:10px 16px;border-right:1px solid #b7b3ad;border-bottom:1px solid #b7b3ad;margin:0;background:#fafaf8}
+#changeDrawer .risk-worksheet label{font-size:12px}
+#changeDrawer .risk-worksheet input,#changeDrawer .risk-worksheet textarea,#changeDrawer .risk-worksheet select{border-radius:2px;box-sizing:border-box;max-width:100%;line-height:1.7}
+#changeDrawer .risk-worksheet-controls{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #b7b3ad;border-left:1px solid #b7b3ad;margin:18px 0}
+#changeDrawer .risk-worksheet-controls>div{min-width:0;padding:16px;border-right:1px solid #b7b3ad;border-bottom:1px solid #b7b3ad}
+#changeDrawer .risk-worksheet-controls textarea{min-height:120px}
+#changeDrawer .risk-worksheet-table-wrap{overflow-x:auto;margin:20px 0;border:1px solid #b7b3ad}
+#changeDrawer .risk-worksheet-ratings{width:100%;border-collapse:collapse;min-width:650px;font-size:12px}
+#changeDrawer .risk-worksheet-ratings caption{text-align:left;background:#f0f2e9;padding:13px 14px;font-weight:800;color:#3d3935}
+#changeDrawer .risk-worksheet-ratings th,#changeDrawer .risk-worksheet-ratings td{padding:12px;border:1px solid #d5d2cc;text-align:left;vertical-align:middle}
+#changeDrawer .risk-worksheet-ratings thead th{background:#3d3935;color:#fff;font-weight:700}
+#changeDrawer .risk-worksheet-ratings tbody th{background:#f5f5f0;min-width:100px}
+#changeDrawer .risk-worksheet-ratings select{min-width:115px;width:100%;padding:9px;font:inherit;border:1px solid #b7b3ad;background:#fff}
+#changeDrawer .risk-worksheet-ratings .badge{display:inline-block;white-space:nowrap;padding:8px 10px;font-weight:700}
+#changeDrawer .risk-worksheet-guide{border:1px solid #d5d2cc;padding:14px;margin:20px 0}
+#changeDrawer .risk-worksheet-guide>summary{font-weight:700;cursor:pointer;color:#3d3935}
+#changeDrawer .risk-worksheet-guide .stages{margin-top:18px}
+#changeDrawer .risk-worksheet-guide .summary-ratings[hidden]{display:none!important}
+@media(max-width:650px){#changeDrawer .risk-worksheet-controls{grid-template-columns:1fr}#changeDrawer .change-sheet-heading{padding:16px}#changeDrawer .change-sheet-heading h3{font-size:20px}#changeDrawer .change-grid>label,#changeDrawer .risk-worksheet .fields>div,#changeDrawer .risk-worksheet .tiers>div{padding:12px}}

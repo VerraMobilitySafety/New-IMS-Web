@@ -231,8 +231,8 @@ test('administrator adds and edits shared sites with contract linking and retain
   await page.goto('https://vero.test/client-services-sites.html');await page.getByRole('button',{name:'+ Add Site',exact:true}).click();
   const dialog=page.locator('#globalSiteDialog');await dialog.getByLabel('Site reference',{exact:true}).fill('NEW-SITE');await dialog.getByLabel('Site name',{exact:true}).fill('New shared site');await dialog.getByLabel('Address',{exact:true}).fill('Example address');await dialog.getByLabel('Link to contract',{exact:true}).selectOption('3');
   await dialog.getByRole('button',{name:'Add Site',exact:true}).click();await dialog.getByRole('alert').filter({hasText:'Temporary save failure'}).waitFor();assert.equal(await dialog.getByLabel('Site name',{exact:true}).inputValue(),'New shared site');fail=false;
-  await dialog.getByRole('button',{name:'Add Site',exact:true}).click();await page.getByRole('button',{name:'Edit site NEW-SITE',exact:true}).waitFor();assert.equal(posts[0].request_id,posts[1].request_id);assert.equal(posts[1].contract_id,3);
-  await page.getByRole('button',{name:'Edit site NEW-SITE',exact:true}).click();await dialog.getByText('1775M · NSW agreement',{exact:false}).waitFor();await dialog.getByLabel('Site name',{exact:true}).fill('Updated shared site');await dialog.getByLabel('Site status',{exact:true}).selectOption('Inactive');await dialog.getByLabel('Link to contract',{exact:true}).selectOption('4');
+  await dialog.getByRole('button',{name:'Add Site',exact:true}).click();await page.getByRole('cell',{name:'New shared site',exact:true}).waitFor();assert.equal(posts[0].request_id,posts[1].request_id);assert.equal(posts[1].contract_id,3);
+  assert.equal(await page.locator('[data-site-edit]').count(),0);await page.evaluate(()=>openSiteEditor(allSites[0]));await dialog.getByText('1775M · NSW agreement',{exact:false}).waitFor();await dialog.getByLabel('Site name',{exact:true}).fill('Updated shared site');await dialog.getByLabel('Site status',{exact:true}).selectOption('Inactive');await dialog.getByLabel('Link to contract',{exact:true}).selectOption('4');
   assert.equal(await dialog.evaluate(el=>el.getBoundingClientRect().width<=innerWidth),true);
   await dialog.getByRole('button',{name:'Save Changes',exact:true}).click();await page.getByRole('cell',{name:'Updated shared site',exact:true}).waitFor();assert.equal(posts[2].version,1);assert.equal(posts[2].contract_id,4);assert.equal(sites[0].contracts.length,2);assert.equal(await page.getByRole('link',{name:'Report Event',exact:true}).count(),0);
   await page.close();
@@ -263,7 +263,7 @@ test('site event history distinguishes missing coverage, counts and impact and s
    return route.fulfill({contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css','.png':'image/png'})[path.extname(file)]||'application/octet-stream',body});
   });
   await page.goto('https://vero.test/client-services-sites.html');
-  await page.getByRole('button',{name:'Edit site B',exact:true}).waitFor();
+  await page.getByRole('link',{name:'B',exact:true}).waitFor();
   const rows=page.locator('#siteRows tr');
   assert.equal(await rows.count(),4);
   assert.equal(await page.locator('.table-wrap').evaluate(el=>getComputedStyle(el).overflowX),'auto');
@@ -271,10 +271,10 @@ test('site event history distinguishes missing coverage, counts and impact and s
   assert.equal(await rows.nth(0).locator('.site-event-count strong').innerText(),'0');
   assert.equal(await rows.nth(1).locator('.site-event-count strong').innerText(),'1');
   assert.match(await rows.nth(2).innerText(),/Unavailable/);
-  await page.getByLabel('Sort by',{exact:true}).selectOption('events');
+  await page.getByRole('button',{name:'Sort by Events (last 12 months)',exact:true}).click();
   assert.equal(await rows.first().locator('td').first().innerText(),'B');
-  await page.getByLabel('Sort by',{exact:true}).selectOption('impact');
-  assert.equal(await rows.first().locator('td').first().innerText(),'D');
+  await page.getByRole('button',{name:'Sort by Events (last 12 months)',exact:true}).click();
+  assert.equal(await rows.first().locator('td').first().innerText(),'A');
   await page.getByLabel('Event history',{exact:true}).selectOption('open');
   assert.equal(await rows.count(),1);assert.equal(await rows.first().locator('td').first().innerText(),'B');
   await page.getByLabel('Search sites',{exact:true}).fill('No such site');

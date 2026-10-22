@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="vero-shell.css?v=20261021-arrow-align"><script src="nav.js?v=20261022-improvement-register"></script><style id="vero-loading-guard">html[data-vero-loading] .main>:not(.global-hero):not(.workspace-hero){visibility:hidden!important}html[data-vero-loading] .main{background:#f4f6f8}</style><script>document.documentElement.setAttribute('data-vero-loading','');window.__veroLoaderDeadline=setTimeout(function(){document.documentElement.removeAttribute('data-vero-loading');window.VeroPageLoader?.dismiss();},12000);</script><link rel="stylesheet" href="risk-page-loader.css?v=20261021-clean-camera"><script src="risk-page-loader.js?v=20261021-clean-camera" data-tasks="account workspace"></script><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png">
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="vero-shell.css?v=20261021-arrow-align"><script src="nav.js?v=20261022-change-management"></script><style id="vero-loading-guard">html[data-vero-loading] .main>:not(.global-hero):not(.workspace-hero){visibility:hidden!important}html[data-vero-loading] .main{background:#f4f6f8}</style><script>document.documentElement.setAttribute('data-vero-loading','');window.__veroLoaderDeadline=setTimeout(function(){document.documentElement.removeAttribute('data-vero-loading');window.VeroPageLoader?.dismiss();},12000);</script><link rel="stylesheet" href="risk-page-loader.css?v=20261021-clean-camera"><script src="risk-page-loader.js?v=20261021-clean-camera" data-tasks="account workspace"></script><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <title>VERRA | VERO — Project Workspace</title><style>
@@ -369,7 +369,7 @@
  <img class="chev c1" src="verra-chevron.png" alt="">
  <img class="chev c2" src="verra-chevron.png" alt="">
  <img class="chev c3" src="verra-chevron.png" alt="">
- <nav class="nav"><div id="vero-nav" data-vero-nav="20261022-improvement-register">
+ <nav class="nav"><div id="vero-nav" data-vero-nav="20261022-change-management">
     <div class="nav-section">
       <a class=""
          href="index.html">
@@ -426,6 +426,10 @@
       <a class="" href="contractor-management.html">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"></path><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"></path><path d="M4 15v-3a6 6 0 0 1 6-6"></path><path d="M14 6a6 6 0 0 1 6 6v3"></path></svg>
         <span>Contractor Management</span>
+      </a>
+      <a class="" href="change-management.html" >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 0 1 15-6l3 3M21 3v5h-5M21 13a9 9 0 0 1-15 6l-3-3M3 21v-5h5"/></svg>
+        <span>Change Management</span>
       </a>
     </div>
 
@@ -486,7 +490,7 @@
           <button class="vero-nav-expand" type="button" aria-label="Expand Risk Management" aria-controls="riskNavChildren" aria-expanded="false"><span>›</span></button>
         </div>
         <div class="vero-nav-children" id="riskNavChildren">
-          <a class="" href="safe-work-method-statement.html" >Safe Work Method Statement</a>
+          <a class="" href="safe-work-method-statement.html" >Safe Work Method Statements</a>
           <a class="" href="take-5.html" >Take 5</a>
         </div>
       </div>
@@ -606,7 +610,7 @@
   <button type="submit" class="btn green" id="projectContractUploadButton">Upload Contract</button>
   <p id="projectContractUploadStatus" role="status" aria-live="polite"></p>
  </form>
- <div class="panel"><div class="panel-head"><h2>Project Documents</h2><span id="projectDocumentCount">Loading…</span></div><div id="projectDocumentsList" class="project-docs"><div class="empty-state"><b>Loading project documents…</b></div></div></div></section>
+ <div class="panel"><div class="panel-head"><h2>Project Documents and Records</h2><span id="projectDocumentCount">Loading…</span></div><div id="projectDocumentsList" class="project-docs"><div class="empty-state"><b>Loading project documents…</b></div></div></div></section>
  <section id="assurance" class="ws-view"><div class="empty-state"><b>Project Assurance</b><br><br>Audits, inspections, project gates and assurance activities linked to this project will appear here.</div></section>
  <section id="delivery" class="ws-view"><div id="projectDelivery"></div></section>
  <section id="updates" class="ws-view"><div id="projectMonthlyUpdates"></div></section>
@@ -626,6 +630,7 @@
  </section>
 </div>
 
+<script src="project-documents.js?v=20261022-project1"></script>
 <script>
 function showTab(id,btn){document.querySelectorAll('.ws-view').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.ws-tab').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');btn.classList.add('active');}
 
@@ -721,18 +726,7 @@ async function refreshProjectWorkflow(){
 function renderNoRequest(){currentRequest=null;renderProjectWorkflow();}
 function renderMilestoneOverview(){const panel=document.querySelector('#overview .overview-grid .panel:nth-child(2)');if(!panel)return;const upcoming=currentMilestones.slice().sort((a,b)=>(a.target_date||'9999').localeCompare(b.target_date||'9999')).slice(0,5);panel.innerHTML='<div class="panel-head"><h2>Upcoming Milestones</h2><span>Project milestones</span></div>'+(upcoming.length?`<div class="milestones">${upcoming.map(m=>`<div class="milestone"><i></i><div><b>${esc(m.milestone_name)}</b><small>${esc(m.milestone_type||'Milestone')}</small></div><time>${esc(fmtDate(m.target_date))}</time></div>`).join('')}</div>`:'<div class="empty-state" style="margin:18px"><b>No live milestones connected yet.</b><br><br>Milestones linked to this project will appear here.</div>');}
 async function loadProjectDocuments(projectId){
- const list=document.getElementById('projectDocumentsList'),count=document.getElementById('projectDocumentCount');
- if(!list)return;
- try{
-  const res=await apiFetch(PROJECT_DOCUMENTS_API(projectId),{cache:'no-store'});
-  const data=await res.json().catch(()=>({}));
-  if(!res.ok)throw new Error(data.message||('Documents API returned '+res.status));
-  const docs=(data.documents||[]).filter(d=>String(d.status||'Current').toLowerCase()!=='deleted');
-  if(count)count.textContent=docs.length+' document'+(docs.length===1?'':'s');
-  if(!docs.length){list.innerHTML='<div class="empty-state"><b>No project documents yet.</b><br><br>Documents uploaded through VERO for this project will appear here.</div>';return true;}
-  list.innerHTML=docs.map(d=>`<div class="project-doc-row"><div class="project-doc-name"><b>📄 ${esc(d.document_title||d.file_name||'Project Document')}</b><small>${esc(d.file_name||'')} · Version ${esc(d.version_number||1)}</small></div><div class="project-doc-meta"><b>${esc(d.document_type||'Project Document')}</b><span>${esc(d.uploaded_by||'VERO user')}</span></div><div><span class="status current">${esc(d.status||'Current')}</span></div><div class="project-doc-action"><button type="button" class="btn outline" data-project-document-id="${Number(d.id)}" data-file-name="${esc(d.file_name||'Project document')}" onclick="viewProjectDocument(${Number(d.id)})">View Document</button></div></div>`).join('');
- return true;
- }catch(e){console.error(e);if(count)count.textContent='Unable to load';list.innerHTML='<div class="empty-state"><b>Unable to load project documents.</b><br><br>'+esc(e.message)+'</div>';return false;}
+ return VeroProjectDocuments.mount(document.getElementById('projectDocumentsList'),projectId,apiFetch,API_BASE,document.getElementById('projectDocumentCount'));
 }
 let projectContractUploadPending=false;
 async function uploadProjectContract(event){
@@ -874,7 +868,7 @@ async function loadProjectAssessmentHistory(applicabilityId,selectedId){
    for(const [label,key] of [['Status','status'],['Inherent likelihood','inherent_likelihood'],['Inherent consequence','inherent_impact'],['Residual likelihood','residual_likelihood'],['Residual consequence','residual_impact'],['Current controls','controls_summary'],['Further treatments','treatments_summary'],['Assessment owner','owner_user_id'],['Approved by','approved_by_user_id'],['Approved at','approved_at']]){const row=document.createElement('p'),name=document.createElement('strong');name.textContent=label+': ';row.append(name,document.createTextNode(item[key]==null?'Not recorded':String(item[key])));detail.appendChild(row);}
    if(item.status==='Returned'&&(Number(item.owner_user_id)===userId||administratorOverride)&&capability.can_create){
     const revise=document.createElement('button');revise.type='button';revise.className='btn green';revise.textContent='Revise returned assessment';
-    revise.onclick=()=>{for(const [id,key] of [['projectAssessIL','inherent_likelihood'],['projectAssessIC','inherent_impact'],['projectAssessRL','residual_likelihood'],['projectAssessRC','residual_impact'],['projectAssessControls','controls_summary'],['projectAssessTreatments','treatments_summary']])overlay.querySelector('#'+id).value=item[key]??'';overlay.dataset.returnedAssessmentId=String(item.id);form.hidden=false;overlay.querySelector('#projectAssessmentMessage').textContent='A new draft revision will retain this returned assessment in history. Save the correction, then submit it for independent approval.';};detail.appendChild(revise);
+    revise.onclick=()=>{for(const [id,key] of [['projectAssessIL','inherent_likelihood'],['projectAssessIC','inherent_impact'],['projectAssessRL','residual_likelihood'],['projectAssessRC','residual_impact'],['projectAssessControls','controls_summary'],['projectAssessTreatments','treatments_summary']])overlay.querySelector('#'+id).value=item[key]??'';overlay.dataset.returnedAssessmentId=String(item.id);form.hidden=false;overlay.querySelector('#projectAssessmentMessage').textContent='A new draft revision will retain this returned assessment in history. Save the correction, then submit it for Risk Officer approval.';};detail.appendChild(revise);
    }
   }
   const requestedId=Number(selectedId||overlay.dataset.selectedAssessmentId),selected=rows.find(item=>Number(item.id)===requestedId);
@@ -891,7 +885,7 @@ async function loadProjectAssessmentHistory(applicabilityId,selectedId){
    [item.revision,item.status,(item.residual_likelihood&&item.residual_impact)?item.residual_likelihood*item.residual_impact:'—'].forEach(value=>{tr.insertCell().textContent=String(value)});
    const cell=tr.insertCell();
    const own=Number(item.owner_user_id)===userId;
-   const decision=item.status==='Draft'&&(own||administratorOverride)&&capability.can_create?'Submit':item.status==='Submitted'&&(!own||administratorOverride)&&capability.can_approve?'Approve':null;
+   const decision=item.status==='Draft'&&(own||administratorOverride)&&capability.can_create?'Submit':item.status==='Submitted'&&capability.can_approve?'Approve':null;
    if(decision){
     const button=document.createElement('button');button.type='button';button.className='btn outline';
     button.textContent=decision;
@@ -977,7 +971,7 @@ async function openProjectAssessment(applicabilityId,riskTitle,assessmentId){
     });
     const result=await response.json().catch(()=>({}));
     if(!response.ok)throw Error(result.message||'Unable to save assessment');
-    status.textContent='Draft assessment saved. Submission and independent approval are required before enterprise reporting.';
+    status.textContent='Draft assessment saved. Submission and Risk Officer approval are required before enterprise reporting.';
     await loadProjectRisks(currentProject.id);
     delete overlay.dataset.returnedAssessmentId;
     await loadProjectAssessmentHistory(overlay.dataset.applicabilityId,result.id);

@@ -4,7 +4,7 @@ const content=document.getElementById('vh'),status=document.getElementById('heig
 content.hidden=true;
 menu.addEventListener('click',()=>{const open=document.body.classList.toggle('vr-nav-open');menu.setAttribute('aria-expanded',String(open));});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.body.classList.remove('vr-nav-open');menu.setAttribute('aria-expanded','false');}});
-const login=()=>location.replace('login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'asset-management.html'));
+const login=()=>location.replace('login.html?return='+encodeURIComponent((location.pathname.split('/').pop()||'asset-management.html')+location.search));
 const account=document.getElementById('veroAccount'),trigger=document.getElementById('veroAccountTrigger');
 trigger.addEventListener('click',e=>{e.stopPropagation();trigger.setAttribute('aria-expanded',String(account.classList.toggle('open')));});
 document.addEventListener('click',e=>{if(!account.contains(e.target)){account.classList.remove('open');trigger.setAttribute('aria-expanded','false');}});

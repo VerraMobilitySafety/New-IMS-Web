@@ -302,3 +302,97 @@ test('failed approved-assessment read is unavailable, never a successful zero',a
  assert.ok(app.cells().every(cell=>cell.disabled));
 });
 
+
+test('Site context finds saved D33 submission while approved totals remain zero',async()=>{
+ const app=setup(route=>{
+  if(route==='/risk/operational-contexts')return response({...contexts,context_types:[...contexts.context_types,'Site'],sites:[{id:4944,code:'D33',name:'Radar pole'}]});
+  if(route==='/risks/2/applicability')return response({assignments:[],pending_contexts:[{context_type:'Site',context_id:4944,status:'Pending',submission_status:'Submitted'}]});
+  if(route==='/risk/approved-matrix-positions')return response({positions:[]});
+ });
+ await settle();app.change('veroContextTypeFilter','Site');await settle();
+ assert.match(app.el('veroApplicationFilter').textContent,/D33/);
+ app.change('veroApplicationFilter',4944);await settle();
+ assert.match(app.table(),/Beta/);assert.doesNotMatch(app.table(),/Alpha|Gamma/);
+ assert.equal(app.el('veroMatrixStatus').textContent,'0');
+ assert.match(app.el('veroContextStatus').textContent,/awaiting Risk Officer approval/);
+});
+
+test('Site filter includes approved applicability and narrows approved coordinates to the chosen site',async()=>{
+ const app=setup(route=>{
+  if(route==='/risk/operational-contexts')return response({...contexts,context_types:['Site'],sites:[{id:4944,code:'D33',name:'Radar pole'},{id:7,code:'D34',name:'Other site'}]});
+  if(route==='/risks/2/applicability')return response({assignments:[{id:2,context_type:'Site',context_id:4944,status:'Applicable'}]});
+  if(route==='/risk/approved-matrix-positions')return response({positions:[{assessment_id:276,risk_id:2,context_type:'Site',context_id:4944,residual_likelihood:5,residual_impact:5}]});
+ });
+ await settle();app.change('veroContextTypeFilter','Site');await settle();app.change('veroApplicationFilter',4944);await settle();
+ assert.match(app.table(),/Beta/);assert.equal(app.el('veroMatrixStatus').textContent,'1');
+ app.change('veroApplicationFilter',7);await settle();assert.doesNotMatch(app.table(),/Beta/);assert.equal(app.el('veroMatrixStatus').textContent,'0');
+});
+
+function linkedContractFixture(route){
+ if(route==='/risk/operational-contexts')return response({...contexts,context_types:[...contexts.context_types,'Site'],contracts:[...contexts.contracts,{id:15,name:'VIC DJCS Fixed Camera Operations'},{id:16,name:'Other contract'}],sites:[...contexts.sites,{id:4944,code:'D33',name:'D33'},{id:4945,code:'D34',name:'D34'}],contract_sites:[{context_id:15,site_id:4944},{context_id:15,site_id:4944},{context_id:16,site_id:4945},{context_id:999,site_id:4944}]});
+ if(route==='/risks/2/applicability')return response({assignments:[{id:276,context_type:'Site',context_id:4944,status:'Applicable'}]});
+ if(route==='/risk/approved-matrix-positions')return response({positions:[{assessment_id:2,risk_id:2,context_type:'Site',context_id:4944,residual_likelihood:3,residual_impact:1}]});
+}
+
+test('VIC contract includes approved D33 site risk once and uses its approved Site coordinates',async()=>{
+ const app=setup(linkedContractFixture);await settle();app.change('veroContextTypeFilter','Contract');await settle();
+ app.change('veroApplicationFilter',15);await settle();
+ assert.match(app.table(),/Beta/);assert.doesNotMatch(app.table(),/Alpha|Gamma|Delta/);
+ assert.equal((app.table().match(/Beta/g)||[]).length,1);
+ assert.equal(app.el('veroMatrixStatus').textContent,'1');
+ assert.equal(app.cells()[10].children.at(-1).textContent,'1');
+ assert.match(app.el('veroContextStatus').textContent,/linked sites/);
+ app.change('veroApplicationFilter',16);await settle();assert.doesNotMatch(app.table(),/Beta/);
+ assert.equal(app.el('veroMatrixStatus').textContent,'0');
+ app.change('veroApplicationFilter','');await settle();assert.match(app.table(),/Beta/);
+ assert.equal(app.el('veroMatrixStatus').textContent,'1');
+});
+
+test('linked site pending submission appears under its contract without approved matrix contribution',async()=>{
+ const app=setup(route=>{
+  if(route==='/risks/2/applicability')return response({assignments:[],pending_contexts:[{context_type:'Site',context_id:4944,status:'Pending'}]});
+  if(route==='/risk/approved-matrix-positions')return response({positions:[]});
+  return linkedContractFixture(route);
+ });
+ await settle();app.change('veroContextTypeFilter','Contract');await settle();app.change('veroApplicationFilter',15);await settle();
+ assert.match(app.table(),/Beta/);assert.equal(app.el('veroMatrixStatus').textContent,'0');
+ app.change('veroContextTypeFilter','Project');await settle();assert.doesNotMatch(app.table(),/Beta/);
+ app.change('veroContextTypeFilter','Site');await settle();app.change('veroApplicationFilter',4944);await settle();assert.match(app.table(),/Beta/);
+});
+
+test('withdrawn Site applicability and hidden contract/site links cannot add risks to contract results',async()=>{
+ for(const hidden of ['contract','site','withdrawn']){
+  const app=setup(route=>{
+   if(route==='/risk/operational-contexts'){const d=linkedContractFixture(route);return {ok:true,status:200,json:async()=>{
+    const v=await d.json();if(hidden==='contract')v.contracts=v.contracts.filter(c=>c.id!==15);if(hidden==='site')v.sites=v.sites.filter(s=>s.id!==4944);return v;
+   }};}
+   if(hidden==='withdrawn'&&route==='/risks/2/applicability')return response({assignments:[{context_type:'Site',context_id:4944,status:'Not Applicable'}]});
+   return linkedContractFixture(route);
+  });
+  await settle();app.change('veroContextTypeFilter','Contract');await settle();
+  if(hidden!=='contract')app.change('veroApplicationFilter',15);
+  await settle();assert.doesNotMatch(app.table(),/Beta/,hidden);
+ }
+});
+
+test('direct contract and linked Site applicability share one risk row and each approved assessment counts once',async()=>{
+ const app=setup(route=>{
+  if(route==='/risks/2/applicability')return response({assignments:[{context_type:'Site',context_id:4944,status:'Applicable'},{context_type:'Maintenance Contract',context_id:15,status:'Applicable'}]});
+  return linkedContractFixture(route);
+ });
+ await settle();app.change('veroContextTypeFilter','Contract');await settle();app.change('veroApplicationFilter',15);await settle();
+ assert.equal((app.table().match(/Beta/g)||[]).length,1);assert.equal(app.el('veroMatrixStatus').textContent,'1');
+});
+
+test('hierarchy and tier summary retain Site context when browsing classifications',async()=>{
+ const app=setup(route=>{
+  if(route==='/risk/operational-contexts')return response({...contexts,context_types:['Site'],sites:[{id:4944,name:'D33'}]});
+  if(route==='/risk/tier-assessment-summary')return response({summaries:[]});
+ });
+ await settle();app.change('veroContextTypeFilter','Site');await settle();app.change('veroApplicationFilter',4944);await settle();
+ app.document.dispatchEvent(new CustomEvent('vero-risk-hierarchy-render',{detail:{showRisks:false}}));await settle();
+ for(const path of ['/risk/hierarchical-register','/risk/tier-assessment-summary']){
+  const call=app.calls.filter(c=>c.route===path).at(-1);assert.ok(call,path);
+  assert.equal(call.url.searchParams.get('context_type'),'Site');assert.equal(call.url.searchParams.get('context_id'),'4944');
+ }
+});

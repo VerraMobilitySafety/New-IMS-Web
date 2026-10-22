@@ -2,7 +2,7 @@
 const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
 let contracts=[],selected=null,tab='Overview',maintenanceFilter='all',contractDetails=null,importOptions=null,canEditContractOwner=false;
 const workspace=!!document.getElementById('contractWorkspace');
-const names=['Overview','Sites','Events','Risks','Compliance','Records'];
+const names=['Overview','Sites','Events','Risks','Compliance','Documents','Client Documents','Records'];
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=x=>x?new Date(x).toLocaleDateString('en-AU'):'—';
 async function request(path,options={}){
@@ -26,7 +26,7 @@ function filterMaintenance(value,button){maintenanceFilter=value;document.queryS
 function render(){
  const query=document.getElementById('search').value.toLowerCase();
  const days=c=>c.expiry_date?(new Date(c.expiry_date)-new Date())/86400000:NaN;
- const list=contracts.filter(c=>[c.contract_name,c.contract_code,c.customer_name,c.scope].some(x=>String(x||'').toLowerCase().includes(query)))
+ const list=contracts.filter(c=>[c.contract_name,c.official_contract_name,c.contract_code,c.customer_name,c.scope].some(x=>String(x||'').toLowerCase().includes(query)))
   .filter(c=>maintenanceFilter==='all'||maintenanceFilter==='active'&&c.status==='Active'||maintenanceFilter==='attention'&&c.compliance_status==='Attention'||maintenanceFilter==='renew'&&days(c)>=0&&days(c)<=90);
  for(const [id,n] of Object.entries({all:contracts.length,active:contracts.filter(c=>c.status==='Active').length,renew:contracts.filter(c=>days(c)>=0&&days(c)<=90).length,attention:contracts.filter(c=>c.compliance_status==='Attention').length}))document.getElementById(id).textContent=n;
  document.getElementById('rows').innerHTML=list.map(c=>'<tr data-id="'+c.id+'"><td><b><a href="maintenance-workspace.html?id='+encodeURIComponent(c.id)+'">'+esc(c.contract_name)+'</a></b><div>'+esc(c.contract_code)+'</div></td><td>'+esc(c.customer_name||'—')+'</td><td>'+esc(c.owner_name||'Unassigned')+'</td><td>'+esc(c.scope||'—')+'</td><td><span class="pill">'+esc(c.status)+'</span></td><td>'+c.requirement_count+' linked · Not assessed</td><td>Not assessed</td><td>'+date(c.expiry_date)+'</td></tr>').join('')||'<tr><td colspan="8">No customer contracts found.</td></tr>';
@@ -36,7 +36,7 @@ async function openContract(c){
  if(!c)return openImport();
  if(!workspace){location.href='maintenance-workspace.html?id='+encodeURIComponent(c.id);return;}
  selected=c;contractDetails=null;tab='Overview';document.getElementById('heroName').textContent=c.contract_name;document.title='VERO — '+c.contract_name;document.getElementById('heroCustomer').textContent=[c.contract_code,c.customer_name].filter(Boolean).join(' · ');document.getElementById('contractSummary').innerHTML=[['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Renewal',date(c.expiry_date)],['Linked requirements',c.requirement_count??0]].map(([label,value])=>'<div class="kpi"><b>'+esc(value??'—')+'</b><span>'+label+'</span></div>').join('');drawTab();
- try{const details=await request('/maintenance-contracts/'+c.id+'/details');if(selected?.id===c.id){contractDetails=details;drawTab();}}catch(e){if(selected?.id===c.id){document.getElementById('tabContent').textContent=e.message;addContractRetry(()=>openContract(c));}}
+ try{const details=await request('/maintenance-contracts/'+c.id+'/details');if(selected?.id===c.id){contractDetails=details;if(!['Documents','Client Documents'].includes(tab))drawTab();}}catch(e){if(selected?.id===c.id){if(['Documents','Client Documents'].includes(tab))return;document.getElementById('tabContent').textContent=e.message;addContractRetry(()=>openContract(c));}}
 }
 function closeContract(){}
 async function editContractOwner(c){
@@ -93,8 +93,10 @@ function drawTab(){
  if(tab==='Risks'){void drawContractRisks(c);return;}
  if(tab==='Sites'){void window.VeroContractActivity.sites(c,el,request);return;}
  if(tab==='Events'){void window.VeroContractActivity.events(c,el,request);return;}
+ if(tab==='Documents'){void VeroSwmsService.mount(el,c,API,request);return;}
+ if(tab==='Client Documents'){void VeroLinkedDocuments.mount(el,{type:'Client',name:c.customer_name,label:c.customer_name},null,API,request);return;}
  if(tab==='Overview'){
-  el.innerHTML='<div class="fields">'+[['Contract reference',c.contract_code],['Customer',c.customer_name],['Contract type','Customer'],['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Compliance','Not assessed'],['Source files',c.source_count],['Linked requirements',c.requirement_count],['Scope',c.scope],['Notes',c.notes]].map(([label,value])=>'<div class="field"><label>'+esc(label)+'</label><p>'+esc(value||'—')+'</p>'+(label==='Owner'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractOwnerEdit">Edit owner</button>':'')+(label==='Status'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractStatusEdit">Edit status</button>':'')+'</div>').join('')+'</div>';document.getElementById('contractOwnerEdit')?.addEventListener('click',()=>editContractOwner(c));document.getElementById('contractStatusEdit')?.addEventListener('click',()=>editContractStatus(c));return;
+  el.innerHTML='<div class="fields">'+[['Friendly name',c.friendly_name||c.contract_name],['Full contract name',c.official_contract_name||c.contract_name],['Contract reference',c.contract_code],['Customer',c.customer_name],['Contract type','Customer'],['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Compliance','Not assessed'],['Source files',c.source_count],['Linked requirements',c.requirement_count],['Scope',c.scope],['Notes',c.notes]].map(([label,value])=>'<div class="field"><label>'+esc(label)+'</label><p>'+esc(value||'—')+'</p>'+(label==='Owner'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractOwnerEdit">Edit owner</button>':'')+(label==='Status'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractStatusEdit">Edit status</button>':'')+'</div>').join('')+'</div>';document.getElementById('contractOwnerEdit')?.addEventListener('click',()=>editContractOwner(c));document.getElementById('contractStatusEdit')?.addEventListener('click',()=>editContractStatus(c));return;
  }
  if(!contractDetails){el.textContent='Loading linked records…';return;}
  if(tab==='Records'){

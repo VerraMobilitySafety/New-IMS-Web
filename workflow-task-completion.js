@@ -1,0 +1,7 @@
+/* Open the task's real, existing completion form; source endpoints retain their authority. */
+(()=>{'use strict';
+const key=new URLSearchParams(location.search).get('complete_task');if(!key)return;
+const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
+(async()=>{const headers={Authorization:'Bearer '+localStorage.getItem('vero_session_token')};let response=await fetch(API+'/my-actions/managed/'+encodeURIComponent(key),{headers,cache:'no-store'});if(response.status===403||response.status===404)response=await fetch(API+'/continual-improvement/actions/'+encodeURIComponent(key),{headers,cache:'no-store'});const data=await response.json();if(!response.ok)throw Error(data.message||'Unable to open the source workflow.');if(data.action.closed)throw Error('This workflow task is already complete.');const source=data.action.source_action;if(!source||typeof source!=='object'||!source.id)throw Error('Open the source module from Action Details to complete this workflow.');const original=JSON.parse(JSON.stringify(source));delete original.managed_task_id;allActions.push(original);openActionDetail(allActions.length-1);
+})().catch(error=>{const message=document.createElement('p');message.className='action-edit-error';message.setAttribute('role','alert');message.textContent=error.message;(document.querySelector('.main')||document.body).prepend(message);});
+})();

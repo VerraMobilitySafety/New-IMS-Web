@@ -6,7 +6,26 @@ let site=null,reviewVersion=0;
 const node=(tag,value)=>{const n=document.createElement(tag);if(value!=null)n.textContent=String(value);return n;};
 async function apiFetch(url,options={}){return fetch(url,{...options,headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json',...options.headers},cache:'no-store'});}
 async function read(path){const response=await apiFetch(API+path);const data=await response.json();if(!response.ok)throw Error(data.message||'Unable to load this site.');return data;}
-function create(submission){window.VeroSiteRiskCreator.open({site,submission,apiBase:API,apiFetch,onSaved:async result=>{el('siteRiskStatus').textContent='Assessment submitted for independent Risk Officer review.';await load();await openReview(result.risk_id);}});}
+async function submitted(result){
+ const status=el('siteRiskStatus'),reference=result.risk_code||'Risk #'+result.risk_id;
+ const url=new URL(location.href);url.searchParams.set('risk_id',result.risk_id);history.replaceState(null,'',url);
+ function confirmation(refreshError){
+  status.replaceChildren(node('strong','Submitted successfully · '+reference+'. '),
+   node('span','Waiting for Risk Officer review. It will contribute to the site risk rating after approval. '));
+  const link=node('a','Open submitted risk');link.href=url.href;link.onclick=event=>{event.preventDefault();void openReview(result.risk_id);};status.append(link);
+  if(refreshError){
+   status.append(node('span',' The risk was saved, but the site list could not refresh. Do not submit it again. '));
+   const retry=node('button','Retry loading site risks');retry.type='button';retry.onclick=async()=>{
+    retry.disabled=true;
+    try{await load();confirmation(false);}catch{retry.disabled=false;}
+   };status.append(retry);
+  }
+ }
+ confirmation(false);
+ try{await load();}catch{confirmation(true);}
+ await openReview(result.risk_id);
+}
+function create(submission){window.VeroSiteRiskCreator.open({site,submission,apiBase:API,apiFetch,onSaved:submitted});}
 async function openReview(riskId){
  const ticket=++reviewVersion,host=el('siteRiskReviewBody');el('siteRiskReview').hidden=false;host.textContent='Loading assessment…';
  try{const data=await window.VeroSiteRiskSubmission.load(riskId);if(ticket!==reviewVersion)return;

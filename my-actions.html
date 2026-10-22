@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="vero-shell.css?v=20261021-arrow-align"><script src="nav.js?v=20261022-improvement-register"></script><style id="vero-loading-guard">html[data-vero-loading] .main>:not(.global-hero):not(.workspace-hero){visibility:hidden!important}html[data-vero-loading] .main{background:#f4f6f8}</style><script>document.documentElement.setAttribute('data-vero-loading','');window.__veroLoaderDeadline=setTimeout(function(){document.documentElement.removeAttribute('data-vero-loading');window.VeroPageLoader?.dismiss();},12000);</script><link rel="stylesheet" href="risk-page-loader.css?v=20261021-clean-camera"><script src="risk-page-loader.js?v=20261021-clean-camera" data-tasks="account actions"></script><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png">
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="vero-shell.css?v=20261021-arrow-align"><script src="nav.js?v=20261022-change-management"></script><style id="vero-loading-guard">html[data-vero-loading] .main>:not(.global-hero):not(.workspace-hero){visibility:hidden!important}html[data-vero-loading] .main{background:#f4f6f8}</style><script>document.documentElement.setAttribute('data-vero-loading','');window.__veroLoaderDeadline=setTimeout(function(){document.documentElement.removeAttribute('data-vero-loading');window.VeroPageLoader?.dismiss();},12000);</script><link rel="stylesheet" href="risk-page-loader.css?v=20261021-clean-camera"><script src="risk-page-loader.js?v=20261021-clean-camera" data-tasks="account actions"></script><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -360,13 +360,13 @@
 
 
 
-</head>
+<link rel="stylesheet" href="action-details.css?v=20261022-edit"></head>
 <body class="vr-page" data-register-layout="actions"><div class="app"><aside class="sidebar">
  <div class="brand"><span class="vero-brand-logo" role="img" aria-label="Verra Mobility"></span><div class="vero-lockup"><span class="vero-divider"></span><span class="vero-name">VERO</span></div></div>
  <img class="chev c1" src="verra-chevron.png" alt="">
  <img class="chev c2" src="verra-chevron.png" alt="">
  <img class="chev c3" src="verra-chevron.png" alt="">
- <nav class="nav"><div id="vero-nav" data-vero-nav="20261022-improvement-register">
+ <nav class="nav"><div id="vero-nav" data-vero-nav="20261022-change-management">
     <div class="nav-section">
       <a class=""
          href="index.html">
@@ -423,6 +423,10 @@
       <a class="" href="contractor-management.html">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"></path><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"></path><path d="M4 15v-3a6 6 0 0 1 6-6"></path><path d="M14 6a6 6 0 0 1 6 6v3"></path></svg>
         <span>Contractor Management</span>
+      </a>
+      <a class="" href="change-management.html" >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 0 1 15-6l3 3M21 3v5h-5M21 13a9 9 0 0 1-15 6l-3-3M3 21v-5h5"/></svg>
+        <span>Change Management</span>
       </a>
     </div>
 
@@ -483,7 +487,7 @@
           <button class="vero-nav-expand" type="button" aria-label="Expand Risk Management" aria-controls="riskNavChildren" aria-expanded="false"><span>›</span></button>
         </div>
         <div class="vero-nav-children" id="riskNavChildren">
-          <a class="" href="safe-work-method-statement.html" >Safe Work Method Statement</a>
+          <a class="" href="safe-work-method-statement.html" >Safe Work Method Statements</a>
           <a class="" href="take-5.html" >Take 5</a>
         </div>
       </div>
@@ -606,6 +610,7 @@
   <div class="action-detail-body">
    <div class="action-status" id="actionDetailStatus">Submitted</div>
    <div class="action-detail-grid" id="actionDetailGrid"></div>
+   <div class="action-detail-section" id="actionDocumentContext" hidden></div>
    <div class="action-detail-section"><h3>Business reason</h3><div class="detail-copy" id="actionDetailReason">—</div></div>
    <div class="action-detail-section"><h3>Additional information</h3><div class="detail-copy" id="actionDetailAdditional">—</div></div>
    <div class="action-draft-card" id="actionDraftCard"><div class="action-draft-icon">📄</div><div class="action-draft-info"><label>Completed Word Draft</label><strong id="actionDraftName">—</strong><small id="actionDraftMeta"></small></div><button class="action-draft-open" id="actionDraftOpen" type="button" onclick="openDocumentDraft()">Open Draft Document</button></div>
@@ -791,7 +796,7 @@
         <option value="Management Plan">Management Plan</option>
         <option value="Form">Form</option>
         <option value="Template">Template</option>
-        <option value="Guideline">Guideline</option>
+        <option value="Guideline">Guideline</option><option value="Bill of Materials">Bill of Materials</option><option value="Safety Management Plan">Safety Management Plan</option>
        </select>
       </div>
 
@@ -1370,12 +1375,16 @@ document.getElementById('assignRecordReviewerBtn')
  });
 
 function openActionDetail(index){
- const action=allActions[index]; if(!action)return;
+ const action=allActions[index];
+ if(action?.managed_task_id){window.VeroActionDetails.open(action.managed_task_id,{personal:true,onSaved:()=>loadActions()});return;}
+ if(!action)return;
  if(action.source==='Risks'&&/^Site Risk (Review|Correction|Treatment|Treatment Verification)$/.test(action.action_type||'')&&Number.isSafeInteger(Number(action.site_id))&&Number(action.site_id)>0&&Number.isSafeInteger(Number(action.risk_id))&&Number(action.risk_id)>0){location.href='client-services-site.html?'+new URLSearchParams({id:String(action.site_id),risk_id:String(action.risk_id)});return;}
+ if(action.source==='Changes'&&/^Change (Approval|Implementation)$/.test(action.action_type||'')&&/^[0-9a-f-]{36}$/i.test(String(action.source_id||''))){location.href='change-management.html?change_id='+encodeURIComponent(action.source_id);return;}
  if(action.source==='Insurance'&&action.action_type==='Insurance Renewal'){location.href='insurance.html?renewals=1';return;}
  if(action.source==='Incidents' && /^[0-9a-f-]{36}$/i.test(String(action.source_id||''))){location.href='incident-management.html?'+(action.action_type==='Investigation'?'event=':'action=')+encodeURIComponent(action.source_id);return;}
 
  currentAction=action; resetDecisionUI();
+ loadDocumentActionContext(action);
 
  const isRecordAssignment=
   action.source==='Records' &&
@@ -2149,6 +2158,25 @@ function openProjectAction(){
  if(!action||action.source!=='Projects'||!action.source_id)return;
  location.href=`project-workspace.html?id=${encodeURIComponent(action.source_id)}`;
 }
+async function loadDocumentActionContext(action){
+ const panel=document.getElementById('actionDocumentContext');panel.hidden=true;panel.replaceChildren();
+ const input=document.getElementById('reviewRevisionDraft');if(input)input.accept='.docx';
+ if(action.source!=='Documents')return;
+ const requestId=action.source_id;
+ const isReview=action.action_type==='Document Review';
+ if(!requestId)return;
+ panel.hidden=false;panel.textContent='Loading document category and links…';
+ try{
+  const r=await fetch(API+(isReview?'/documents/'+encodeURIComponent(requestId)+'/metadata':'/document-requests/'+encodeURIComponent(requestId)+'/context'),{headers:{Authorization:'Bearer '+localStorage.getItem(TOKEN_KEY)},cache:'no-store'});
+  if(!r.ok)throw Error('Unable to load document category and links. Reopen this action to retry.');
+  const data=await r.json();if(currentAction!==action)return;
+  action.document_category=data.entity_type;
+  const label=document.querySelector('label[for="reviewRevisionDraft"]');if(label)label.textContent=data.entity_type==='Operational'?'Revised draft (.docx or .xlsx) *':'Revised Word Draft (.docx) *';
+  panel.textContent=data.entity_type+(data.document_links.length?' · '+data.document_links.map(x=>x.type+': '+x.label).join(' · '):'');
+  if(input)input.accept=data.entity_type==='Operational'?'.docx,.xlsx':'.docx';
+ }catch(e){if(currentAction===action)panel.textContent=e.message;}
+}
+
 async function openDocumentDraft(){const action=currentAction,token=localStorage.getItem(TOKEN_KEY);if(!action||action.source!=='Documents'||!['Document Request','Document Approval'].includes(action.action_type)||!action.source_id||!token)return;const btn=document.getElementById('actionDraftOpen');if(btn)btn.disabled=true;try{const r=await fetch(`${API}/document-requests/${encodeURIComponent(action.source_id)}/draft`,{headers:{Authorization:'Bearer '+token},cache:'no-store'});if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.message||'Unable to open draft document');}const blob=await r.blob();const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=action.draft_file_name||'document-draft.docx';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}catch(e){showDecisionMessage(e.message||'Unable to open draft document.','error');}finally{if(btn)btn.disabled=false;}}
 function prepareActionDecision(decision){
  const note=document.getElementById('actionDecisionNote'), confirm=document.getElementById('actionDecisionConfirm');
@@ -2320,15 +2348,15 @@ async function completeDocumentReview(){
  }
 
  if(outcome==='Revision Required'&&!revisionDraft){
-  showReviewMessage('Upload the revised Word draft.','error');
+  showReviewMessage('Upload the revised draft.','error');
   return;
  }
 
  if(
   outcome==='Revision Required' &&
-  !revisionDraft.name.toLowerCase().endsWith('.docx')
+  !revisionDraft.name.toLowerCase().endsWith(currentAction?.document_category==='Operational'?'.xlsx':'.docx') && !revisionDraft.name.toLowerCase().endsWith('.docx')
  ){
-  showReviewMessage('The revised draft must be a .docx Word document.','error');
+  showReviewMessage('Use a Word .docx draft, or Excel .xlsx for operational documents.','error');
   return;
  }
 
@@ -2798,7 +2826,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 
-<link rel="stylesheet" href="register-layout.css"><link rel="stylesheet" href="register-operations-layout.css"><script src="register-layout.js"></script><script src="register-operations-layout.js?v=20261022-action-counts"></script></body></html>
+<link rel="stylesheet" href="register-layout.css"><link rel="stylesheet" href="register-operations-layout.css"><script src="register-layout.js"></script><script src="register-operations-layout.js?v=20261022-action-counts"></script><script src="action-details.js?v=20261022-edit"></script><script>const managedTaskKey=new URLSearchParams(location.search).get("managed_task");if(managedTaskKey)window.VeroActionDetails.open(managedTaskKey,{personal:true,onSaved:()=>loadActions()});</script><script src="workflow-task-completion.js?v=20261022-source"></script></body></html>
 
 <style>
 #actionDetailAdditional .action-btn-approve{

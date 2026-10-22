@@ -63,11 +63,11 @@ for(const [name,app,labels] of surfaces){
    const form=a.host.querySelector('form');assert.deepEqual(form.querySelectorAll('textarea').map(el=>el.value),['Stored current controls','Stored treatment notes']);await form.emit('submit');const post=a.calls.find(c=>c.method==='POST');assert.equal(post.route,'/risk/applicability/55/assessments');assert.deepEqual(post.body,{inherent_likelihood:4,inherent_impact:5,residual_likelihood:2,residual_impact:3,controls_summary:'Stored current controls',treatments_summary:'Stored treatment notes',returned_assessment_id:77});
   }
  });
- test(name+': ordinary users retain ownership and independent-approval restrictions',async()=>{
+ test(name+': authorised officers can approve own assessments while draft ownership is retained',async()=>{
   const capability={can_create:true,can_approve:true};
   assert.equal((await app({row:assessment('Draft',22),capability})).button(labels.submit),undefined);
   assert.ok((await app({row:assessment('Draft',11),capability})).button(labels.submit));
-  assert.equal((await app({row:assessment('Submitted',11),capability})).button(labels.approve),undefined);
+  assert.ok((await app({row:assessment('Submitted',11),capability})).button(labels.approve));
   assert.ok((await app({row:assessment('Submitted',22),capability})).button(labels.approve));
   assert.equal((await app({row:assessment('Returned',22),capability})).button('Revise returned assessment'),undefined);
   assert.ok((await app({row:assessment('Returned',11),capability})).button('Revise returned assessment'));
@@ -76,7 +76,7 @@ for(const [name,app,labels] of surfaces){
   for(const administrator_override of [undefined,false,'true',1]){
    const options={capability:{can_create:true,can_approve:true,administrator_override},user:{id:11,vero_role:'Administrator'}};
    assert.equal((await app({...options,row:assessment('Draft',22)})).button(labels.submit),undefined);
-   assert.equal((await app({...options,row:assessment('Submitted',11)})).button(labels.approve),undefined);
+   assert.ok((await app({...options,row:assessment('Submitted',11)})).button(labels.approve));
    assert.equal((await app({...options,row:assessment('Returned',22)})).button('Revise returned assessment'),undefined);
   }
  });
@@ -92,7 +92,7 @@ for(const [name,app,labels] of surfaces){
 test('Enterprise operational drawer never applies Administrator ownership exceptions to a Site or Maintenance Contract',async()=>{
  for(const contextType of ['VM Site','Maintenance Contract']){
   assert.equal((await operationalApp({contextType,row:assessment('Draft',22)})).button('Submit for approval'),undefined);
-  assert.equal((await operationalApp({contextType,row:assessment('Submitted',11)})).button('Approve assessment'),undefined);
+  assert.ok((await operationalApp({contextType,row:assessment('Submitted',11)})).button('Approve assessment'));
   assert.equal((await operationalApp({contextType,row:assessment('Returned',22)})).button('Revise returned assessment'),undefined);
   assert.ok((await operationalApp({contextType,row:assessment('Draft',11)})).button('Submit for approval'));
   assert.ok((await operationalApp({contextType,row:assessment('Submitted',22)})).button('Approve assessment'));

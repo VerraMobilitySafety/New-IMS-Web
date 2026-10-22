@@ -29,6 +29,11 @@
    field(row,'Risk Office rationale',a.rationale);
    list.appendChild(row);
   }
+  if(data.pending_contexts?.length){
+   const pending=section('Submitted operational context · awaiting approval');
+   for(const item of data.pending_contexts)field(pending,item.context_type+' · Record '+item.context_id,item.submission_status);
+   pending.appendChild(node('p','This submission is saved in the register. Its assessment contributes to operational totals after Risk Officer approval.'));
+  }
   // Only authorised Risk Managers can change the applicability boundary.
   const governance=section('Manage applicability');
   governance.appendChild(node('p','Risk Office only · each assignment or withdrawal requires a justification.'));
@@ -46,7 +51,7 @@
     form.style.display='grid';form.style.gap='10px';
     const typeLabel=node('label','Operational context type');
     const type=node('select');
-    for(const t of ['VM Site','Project','Maintenance Contract']){
+    for(const t of ['VM Site','Project','Maintenance Contract','Site']){
      const opt=node('option',t);opt.value=t;type.appendChild(opt);
     }
     typeLabel.appendChild(type);
@@ -64,7 +69,7 @@
     function populate(){
      record.replaceChildren();
      const options=type.value==='VM Site'?contexts.vm_locations:
-       type.value==='Project'?contexts.projects:contexts.contracts;
+       type.value==='Project'?contexts.projects:type.value==='Site'?contexts.sites:contexts.contracts;
      const blank=node('option','Select an operational record');blank.value='';record.appendChild(blank);
      for(const item of options||[]){
       const opt=node('option',(item.code?item.code+' · ':'')+item.name);
@@ -311,7 +316,7 @@
      }
      let decision=null;
      if(assessment.status==='Draft'&&(own||administratorOverride)&&capability?.can_create)decision='Submit';
-     if(assessment.status==='Submitted'&&capability?.can_approve&&(!own||administratorOverride))decision='Approve';
+     if(assessment.status==='Submitted'&&capability?.can_approve)decision='Approve';
      if(decision){
       const button=node('button',decision==='Submit'?'Submit for approval':'Approve assessment');
       button.type='button';

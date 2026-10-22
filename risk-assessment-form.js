@@ -11,6 +11,7 @@ const stages=['Inherent','Current Residual','Target'];
 const bands=[['Low','Low','Low','Moderate','Moderate'],['Low','Moderate','Moderate','Moderate','High'],['Low','Moderate','High','High','Significant'],['Moderate','Moderate','High','Significant','Significant'],['Moderate','High','Significant','Significant','Significant']];
 const colours={Low:'#A8C63D',Moderate:'#21869B',High:'#D1B443',Significant:'#BF302D'};
 let options=config.options,owner=null,stage=0,ratings=[null,null,null],busy=false,ownerMatches=[],ownerIndex=-1;
+const traditional=config.layout==='traditional',worksheetRatings=[];
 function node(tag,text,cls){const el=document.createElement(tag);if(text!=null)el.textContent=['label','h3','h4','summary'].includes(tag)?String(text).replace(/\b[a-z]/g,c=>c.toUpperCase()):text;if(cls)el.className=cls;return el;}
 function button(text,cls){const b=node('button',text,cls);b.type='button';return b;}
 function uuid(){return crypto.randomUUID();}
@@ -52,6 +53,32 @@ const fullCriteria=node('details');fullCriteria.append(node('summary','View full
 for(let l=5;l>=1;l--){fullCriteria.append(node('h4',names[l-1]),node('p',criteria.likelihood[names[l-1]]));}
 for(const group of Object.keys(criteria.impact['1'])){const block=node('details');block.append(node('summary',group));for(let impact=5;impact>=1;impact--)block.append(node('h4',impacts[impact-1]),node('p',criteria.impact[String(impact)][group]));fullCriteria.append(block);}summary.append(fullCriteria);
 const selectedControls=new Set();
+if(traditional){
+ host.classList.add('risk-worksheet');
+ const tableWrap=node('div',null,'risk-worksheet-table-wrap'),table=node('table',null,'risk-worksheet-ratings');
+ table.append(node('caption','Risk rating assessment'));
+ const head=node('thead'),headRow=node('tr');
+ for(const label of ['Assessment','Basis','Likelihood','Consequence','Risk rating']){const th=node('th',label);th.scope='col';headRow.append(th);}head.append(headRow);table.append(head);
+ const body=node('tbody');
+ for(let i=0;i<3;i++){
+  const row=node('tr'),heading=node('th',stages[i]);heading.scope='row';
+  row.append(heading,node('td',['Before controls','With existing controls','After proposed controls'][i]));
+  const selects=[];
+  for(const [axis,labels] of [['likelihood',names],['impact',impacts]]){
+   const cell=node('td'),select=node('select');select.setAttribute('aria-label',stages[i]+' '+(axis==='impact'?'consequence':axis));
+   select.append(node('option','Select…'));select.firstChild.value='';
+   labels.forEach((label,n)=>{const option=node('option',label);option.value=String(n+1);select.append(option);});
+   select.onchange=()=>{const l=selects[0].value,c=selects[1].value;ratings[i]=l&&c?{likelihood:Number(l),impact:Number(c)}:null;stage=i;if(l&&c)renderAssessment();else{worksheetRatings[i].badge.textContent='Not assessed';worksheetRatings[i].badge.removeAttribute('style');updateReview();}host.dispatchEvent(new Event('change',{bubbles:true}));};
+   selects.push(select);cell.append(select);row.append(cell);
+  }
+  const result=node('td'),badge=node('span','Not assessed','badge');result.setAttribute('aria-live','polite');result.append(badge);row.append(result);body.append(row);worksheetRatings.push({selects,badge});
+ }
+ table.append(body);tableWrap.append(table);
+ const controls=node('section',null,'risk-worksheet-controls');controls.append(controlsSection,targetSection);
+ const guide=node('details',null,'risk-worksheet-guide');guide.append(node('summary','Risk matrix and rating definitions'),tabs,columns);
+ host.replaceChildren(identification,tierBox,controls,tableWrap,notes.wrap,guide,footer,status);
+ summaries.hidden=true;summary.querySelector('h3').hidden=true;
+}
 function addPicker(search,list,selection,items,label){
  const anchor=node('div',null,'picker-anchor'),added=node('div',null,'added-items');
  anchor.append(search.el,list);search.wrap.append(anchor,added);list.className='add-options';list.hidden=true;list.id=search.el.id+'-options';list.setAttribute('role','listbox');search.el.setAttribute('role','combobox');search.el.setAttribute('aria-autocomplete','list');search.el.setAttribute('aria-controls',list.id);search.el.setAttribute('aria-expanded','false');search.el.autocomplete='off';search.el.placeholder='Search and add one at a time';
@@ -92,9 +119,9 @@ ownerField.el.onkeydown=e=>{if(e.key==='Escape'){ownerList.hidden=true;ownerFiel
 function showExplanation(value,axis){explanation.replaceChildren();if(!value){explanation.append(node('p','Select a cell or a rating label to see the definitions.'));return;}if(axis!=='impact'){explanation.append(node('h4',names[value.likelihood-1]),node('p',criteria.likelihood[names[value.likelihood-1]]));}if(axis!=='likelihood'){explanation.append(node('h4',impacts[value.impact-1]),node('p',criteria.impact[String(value.impact)][category.el.value]));}}
 function updateReview(){if(!options.review_policy||!window.VeroRiskReviewPolicy)return;review.el.readOnly=true;const r=ratings[1];if(!r){review.el.value='';reviewHelp.textContent='Calculated from the Current Residual rating.';return;}const plan=window.VeroRiskReviewPolicy.schedule(r.likelihood,r.impact,options.review_policy);review.el.value=plan.next_review_date;reviewHelp.textContent=plan.residual_rating+' · '+plan.default_interval_months+' month default'+(plan.constraints.length?' · '+plan.constraints.join('; '):'')+(plan.immediate_escalation?' · Immediate escalation is also required.':'');}
 function colour(el,band){el.style.background=colours[band];el.style.color=['Moderate','Significant'].includes(band)?'#fff':'#292725';}
-function renderAssessment(){updateReview();[...tabs.children].forEach((b,i)=>b.setAttribute('aria-pressed',String(i===stage)));controlsSection.hidden=stage!==1;targetSection.hidden=stage!==2;inherentNote.hidden=stage!==0;matrixHeading.textContent=stages[stage]+' Risk Assessment';matrix.replaceChildren();matrix.append(node('span'),node('span'));for(let impact=1;impact<=5;impact++){const b=button(impacts[impact-1],'axis-label');b.onmouseenter=b.onfocus=b.onclick=()=>showExplanation({impact,likelihood:1},'impact');matrix.append(b);}matrix.append(node('span'),node('span','L / C','axis like-number'));for(let i=1;i<=5;i++)matrix.append(node('span',String(i),'axis'));
+function renderAssessment(){updateReview();[...tabs.children].forEach((b,i)=>b.setAttribute('aria-pressed',String(i===stage)));controlsSection.hidden=!traditional&&stage!==1;targetSection.hidden=!traditional&&stage!==2;inherentNote.hidden=traditional||stage!==0;matrixHeading.textContent=stages[stage]+' Risk Assessment';matrix.replaceChildren();matrix.append(node('span'),node('span'));for(let impact=1;impact<=5;impact++){const b=button(impacts[impact-1],'axis-label');b.onmouseenter=b.onfocus=b.onclick=()=>showExplanation({impact,likelihood:1},'impact');matrix.append(b);}matrix.append(node('span'),node('span','L / C','axis like-number'));for(let i=1;i<=5;i++)matrix.append(node('span',String(i),'axis'));
 for(let l=5;l>=1;l--){const b=button(names[l-1],'axis-label like');b.onmouseenter=b.onfocus=b.onclick=()=>showExplanation({likelihood:l,impact:1},'likelihood');matrix.append(b,node('span',String(l*5),'axis like-number'));for(let impact=1;impact<=5;impact++){const band=bands[l-1][impact-1],cell=button('','cell');cell.dataset.l=String(l);cell.dataset.i=String(impact);colour(cell,band);cell.append(node('span',String(l*5*impact),'score'),node('small',band));const selected=ratings[stage]?.likelihood===l&&ratings[stage]?.impact===impact;cell.setAttribute('aria-pressed',String(selected));cell.setAttribute('aria-label',names[l-1]+', '+impacts[impact-1]+', '+(l*5*impact)+' '+band);cell.tabIndex=selected||(!ratings[stage]&&l===5&&impact===1)?0:-1;cell.onclick=()=>{ratings[stage]={likelihood:l,impact};renderAssessment();matrix.querySelector(`[data-l="${l}"][data-i="${impact}"]`).focus();};cell.onkeydown=e=>{let nl=l,ni=impact;if(e.key==='ArrowRight')ni=Math.min(5,impact+1);else if(e.key==='ArrowLeft')ni=Math.max(1,impact-1);else if(e.key==='ArrowDown')nl=Math.max(1,l-1);else if(e.key==='ArrowUp')nl=Math.min(5,l+1);else return;e.preventDefault();matrix.querySelector(`[data-l="${nl}"][data-i="${ni}"]`).focus();};matrix.append(cell);}}
-summaries.replaceChildren();ratings.forEach((r,i)=>{const group=node('div');group.append(node('small',stages[i]));const badge=node('span',r?r.likelihood*5*r.impact+' · '+bands[r.likelihood-1][r.impact-1]:'Not assessed','badge');if(r)colour(badge,bands[r.likelihood-1][r.impact-1]);group.append(badge);summaries.append(group);});const r=ratings[stage];selection.textContent=r?names[r.likelihood-1]+' × '+impacts[r.impact-1]+' = '+r.likelihood*5*r.impact:'Select a cell';showExplanation(r);}
+worksheetRatings.forEach((row,i)=>{const r=ratings[i];if(r){row.selects[0].value=String(r.likelihood);row.selects[1].value=String(r.impact);}row.badge.textContent=r?r.likelihood*5*r.impact+' · '+bands[r.likelihood-1][r.impact-1]:'Not assessed';if(r)colour(row.badge,bands[r.likelihood-1][r.impact-1]);else row.badge.removeAttribute('style');});summaries.replaceChildren();ratings.forEach((r,i)=>{const group=node('div');group.append(node('small',stages[i]));const badge=node('span',r?r.likelihood*5*r.impact+' · '+bands[r.likelihood-1][r.impact-1]:'Not assessed','badge');if(r)colour(badge,bands[r.likelihood-1][r.impact-1]);group.append(badge);summaries.append(group);});const r=ratings[stage];selection.textContent=r?names[r.likelihood-1]+' × '+impacts[r.impact-1]+' = '+r.likelihood*5*r.impact:'Select a cell';showExplanation(r);}
 
 function closePickers(){enterprisePicker.hide();documentPicker.hide();ownerList.hidden=true;ownerField.el.setAttribute('aria-expanded','false');}
 function setBusy(value){busy=value;host.querySelectorAll('input,textarea,select,button').forEach(el=>el.disabled=value);if(!value)tierFields.forEach((el,i)=>el.disabled=config.projectMode&&i<2?true:i>0&&!tierFields[i-1].value&&!(config.classificationMode==='category-event'&&i===2));config.onBusy?.(value);}
@@ -107,7 +134,7 @@ function value(){return {risk_title:title.el.value.trim(),risk_description:descr
 function setValue(v={}){
  title.el.value=config.fixedCategory?.name||v.risk_title||'';description.el.value=v.risk_description||'';notes.el.value=v.justification||'';
  existing.el.value=v.controls_summary||'';further.el.value=v.treatments_summary||'';review.el.value=v.next_review_date||'';
- ratings=[v.inherent||null,v.residual||null,v.target||null];
+ ratings=[v.inherent||null,v.residual||null,v.target||null];worksheetRatings.forEach((row,i)=>{row.selects[0].value=ratings[i]?String(ratings[i].likelihood):'';row.selects[1].value=ratings[i]?String(ratings[i].impact):'';});
  owner=null;ownerField.el.value='';const user=options.users.find(u=>u.id===v.risk_owner_user_id);if(user)chooseOwner(user);
  selectedControls.clear();for(const id of v.control_ids||[])selectedControls.add(id);
  selectedDocuments.clear();for(const id of v.document_ids||[])selectedDocuments.add(id);

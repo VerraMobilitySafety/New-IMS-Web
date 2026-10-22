@@ -40,6 +40,10 @@
  function destination(action) {
   if (!isRiskAction(action)) return null;
   const type = Object.hasOwn(types, action.action_type) ? types[action.action_type] : null;
+  if (action.action_type === 'Asset Type Assessment Review') {
+   const id = positiveId(action.assessment_id);
+   return id ? {href:'asset-management.html?' + new URLSearchParams({assessment:id}).toString(), label:'Review Asset Type Assessment'} : null;
+  }
   if (action.action_type === 'Central Risk Treatment') {
    const riskId = positiveId(action.risk_id);
    const treatmentId = positiveId(action.treatment_action_id);

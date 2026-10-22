@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="vero-shell.css?v=20261021-arrow-align"><script src="nav.js?v=20261022-improvement-register"></script><style id="vero-loading-guard">html[data-vero-loading] .main>:not(.global-hero):not(.workspace-hero){visibility:hidden!important}html[data-vero-loading] .main{background:#f4f6f8}</style><script>document.documentElement.setAttribute('data-vero-loading','');window.__veroLoaderDeadline=setTimeout(function(){document.documentElement.removeAttribute('data-vero-loading');window.VeroPageLoader?.dismiss();},12000);</script><link rel="stylesheet" href="risk-page-loader.css?v=20261021-clean-camera"><script src="risk-page-loader.js?v=20261021-clean-camera" data-tasks="account records view permissions"></script><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><title>VERRA | VERO — Records Management</title><script defer src="record-metadata-editor.js?v=20261020-admin"></script><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="vero-shell.css?v=20261021-arrow-align"><script src="nav.js?v=20261022-change-management"></script><style id="vero-loading-guard">html[data-vero-loading] .main>:not(.global-hero):not(.workspace-hero){visibility:hidden!important}html[data-vero-loading] .main{background:#f4f6f8}</style><script>document.documentElement.setAttribute('data-vero-loading','');window.__veroLoaderDeadline=setTimeout(function(){document.documentElement.removeAttribute('data-vero-loading');window.VeroPageLoader?.dismiss();},12000);</script><link rel="stylesheet" href="risk-page-loader.css?v=20261021-clean-camera"><script src="risk-page-loader.js?v=20261021-clean-camera" data-tasks="account records view permissions"></script><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><title>VERRA | VERO — Records Management</title><script defer src="record-metadata-editor.js?v=20261020-admin"></script><style>
 
 :root {
     --verra-navy: #00263E;
@@ -1712,7 +1712,7 @@ body[data-records-manager="false"]
  <img class="chev c1" src="verra-chevron.png" alt="">
  <img class="chev c2" src="verra-chevron.png" alt="">
  <img class="chev c3" src="verra-chevron.png" alt="">
- <nav class="nav"><div id="vero-nav" data-vero-nav="20261022-improvement-register">
+ <nav class="nav"><div id="vero-nav" data-vero-nav="20261022-change-management">
     <div class="nav-section">
       <a class=""
          href="index.html">
@@ -1769,6 +1769,10 @@ body[data-records-manager="false"]
       <a class="" href="contractor-management.html">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"></path><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"></path><path d="M4 15v-3a6 6 0 0 1 6-6"></path><path d="M14 6a6 6 0 0 1 6 6v3"></path></svg>
         <span>Contractor Management</span>
+      </a>
+      <a class="" href="change-management.html" >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 0 1 15-6l3 3M21 3v5h-5M21 13a9 9 0 0 1-15 6l-3-3M3 21v-5h5"/></svg>
+        <span>Change Management</span>
       </a>
     </div>
 
@@ -1829,7 +1833,7 @@ body[data-records-manager="false"]
           <button class="vero-nav-expand" type="button" aria-label="Expand Risk Management" aria-controls="riskNavChildren" aria-expanded="false"><span>›</span></button>
         </div>
         <div class="vero-nav-children" id="riskNavChildren">
-          <a class="" href="safe-work-method-statement.html" >Safe Work Method Statement</a>
+          <a class="" href="safe-work-method-statement.html" >Safe Work Method Statements</a>
           <a class="" href="take-5.html" >Take 5</a>
         </div>
       </div>
@@ -3993,6 +3997,7 @@ body[data-records-manager="false"]
  }
 
  async function openRecordDrawer(recordId){
+ document.getElementById('take5OutcomeLink')?.setAttribute('hidden','');
   const modal = document.getElementById('recordModal');
   if(!modal) return;
 
@@ -4137,6 +4142,11 @@ body[data-records-manager="false"]
 
    document.getElementById('drawerSource').textContent =
     r.source_module || '—';
+   if(r.related_change){
+    const link=document.createElement('a');link.textContent='Open linked change';
+    link.href='change-management.html?change_id='+encodeURIComponent(r.related_change.id);
+    link.style.display='block';document.getElementById('drawerSource').append(link);
+   }
 
    document.getElementById('drawerOwner').textContent =
     ownerText;
@@ -4260,6 +4270,17 @@ body[data-records-manager="false"]
    ).catch(error=>{
     console.error('Unable to load viewing permissions',error);
    });
+
+   let take5OutcomeLink=document.getElementById('take5OutcomeLink');
+   if(!take5OutcomeLink){
+    take5OutcomeLink=document.createElement('a');
+    take5OutcomeLink.id='take5OutcomeLink';
+    take5OutcomeLink.className='btn primary';
+    take5OutcomeLink.textContent='Open completed Take 5';
+    document.getElementById('viewRecordBtn').parentElement.prepend(take5OutcomeLink);
+   }
+   take5OutcomeLink.hidden=!(r.source_module==='Take 5' && r.source_entity_type==='Take 5 Assessment' && r.status!=='Disposed');
+   take5OutcomeLink.href='take-5.html?record_id='+encodeURIComponent(r.id);
 
    closeControlledPreview();
 
@@ -7652,4 +7673,4 @@ body[data-records-manager="false"]
 </script>
 
 
-<link rel="stylesheet" href="register-layout.css"><link rel="stylesheet" href="register-governance-layout.css"><link rel="stylesheet" href="records-register-layout.css?v=20261020-personal"><script src="register-layout.js"></script><script src="register-governance-layout.js"></script><script src="records-summary.js?v=20261020"></script></body></html>
+<link rel="stylesheet" href="register-layout.css"><link rel="stylesheet" href="register-governance-layout.css"><link rel="stylesheet" href="records-register-layout.css?v=20261020-personal"><script src="register-layout.js"></script><script src="register-governance-layout.js"></script><script src="records-summary.js?v=20261020"></script><script src="page-related-documents.js?v=20261022-placement"></script></body></html>

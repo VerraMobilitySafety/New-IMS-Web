@@ -12,7 +12,7 @@
  let serial=0,showRisks=false;
  const make=(tag,text)=>{const el=document.createElement(tag);el.textContent=String(text??'');return el;};
  function context(){
-  const mapped={'Project':'Project','Contract':'Maintenance Contract','VM Location':'VM Site'}[type.value]||'';
+  const mapped={'Project':'Project','Contract':'Maintenance Contract','VM Location':'VM Site','Site':'Site'}[type.value]||'';
   return {context_type:mapped,context_id:Number(name.value)||0};
  }
  function selectedParent(){

@@ -94,6 +94,7 @@
   if(Array.isArray(data.history)&&data.history.length){const history=card(host,'Submission history');for(const event of data.history)field(history,event.action||event.status,[event.actor_name||event.actor||event.actor_user_id,event.occurred_at||event.created_at,event.reason].filter(Boolean).join(' · '));}
   const decisions=card(host,'Risk approval');
   if(submission.legacy&&capabilities.can_resubmit)decisions.appendChild(node('p','Your original risk and assessment are saved. Complete any missing controls or documents, then resubmit the same risk. No new assessment is needed.'));
+  if(capabilities.is_self_review&&capabilities.can_approve)decisions.appendChild(node('p','You can review your own submission as an authorised Risk Officer. Your approval and rationale will be recorded as a self-review.'));
   for(const blocker of capabilities.approval_blockers||[])decisions.appendChild(node('p',typeof blocker==='string'?blocker:blocker.message));
   if(pending&&!data.is_live){if(data.reviewer_routing?.ready===false)decisions.appendChild(node('p',data.reviewer_routing.message||'An eligible reviewer must be assigned before this risk can be approved.'));else decisions.appendChild(node('p','Each remaining approval is routed through My Actions. The submitted assessment and selected document versions stay with this risk.'));}
   if(options.onAssessments&&(data.is_live||capabilities.can_use_assessment_workflow)){const history=node('button','View assessment history and revisions');history.type='button';history.className='btn outline';history.addEventListener('click',options.onAssessments);decisions.appendChild(history);}
@@ -103,7 +104,7 @@
    if(decisions.dataset.saving)return;
    const reason=global.prompt(decision==='Return'?'Reason for returning this Site Risk (required):':'Approval rationale (required):');
    if(reason===null)return;if(!reason.trim()||reason.length>2000){status.textContent='Enter a rationale of 1–2000 characters.';return;}
-   if(decision==='Approve'&&!global.confirm(capabilities.can_complete?'Approve this risk and its submitted assessment?':'Approve this stage? An independent reviewer must still approve the assessment before the risk becomes active.'))return;
+   if(decision==='Approve'&&!global.confirm(capabilities.can_complete?'Approve this risk and its submitted assessment?':'Approve this stage? An authorised site Approver must still approve the assessment before the risk becomes active.'))return;
    decisions.dataset.saving='1';buttons.forEach(b=>b.disabled=true);status.textContent='Recording review…';
    try{
     await json('/risks/'+encodeURIComponent(submission.risk_id||risk.id)+'/site-submission/decision',{method:'POST',body:JSON.stringify({decision,reason:reason.trim(),version:submission.version,package_hash:submission.package_hash})});

@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="vero-shell.css?v=20261021-arrow-align"><script src="nav.js?v=20261022-improvement-register"></script><style id="vero-loading-guard">html[data-vero-loading] .main>:not(.global-hero):not(.workspace-hero){visibility:hidden!important}html[data-vero-loading] .main{background:#f4f6f8}</style><script>document.documentElement.setAttribute('data-vero-loading','');window.__veroLoaderDeadline=setTimeout(function(){document.documentElement.removeAttribute('data-vero-loading');window.VeroPageLoader?.dismiss();},12000);</script><link rel="stylesheet" href="risk-page-loader.css?v=20261021-clean-camera"><script src="risk-page-loader.js?v=20261021-clean-camera" data-tasks="account risk"></script><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><title>VERRA | VERO — Risks</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="vero-shell.css?v=20261021-arrow-align"><script src="nav.js?v=20261022-change-management"></script><style id="vero-loading-guard">html[data-vero-loading] .main>:not(.global-hero):not(.workspace-hero){visibility:hidden!important}html[data-vero-loading] .main{background:#f4f6f8}</style><script>document.documentElement.setAttribute('data-vero-loading','');window.__veroLoaderDeadline=setTimeout(function(){document.documentElement.removeAttribute('data-vero-loading');window.VeroPageLoader?.dismiss();},12000);</script><link rel="stylesheet" href="risk-page-loader.css?v=20261021-clean-camera"><script src="risk-page-loader.js?v=20261021-clean-camera" data-tasks="account risk"></script><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/png" href="/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><title>VERRA | VERO — Risks</title><style>
 
 :root {
     --verra-navy: #00263E;
@@ -652,7 +652,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
  <img class="chev c1" src="verra-chevron.png" alt="">
  <img class="chev c2" src="verra-chevron.png" alt="">
  <img class="chev c3" src="verra-chevron.png" alt="">
- <nav class="nav"><div id="vero-nav" data-vero-nav="20261022-improvement-register">
+ <nav class="nav"><div id="vero-nav" data-vero-nav="20261022-change-management">
     <div class="nav-section">
       <a class=""
          href="index.html">
@@ -709,6 +709,10 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
       <a class="" href="contractor-management.html">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"></path><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"></path><path d="M4 15v-3a6 6 0 0 1 6-6"></path><path d="M14 6a6 6 0 0 1 6 6v3"></path></svg>
         <span>Contractor Management</span>
+      </a>
+      <a class="" href="change-management.html" >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 0 1 15-6l3 3M21 3v5h-5M21 13a9 9 0 0 1-15 6l-3-3M3 21v-5h5"/></svg>
+        <span>Change Management</span>
       </a>
     </div>
 
@@ -769,7 +773,7 @@ body{font-family:Montserrat,Verdana,Arial,sans-serif;background:var(--bg);color:
           <button class="vero-nav-expand" type="button" aria-label="Expand Risk Management" aria-controls="riskNavChildren" aria-expanded="true"><span>›</span></button>
         </div>
         <div class="vero-nav-children" id="riskNavChildren">
-          <a class="" href="safe-work-method-statement.html" >Safe Work Method Statement</a>
+          <a class="" href="safe-work-method-statement.html" >Safe Work Method Statements</a>
           <a class="" href="take-5.html" >Take 5</a>
         </div>
       </div>
@@ -2150,7 +2154,7 @@ table {
 </select>
 
 
-<div class="vero-exposure-navigation"><button id="veroShowClassification" type="button" aria-pressed="true">Risk Classification</button><button id="veroShowExposure" type="button" aria-pressed="false">Operational Exposure</button></div><div class="vero-operational-entry"><button type="button" id="veroOperationalEntry" aria-expanded="false" aria-controls="veroExposurePanel">View Operational Exposure</button><span>VM Sites · Projects · Maintenance Contracts</span></div><section id="veroExposurePanel" class="vero-risk-panel" hidden><div class="vero-exposure-head"><div><h2>Operational Exposure <span id="veroExposureCount">—</span></h2><p>Actual operational applicability and assessments across VM Sites, Projects and Maintenance Contracts.</p></div><button type="button" id="veroExposureRefresh">Refresh</button></div><div class="vero-exposure-filters"><label>Context type<select id="veroExposureType"><option value="">All contexts</option><option>VM Site</option><option>Project</option><option>Maintenance Contract</option></select></label><label>Search<input id="veroExposureSearch" type="search" placeholder="Search name or code"></label></div><div id="veroExposureStatus" role="status"></div><div class="vero-risk-register-scroll"><table class="vero-exposure-table"><thead><tr><th>Operational context</th><th>Type</th><th>Applicable risks</th><th>Approved assessments</th><th>Awaiting assessment</th><th>Maximum residual</th></tr></thead><tbody id="veroExposureBody"></tbody></table></div></section><div id="veroCompactRiskLayout">
+<div class="vero-exposure-navigation"><button id="veroShowClassification" type="button" aria-pressed="true">Risk Classification</button><button id="veroShowExposure" type="button" aria-pressed="false">Operational Exposure</button></div><div class="vero-operational-entry"><button type="button" id="veroOperationalEntry" aria-expanded="false" aria-controls="veroExposurePanel">View Operational Exposure</button><span>Client Sites · VM Sites · Projects · Maintenance Contracts</span></div><section id="veroExposurePanel" class="vero-risk-panel" hidden><div class="vero-exposure-head"><div><h2>Operational Exposure <span id="veroExposureCount">—</span></h2><p>Actual operational applicability and assessments across VM Sites, Projects and Maintenance Contracts.</p></div><button type="button" id="veroExposureRefresh">Refresh</button></div><div class="vero-exposure-filters"><label>Context type<select id="veroExposureType"><option value="">All contexts</option><option>VM Site</option><option>Project</option><option>Maintenance Contract</option><option>Site</option></select></label><label>Search<input id="veroExposureSearch" type="search" placeholder="Search name or code"></label></div><div id="veroExposureStatus" role="status"></div><div class="vero-risk-register-scroll"><table class="vero-exposure-table"><thead><tr><th>Operational context</th><th>Type</th><th>Applicable risks</th><th>Approved assessments</th><th>Awaiting assessment</th><th>Maximum residual</th></tr></thead><tbody id="veroExposureBody"></tbody></table></div></section><div id="veroCompactRiskLayout">
 
 <div class="vero-risk-filter-panels">
 <section class="vero-risk-panel vero-compact-filter-panel vero-risk-filter-panel" aria-label="Risk Classification"><h2>Risk Classification</h2><div class="vero-risk-secondary-row"><div class="vero-risk-filter"><label for="veroTier4Filter">Risk Domain</label><select id="veroTier4Filter"><option value="">All Risk Domains</option></select></div>
@@ -2159,7 +2163,7 @@ table {
 <div class="vero-risk-filter"><label for="veroTier1Filter">Risk Event</label><select id="veroTier1Filter"><option value="">All Risk Events</option></select></div></div></section>
 <section class="vero-risk-panel vero-compact-filter-panel vero-risk-filter-panel" aria-label="Operational Context"><h2>Operational Context</h2><div class="vero-risk-secondary-row"><div class="vero-risk-filter"><label for="veroContextTypeFilter">Context Type</label><select id="veroContextTypeFilter"><option value="">All context types</option></select></div>
 <div class="vero-risk-filter"><label for="veroApplicationFilter">Context Name</label><select id="veroApplicationFilter"><option value="">All contexts</option></select></div>
-<div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area</label><select id="veroSiteFilter" disabled aria-describedby="veroContextStatus"><option value="">Site-level filtering unavailable</option></select></div></div><p id="veroContextStatus" role="status"></p><button id="veroContextRetry" class="vero-risk-clear" type="button" hidden>Retry context data</button></section>
+<div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area</label><select id="veroSiteFilter" disabled aria-describedby="veroContextStatus"><option value="">Choose Site in Context Type</option></select></div></div><p id="veroContextStatus" role="status"></p><button id="veroContextRetry" class="vero-risk-clear" type="button" hidden>Retry context data</button></section>
 </div>
 <div class="vero-matrix-register-grid" style="margin-top:14px !important;">
 <section class="vero-risk-panel">
@@ -2366,6 +2370,7 @@ table {
  }
  let selectedCell=null;
  let contextAssignments=[];
+ let contractSiteLinks=[];
  let contextAssignmentsReady=false;
  let contextAssignmentsState='idle';
  let contextSelection='';
@@ -2374,6 +2379,7 @@ table {
  const contextSiteFilter=document.getElementById('veroSiteFilter');
  document.addEventListener('vero-risk-context-assignments',event=>{
   contextAssignments=event.detail.assignments||[];
+  contractSiteLinks=event.detail.contractSites||[];
   contextAssignmentsReady=event.detail.ready===true;
   contextAssignmentsState=event.detail.state||'idle';
   const selection=contextTypeFilter.value+'|'+contextNameFilter.value;
@@ -2484,6 +2490,17 @@ table {
    return Array.isArray(ids) && ids.some(value=>Number(value)===Number(id));
   }
 
+ // Linked-site visibility is a filter rule; it creates no contract assessment.
+ function matchesSelectedContext(position){
+  const kind={'Project':'Project','Contract':'Maintenance Contract',
+              'VM Location':'VM Site','Site':'Site'}[contextTypeFilter.value];
+  const selected=contextNameFilter.value;
+  if(position.context_type===kind&&(!selected||String(position.context_id)===selected))return true;
+  return kind==='Maintenance Contract'&&position.context_type==='Site'&&
+   contractSiteLinks.some(link=>Number(link.site_id)===Number(position.context_id)&&
+    (!selected||String(link.context_id)===selected));
+ }
+
  function filteredRisks(){
   if(riskDataState!=='ready')return [];
   return risks.filter(risk=>{
@@ -2491,13 +2508,9 @@ table {
     if(String(risk.status||'').toLowerCase()==='archived')return false;
     if(contextTypeFilter.value){
      if(!contextAssignmentsReady)return false;
-     const kind={'Project':'Project','Contract':'Maintenance Contract',
-                 'VM Location':'VM Site'}[contextTypeFilter.value];
-     if(!kind)return false;
      const matches=contextAssignments.some(a=>
       Number(a.risk_id)===Number(risk.id) &&
-      a.status==='Applicable' && a.context_type===kind &&
-      (!contextNameFilter.value || String(a.context_id)===contextNameFilter.value)
+      ['Applicable','Pending'].includes(a.status) && matchesSelectedContext(a)
      );
      if(!matches)return false;
     }
@@ -2545,11 +2558,9 @@ table {
 
  function matrixPositionsForVisibleRisks(visible){
   const ids=new Set(visible.map(r=>Number(r.id)));
-  const context={'Project':'Project','Contract':'Maintenance Contract','VM Location':'VM Site'}[contextTypeFilter.value];
   if(!matrixPositionsReady)return [];
   return approvedMatrixPositions.filter(p=>ids.has(Number(p.risk_id)) &&
-   (!context || (p.context_type===context &&
-    (!contextNameFilter.value || String(p.context_id)===contextNameFilter.value))));
+   (!contextTypeFilter.value || matchesSelectedContext(p)));
  }
  function matrixCellRisks(visible,row,col){
   const type=assessmentFilter.value;
@@ -2941,6 +2952,11 @@ table {
   content.replaceChildren();
   tabs.forEach(t=>t.setAttribute('aria-current',String(t.dataset.riskTab===active)));
   if(!risk)return;
+  if(risk.source_change_id){
+   const sourceCard=card('Linked change',[['Change status',risk.source_change_status]]);
+   const link=document.createElement('a');link.textContent='Open originating change';
+   link.href='change-management.html?change_id='+encodeURIComponent(risk.source_change_id);sourceCard.append(link);content.append(sourceCard);
+  }
   if(active==='overview'){
    content.appendChild(card('Master Risk',[
     ['Description',risk.risk_description],['Status',risk.status],['Register',risk.register_name],
@@ -3497,7 +3513,7 @@ table {
 })();
 </script>
 
-<script src="risk-context.js?v=20261016-no-site-note"></script>
+<script src="risk-context.js?v=20261022-linked-contract-sites"></script>
 <style>
 .vero-risk-office-actions{display:flex;gap:12px;align-items:center;padding:10px 22px;background:white;border-bottom:1px solid #e1e5e2}
 .vero-risk-office-actions button,.vero-risk-office-form button[type=submit]{background:#3d3935;color:white;border:0;border-radius:7px;padding:10px 14px;font-weight:700;cursor:pointer}
@@ -3944,7 +3960,7 @@ table {
 <link rel="stylesheet" href="risk-tier-assessment.css">
 <script src="risk-tier-assessment.js"></script>
 <script src="risk-tier-matrix.js"></script>
-<script src="risk-hierarchy.js?v=20261016-tier-assessment"></script>
+<script src="risk-hierarchy.js?v=20261022-site-rollup"></script>
 <script src="risk-operational.js"></script><script src="site-risk-register.js"></script>
 <link rel="stylesheet" href="project-risk-submission.css">
 <script src="project-risk-submission.js"></script>
@@ -3967,7 +3983,7 @@ table {
 })();
 </script>
 
-<style id="vero-exposure-styles">.vero-operational-entry{display:none!important;align-items:center;gap:14px;flex-wrap:wrap;margin:12px 0 16px}.vero-operational-entry button{border:0;background:#3d3935;color:white;border-radius:8px;padding:12px 17px;font-weight:700;cursor:pointer}.vero-operational-entry span{font-size:12px;color:#857874}#veroCompactRiskLayout[hidden],#veroExposurePanel[hidden]{display:none!important}.vero-exposure-navigation{display:none!important;gap:8px;margin:16px 0}.vero-exposure-navigation button{padding:11px 17px;border:1px solid #ddd;border-radius:7px;background:#fff;color:#3d3935;font-weight:700;cursor:pointer}.vero-exposure-navigation button[aria-pressed=true]{background:#3d3935;color:white}.vero-exposure-head{display:flex;justify-content:space-between;align-items:center;gap:16px}.vero-exposure-head h2{margin:0}.vero-exposure-head p{font-size:12px;color:#777}.vero-exposure-head button{padding:10px 15px;border:0;border-radius:7px;background:#a9c23f;font-weight:700;cursor:pointer}.vero-exposure-filters{display:flex;flex-wrap:wrap;gap:15px;margin:18px 0}.vero-exposure-filters label{font-size:12px;font-weight:700;display:grid;gap:6px}.vero-exposure-filters select,.vero-exposure-filters input{padding:10px;border:1px solid #ddd;border-radius:6px;min-width:210px}.vero-exposure-table{width:100%;border-collapse:collapse}.vero-exposure-table th,.vero-exposure-table td{text-align:left;padding:13px;border-bottom:1px solid #e5e1de;font-size:12px}.vero-exposure-table th{background:#f8f7f6}.vero-exposure-table tbody tr{cursor:pointer}.vero-exposure-table tbody tr:hover{background:#f2f5eb}.vero-exposure-table tbody tr:focus-visible{outline:2px solid #2c8259}.vero-exposure-table td:first-child{font-weight:700}.vero-exposure-context{padding:12px 0;border-bottom:1px solid #e5e1de}.vero-exposure-context p{margin:6px 0;font-size:12px}.vero-exposure-context h4{margin:4px 0 10px}.vero-exposure-context button{border:0;background:#0b3d2e;color:#fff;border-radius:6px;padding:8px 12px;cursor:pointer}@media(max-width:700px){.vero-exposure-head{align-items:flex-start;flex-direction:column}.vero-exposure-table{min-width:740px}}</style></body></html>
+<style id="vero-exposure-styles">.vero-operational-entry{display:none!important;align-items:center;gap:14px;flex-wrap:wrap;margin:12px 0 16px}.vero-operational-entry button{border:0;background:#3d3935;color:white;border-radius:8px;padding:12px 17px;font-weight:700;cursor:pointer}.vero-operational-entry span{font-size:12px;color:#857874}#veroCompactRiskLayout[hidden],#veroExposurePanel[hidden]{display:none!important}.vero-exposure-navigation{display:none!important;gap:8px;margin:16px 0}.vero-exposure-navigation button{padding:11px 17px;border:1px solid #ddd;border-radius:7px;background:#fff;color:#3d3935;font-weight:700;cursor:pointer}.vero-exposure-navigation button[aria-pressed=true]{background:#3d3935;color:white}.vero-exposure-head{display:flex;justify-content:space-between;align-items:center;gap:16px}.vero-exposure-head h2{margin:0}.vero-exposure-head p{font-size:12px;color:#777}.vero-exposure-head button{padding:10px 15px;border:0;border-radius:7px;background:#a9c23f;font-weight:700;cursor:pointer}.vero-exposure-filters{display:flex;flex-wrap:wrap;gap:15px;margin:18px 0}.vero-exposure-filters label{font-size:12px;font-weight:700;display:grid;gap:6px}.vero-exposure-filters select,.vero-exposure-filters input{padding:10px;border:1px solid #ddd;border-radius:6px;min-width:210px}.vero-exposure-table{width:100%;border-collapse:collapse}.vero-exposure-table th,.vero-exposure-table td{text-align:left;padding:13px;border-bottom:1px solid #e5e1de;font-size:12px}.vero-exposure-table th{background:#f8f7f6}.vero-exposure-table tbody tr{cursor:pointer}.vero-exposure-table tbody tr:hover{background:#f2f5eb}.vero-exposure-table tbody tr:focus-visible{outline:2px solid #2c8259}.vero-exposure-table td:first-child{font-weight:700}.vero-exposure-context{padding:12px 0;border-bottom:1px solid #e5e1de}.vero-exposure-context p{margin:6px 0;font-size:12px}.vero-exposure-context h4{margin:4px 0 10px}.vero-exposure-context button{border:0;background:#0b3d2e;color:#fff;border-radius:6px;padding:8px 12px;cursor:pointer}@media(max-width:700px){.vero-exposure-head{align-items:flex-start;flex-direction:column}.vero-exposure-table{min-width:740px}}</style><script src="page-related-documents.js?v=20261022-placement"></script><script src="risk-asset-source.js?v=20261022-plant"></script></body></html>
 
 
 
