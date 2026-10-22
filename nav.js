@@ -1,7 +1,7 @@
 /* Shared navigation: prerender markup with scripts/build-navigation.cjs; hydrate without replacing it. */
 /* Inline navigation icons: Lucide 0.456.0, ISC licence (vendor/lucide-LICENSE). */
 (function(){'use strict';
- const VERSION='20261022-improvement-register';
+ const VERSION='20261022-change-management';
  function renderNavigation(path){  /* CURRENT PAGE */
   path=(path||'index.html').toLowerCase();
 
@@ -84,6 +84,10 @@
       <a class="${isActive('contractor-management.html') ? 'active' : ''}" href="contractor-management.html">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"></path><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"></path><path d="M4 15v-3a6 6 0 0 1 6-6"></path><path d="M14 6a6 6 0 0 1 6 6v3"></path></svg>
         <span>Contractor Management</span>
+      </a>
+      <a class="${isActive('change-management.html') ? 'active' : ''}" href="change-management.html" ${isActive('change-management.html') ? 'aria-current="page"' : ''}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 0 1 15-6l3 3M21 3v5h-5M21 13a9 9 0 0 1-15 6l-3-3M3 21v-5h5"/></svg>
+        <span>Change Management</span>
       </a>
     </div>
 
