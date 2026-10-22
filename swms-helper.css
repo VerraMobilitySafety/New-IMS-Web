@@ -132,3 +132,5 @@
 .swms-user-picker select[hidden]{display:none!important}
 .swms-high-risk-picker,.swms-checkbox-dropdown,.swms-checkbox-options{min-width:0;max-width:100%;box-sizing:border-box}
 .swms-readable-editor .swms-arrangements-grid{grid-template-columns:minmax(0,1fr)}.swms-arrangements-grid>div{min-width:0}.swms-checkbox-dropdown summary{box-sizing:border-box;max-width:100%}
+
+.swms-requirement-picker{min-width:0;max-width:100%}.swms-requirement-picker textarea[hidden]{display:none!important}.swms-requirement-picker>p:first-child{font-weight:700}.swms-requirement-picker>label input{display:block;width:100%;box-sizing:border-box}.swms-requirement-picker label{overflow-wrap:anywhere}
