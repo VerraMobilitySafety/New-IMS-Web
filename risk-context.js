@@ -26,9 +26,12 @@
    type.value&&state==='error'?'Risk applicability could not be loaded. No partial totals are shown.':
    type.value&&state!=='ready'?'Loading authorised risk applicability…':
    type.value&&assignments.some(a=>a.status==='Pending')?'Includes saved submissions awaiting Risk Officer approval. Totals use approved assessments.':'';
-  status.textContent=message;
+  status.textContent=[message,type.value==='Contract'&&state==='ready'&&!optionsError?
+   'Includes risks recorded against contracts and their linked sites.':''].filter(Boolean).join(' ');
   document.dispatchEvent(new CustomEvent('vero-risk-context-assignments',{
-   detail:{assignments,ready:state==='ready',state}
+   detail:{assignments,contractSites:(contexts.contract_sites||[]).filter(link=>
+    (contexts.contracts||[]).some(c=>Number(c.id)===Number(link.context_id))&&
+    (contexts.sites||[]).some(s=>Number(s.id)===Number(link.site_id))),ready:state==='ready',state}
   }));
  }
  async function read(path,signal){

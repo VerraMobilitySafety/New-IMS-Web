@@ -2370,6 +2370,7 @@ table {
  }
  let selectedCell=null;
  let contextAssignments=[];
+ let contractSiteLinks=[];
  let contextAssignmentsReady=false;
  let contextAssignmentsState='idle';
  let contextSelection='';
@@ -2378,6 +2379,7 @@ table {
  const contextSiteFilter=document.getElementById('veroSiteFilter');
  document.addEventListener('vero-risk-context-assignments',event=>{
   contextAssignments=event.detail.assignments||[];
+  contractSiteLinks=event.detail.contractSites||[];
   contextAssignmentsReady=event.detail.ready===true;
   contextAssignmentsState=event.detail.state||'idle';
   const selection=contextTypeFilter.value+'|'+contextNameFilter.value;
@@ -2488,6 +2490,17 @@ table {
    return Array.isArray(ids) && ids.some(value=>Number(value)===Number(id));
   }
 
+ // Linked-site visibility is a filter rule; it creates no contract assessment.
+ function matchesSelectedContext(position){
+  const kind={'Project':'Project','Contract':'Maintenance Contract',
+              'VM Location':'VM Site','Site':'Site'}[contextTypeFilter.value];
+  const selected=contextNameFilter.value;
+  if(position.context_type===kind&&(!selected||String(position.context_id)===selected))return true;
+  return kind==='Maintenance Contract'&&position.context_type==='Site'&&
+   contractSiteLinks.some(link=>Number(link.site_id)===Number(position.context_id)&&
+    (!selected||String(link.context_id)===selected));
+ }
+
  function filteredRisks(){
   if(riskDataState!=='ready')return [];
   return risks.filter(risk=>{
@@ -2495,13 +2508,9 @@ table {
     if(String(risk.status||'').toLowerCase()==='archived')return false;
     if(contextTypeFilter.value){
      if(!contextAssignmentsReady)return false;
-     const kind={'Project':'Project','Contract':'Maintenance Contract',
-                 'VM Location':'VM Site','Site':'Site'}[contextTypeFilter.value];
-     if(!kind)return false;
      const matches=contextAssignments.some(a=>
       Number(a.risk_id)===Number(risk.id) &&
-      ['Applicable','Pending'].includes(a.status) && a.context_type===kind &&
-      (!contextNameFilter.value || String(a.context_id)===contextNameFilter.value)
+      ['Applicable','Pending'].includes(a.status) && matchesSelectedContext(a)
      );
      if(!matches)return false;
     }
@@ -2549,11 +2558,9 @@ table {
 
  function matrixPositionsForVisibleRisks(visible){
   const ids=new Set(visible.map(r=>Number(r.id)));
-  const context={'Project':'Project','Contract':'Maintenance Contract','VM Location':'VM Site','Site':'Site'}[contextTypeFilter.value];
   if(!matrixPositionsReady)return [];
   return approvedMatrixPositions.filter(p=>ids.has(Number(p.risk_id)) &&
-   (!context || (p.context_type===context &&
-    (!contextNameFilter.value || String(p.context_id)===contextNameFilter.value))));
+   (!contextTypeFilter.value || matchesSelectedContext(p)));
  }
  function matrixCellRisks(visible,row,col){
   const type=assessmentFilter.value;
@@ -3501,7 +3508,7 @@ table {
 })();
 </script>
 
-<script src="risk-context.js?v=20261016-no-site-note"></script>
+<script src="risk-context.js?v=20261022-linked-contract-sites"></script>
 <style>
 .vero-risk-office-actions{display:flex;gap:12px;align-items:center;padding:10px 22px;background:white;border-bottom:1px solid #e1e5e2}
 .vero-risk-office-actions button,.vero-risk-office-form button[type=submit]{background:#3d3935;color:white;border:0;border-radius:7px;padding:10px 14px;font-weight:700;cursor:pointer}
