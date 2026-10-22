@@ -11,7 +11,7 @@ async function submitted(result){
  const url=new URL(location.href);url.searchParams.set('risk_id',result.risk_id);history.replaceState(null,'',url);
  function confirmation(refreshError){
   status.replaceChildren(node('strong','Submitted successfully · '+reference+'. '),
-   node('span','Waiting for independent Risk Officer review. It will contribute to the site risk rating after approval. '));
+   node('span','Waiting for Risk Officer review. It will contribute to the site risk rating after approval. '));
   const link=node('a','Open submitted risk');link.href=url.href;link.onclick=event=>{event.preventDefault();void openReview(result.risk_id);};status.append(link);
   if(refreshError){
    status.append(node('span',' The risk was saved, but the site list could not refresh. Do not submit it again. '));
