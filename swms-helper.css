@@ -5,3 +5,18 @@
 
 /* Keep the public page header visible while authentication gates the workspace. */
 #vh[hidden]{display:block!important}#vh[hidden] .main>:not(.global-hero):not(#heights-auth-status){display:none!important}#vh[hidden] .hero-tools{visibility:hidden}#vh #heights-auth-status{margin:0;padding:24px 0}
+
+/* The interview stays within the drawer; only its message history grows. */
+#swmsDialog[open]:has(#swmsIntake:not([hidden])){display:flex;flex-direction:column;overflow:hidden}
+#swmsDialog .swms-dialog-head{flex:none}
+#swmsDialog #swmsIntake:not([hidden]){display:flex;flex-direction:column;flex:1;min-height:0;padding:18px 28px;gap:12px}
+#swmsIntake>p{margin:0;font-size:12px;flex:none}
+#swmsDialog #swmsIntake>label{margin:0;flex:none}
+#swmsConversation{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding-right:10px}
+#swmsDialog #swmsChatForm{flex:none;border-top:1px solid #e5e1de;padding-top:10px}
+#swmsDialog #swmsChatForm label{margin:0 0 8px}
+#swmsDialog #swmsAnswer{height:72px;min-height:56px;max-height:100px;resize:none}
+#swmsDialog #swmsAiStatus:empty{display:none}
+#swmsDialog #swmsIntake .swms-intake-actions{margin:0;flex:none;gap:8px}
+@media(max-width:600px){#swmsDialog #swmsIntake:not([hidden]){padding:14px 18px;gap:8px}}
+@media(max-height:650px){#swmsIntake>p{display:none}#swmsDialog #swmsAnswer{height:56px}#swmsDialog #swmsIntake:not([hidden]){gap:6px}#swmsDialog .swms-dialog-head{padding:12px 18px}}
