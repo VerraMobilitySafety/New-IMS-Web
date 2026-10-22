@@ -129,7 +129,7 @@ test('compact SWMS rows open the digital drawer by click or keyboard without hyp
  assert.equal(await p.locator('#swmsRows tr').first().locator('td').first().evaluate(e=>getComputedStyle(e).whiteSpace),'nowrap');
  }finally{await s.browser.close();}
 });
-function digitalFields(){return {...Object.fromEntries(['title','location','responsible_person','scope','high_risk_work','site_conditions','consultation','resources','emergency','monitoring'].map(k=>[k,'Recorded '+k])),ppe:['Hi-vis'],jurisdiction:'NSW',emergency_number:'000',steps:[{activity:'Set up',action:'Set up separation',hazards:'Traffic',controls:'Separate work area',implementation:'Supervisor checks',owner:'Supervisor',risks:[{hazards:'Traffic',controls:'Separate work area',initial_impact:4,initial_likelihood:20,residual_impact:2,residual_likelihood:5}]}]};}
+function digitalFields(){return {...Object.fromEntries(['title','location','responsible_person','scope','high_risk_work','site_conditions','consultation','resources','emergency','monitoring'].map(k=>[k,'Recorded '+k])),ppe:['Hi-vis'],competencies:['White Card'],jurisdiction:'NSW',emergency_number:'000',steps:[{activity:'Set up',action:'Set up separation',hazards:'Traffic',controls:'Separate work area',implementation:'Supervisor checks',owner:'Supervisor',risks:[{hazards:'Traffic',controls:'Separate work area',initial_impact:4,initial_likelihood:20,residual_impact:2,residual_likelihood:5}]}]};}
 test('HSEQ editing submits a versioned revision and retains changes on failure',async()=>{
  const s=await screen();try{const p=s.page;let posted,deny=true;
  await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'SWMS deployment',reference:'S10',version:'7.0',status:'Current',can_edit:true,fields:digitalFields(),history:[]}}));
@@ -137,7 +137,7 @@ test('HSEQ editing submits a versioned revision and retains changes on failure',
  await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.getByRole('button',{name:'Edit SWMS',exact:true}).click();
  await p.locator('#swmsDocumentDialog [name=scope]').fill('Updated roadside scope');await p.locator('#swmsDocumentDialog [name=change_reason]').fill('Improve separation controls');await p.locator('#swmsDocumentDialog input[type=checkbox]').check();await p.getByRole('button',{name:'Submit revision for review',exact:true}).click();
  await p.getByText('Only users with the HSEQ role can edit a SWMS. Your changes are retained.',{exact:true}).waitFor();assert.equal(await p.locator('#swmsDocumentDialog [name=scope]').inputValue(),'Updated roadside scope');
- deny=false;await p.getByRole('button',{name:'Submit revision for review',exact:true}).click();await p.getByText('Revision submitted for review.',{exact:true}).waitFor();assert.equal(posted.expected_version,'7.0');assert.equal(posted.change_reason,'Improve separation controls');assert.equal(posted.review_confirmed,true);assert.deepEqual(posted.ppe,['Hi-vis']);assert.equal(posted.steps[0].risks[0].initial_impact,4);assert.equal(posted.emergency_number,'000');
+ deny=false;await p.getByRole('button',{name:'Submit revision for review',exact:true}).click();await p.getByText('Revision submitted for review.',{exact:true}).waitFor();assert.equal(posted.expected_version,'7.0');assert.equal(posted.change_reason,'Improve separation controls');assert.equal(posted.review_confirmed,true);assert.deepEqual(posted.ppe,['Hi-vis']);assert.deepEqual(posted.competencies,['White Card']);assert.equal(posted.steps[0].risks[0].initial_impact,4);assert.equal(posted.emergency_number,'000');
  }finally{await s.browser.close();}
 });
 test('legacy SWMS shows a controlled-record link without embedding or fetching the file',async()=>{
@@ -175,6 +175,7 @@ test('SWMS drawer aligns each hazard with its own initial rating, controls and r
  fields.steps[0].hazards='Traffic and uneven ground combined';fields.steps[0].controls='Combined controls must not be repeated';
  await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'SWMS deployment',version:'7.0',status:'Current',can_edit:true,fields,history:[]}}));
  await p.locator('#swmsRows tr').first().click();await p.locator('#swmsDocumentDialog .swms-risk-table').waitFor();
+ assert.equal(await p.locator('.swms-requirements').isVisible(),true);assert.match(await p.locator('.swms-requirements').innerText(),/Competency requirements[\s\S]*White Card[\s\S]*PPE requirements[\s\S]*Hi-vis/);
  const table=p.locator('#swmsDocumentDialog .swms-risk-table');assert.deepEqual(await table.locator('thead th').allTextContents(),['Step','Hazard','Risk assessment','Controls','Residual risk']);
  const rows=table.locator('tbody tr');assert.equal(await rows.count(),2);assert.equal(await rows.first().locator('td').first().getAttribute('rowspan'),'2');
  assert.equal(await rows.first().locator('td').nth(1).innerText(),'Traffic');assert.equal(await rows.first().locator('td').nth(3).innerText(),'Separate work area');
