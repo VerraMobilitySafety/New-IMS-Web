@@ -4,7 +4,7 @@ const {JSDOM,VirtualConsole}=require('jsdom');
 const {webcrypto}=require('node:crypto');
 const path=require('node:path'),root=path.resolve(__dirname,'..');
 let html=fs.readFileSync(path.join(root,'incident-management.html'),'utf8');
-html=html.replace('<script src="nav.js"></script>','').replace('<body>','<body><script>'+fs.readFileSync(path.join(__dirname,'event-fixture.js'),'utf8')+'</script>').replace('<script src="incident-management.js"></script>','<script>'+fs.readFileSync(path.join(root,'incident-management.js'),'utf8')+'</script>');
+html=html.replace('<script src="nav.js"></script>','').replace('<body>','<body><script>'+fs.readFileSync(path.join(__dirname,'event-fixture.js'),'utf8')+'</script>').replace(/<script src="incident-management\.js(?:\?[^\"]*)?"><\/script>/,'<script>'+fs.readFileSync(path.join(root,'incident-management.js'),'utf8')+'</script>');
 const errors=[];const vc=new VirtualConsole();vc.on('jsdomError',e=>errors.push(e.message));
 const dom=new JSDOM(html,{url:'https://preview.invalid/incident-management.html',runScripts:'dangerously',virtualConsole:vc,beforeParse(w){w.structuredClone=structuredClone;w.crypto.randomUUID=()=>webcrypto.randomUUID();}});
 const w=dom.window,d=w.document;
