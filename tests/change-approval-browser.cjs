@@ -5,7 +5,7 @@ const options={classification_categories:[{id:1,tier:4,name:'Operations'}],class
 const payload={title:'Workshop change',reason:'Reliability',scope:'Replace equipment',affected:'Workshop',planned_date:'2026-11-10',implementation:'Isolate and commission',consultation:'Brief team',rollback:'Retain unit',review_confirmed:true,risk:{risk_title:'Energisation',risk_description:'Unexpected energisation',classification_path:[1],risk_owner_user_id:7,inherent:{likelihood:3,impact:4},residual:{likelihood:2,impact:3},target:{likelihood:1,impact:3},controls_summary:'Isolation',treatments_summary:'Test',justification:'Credible exposure',control_ids:[],document_ids:[],treatment_actions:[]}};
 (async()=>{const chrome='C:/Program Files/Google/Chrome/Application/chrome.exe';const browser=await chromium.launch({headless:true,...(fs.existsSync(chrome)?{executablePath:chrome}:{})});
 try{for(const width of [1440,390]){
-let manager=false,saved={id:cid,status:'Submitted',version:1,payload,updated_at:new Date().toISOString(),risk_id:81},writes=0,fail=false;
+let manager=false,saved={id:cid,status:'Submitted',version:1,payload,updated_at:new Date().toISOString(),risk_id:81,record_id:501},writes=0,fail=false;
 const page=await browser.newPage({viewport:{width,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
 await page.addInitScript(()=>localStorage.setItem('vero_session_token','isolated-browser-test'));
 const snapshot=()=>({...saved,can_approve:manager&&saved.status==='Submitted',can_implement:!manager&&saved.status==='Approved',can_close:!manager&&saved.status==='In progress',can_edit:false});
@@ -26,6 +26,7 @@ return route.fulfill({json:{documents:[],resources:[]}});
 await page.goto('https://vero.test/change-management.html?change_id='+cid);await page.locator('#changeDetails').waitFor({state:'visible'});
 assert.equal(await page.locator('#changeSubmit').isVisible(),false);assert.equal(await page.locator('#changeApprove').isVisible(),false);assert.equal(await page.locator('#change_scope').isDisabled(),true);
 assert.equal(await page.getByRole('link',{name:'Open linked Master Risk record'}).getAttribute('href'),'risk.html?risk_id=81');
+assert.equal(await page.getByRole('link',{name:'Open linked Records Management entry'}).getAttribute('href'),'records.html?record_id=501');
 manager=true;await page.reload();await page.locator('#changeApprove').waitFor({state:'visible'});
 await page.locator('#changeApprove').click();await page.getByText('Enter a reason for your decision.').waitFor();assert.equal(writes,0);
 await page.locator('#changeDecisionReason').fill('Controls and implementation plan reviewed.');fail=true;await page.locator('#changeApprove').click();await page.getByText('Temporary save failure',{exact:true}).waitFor();assert.equal(await page.locator('#changeDecisionReason').inputValue(),'Controls and implementation plan reviewed.');

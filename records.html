@@ -4141,6 +4141,11 @@ body[data-records-manager="false"]
 
    document.getElementById('drawerSource').textContent =
     r.source_module || '—';
+   if(r.related_change){
+    const link=document.createElement('a');link.textContent='Open linked change';
+    link.href='change-management.html?change_id='+encodeURIComponent(r.related_change.id);
+    link.style.display='block';document.getElementById('drawerSource').append(link);
+   }
 
    document.getElementById('drawerOwner').textContent =
     ownerText;
