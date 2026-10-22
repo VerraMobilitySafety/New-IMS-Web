@@ -11,7 +11,7 @@ const stages=['Inherent','Current Residual','Target'];
 const bands=[['Low','Low','Low','Moderate','Moderate'],['Low','Moderate','Moderate','Moderate','High'],['Low','Moderate','High','High','Significant'],['Moderate','Moderate','High','Significant','Significant'],['Moderate','High','Significant','Significant','Significant']];
 const colours={Low:'#A8C63D',Moderate:'#21869B',High:'#D1B443',Significant:'#BF302D'};
 let options=config.options,owner=null,stage=0,ratings=[null,null,null],busy=false,ownerMatches=[],ownerIndex=-1;
-const traditional=config.layout==='traditional',worksheetRatings=[];
+const compact=config.layout==='compact',traditional=config.layout==='traditional'||compact,worksheetRatings=[];
 function node(tag,text,cls){const el=document.createElement(tag);if(text!=null)el.textContent=['label','h3','h4','summary'].includes(tag)?String(text).replace(/\b[a-z]/g,c=>c.toUpperCase()):text;if(cls)el.className=cls;return el;}
 function button(text,cls){const b=node('button',text,cls);b.type='button';return b;}
 function uuid(){return crypto.randomUUID();}
@@ -78,6 +78,19 @@ if(traditional){
  const guide=node('details',null,'risk-worksheet-guide');guide.append(node('summary','Risk matrix and rating definitions'),tabs,columns);
  host.replaceChildren(identification,tierBox,controls,tableWrap,notes.wrap,guide,footer,status);
  summaries.hidden=true;summary.querySelector('h3').hidden=true;
+ if(compact){
+  host.classList.add('risk-compact');identification.append(review.wrap,description.wrap);
+  headRow.replaceChildren();const ratingRow=node('tr');
+  worksheetRatings.forEach((row,i)=>{
+   const th=node('th',stages[i]);th.scope='col';headRow.append(th);
+   const cell=node('td'),axes=node('div',null,'compact-rating-axes');
+   row.selects.forEach((select,n)=>{const label=node('label',n?'Consequence':'Likelihood');label.append(select);axes.append(label);});
+   cell.append(axes,row.badge);ratingRow.append(cell);
+  });body.replaceChildren(ratingRow);
+  const advanced=node('details',null,'risk-compact-advanced');advanced.append(node('summary','Justification, actions and supporting controls'),notes.wrap,
+   controlSearch.wrap,controlList,documentSearch.wrap,documentList,actionList,addAction,guide);
+  host.replaceChildren(identification,tierBox,controls,tableWrap,advanced,footer,status);
+ }
 }
 function addPicker(search,list,selection,items,label){
  const anchor=node('div',null,'picker-anchor'),added=node('div',null,'added-items');
