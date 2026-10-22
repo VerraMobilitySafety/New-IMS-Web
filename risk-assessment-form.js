@@ -87,9 +87,10 @@ if(traditional){
    row.selects.forEach((select,n)=>{const label=node('label',n?'Consequence':'Likelihood');label.append(select);axes.append(label);});
    cell.append(axes,row.badge);ratingRow.append(cell);
   });body.replaceChildren(ratingRow);
-  const advanced=node('details',null,'risk-compact-advanced');advanced.append(node('summary','Justification, actions and supporting controls'),notes.wrap,
-   controlSearch.wrap,controlList,documentSearch.wrap,documentList,actionList,addAction,guide);
-  host.replaceChildren(identification,tierBox,controls,tableWrap,advanced,footer,status);
+  const advanced=node('details',null,'risk-compact-advanced');advanced.append(node('summary','Justification and supporting controls'),notes.wrap,
+   controlSearch.wrap,controlList,documentSearch.wrap,documentList,guide);
+  const treatments=node('section',null,'risk-compact-actions');treatments.append(node('h4','Treatment actions'),node('p','Assign an owner and due date to each action. After Risk Manager approval, actions appear in the selected owners’ My Actions workflow.','muted'),actionList,addAction);
+  host.replaceChildren(identification,tierBox,controls,tableWrap,treatments,advanced,footer,status);
  }
 }
 function addPicker(search,list,selection,items,label){
@@ -108,7 +109,7 @@ function addPicker(search,list,selection,items,label){
 const enterprisePicker=addPicker(controlSearch,controlList,selectedControls,()=>options?.controls||[],c=>c.code+' · '+c.title);
 const documentPicker=addPicker(documentSearch,documentList,selectedDocuments,()=>options?.documents||[],d=>d.code+' · '+d.title+' · Version '+d.version);
 function renderDocuments(){documentPicker.render();}
-function renderActions(){actionList.replaceChildren();for(const action of actionRows){const row=node('div',null,'fields panel'),label=field('Treatment title '+action.key),assigned=field('Treatment owner '+action.key,'select'),due=field('Treatment due date '+action.key);label.el.value=action.title;label.el.oninput=()=>action.title=label.el.value;const blank=node('option','Select authorised owner');blank.value='';assigned.el.append(blank);for(const u of options.treatment_owners||[]){const opt=node('option',u.name+' · '+u.email);opt.value=String(u.id);assigned.el.append(opt);}assigned.el.value=String(action.owner_user_id||'');assigned.el.onchange=()=>action.owner_user_id=Number(assigned.el.value)||null;due.el.type='date';due.el.value=action.due_date;due.el.oninput=()=>action.due_date=due.el.value;const remove=button('Remove action','button');remove.onclick=()=>{actionRows.splice(actionRows.indexOf(action),1);renderActions();};row.append(label.wrap,assigned.wrap,due.wrap);
+function renderActions(){actionList.replaceChildren();for(const action of actionRows){const row=node('div',null,'fields panel'),label=field('Treatment title '+action.key),assigned=field('Treatment owner '+action.key,'select'),due=field('Treatment due date '+action.key);label.el.maxLength=255;label.el.value=action.title;label.el.oninput=()=>action.title=label.el.value;const blank=node('option','Select authorised owner');blank.value='';assigned.el.append(blank);for(const u of options.treatment_owners||[]){const opt=node('option',u.name+' · '+u.email);opt.value=String(u.id);assigned.el.append(opt);}assigned.el.value=String(action.owner_user_id||'');assigned.el.onchange=()=>action.owner_user_id=Number(assigned.el.value)||null;due.el.type='date';due.el.value=action.due_date;due.el.oninput=()=>action.due_date=due.el.value;const remove=button('Remove action','button');remove.onclick=()=>{actionRows.splice(actionRows.indexOf(action),1);renderActions();};row.append(label.wrap,assigned.wrap,due.wrap);
 if(config.projectMode){const detail=field('Treatment Description '+action.key,'textarea'),priority=field('Treatment Priority '+action.key,'select');detail.el.value=action.description||'';detail.el.oninput=()=>action.description=detail.el.value;for(const name of ['Normal','Low','High','Critical']){const opt=node('option',name);opt.value=name;priority.el.append(opt);}priority.el.value=action.priority||'Normal';priority.el.onchange=()=>action.priority=priority.el.value;row.append(detail.wrap,priority.wrap);}
 row.append(remove);actionList.append(row);}}
 let actionKey=0;addAction.onclick=()=>{actionRows.push({key:++actionKey,title:'',owner_user_id:null,due_date:''});renderActions();};
