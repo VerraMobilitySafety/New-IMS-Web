@@ -24,3 +24,5 @@
 #changeStatus,#changeAiStatus{line-height:1.8}#changeRegisterStatus{padding:0 18px;font-size:12px;line-height:1.8}#changeRegisterStatus:empty{display:none}#changeRegisterStatus button{margin-left:12px}
 #changeDrawer [hidden]{display:none!important}#changeDrawer button:focus-visible,#changeDrawer input:focus-visible,#changeDrawer textarea:focus-visible{outline:3px solid #21869b;outline-offset:3px}
 @media(max-width:650px){#changeDrawer .change-grid{grid-template-columns:1fr}#changeDrawer .change-compose .actions{flex-wrap:wrap}#changeDrawer .change-message{max-width:94%}}
+
+#vh #heights-auth-status{margin-left:0;padding:24px 0}
