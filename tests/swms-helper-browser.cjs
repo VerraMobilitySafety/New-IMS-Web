@@ -121,7 +121,7 @@ test('SWMS rows open the digital drawer by click or keyboard and retain client s
  await p.locator('#swmsRows tr').first().getByRole('link',{name:contract.label}).click();await p.waitForURL('**/maintenance-workspace.html?id=8');
  }finally{await s.browser.close();}
 });
-function digitalFields(){return {...Object.fromEntries(['title','location','responsible_person','scope','high_risk_work','site_conditions','consultation','resources','emergency','monitoring'].map(k=>[k,'Recorded '+k])),steps:[{activity:'Set up',hazards:'Traffic',controls:'Separate work area',implementation:'Supervisor checks',owner:'Supervisor'}]};}
+function digitalFields(){return {...Object.fromEntries(['title','location','responsible_person','scope','high_risk_work','site_conditions','consultation','resources','emergency','monitoring'].map(k=>[k,'Recorded '+k])),ppe:['Hi-vis'],jurisdiction:'NSW',emergency_number:'000',steps:[{activity:'Set up',action:'Set up separation',hazards:'Traffic',controls:'Separate work area',implementation:'Supervisor checks',owner:'Supervisor',risks:[{hazards:'Traffic',controls:'Separate work area',initial_impact:4,initial_likelihood:20,residual_impact:2,residual_likelihood:5}]}]};}
 test('HSEQ editing submits a versioned revision and retains changes on failure',async()=>{
  const s=await screen();try{const p=s.page;let posted,deny=true;
  await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'SWMS deployment',reference:'S10',version:'7.0',status:'Current',can_edit:true,fields:digitalFields(),history:[]}}));
@@ -129,7 +129,7 @@ test('HSEQ editing submits a versioned revision and retains changes on failure',
  await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.getByRole('button',{name:'Edit SWMS',exact:true}).click();
  await p.locator('#swmsDocumentDialog [name=scope]').fill('Updated roadside scope');await p.locator('#swmsDocumentDialog [name=change_reason]').fill('Improve separation controls');await p.locator('#swmsDocumentDialog input[type=checkbox]').check();await p.getByRole('button',{name:'Submit revision for review',exact:true}).click();
  await p.getByText('Only HSEQ Managers can edit a SWMS. Your changes are retained.',{exact:true}).waitFor();assert.equal(await p.locator('#swmsDocumentDialog [name=scope]').inputValue(),'Updated roadside scope');
- deny=false;await p.getByRole('button',{name:'Submit revision for review',exact:true}).click();await p.getByText('Revision submitted for review.',{exact:true}).waitFor();assert.equal(posted.expected_version,'7.0');assert.equal(posted.change_reason,'Improve separation controls');assert.equal(posted.review_confirmed,true);
+ deny=false;await p.getByRole('button',{name:'Submit revision for review',exact:true}).click();await p.getByText('Revision submitted for review.',{exact:true}).waitFor();assert.equal(posted.expected_version,'7.0');assert.equal(posted.change_reason,'Improve separation controls');assert.equal(posted.review_confirmed,true);assert.deepEqual(posted.ppe,['Hi-vis']);assert.equal(posted.steps[0].risks[0].initial_impact,4);assert.equal(posted.emergency_number,'000');
  }finally{await s.browser.close();}
 });
 test('legacy SWMS has an in-drawer original preview and verified conversion fields',async()=>{
