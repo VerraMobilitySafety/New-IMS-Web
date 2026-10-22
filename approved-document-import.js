@@ -1,7 +1,7 @@
 /* Existing approved PDF migration. Server remains responsible for authorization. */
 (() => {
  const el=id=>document.getElementById(id), dialog=el('approvedImport');
- const types=['Policy','Procedure','Standard','Work Instruction','Management Plan','Form','Template','Guideline'];
+ const types=['Policy','Procedure','Standard','Work Instruction','Safe Work Method Statement','Management Plan','Form','Template','Guideline'];
  let rows=[], inventory=[], busy=false;
  const key=value=>String(value||'').trim().toUpperCase();
  const message=value=>{el('approvedImportMessage').textContent=value;};
