@@ -1,0 +1,20 @@
+#vh{font-family:Montserrat,VeroSidebar,Arial,sans-serif}
+#changeDrawer{width:min(1080px,100vw)}
+#changeDrawer .t5-editor{min-height:100%;box-sizing:border-box}
+#changeDrawer .change-intro{font-size:13px;line-height:1.8;color:#625e59;max-width:650px}
+#changeDrawer .change-chat{height:min(47dvh,420px);min-height:180px;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:14px;padding:12px 5px 18px;margin-bottom:18px}
+#changeDrawer .change-message{max-width:85%;padding:15px 18px;border-radius:12px;background:#f1f4e9;flex-shrink:0;line-height:1.8}
+#changeDrawer .change-message.user{background:#edf3f5;align-self:flex-end}
+#changeDrawer .change-message strong{font-size:11px}#changeDrawer .change-message p{margin:4px 0 0;white-space:pre-wrap}
+#changeDrawer .change-compose{display:grid;gap:14px}#changeDrawer .change-compose textarea{width:100%;box-sizing:border-box;min-height:100px;padding:14px;border:1px solid #d6d2cf;border-radius:8px;font:inherit;resize:vertical}
+#changeDrawer .change-compose .actions{justify-content:space-between}
+#changeDrawer .change-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:18px 0}
+#changeDrawer .change-grid label{display:grid;gap:7px;font-weight:600;line-height:1.7}
+#changeDrawer .change-grid input,#changeDrawer .change-grid textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #d6d2cf;border-radius:6px;font:inherit;font-weight:400;resize:vertical;min-width:0}
+#changeDrawer .change-grid textarea{min-height:85px}#changeDrawer .change-full{grid-column:1/-1}
+#changeDrawer .change-section{border-top:1px solid #e5e1de;margin-top:24px;padding-top:22px}#changeDrawer .change-section h3{font-size:17px}
+#changeDrawer .vero-central{padding:0}#changeDrawer .change-confirm{display:flex;gap:10px;line-height:1.8;margin:20px 0}#changeDrawer .change-confirm input{width:18px;height:18px;flex-shrink:0;accent-color:#53691c}
+#changeSources{background:#f4f6ed;border:1px solid #dce4c9;border-radius:8px;padding:18px;line-height:1.8;margin-bottom:20px}#changeSources p{white-space:pre-wrap}#changeSources a{color:#53691c}
+#changeStatus,#changeAiStatus{line-height:1.8}#changeRegisterStatus{padding:0 18px;font-size:12px;line-height:1.8}#changeRegisterStatus:empty{display:none}#changeRegisterStatus button{margin-left:12px}
+#changeDrawer [hidden]{display:none!important}#changeDrawer button:focus-visible,#changeDrawer input:focus-visible,#changeDrawer textarea:focus-visible{outline:3px solid #21869b;outline-offset:3px}
+@media(max-width:650px){#changeDrawer .change-grid{grid-template-columns:1fr}#changeDrawer .change-compose .actions{flex-wrap:wrap}#changeDrawer .change-message{max-width:94%}}
