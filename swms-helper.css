@@ -130,3 +130,5 @@
 .swms-checkbox-dropdown summary{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 .swms-user-picker select[hidden]{display:none!important}
+.swms-high-risk-picker,.swms-checkbox-dropdown,.swms-checkbox-options{min-width:0;max-width:100%;box-sizing:border-box}
+.swms-readable-editor .swms-arrangements-grid{grid-template-columns:minmax(0,1fr)}.swms-arrangements-grid>div{min-width:0}.swms-checkbox-dropdown summary{box-sizing:border-box;max-width:100%}
