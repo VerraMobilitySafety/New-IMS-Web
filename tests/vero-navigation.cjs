@@ -12,7 +12,7 @@ test('every workspace ships the current shared menu, logo, icons and geometry be
   assert.match(match[2],/id="continualImprovementNav" hidden style="display:none!important"/,name+' management link stays hidden until access is verified');
   if(/<body[^>]*data-register-layout=/.test(html))assert.match(html,/<body[^>]*class="[^"]*\bvr-page\b/,name+' mobile shell class is static');
  }
- assert.equal(count,41);
+ assert.equal(count,42);
  const nav=fs.readFileSync(path.join(root,'nav.js'),'utf8');assert.doesNotMatch(nav,/style\.(width|marginLeft)|SIDEBAR_WIDTH|createElement\('style'\)/);
  const css=fs.readFileSync(path.join(root,'vero-shell.css'),'utf8');assert.match(css,/data:font\/woff2;base64/);assert.match(css,/data:image\/png;base64/);
 });

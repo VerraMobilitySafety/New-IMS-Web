@@ -1,7 +1,7 @@
 /* Shared navigation: prerender markup with scripts/build-navigation.cjs; hydrate without replacing it. */
 /* Inline navigation icons: Lucide 0.456.0, ISC licence (vendor/lucide-LICENSE). */
 (function(){'use strict';
- const VERSION='20261022-change-management';
+ const VERSION='20261023-customer-satisfaction';
  function renderNavigation(path){  /* CURRENT PAGE */
   path=(path||'index.html').toLowerCase();
 
@@ -112,10 +112,7 @@
 <a class="${isActive('working-from-home.html') ? 'active' : ''}" href="working-from-home.html">Working from Home</a>
 <a class="${isActive('working-near-traffic.html') ? 'active' : ''}" href="working-near-traffic.html">Working Near Traffic</a></details>
 
-      <a class="placeholder" href="#" onclick="return false">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg>
-        <span>Quality Risks</span>
-      </a>
+      <details class="vero-risk-navigation" ${isActive('customer-satisfaction-risk-management.html') ? 'open' : ''}><summary><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="m9 12 2 2 4-4"></path></svg><span>Quality Risks</span></summary><a class="${isActive('customer-satisfaction-risk-management.html') ? 'active' : ''}" href="customer-satisfaction-risk-management.html" ${isActive('customer-satisfaction-risk-management.html') ? 'aria-current="page"' : ''}>Customer Satisfaction</a></details>
 
       <details class="vero-risk-navigation" ${["waste-management.html"].includes(path) ? 'open' : ''}><summary><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path></svg><span>Sustainability Risks</span></summary><a class="${isActive('waste-management.html') ? 'active' : ''}" href="waste-management.html">Waste Management</a></details>
     </div>
