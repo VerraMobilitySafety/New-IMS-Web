@@ -128,3 +128,5 @@
 .swms-checkbox-dropdown{position:relative;margin:10px 0}.swms-checkbox-dropdown summary{cursor:pointer;border:1px solid #c9c7c4;border-radius:6px;padding:13px 16px;background:white;font-weight:400;overflow-wrap:anywhere}.swms-checkbox-dropdown[open] summary{border-color:#347f8e}.swms-checkbox-options{max-height:320px;overflow-y:auto;border:1px solid #c9c7c4;border-radius:6px;background:white;padding:12px;margin-top:4px}.swms-checkbox-options label{display:flex!important;align-items:flex-start;gap:10px;font-weight:400!important;padding:7px!important;margin:0!important}.swms-checkbox-options input[type=checkbox]{width:auto!important;flex:none;margin:3px 0!important}.swms-checkbox-options .swms-high-risk-choices{display:block;margin-top:0}.swms-checkbox-dropdown summary:focus-visible{outline:2px solid #347f8e;outline-offset:2px}
 
 .swms-checkbox-dropdown summary{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.swms-user-picker select[hidden]{display:none!important}
