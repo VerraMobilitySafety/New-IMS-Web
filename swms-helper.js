@@ -52,7 +52,7 @@ async function load(){
 }
 function addStep(value={}){
  const host=el('swmsSteps'),fieldset=node('fieldset');fieldset.className='swms-step';fieldset.append(node('legend','Work step '+(host.children.length+1)));
- for(const [key,label,hint] of [['activity','Step','Name this stage of the work'],['action','Action','Describe what is done in this step'],['implementation','Implementation and monitoring','How and when are controls put in place and checked?'],['owner','Responsible person','Who implements and checks these controls?']]){
+ for(const [key,label,hint] of [['activity','Step','Describe this stage of the work']]){
   const lab=node('label',label+' *'),input=node(key==='owner'?'input':'textarea');input.dataset.field=key;input.required=true;input.maxLength=key==='activity'?500:3000;input.placeholder=hint;input.value=value[key]||'';lab.append(input);fieldset.append(lab);
  }
  const risks=node('div');risks.className='swms-step-risks';fieldset.append(risks);

@@ -70,7 +70,7 @@ test('question-led AI intake prefills only after enough answers, exposes sources
  assert.equal(await p.locator('[name=title]').inputValue(),'Camera replacement');assert.equal(await p.locator('[name=consultation]').inputValue(),'');assert.equal(await p.locator('[data-risk-field=controls]').inputValue(),'Establish separation before work');
  assert.equal(await p.locator('#swmsAiContext a').getAttribute('href'),'documents.html?document=12');await p.getByText('Confirm emergency contacts.',{exact:true}).waitFor();assert.equal(s.posted,undefined);
  if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-ai-review.png'),fullPage:true});
- await p.locator('[name=consultation]').fill('Crew consulted and controls agreed.');await p.locator('[data-field=action]').fill('Access the camera cabinet');await fillRisk(p);await p.locator('#swmsReviewConfirmed').check();await p.locator('#swmsSubmit').click();assert.equal(s.posted,undefined);
+ await p.locator('[name=consultation]').fill('Crew consulted and controls agreed.');assert.equal(await p.locator('[data-field=action],[data-field=implementation],[data-field=owner]').count(),0);await fillRisk(p);await p.locator('#swmsReviewConfirmed').check();await p.locator('#swmsSubmit').click();assert.equal(s.posted,undefined);
  await p.locator('#swmsAiConfirmed').check();await p.locator('#swmsSubmit').click();await p.locator('#swmsDialog').waitFor({state:'hidden'});
  assert.equal(s.posted.ai_assisted,true);assert.equal(s.posted.ai_review_confirmed,true);assert.deepEqual(s.posted.ai_sources,[{document_id:12,version:'2.0'}]);assert.equal(s.assistCalls,2);
  }finally{await s.browser.close();}
@@ -187,6 +187,7 @@ test('SWMS drawer aligns each hazard with its own initial rating, controls and r
  assert.equal(await p.getByText('Combined controls must not be repeated',{exact:true}).count(),0);if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-risk-grid-preview.png')});
  await p.getByRole('button',{name:'Edit SWMS',exact:true}).click();const risk=p.locator('.swms-digital-risk').nth(1);
  assert.equal(await p.locator('form.swms-readable-editor .swms-section-heading').count(),6);
+ assert.equal(await p.locator('#swmsDocumentDialog [data-step=action],#swmsDocumentDialog [data-step=implementation],#swmsDocumentDialog [data-step=owner]').count(),0);
  assert.equal(await p.locator('form .swms-document-section').nth(0).locator('[name=scope]').inputValue(),'Recorded scope');
  assert.equal(await p.locator('form .swms-document-section').nth(1).locator('[name=competencies]').inputValue(),'White Card');
  assert.equal(await p.locator('form .swms-document-section').nth(2).locator('[name=ppe]').inputValue(),'Hi-vis');
@@ -198,7 +199,7 @@ test('SWMS drawer aligns each hazard with its own initial rating, controls and r
  if(process.env.VERO_SWMS_SCREENSHOTS){await p.locator('#swmsDocumentDialog .swms-risk-table').scrollIntoViewIfNeeded();await p.screenshot({path:path.join(root,'tests/swms-risk-editor-preview.png')});}await risk.locator('[data-risk=residual_impact]').selectOption('3');assert.match(await risk.locator('output').last().innerText(),/15 · Low/);
  let posted;await p.route('**/swms/documents/10/revisions',route=>{posted=route.request().postDataJSON();return route.fulfill({status:201,json:{request:{id:88}}});});
  await p.locator('#swmsDocumentDialog [name=change_reason]').fill('Review each risk separately');await p.locator('#swmsDocumentDialog input[type=checkbox]').check();await p.getByRole('button',{name:'Submit revision for review',exact:true}).click();await p.getByText('Revision submitted for review.',{exact:true}).waitFor();
- assert.equal(posted.steps.length,1);assert.equal(posted.steps[0].risks.length,2);assert.equal(posted.steps[0].risks[0].controls,'Separate work area');assert.equal(posted.steps[0].risks[1].controls,'Inspect access path');assert.equal(posted.steps[0].risks[1].residual_impact,3);
+ assert.equal(posted.steps.length,1);for(const key of ['action','implementation','owner'])assert.equal(Object.hasOwn(posted.steps[0],key),false);assert.equal(posted.steps[0].risks.length,2);assert.equal(posted.steps[0].risks[0].controls,'Separate work area');assert.equal(posted.steps[0].risks[1].controls,'Inspect access path');assert.equal(posted.steps[0].risks[1].residual_impact,3);
  }finally{await s.browser.close();}
 });
 
