@@ -99,6 +99,7 @@ test('long conversations scroll inside the chat while composer and controls stay
  await p.locator('#swmsGenerate').click();
  const before=await p.locator('#swmsAnswer').boundingBox();
  for(let i=0;i<7;i++){await p.locator('#swmsAnswer').fill('Example answer '+i+' describing the roadside camera work and traffic arrangements.');await p.locator('#swmsAsk').click();await p.locator('#swmsAsk').filter({hasText:'Send answer'}).waitFor();}
+ await p.waitForFunction(()=>{const log=document.getElementById('swmsConversation');return log.scrollHeight-log.clientHeight-log.scrollTop<=2;});
  const metrics=await p.evaluate(()=>{const d=document.getElementById('swmsDialog'),log=document.getElementById('swmsConversation'),answer=document.getElementById('swmsAnswer');return {drawer:d.scrollHeight-d.clientHeight,overflow:log.scrollHeight-log.clientHeight,bottom:log.scrollHeight-log.clientHeight-log.scrollTop,answer:answer.getBoundingClientRect().y};});
  assert.ok(metrics.drawer<=1,'drawer must not scroll during chat');assert.ok(metrics.overflow>0,'history must contain its own overflow');assert.ok(metrics.bottom<=2,'latest message is in view');assert.ok(Math.abs(metrics.answer-before.y)<=1,'answer box must stay in place');
  for(const id of ['swmsAsk','swmsManual','swmsRestart']){const box=await p.locator('#'+id).boundingBox();assert.ok(box.y>=0&&box.y+box.height<=740,id+' stays visible');}
