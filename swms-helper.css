@@ -82,3 +82,5 @@
 
 .swms-document-body .swms-digital-step legend,.swms-document-body .swms-risk-table label,.swms-document-body .swms-risk-table input,.swms-document-body .swms-risk-table textarea,.swms-document-body .swms-risk-table select,.swms-document-body .swms-risk-table output{font-family:Montserrat,Arial,sans-serif}
 .swms-document-body .swms-risk-table input,.swms-document-body .swms-risk-table textarea,.swms-document-body .swms-risk-table select{font-weight:400}
+
+.swms-requirements{display:grid;grid-template-columns:1fr 1fr;gap:24px;border-bottom:1px solid #dedbd4;padding-bottom:16px}.swms-requirements ul{padding-left:20px;margin:8px 0}.swms-requirements li{margin:4px 0;overflow-wrap:anywhere}@media(max-width:600px){.swms-requirements{grid-template-columns:1fr;gap:0}}
