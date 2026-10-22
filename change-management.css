@@ -63,3 +63,33 @@
 #changeDrawer .risk-worksheet-guide .stages{margin-top:18px}
 #changeDrawer .risk-worksheet-guide .summary-ratings[hidden]{display:none!important}
 @media(max-width:650px){#changeDrawer .risk-worksheet-controls{grid-template-columns:1fr}#changeDrawer .change-sheet-heading{padding:16px}#changeDrawer .change-sheet-heading h3{font-size:20px}#changeDrawer .change-grid>label,#changeDrawer .risk-worksheet .fields>div,#changeDrawer .risk-worksheet .tiers>div{padding:12px}}
+#changeDrawer .change-risk-entry{border:1px solid #b7b3ad;margin:10px 0;background:#fff}
+#changeDrawer .change-risk-entry>summary{padding:12px 14px;background:#f0f2e9;font-weight:700;cursor:pointer;overflow-wrap:anywhere}
+#changeDrawer .change-risk-body{padding:10px 12px}
+#changeDrawer .change-risk-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+#changeDrawer .change-risk-tools button{padding:7px 10px;font-size:11px}
+#changeDrawer .risk-worksheet.risk-compact .fields{grid-template-columns:repeat(3,minmax(0,1fr));margin:8px 0}
+#changeDrawer .risk-worksheet.risk-compact .fields>div,#changeDrawer .risk-worksheet.risk-compact .tiers>div{padding:8px 10px}
+#changeDrawer .risk-worksheet.risk-compact .tiers{margin:8px 0}
+#changeDrawer .risk-worksheet.risk-compact .tiers>.full{display:none}
+#changeDrawer .risk-worksheet.risk-compact textarea{min-height:58px}
+#changeDrawer .risk-worksheet.risk-compact .risk-worksheet-controls{margin:8px 0}
+#changeDrawer .risk-worksheet.risk-compact .risk-worksheet-controls>div{padding:8px 10px}
+#changeDrawer .risk-worksheet.risk-compact .risk-worksheet-controls textarea{min-height:68px}
+#changeDrawer .risk-worksheet.risk-compact .risk-worksheet-table-wrap{margin:8px 0}
+#changeDrawer .risk-worksheet.risk-compact .risk-worksheet-ratings{table-layout:fixed;min-width:580px}
+#changeDrawer .risk-worksheet.risk-compact .risk-worksheet-ratings td{padding:8px}
+#changeDrawer .risk-worksheet.risk-compact .compact-rating-axes{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:7px}
+#changeDrawer .risk-worksheet.risk-compact .compact-rating-axes label{font-size:10px;margin:0}
+#changeDrawer .risk-worksheet.risk-compact .compact-rating-axes select{min-width:0;width:100%;padding:6px 3px;margin:3px 0 0;font-size:11px}
+#changeDrawer .risk-worksheet.risk-compact .risk-worksheet-ratings .badge{padding:5px 8px;font-size:12px}
+#changeDrawer .risk-compact-advanced{border:1px solid #d5d2cc;padding:9px 10px;margin:8px 0}
+#changeDrawer .risk-compact-advanced>summary{cursor:pointer;font-weight:600;font-size:11px}
+#changeDrawer .risk-compact-advanced[open]>div{margin-top:12px}
+#changeDrawer .change-risk-ai{border:1px solid #d2dfb2;background:#f7f9f1;padding:12px;margin:10px 0;font-size:12px}
+#changeDrawer .change-risk-ai label{display:grid;gap:6px}
+#changeDrawer .change-risk-ai textarea{min-height:70px;width:100%;box-sizing:border-box;font:inherit;padding:8px}
+@media(max-width:650px){#changeDrawer .risk-worksheet.risk-compact .fields{grid-template-columns:1fr 1fr}#changeDrawer .risk-worksheet.risk-compact .fields>div:first-child{grid-column:1/-1}#changeDrawer .change-risk-body{padding:8px}}
+#changeDrawer .change-risk-list-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0;font-size:11px;color:#625e59}
+#changeDrawer .risk-worksheet.risk-compact .tiers{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:650px){#changeDrawer .risk-worksheet.risk-compact .tiers{grid-template-columns:repeat(2,minmax(0,1fr))}}

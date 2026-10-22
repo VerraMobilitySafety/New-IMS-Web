@@ -29,7 +29,7 @@ await page.getByRole('combobox',{name:'Target consequence',exact:true}).selectOp
 await page.getByRole('combobox',{name:'Target likelihood',exact:true}).selectOption('2');await page.getByRole('combobox',{name:'Inherent likelihood',exact:true}).selectOption('3');
 assert.equal(await page.getByRole('combobox',{name:'Target likelihood',exact:true}).inputValue(),'2','Incomplete rating retains the chosen likelihood');
 await page.getByRole('combobox',{name:'Target consequence',exact:true}).selectOption('3');
-assert.equal(await page.locator('.risk-worksheet-ratings tbody tr').last().locator('.badge').textContent(),'30 · Moderate');
+assert.equal(await page.locator('.risk-worksheet-ratings .badge').last().textContent(),'30 · Moderate');
 await page.getByRole('combobox',{name:'Target likelihood',exact:true}).selectOption('1');
 await page.locator('.risk-worksheet-ratings').scrollIntoViewIfNeeded();
 await page.screenshot({path:path.join(out,`assessment-sheet-${width}.png`),fullPage:true});

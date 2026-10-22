@@ -1,7 +1,7 @@
 name: Change Management browser validation
 on:
   pull_request:
-    paths: ['change-management.*', 'records.html', 'change-page-auth.js', 'page-related-documents.js', 'tests/change-header-loading-browser.cjs', 'nav.js', 'risk-assessment-form.js', 'tests/change-management-browser.cjs', 'tests/change-approval-browser.cjs', 'tests/change-records-browser.cjs', '.github/workflows/change-management-validation.yml']
+    paths: ['change-management.*', 'change-risk-list.js', 'tests/change-multiple-risks-browser.cjs', 'records.html', 'change-page-auth.js', 'page-related-documents.js', 'tests/change-header-loading-browser.cjs', 'nav.js', 'risk-assessment-form.js', 'tests/change-management-browser.cjs', 'tests/change-approval-browser.cjs', 'tests/change-records-browser.cjs', '.github/workflows/change-management-validation.yml']
 permissions:
   contents: read
 jobs:
@@ -19,3 +19,5 @@ jobs:
       - run: node tests/change-header-loading-browser.cjs
       - run: node tests/change-approval-browser.cjs
       - run: node tests/change-records-browser.cjs
+
+      - run: node tests/change-multiple-risks-browser.cjs
