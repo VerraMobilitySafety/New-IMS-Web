@@ -34,10 +34,11 @@ for(const width of [1440,390]){
  await choices.nth(1).uncheck();await p.getByRole('button',{name:'Add selected risks',exact:true}).click();assert.equal(await p.locator('.change-risk-entry').count(),2);
  const second=p.locator('.change-risk-entry').nth(1);assert.equal(await second.getByLabel('Risk Title',{exact:true}).inputValue(),'Electrical contact');
  assert.equal(await p.locator('.change-risk-entry').first().getByLabel('Risk Title',{exact:true}).inputValue(),'Original risk');
- const action=second.locator('.risk-compact-actions');await action.getByLabel('Treatment Owner 1',{exact:true}).selectOption('9');await action.getByLabel('Treatment Due Date 1',{exact:true}).fill('2026-12-01');
+ assert.equal(await second.getByRole('heading',{name:'Further Controls And Actions',exact:true}).count(),1);assert.equal(await second.locator('.risk-compact-control-notes').getAttribute('open'),null);
+ const action=second.locator('.risk-compact-actions');await action.getByLabel('Action Owner 1',{exact:true}).selectOption('9');await action.getByLabel('Due Date 1',{exact:true}).fill('2026-12-01');
  await second.getByRole('combobox',{name:'Risk Owner',exact:true}).fill('Test');await second.locator('.owner-options').getByRole('option',{name:/Test Owner/}).click();
- await p.locator('#changeDraft').click();await p.getByText('Change saved.',{exact:true}).waitFor();assert.equal(saved.payload.risks.length,2);assert.deepEqual(saved.payload.risks[1].assessment.treatment_actions,[{title:'Verify isolation before removal',owner_user_id:9,due_date:'2026-12-01'}]);
- await p.reload();await p.locator('#changeSuggestRisks').waitFor({state:'visible'});await p.locator('.change-risk-entry').nth(1).locator('summary').first().click();assert.equal(await p.getByLabel('Treatment Owner 1',{exact:true}).inputValue(),'9');
+ await p.locator('#changeDraft').click();await p.getByText('Change saved.',{exact:true}).waitFor();assert.equal(saved.payload.risks.length,2);assert.equal(saved.payload.risks[1].assessment.treatments_summary,'Test isolation');assert.deepEqual(saved.payload.risks[1].assessment.treatment_actions,[{title:'Verify isolation before removal',owner_user_id:9,due_date:'2026-12-01'}]);
+ await p.reload();await p.locator('#changeSuggestRisks').waitFor({state:'visible'});await p.locator('.change-risk-entry').nth(1).locator('summary').first().click();assert.equal(await p.getByLabel('Action Owner 1',{exact:true}).inputValue(),'9');
  await p.screenshot({path:path.join(out,'suggestions-'+width+'.png'),fullPage:true});
  await p.locator('#changeConfirmed').check();await p.locator('#changeSubmit').click();await p.getByText('Change saved.',{exact:true}).waitFor();assert.equal(saved.status,'Submitted');assert.equal(await p.locator('#changeSuggestRisks').isVisible(),false);
  assert.equal(saved.payload.risks[1].assessment.treatment_actions[0].owner_user_id,9);

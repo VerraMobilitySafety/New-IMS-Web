@@ -10,6 +10,7 @@ const impacts=['Insignificant','Minor','Moderate','Major','Catastrophic'];
 const stages=['Inherent','Current Residual','Target'];
 const bands=[['Low','Low','Low','Moderate','Moderate'],['Low','Moderate','Moderate','Moderate','High'],['Low','Moderate','High','High','Significant'],['Moderate','Moderate','High','Significant','Significant'],['Moderate','High','Significant','Significant','Significant']];
 const colours={Low:'#A8C63D',Moderate:'#21869B',High:'#D1B443',Significant:'#BF302D'};
+let controlNotes=null;
 let options=config.options,owner=null,stage=0,ratings=[null,null,null],busy=false,ownerMatches=[],ownerIndex=-1;
 const compact=config.layout==='compact',traditional=config.layout==='traditional'||compact,worksheetRatings=[];
 function node(tag,text,cls){const el=document.createElement(tag);if(text!=null)el.textContent=['label','h3','h4','summary'].includes(tag)?String(text).replace(/\b[a-z]/g,c=>c.toUpperCase()):text;if(cls)el.className=cls;return el;}
@@ -34,7 +35,7 @@ const columns=node('div',null,'columns'),panel=node('section',null,'panel'),summ
 const existing=field('Existing controls','textarea'),further=field('Further controls and treatments','textarea');existing.el.maxLength=further.el.maxLength=config.projectMode?10000:20000;
 const controlSearch=field('Find enterprise controls');controlSearch.el.type='search';
 const controlList=node('div',null,'control-options');const controlsSection=node('div');controlsSection.append(existing.wrap,controlSearch.wrap,controlList);
-const actionRows=[];const actionList=node('div');const addAction=button('+ Add treatment action','button');
+const actionRows=[];const actionList=node('div');const addAction=button(compact?'+ Add control / action':'+ Add treatment action','button');
 const targetSection=node('div');targetSection.append(further.wrap,node('p','The target is a planned position, not evidence that further controls are implemented.','muted'));
 targetSection.append(actionList,addAction);
 const documentSearch=field('Find Document Library controls');documentSearch.el.type='search';const documentList=node('div',null,'control-options');controlsSection.append(documentSearch.wrap,documentList);
@@ -89,7 +90,10 @@ if(traditional){
   });body.replaceChildren(ratingRow);
   const advanced=node('details',null,'risk-compact-advanced');advanced.append(node('summary','Justification and supporting controls'),notes.wrap,
    controlSearch.wrap,controlList,documentSearch.wrap,documentList,guide);
-  const treatments=node('section',null,'risk-compact-actions');treatments.append(node('h4','Treatment actions'),node('p','Assign an owner and due date to each action. After Risk Manager approval, actions appear in the selected owners’ My Actions workflow.','muted'),actionList,addAction);
+  controls.replaceChildren(controlsSection);controls.classList.add('risk-compact-existing');
+  further.wrap.querySelector('label').textContent='Additional control notes (optional)';
+  controlNotes=node('details',null,'risk-compact-control-notes');controlNotes.append(node('summary','Additional control notes'),further.wrap);
+  const treatments=node('section',null,'risk-compact-actions');treatments.append(node('h4','Further controls and actions'),node('p','List each further control or action once, with its owner and due date. After Risk Manager approval, it appears in the selected owner’s My Actions.','muted'),actionList,addAction,controlNotes);
   host.replaceChildren(identification,tierBox,controls,tableWrap,treatments,advanced,footer,status);
  }
 }
@@ -109,7 +113,7 @@ function addPicker(search,list,selection,items,label){
 const enterprisePicker=addPicker(controlSearch,controlList,selectedControls,()=>options?.controls||[],c=>c.code+' · '+c.title);
 const documentPicker=addPicker(documentSearch,documentList,selectedDocuments,()=>options?.documents||[],d=>d.code+' · '+d.title+' · Version '+d.version);
 function renderDocuments(){documentPicker.render();}
-function renderActions(){actionList.replaceChildren();for(const action of actionRows){const row=node('div',null,'fields panel'),label=field('Treatment title '+action.key),assigned=field('Treatment owner '+action.key,'select'),due=field('Treatment due date '+action.key);label.el.maxLength=255;label.el.value=action.title;label.el.oninput=()=>action.title=label.el.value;const blank=node('option','Select authorised owner');blank.value='';assigned.el.append(blank);for(const u of options.treatment_owners||[]){const opt=node('option',u.name+' · '+u.email);opt.value=String(u.id);assigned.el.append(opt);}assigned.el.value=String(action.owner_user_id||'');assigned.el.onchange=()=>action.owner_user_id=Number(assigned.el.value)||null;due.el.type='date';due.el.value=action.due_date;due.el.oninput=()=>action.due_date=due.el.value;const remove=button('Remove action','button');remove.onclick=()=>{actionRows.splice(actionRows.indexOf(action),1);renderActions();};row.append(label.wrap,assigned.wrap,due.wrap);
+function renderActions(){actionList.replaceChildren();for(const action of actionRows){const row=node('div',null,'fields panel'),label=field((compact?'Control / action ':'Treatment title ')+action.key),assigned=field((compact?'Action owner ':'Treatment owner ')+action.key,'select'),due=field((compact?'Due date ':'Treatment due date ')+action.key);label.el.maxLength=255;label.el.value=action.title;label.el.oninput=()=>action.title=label.el.value;const blank=node('option','Select authorised owner');blank.value='';assigned.el.append(blank);for(const u of options.treatment_owners||[]){const opt=node('option',u.name+' · '+u.email);opt.value=String(u.id);assigned.el.append(opt);}assigned.el.value=String(action.owner_user_id||'');assigned.el.onchange=()=>action.owner_user_id=Number(assigned.el.value)||null;due.el.type='date';due.el.value=action.due_date;due.el.oninput=()=>action.due_date=due.el.value;const remove=button('Remove action','button');remove.onclick=()=>{actionRows.splice(actionRows.indexOf(action),1);renderActions();};row.append(label.wrap,assigned.wrap,due.wrap);
 if(config.projectMode){const detail=field('Treatment Description '+action.key,'textarea'),priority=field('Treatment Priority '+action.key,'select');detail.el.value=action.description||'';detail.el.oninput=()=>action.description=detail.el.value;for(const name of ['Normal','Low','High','Critical']){const opt=node('option',name);opt.value=name;priority.el.append(opt);}priority.el.value=action.priority||'Normal';priority.el.onchange=()=>action.priority=priority.el.value;row.append(detail.wrap,priority.wrap);}
 row.append(remove);actionList.append(row);}}
 let actionKey=0;addAction.onclick=()=>{actionRows.push({key:++actionKey,title:'',owner_user_id:null,due_date:''});renderActions();};
@@ -153,6 +157,7 @@ function setValue(v={}){
  selectedControls.clear();for(const id of v.control_ids||[])selectedControls.add(id);
  selectedDocuments.clear();for(const id of v.document_ids||[])selectedDocuments.add(id);
  actionRows.splice(0);for(const action of v.treatment_actions||[])actionRows.push({...action,key:++actionKey});
+ if(controlNotes)controlNotes.open=!!further.el.value&&!actionRows.length;
  renderTiers();const path=v.classification_path||[];
  const start=config.projectMode?2:0;
  const selected=config.projectMode?path.slice(-2):path;
