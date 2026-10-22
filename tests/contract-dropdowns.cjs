@@ -11,6 +11,11 @@ test('exact legacy aliases display friendly names without rewriting unrelated te
   assert.equal(w.VeroContractLabels.label('Projects'),'Projects');
   assert.equal(w.VeroContractLabels.label('DJCS installation investigation'),'DJCS installation investigation');
   assert.equal(w.VeroContractLabels.record({friendly_name:'Current approved name',contract_name:'Previous name'}),'Current approved name');
+  assert.equal(w.VeroContractLabels.label('Camera Enforcement Adjudication Services'),'Camera Enforcement Adjudication Services','Shared historical title cannot identify NT versus WA');
+  assert.equal(w.VeroContractLabels.record({code:'1311OS:B',name:'Camera Enforcement Adjudication Services'}),'NT DPI Fixed Camera Operations');
+  assert.equal(w.VeroContractLabels.record({code:'1846C',name:'Camera Enforcement Adjudication Services'}),'WA WAPOL Fixed Camera Operations');
+  assert.equal(w.VeroContractLabels.choice({label:'1846C · Camera Enforcement Adjudication Services',client:'Western Australia Police Force'}),'WA WAPOL Fixed Camera Operations');
+  assert.equal(w.VeroContractLabels.choice({label:'1834UK:C · CVOM EG037 — Tranche 03 implementation'}),'NL CVOM Fixed Camera Operations');
  }finally{w.close();}
 });
 
