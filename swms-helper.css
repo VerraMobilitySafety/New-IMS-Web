@@ -21,3 +21,5 @@
 @media(max-width:600px){#swmsDialog #swmsIntake:not([hidden]){padding:14px 18px;gap:8px}}
 @media(max-height:650px){#swmsIntake>p{display:none}#swmsDialog #swmsAnswer{height:56px}#swmsDialog #swmsIntake:not([hidden]){gap:6px}#swmsDialog .swms-dialog-head{padding:12px 18px}}
 #swmsDialog .swms-risk{border:1px solid #dedbd4;border-radius:7px;padding:14px;margin:16px 0;background:#fafbf7}#swmsDialog .swms-risk output{display:block;font-weight:600;margin:8px 0}#swmsDialog .swms-ppe,#swmsDialog .swms-competencies{border:1px solid #dedbd4;border-radius:7px;padding:14px;margin:18px 0}#swmsDialog .swms-ppe label,#swmsDialog .swms-competencies label{display:flex;align-items:flex-start;gap:8px;font-weight:400;margin:6px 0}
+
+#swmsRows .swms-clickable-row{cursor:pointer}#swmsRows .swms-clickable-row:hover{background:#f5f7ed}#swmsRows .swms-clickable-row:focus-visible{outline:3px solid #53691c;outline-offset:-3px}#swmsRows td>button{display:block;margin-top:8px}
