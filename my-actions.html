@@ -1075,7 +1075,7 @@
  </aside>
 </div>
 
-<script src="risk-actions.js"></script>
+<script src="risk-actions.js?v=20261022-change-owners"></script>
 <script>
 const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
 const TOKEN_KEY='vero_session_token', USER_KEY='vero_current_user';
@@ -1378,6 +1378,7 @@ function openActionDetail(index){
  const action=allActions[index];
  if(action?.managed_task_id){window.VeroActionDetails.open(action.managed_task_id,{personal:true,onSaved:()=>loadActions()});return;}
  if(!action)return;
+ if(action.action_type==='Change Risk Treatment'){window.VeroChangeTreatment.open(action.treatment_action_id);return;}
  if(action.source==='Risks'&&/^Site Risk (Review|Correction|Treatment|Treatment Verification)$/.test(action.action_type||'')&&Number.isSafeInteger(Number(action.site_id))&&Number(action.site_id)>0&&Number.isSafeInteger(Number(action.risk_id))&&Number(action.risk_id)>0){location.href='client-services-site.html?'+new URLSearchParams({id:String(action.site_id),risk_id:String(action.risk_id)});return;}
  if(action.source==='Changes'&&/^Change (Approval|Implementation)$/.test(action.action_type||'')&&/^[0-9a-f-]{36}$/i.test(String(action.source_id||''))){location.href='change-management.html?change_id='+encodeURIComponent(action.source_id);return;}
  if(action.source==='Insurance'&&action.action_type==='Insurance Renewal'){location.href='insurance.html?renewals=1';return;}
@@ -2826,7 +2827,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 
-<link rel="stylesheet" href="register-layout.css"><link rel="stylesheet" href="register-operations-layout.css"><script src="register-layout.js"></script><script src="register-operations-layout.js?v=20261022-action-counts"></script><script src="action-details.js?v=20261022-edit"></script><script>const managedTaskKey=new URLSearchParams(location.search).get("managed_task");if(managedTaskKey)window.VeroActionDetails.open(managedTaskKey,{personal:true,onSaved:()=>loadActions()});</script><script src="workflow-task-completion.js?v=20261022-source"></script></body></html>
+<link rel="stylesheet" href="register-layout.css"><link rel="stylesheet" href="register-operations-layout.css"><script src="register-layout.js"></script><script src="register-operations-layout.js?v=20261022-action-counts"></script><script src="action-details.js?v=20261022-edit"></script><script>const managedTaskKey=new URLSearchParams(location.search).get("managed_task");if(managedTaskKey)window.VeroActionDetails.open(managedTaskKey,{personal:true,onSaved:()=>loadActions()});</script><script src="change-treatment-actions.js?v=20261022-active-users"></script><script src="workflow-task-completion.js?v=20261022-source"></script></body></html>
 
 <style>
 #actionDetailAdditional .action-btn-approve{
