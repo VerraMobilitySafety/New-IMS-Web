@@ -2154,7 +2154,7 @@ table {
 </select>
 
 
-<div class="vero-exposure-navigation"><button id="veroShowClassification" type="button" aria-pressed="true">Risk Classification</button><button id="veroShowExposure" type="button" aria-pressed="false">Operational Exposure</button></div><div class="vero-operational-entry"><button type="button" id="veroOperationalEntry" aria-expanded="false" aria-controls="veroExposurePanel">View Operational Exposure</button><span>VM Sites · Projects · Maintenance Contracts</span></div><section id="veroExposurePanel" class="vero-risk-panel" hidden><div class="vero-exposure-head"><div><h2>Operational Exposure <span id="veroExposureCount">—</span></h2><p>Actual operational applicability and assessments across VM Sites, Projects and Maintenance Contracts.</p></div><button type="button" id="veroExposureRefresh">Refresh</button></div><div class="vero-exposure-filters"><label>Context type<select id="veroExposureType"><option value="">All contexts</option><option>VM Site</option><option>Project</option><option>Maintenance Contract</option></select></label><label>Search<input id="veroExposureSearch" type="search" placeholder="Search name or code"></label></div><div id="veroExposureStatus" role="status"></div><div class="vero-risk-register-scroll"><table class="vero-exposure-table"><thead><tr><th>Operational context</th><th>Type</th><th>Applicable risks</th><th>Approved assessments</th><th>Awaiting assessment</th><th>Maximum residual</th></tr></thead><tbody id="veroExposureBody"></tbody></table></div></section><div id="veroCompactRiskLayout">
+<div class="vero-exposure-navigation"><button id="veroShowClassification" type="button" aria-pressed="true">Risk Classification</button><button id="veroShowExposure" type="button" aria-pressed="false">Operational Exposure</button></div><div class="vero-operational-entry"><button type="button" id="veroOperationalEntry" aria-expanded="false" aria-controls="veroExposurePanel">View Operational Exposure</button><span>Client Sites · VM Sites · Projects · Maintenance Contracts</span></div><section id="veroExposurePanel" class="vero-risk-panel" hidden><div class="vero-exposure-head"><div><h2>Operational Exposure <span id="veroExposureCount">—</span></h2><p>Actual operational applicability and assessments across VM Sites, Projects and Maintenance Contracts.</p></div><button type="button" id="veroExposureRefresh">Refresh</button></div><div class="vero-exposure-filters"><label>Context type<select id="veroExposureType"><option value="">All contexts</option><option>VM Site</option><option>Project</option><option>Maintenance Contract</option><option>Site</option></select></label><label>Search<input id="veroExposureSearch" type="search" placeholder="Search name or code"></label></div><div id="veroExposureStatus" role="status"></div><div class="vero-risk-register-scroll"><table class="vero-exposure-table"><thead><tr><th>Operational context</th><th>Type</th><th>Applicable risks</th><th>Approved assessments</th><th>Awaiting assessment</th><th>Maximum residual</th></tr></thead><tbody id="veroExposureBody"></tbody></table></div></section><div id="veroCompactRiskLayout">
 
 <div class="vero-risk-filter-panels">
 <section class="vero-risk-panel vero-compact-filter-panel vero-risk-filter-panel" aria-label="Risk Classification"><h2>Risk Classification</h2><div class="vero-risk-secondary-row"><div class="vero-risk-filter"><label for="veroTier4Filter">Risk Domain</label><select id="veroTier4Filter"><option value="">All Risk Domains</option></select></div>
@@ -2163,7 +2163,7 @@ table {
 <div class="vero-risk-filter"><label for="veroTier1Filter">Risk Event</label><select id="veroTier1Filter"><option value="">All Risk Events</option></select></div></div></section>
 <section class="vero-risk-panel vero-compact-filter-panel vero-risk-filter-panel" aria-label="Operational Context"><h2>Operational Context</h2><div class="vero-risk-secondary-row"><div class="vero-risk-filter"><label for="veroContextTypeFilter">Context Type</label><select id="veroContextTypeFilter"><option value="">All context types</option></select></div>
 <div class="vero-risk-filter"><label for="veroApplicationFilter">Context Name</label><select id="veroApplicationFilter"><option value="">All contexts</option></select></div>
-<div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area</label><select id="veroSiteFilter" disabled aria-describedby="veroContextStatus"><option value="">Site-level filtering unavailable</option></select></div></div><p id="veroContextStatus" role="status"></p><button id="veroContextRetry" class="vero-risk-clear" type="button" hidden>Retry context data</button></section>
+<div class="vero-risk-filter"><label for="veroSiteFilter">Site / Operational Area</label><select id="veroSiteFilter" disabled aria-describedby="veroContextStatus"><option value="">Choose Site in Context Type</option></select></div></div><p id="veroContextStatus" role="status"></p><button id="veroContextRetry" class="vero-risk-clear" type="button" hidden>Retry context data</button></section>
 </div>
 <div class="vero-matrix-register-grid" style="margin-top:14px !important;">
 <section class="vero-risk-panel">
@@ -2496,11 +2496,11 @@ table {
     if(contextTypeFilter.value){
      if(!contextAssignmentsReady)return false;
      const kind={'Project':'Project','Contract':'Maintenance Contract',
-                 'VM Location':'VM Site'}[contextTypeFilter.value];
+                 'VM Location':'VM Site','Site':'Site'}[contextTypeFilter.value];
      if(!kind)return false;
      const matches=contextAssignments.some(a=>
       Number(a.risk_id)===Number(risk.id) &&
-      a.status==='Applicable' && a.context_type===kind &&
+      ['Applicable','Pending'].includes(a.status) && a.context_type===kind &&
       (!contextNameFilter.value || String(a.context_id)===contextNameFilter.value)
      );
      if(!matches)return false;
@@ -2549,7 +2549,7 @@ table {
 
  function matrixPositionsForVisibleRisks(visible){
   const ids=new Set(visible.map(r=>Number(r.id)));
-  const context={'Project':'Project','Contract':'Maintenance Contract','VM Location':'VM Site'}[contextTypeFilter.value];
+  const context={'Project':'Project','Contract':'Maintenance Contract','VM Location':'VM Site','Site':'Site'}[contextTypeFilter.value];
   if(!matrixPositionsReady)return [];
   return approvedMatrixPositions.filter(p=>ids.has(Number(p.risk_id)) &&
    (!context || (p.context_type===context &&

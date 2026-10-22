@@ -6,25 +6,26 @@
  const site=document.getElementById('veroSiteFilter');
  const status=document.getElementById('veroContextStatus');
  const retry=document.getElementById('veroContextRetry');
- const keys={'Project':'projects','Contract':'contracts','VM Location':'vm_locations'};
+ const keys={'Project':'projects','Contract':'contracts','VM Location':'vm_locations','Site':'sites'};
  let contexts={},risks=[],assignments=[],dataReady=false,optionsError=false;
  let state='idle',dataState='loading',generation=0,controller=null;
 
  function fill(select,rows,placeholder){
   select.replaceChildren(new Option(placeholder,''));
-  for(const row of rows)select.add(new Option(row.name||String(row.id),String(row.id)));
+  for(const row of rows)select.add(new Option((row.code?row.code+' · ':'')+(row.name||String(row.id)),String(row.id)));
   select.disabled=!rows.length;
  }
  function clearSite(){
   // Current applicability records have no site dimension. Do not infer it from context/site links.
-  fill(site,[],'Site-level filtering unavailable');
+  fill(site,[],'Choose Site in Context Type');
  }
  function emit(){
   retry.hidden=!(optionsError||state==='error');
   const message=dataState==='error'?'Risk Register data could not be loaded. Retry to reload authorised risks.':
    optionsError?'Operational Context options could not be loaded.':
    type.value&&state==='error'?'Risk applicability could not be loaded. No partial totals are shown.':
-   type.value&&state!=='ready'?'Loading authorised risk applicability…':'';
+   type.value&&state!=='ready'?'Loading authorised risk applicability…':
+   type.value&&assignments.some(a=>a.status==='Pending')?'Includes saved submissions awaiting Risk Officer approval. Totals use approved assessments.':'';
   status.textContent=message;
   document.dispatchEvent(new CustomEvent('vero-risk-context-assignments',{
    detail:{assignments,ready:state==='ready',state}
@@ -54,8 +55,8 @@
      const risk=pending[next++];
      const data=await read('/risks/'+encodeURIComponent(risk.id)+'/applicability',active.signal);
      if(!Array.isArray(data.assignments))throw Error('Invalid applicability response');
-     for(const assignment of data.assignments){
-      if(assignment.status==='Applicable')loaded.push({...assignment,risk_id:risk.id});
+     for(const assignment of [...data.assignments,...(data.pending_contexts||[])]){
+      if(['Applicable','Pending'].includes(assignment.status))loaded.push({...assignment,risk_id:risk.id});
      }
     }
    }));
