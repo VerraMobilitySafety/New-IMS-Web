@@ -71,7 +71,7 @@ el('swmsForm').onsubmit=async event=>{
 };
 el('swmsRefresh').onclick=load;for(const id of ['swmsSearch','swmsServiceFilter','swmsStateFilter'])el(id).addEventListener(id==='swmsSearch'?'input':'change',()=>{if(loaded)render();});
 window.addEventListener('vero-risk-auth-ready',async()=>{
- try{const data=await request('/documents/link-options');services=(data.options||[]).filter(x=>x.type==='Contract');window.VeroSwmsAssistant.services(services,contextId);el('swmsContract').replaceChildren(new Option('Select a client service…',''));for(const s of services)el('swmsContract').add(new Option((window.VeroContractLabels?.label(s.label)??s.label)+(s.client?' · '+s.client:''),s.id));el('swmsContract').value=contextId;el('swmsGenerate').disabled=!services.length;el('swmsGenerate').title=services.length?'':'No accessible client services are available.';await load();}
+ try{const data=await request('/documents/link-options');services=(data.options||[]).filter(x=>x.type==='Contract');window.VeroSwmsAssistant.services(services,contextId);el('swmsContract').replaceChildren(new Option('Select a client service…',''));for(const s of services)el('swmsContract').add(new Option(window.VeroContractLabels?.choice(s)??(s.label+(s.client?' · '+s.client:'')),s.id));el('swmsContract').value=contextId;el('swmsGenerate').disabled=!services.length;el('swmsGenerate').title=services.length?'':'No accessible client services are available.';await load();}
  catch(e){el('swmsStatus').textContent=e.message;}
  finally{window.dispatchEvent(new Event('vero-risk-resources-settled'));}
 },{once:true});
