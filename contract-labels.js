@@ -18,5 +18,12 @@
   return text;
  }
  function record(item){return item.friendly_name||label(item.contract_name||item.name||item.label||'');}
- window.VeroContractLabels={label,record};
+ function choice(item){
+  const text=record(item),parts=text.match(/^\s*([^·]+?)\s*·\s*(.+)$/);
+  if(item.friendly_name)return item.friendly_name;
+  if(parts&&codes.has(normal(parts[1])))return parts[2];
+  if([...codes.values()].includes(text))return text;
+  return text+(item.client?' · '+item.client:'');
+ }
+ window.VeroContractLabels={label,record,choice};
 })();
