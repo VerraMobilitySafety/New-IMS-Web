@@ -185,6 +185,14 @@ test('SWMS drawer aligns each hazard with its own initial rating, controls and r
  await p.setViewportSize({width:390,height:1000});assert.ok(await p.locator('#swmsDocumentDialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1));assert.equal(await p.locator('.swms-requirements').isVisible(),true);if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-readable-mobile.png')});await p.setViewportSize({width:1440,height:1000});
  assert.equal(await p.getByText('Combined controls must not be repeated',{exact:true}).count(),0);if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-risk-grid-preview.png')});
  await p.getByRole('button',{name:'Edit SWMS',exact:true}).click();const risk=p.locator('.swms-digital-risk').nth(1);
+ assert.equal(await p.locator('form.swms-readable-editor .swms-section-heading').count(),6);
+ assert.equal(await p.locator('form .swms-document-section').nth(0).locator('[name=scope]').inputValue(),'Recorded scope');
+ assert.equal(await p.locator('form .swms-document-section').nth(1).locator('[name=competencies]').inputValue(),'White Card');
+ assert.equal(await p.locator('form .swms-document-section').nth(2).locator('[name=ppe]').inputValue(),'Hi-vis');
+ assert.equal(await p.locator('form .swms-document-section').nth(5).locator('[name=change_reason]').getAttribute('required'),'');
+ if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-readable-editor-desktop.png')});
+ await p.setViewportSize({width:390,height:1000});assert.ok(await p.locator('#swmsDocumentDialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1));
+ if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-readable-editor-mobile.png')});await p.setViewportSize({width:1440,height:1000});
  assert.equal(await risk.locator('[data-risk=hazards]').inputValue(),'Uneven ground');assert.equal(await risk.locator('[data-risk=controls]').inputValue(),'Inspect access path');
  if(process.env.VERO_SWMS_SCREENSHOTS){await p.locator('#swmsDocumentDialog .swms-risk-table').scrollIntoViewIfNeeded();await p.screenshot({path:path.join(root,'tests/swms-risk-editor-preview.png')});}await risk.locator('[data-risk=residual_impact]').selectOption('3');assert.match(await risk.locator('output').last().innerText(),/15 · Low/);
  let posted;await p.route('**/swms/documents/10/revisions',route=>{posted=route.request().postDataJSON();return route.fulfill({status:201,json:{request:{id:88}}});});

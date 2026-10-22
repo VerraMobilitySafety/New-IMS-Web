@@ -105,3 +105,19 @@
 @media(max-width:600px){.swms-document-facts,.swms-contact-grid,.swms-arrangements-grid{grid-template-columns:1fr}.swms-requirement-items{grid-template-columns:repeat(2,minmax(0,1fr))}.swms-readable-document{font-size:13px}.swms-requirement-items li{padding:12px}.swms-readable-document .swms-section-heading{font-size:16px}}
 
 .swms-readable-document,.swms-readable-document :is(p,dt,dd,li,strong,span,h3,h4){font-family:Montserrat,Arial,sans-serif}
+
+/* Editing follows the same numbered document sections as reading. */
+.swms-readable-editor .swms-edit-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.swms-readable-editor .swms-edit-contact-fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.swms-readable-editor label{margin:10px 0;font-size:13px}
+.swms-readable-editor textarea,.swms-readable-editor input{font-family:Montserrat,Arial,sans-serif;font-size:13px;line-height:1.6;color:#292725;background:#fff}
+.swms-readable-editor .swms-edit-facts textarea,.swms-readable-editor .swms-edit-contact-fields textarea{min-height:66px}
+.swms-readable-editor .swms-document-prose textarea{min-height:120px}
+.swms-readable-editor .swms-edit-requirements textarea{min-height:130px}
+.swms-readable-editor .swms-edit-requirements{max-width:100%}
+.swms-readable-editor .swms-edit-requirements>p{color:#68615b;font-size:12px}
+.swms-readable-editor .swms-edit-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.swms-readable-editor .swms-edit-actions button{margin:0}
+@media(max-width:600px){.swms-readable-editor .swms-edit-facts,.swms-readable-editor .swms-edit-contact-fields{grid-template-columns:1fr}}
+
+.swms-readable-editor label{font-family:Montserrat,Arial,sans-serif}.swms-document-body .swms-readable-editor :is(input,textarea,select){font-family:Montserrat,Arial,sans-serif;font-weight:400}
