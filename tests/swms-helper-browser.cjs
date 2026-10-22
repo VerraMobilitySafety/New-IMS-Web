@@ -119,7 +119,7 @@ test('compact SWMS rows open the digital drawer by click or keyboard without hyp
  const ending=p.locator('#swmsRows tr').first().locator('.swms-title-ending');assert.equal(await ending.innerText(),'Waterview Tunnel');assert.equal(await ending.evaluate(e=>e.scrollWidth<=e.clientWidth),true);
  await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'SWMS deployment',reference:'S10',version:'7.0',status:'Current',can_edit:false,fields:digitalFields(),history:[{version:'7.0',status:'Current'}]}}));
  assert.equal(await p.getByRole('link',{name:'Open document',exact:true}).count(),0);assert.equal(await p.locator('.swms-table th').count(),5);
- await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.locator('#swmsDocumentDialog').waitFor({state:'visible'});await p.getByText('Only users with the HSEQ role can edit a current SWMS.',{exact:true}).waitFor();assert.match(p.url(),/safe-work-method-statement/);
+ await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.locator('#swmsDocumentDialog').waitFor({state:'visible'});await p.getByText('Only Administrators or users with the HSEQ role can edit a current SWMS.',{exact:true}).waitFor();assert.match(p.url(),/safe-work-method-statement/);
  const rect=await p.locator('#swmsDocumentDialog').boundingBox();assert.equal(rect.x+rect.width,1440);assert.equal(rect.y,0);assert.equal(rect.height,1000);
  await p.getByRole('button',{name:'Close SWMS',exact:true}).click();await p.locator('#swmsRows tr').first().focus();await p.keyboard.press('Enter');await p.locator('#swmsDocumentDialog').waitFor({state:'visible'});
  await p.getByRole('button',{name:'Close SWMS',exact:true}).click();
@@ -157,7 +157,8 @@ test('imported Practice Note opens prefilled in the drawer without requiring inv
  const fields={...digitalFields(),document_type:'Practice Note',scope:'Existing NZTA maintenance scope',location:'',steps:[{activity:'Pre Start',action:'Notify NZTA before work',hazards:'',controls:'',implementation:'',owner:''}]};
  await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'NZTA Low Risk',document_type:'Practice Note',version:'0.1',status:'Draft',can_edit:true,fields,conversion_required:true,review_points:['No approval date was recorded in Cognito.'],history:[]}}));
  await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.getByText('No approval date was recorded in Cognito.',{exact:true}).waitFor();await p.getByRole('link',{name:'Open Practice Note record ↗',exact:true}).waitFor();
- await p.getByRole('button',{name:'Review imported draft',exact:true}).click();
+ if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-admin-edit-preview.png')});
+ await p.getByRole('button',{name:'Edit draft',exact:true}).click();
  assert.equal(await p.locator('#swmsDocumentDialog [name=scope]').inputValue(),'Existing NZTA maintenance scope');
  assert.equal(await p.locator('#swmsDocumentDialog [name=action]').inputValue(),'Notify NZTA before work');
  assert.equal(await p.locator('#swmsDocumentDialog [name=location]').getAttribute('required'),null);
