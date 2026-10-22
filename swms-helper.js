@@ -71,7 +71,7 @@ function addRisk(host,value={}){
  }
  risk.append(grid,...outputs);const remove=node('button','Remove risk');remove.type='button';remove.className='secondary';remove.onclick=()=>{if(host.children.length>1)risk.remove();};risk.append(remove);host.append(risk);
 }
-window.VeroSwmsDocument.highRiskPicker(el('swmsPicker-high_risk_work'),'',true,false);
+window.VeroSwmsDocument.highRiskPicker(el('swmsPicker-high_risk_work'),'',true,false);for(const key of ['ppe','competencies'])window.VeroSwmsDocument.requirementsPicker(el('swmsPicker-'+key),key,[]);
 window.VeroSwmsApplyDraft=data=>{for(const [key,value] of Object.entries(data)){if(key==='steps')continue;const field=el('swmsForm').elements.namedItem(key);if(field){if(field.swmsSetValue)field.swmsSetValue(value||'');else field.value=value||'';}}el('swmsSteps').replaceChildren();for(const step of data.steps||[])addStep(step);};
 window.VeroSwmsAssistant.init();
 el('swmsGenerate').onclick=()=>{el('swmsFormStatus').textContent='';el('swmsDialog').showModal();};
@@ -80,7 +80,7 @@ el('swmsAddStep').onclick=()=>{if(el('swmsSteps').children.length<30)addStep();}
 el('swmsForm').onsubmit=async event=>{
  event.preventDefault();if(busy||!el('swmsForm').reportValidity())return;
  if(!el('swmsSteps').children.length){el('swmsFormStatus').textContent='Add at least one work step.';return;}
- const formData=new FormData(el('swmsForm')),data=Object.fromEntries(formData);data.consultation=formData.getAll('consultation').join('\n');data.ppe=formData.getAll('ppe');data.competencies=formData.getAll('competencies');data.contract_id=Number(data.contract_id);data.review_confirmed=el('swmsReviewConfirmed').checked;
+ const formData=new FormData(el('swmsForm')),data=Object.fromEntries(formData);data.consultation=formData.getAll('consultation').join('\n');for(const key of ['ppe','competencies'])data[key]=String(data[key]||'').split('\n').map(v=>v.trim()).filter(Boolean);data.contract_id=Number(data.contract_id);data.review_confirmed=el('swmsReviewConfirmed').checked;
  try{window.VeroSwmsAssistant.append(data);}catch(error){el('swmsFormStatus').textContent=error.message;return;}
  data.steps=[...el('swmsSteps').children].map(f=>({...Object.fromEntries([...f.querySelectorAll('[data-field]')].map(i=>[i.dataset.field,i.value])),risks:[...f.querySelectorAll('.swms-risk')].map(r=>Object.fromEntries([...r.querySelectorAll('[data-risk-field]')].map(i=>[i.dataset.riskField,i.tagName==='SELECT'?Number(i.value):i.value])))}));
  busy=true;el('swmsSubmit').disabled=true;el('swmsClose').disabled=true;el('swmsFormStatus').textContent='Generating and saving to Operational Documents…';
