@@ -46,10 +46,24 @@ async function load(){
 }
 function addStep(value={}){
  const host=el('swmsSteps'),fieldset=node('fieldset');fieldset.className='swms-step';fieldset.append(node('legend','Work step '+(host.children.length+1)));
- for(const [key,label,hint] of [['activity','Work activity','Describe this stage of the work'],['hazards','Hazards and associated risks','What could cause harm, and how?'],['controls','Control measures','Specific measures that prevent or reduce harm'],['implementation','Implementation and monitoring','How and when are controls put in place and checked?'],['owner','Responsible person','Who implements and checks these controls?']]){
-  const lab=node('label',label+' *'),input=node(key==='owner'?'input':'textarea');input.dataset.field=key;input.required=true;input.maxLength=3000;input.placeholder=hint;input.value=value[key]||'';lab.append(input);fieldset.append(lab);
+ for(const [key,label,hint] of [['activity','Step','Name this stage of the work'],['action','Action','Describe what is done in this step'],['implementation','Implementation and monitoring','How and when are controls put in place and checked?'],['owner','Responsible person','Who implements and checks these controls?']]){
+  const lab=node('label',label+' *'),input=node(key==='owner'?'input':'textarea');input.dataset.field=key;input.required=true;input.maxLength=key==='activity'?500:3000;input.placeholder=hint;input.value=value[key]||'';lab.append(input);fieldset.append(lab);
  }
+ const risks=node('div');risks.className='swms-step-risks';fieldset.append(risks);
+ for(const risk of value.risks||[{hazards:value.hazards||'',controls:value.controls||''}])addRisk(risks,risk);
+ const add=node('button','+ Add risk / hazard');add.type='button';add.className='secondary';add.onclick=()=>{if(document.querySelectorAll('.swms-risk').length<30)addRisk(risks);};fieldset.append(add);
  const remove=node('button','Remove step');remove.type='button';remove.className='secondary';remove.onclick=()=>{fieldset.remove();[...host.children].forEach((f,i)=>f.querySelector('legend').textContent='Work step '+(i+1));};fieldset.append(remove);host.append(fieldset);
+}
+function addRisk(host,value={}){
+ const risk=node('fieldset');risk.className='swms-risk';risk.append(node('legend','Risk / hazard'));
+ for(const [key,label] of [['hazards','Risk / hazard'],['controls','Mitigation / controls']]){const lab=node('label',label+' *'),input=node('textarea');input.dataset.riskField=key;input.required=true;input.maxLength=3000;input.value=value[key]||'';lab.append(input);risk.append(lab);}
+ const grid=node('div');grid.className='swms-grid';const outputs=[];
+ const labels=['Insignificant','Minor','Medium','Major','Catastrophic'],likelihood=['Rare','Unlikely','Possible','Likely','Almost Certain'];
+ for(const [prefix,title] of [['initial','Initial'],['residual','Residual']]){
+  const inputs=[];for(const [suffix,options] of [['impact',labels],['likelihood',likelihood]]){const lab=node('label',title+' '+suffix+' *'),select=node('select');select.dataset.riskField=prefix+'_'+suffix;select.required=true;select.append(new Option('Select…',''));options.forEach((name,i)=>select.append(new Option(name+' ('+(suffix==='impact'?i+1:(i+1)*5)+')',suffix==='impact'?i+1:(i+1)*5)));select.value=value[prefix+'_'+suffix]||'';lab.append(select);grid.append(lab);inputs.push(select);}
+  const output=node('output');output.setAttribute('aria-live','polite');const update=()=>{const score=Number(inputs[0].value)*Number(inputs[1].value);output.textContent=score?title+' risk: '+score+' · '+(score>=75?'Significant':score>=45?'High':score>=20?'Moderate':'Low'):title+' risk: unscored';};inputs.forEach(i=>i.addEventListener('change',update));update();outputs.push(output);
+ }
+ risk.append(grid,...outputs);const remove=node('button','Remove risk');remove.type='button';remove.className='secondary';remove.onclick=()=>{if(host.children.length>1)risk.remove();};risk.append(remove);host.append(risk);
 }
 window.VeroSwmsApplyDraft=data=>{for(const [key,value] of Object.entries(data)){if(key==='steps')continue;const field=el('swmsForm').elements.namedItem(key);if(field)field.value=value||'';}el('swmsSteps').replaceChildren();for(const step of data.steps||[])addStep(step);};
 window.VeroSwmsAssistant.init();
@@ -59,9 +73,9 @@ el('swmsAddStep').onclick=()=>{if(el('swmsSteps').children.length<30)addStep();}
 el('swmsForm').onsubmit=async event=>{
  event.preventDefault();if(busy||!el('swmsForm').reportValidity())return;
  if(!el('swmsSteps').children.length){el('swmsFormStatus').textContent='Add at least one work step.';return;}
- const data=Object.fromEntries(new FormData(el('swmsForm')));data.contract_id=Number(data.contract_id);data.review_confirmed=el('swmsReviewConfirmed').checked;
+ const formData=new FormData(el('swmsForm')),data=Object.fromEntries(formData);data.ppe=formData.getAll('ppe');data.competencies=formData.getAll('competencies');data.contract_id=Number(data.contract_id);data.review_confirmed=el('swmsReviewConfirmed').checked;
  try{window.VeroSwmsAssistant.append(data);}catch(error){el('swmsFormStatus').textContent=error.message;return;}
- data.steps=[...el('swmsSteps').children].map(f=>Object.fromEntries([...f.querySelectorAll('[data-field]')].map(i=>[i.dataset.field,i.value])));
+ data.steps=[...el('swmsSteps').children].map(f=>({...Object.fromEntries([...f.querySelectorAll('[data-field]')].map(i=>[i.dataset.field,i.value])),risks:[...f.querySelectorAll('.swms-risk')].map(r=>Object.fromEntries([...r.querySelectorAll('[data-risk-field]')].map(i=>[i.dataset.riskField,i.tagName==='SELECT'?Number(i.value):i.value])))}));
  busy=true;el('swmsSubmit').disabled=true;el('swmsClose').disabled=true;el('swmsFormStatus').textContent='Generating and saving to Operational Documents…';
  try{const result=await request('/swms',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
   el('swmsDialog').close();el('swmsForm').reset();window.VeroSwmsAssistant.reset();el('swmsSteps').replaceChildren();addStep();if(contextId)el('swmsContract').value=contextId;
