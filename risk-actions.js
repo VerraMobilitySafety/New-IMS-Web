@@ -44,6 +44,10 @@
    const id = positiveId(action.assessment_id);
    return id ? {href:'asset-management.html?' + new URLSearchParams({assessment:id}).toString(), label:'Review Asset Type Assessment'} : null;
   }
+  if (action.action_type === 'Change Risk Treatment') {
+   const id=positiveId(action.treatment_action_id);
+   return id?{href:'my-actions.html?change_treatment_id='+id,label:'Complete Change Action'}:null;
+  }
   if (action.action_type === 'Central Risk Treatment') {
    const riskId = positiveId(action.risk_id);
    const treatmentId = positiveId(action.treatment_action_id);
