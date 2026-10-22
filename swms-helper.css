@@ -53,3 +53,32 @@
 #swmsRows .swms-title-ending{flex:none;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 #swmsStatus:empty{display:none}
+
+/* Keep each hazard aligned with its own initial rating, controls and residual rating. */
+.swms-document-body .swms-risk-table-wrap{max-width:100%;overflow-x:auto;margin:16px 0}
+.swms-document-body .swms-risk-table{width:100%;min-width:760px;table-layout:fixed;border-collapse:collapse;font-size:12px}
+.swms-document-body .swms-risk-table th,.swms-document-body .swms-risk-table td{border:1px solid #dedbd4;padding:10px;text-align:left;vertical-align:top;white-space:pre-wrap;overflow-wrap:anywhere}
+.swms-document-body .swms-risk-table th{background:#f5f5f2;font-weight:700}
+.swms-document-body .swms-risk-table th:nth-child(1){width:18%}
+.swms-document-body .swms-risk-table th:nth-child(2){width:19%}
+.swms-document-body .swms-risk-table th:nth-child(3),.swms-document-body .swms-risk-table th:nth-child(5){width:16%}
+.swms-document-body .swms-risk-table th:nth-child(4){width:31%}
+.swms-document-body .swms-risk-table p{margin:8px 0 0}
+.swms-document-body .swms-risk-table label{margin:0 0 10px;font-size:11px}
+.swms-document-body .swms-risk-table textarea,.swms-document-body .swms-risk-table input,.swms-document-body .swms-risk-table select{padding:7px;min-width:0;font-size:12px}
+.swms-document-body .swms-risk-table textarea{min-height:140px;resize:vertical}
+.swms-document-body .swms-risk-table button{padding:6px;font-size:10px}
+.swms-document-body .swms-digital-step{padding:12px;min-width:0}
+.swms-document-body .swms-risk-score{display:block;font-weight:700;margin:8px 0}
+.swms-document-body .swms-risk-score[data-category=Low]{color:#346323}
+.swms-document-body .swms-risk-score[data-category=Moderate]{color:#795b00}
+.swms-document-body .swms-risk-score[data-category=High],.swms-document-body .swms-risk-score[data-category=Significant]{color:#a22723}
+
+.swms-document-body .swms-note-table{min-width:0}
+.swms-document-body .swms-note-table th:first-child{width:25%}
+.swms-document-body .swms-note-table th:nth-child(2){width:75%}
+
+.swms-document-body .swms-step-cell{background:#fafbf7}
+
+.swms-document-body .swms-digital-step legend,.swms-document-body .swms-risk-table label,.swms-document-body .swms-risk-table input,.swms-document-body .swms-risk-table textarea,.swms-document-body .swms-risk-table select,.swms-document-body .swms-risk-table output{font-family:Montserrat,Arial,sans-serif}
+.swms-document-body .swms-risk-table input,.swms-document-body .swms-risk-table textarea,.swms-document-body .swms-risk-table select{font-weight:400}

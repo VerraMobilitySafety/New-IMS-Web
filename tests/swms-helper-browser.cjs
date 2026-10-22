@@ -37,7 +37,7 @@ async function screen(width=1440,holdAuth=false){
 test('desktop generation saves to the selected service; summaries, search, links and failures work',async()=>{
  const s=await screen();try{const p=s.page;
  assert.equal(await p.locator('#swmsCurrent').textContent(),'1');assert.equal(await p.locator('#swmsDue').textContent(),'1');
- assert.equal(await p.locator('#swmsRows a').count(),0);assert.equal(await p.locator('#swmsRows tr').first().locator('td').nth(1).innerText(),contract.label);
+ assert.equal(await p.locator('#swmsStatus').textContent(),'');assert.equal(await p.locator('#swmsStatus').isVisible(),false);assert.equal(await p.locator('#swmsRows a').count(),0);assert.equal(await p.locator('#swmsRows tr').first().locator('td').nth(1).innerText(),contract.label);
  await p.locator('#swmsGenerate').click();await p.locator('#swmsDialog').waitFor({state:'visible'});const rect=await p.locator('#swmsDialog').boundingBox();assert.equal(rect.x+rect.width,1440);assert.equal(rect.y,0);assert.equal(rect.height,1000);if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-drawer-desktop.png')});await p.locator('#swmsManual').click();assert.equal(await p.locator('#swmsContract').inputValue(),'8');
  for(const [name,value] of Object.entries({title:'Camera maintenance',location:'Eastern Creek',responsible_person:'Site supervisor',scope:'Maintain camera system',high_risk_work:'Work near traffic — NSW',site_conditions:'Live road and public interface',consultation:'Crew briefing 22 October',resources:'Authorised crew and equipment',emergency:'Site emergency plan and first aid',monitoring:'Supervisor checks before and during work'}))await p.locator('[name="'+name+'"]').fill(value);
  for(const input of await p.locator('.swms-step [data-field]').all())await input.fill('Site-specific '+await input.getAttribute('data-field'));
@@ -161,9 +161,30 @@ test('imported Practice Note opens prefilled in the drawer without requiring inv
  assert.equal(await p.locator('#swmsDocumentDialog [name=scope]').inputValue(),'Existing NZTA maintenance scope');
  assert.equal(await p.locator('#swmsDocumentDialog [name=action]').inputValue(),'Notify NZTA before work');
  assert.equal(await p.locator('#swmsDocumentDialog [name=location]').getAttribute('required'),null);
- assert.equal(await p.locator('#swmsDocumentDialog [name=hazards]').getAttribute('required'),null);
+ assert.equal(await p.locator('#swmsDocumentDialog [name=hazards]').count(),0);
  assert.notEqual(await p.locator('#swmsDocumentDialog [name=action]').getAttribute('required'),null);
  await p.getByRole('button',{name:'Submit draft for review',exact:true}).waitFor();
  assert.equal(await p.locator('#swmsDocumentDialog iframe,#swmsDocumentDialog canvas').count(),0);
+ }finally{await s.browser.close();}
+});
+
+
+test('SWMS drawer aligns each hazard with its own initial rating, controls and residual rating when viewing and editing',async()=>{
+ const s=await screen();try{const p=s.page,fields=digitalFields();
+ fields.steps[0].risks.push({hazards:'Uneven ground',controls:'Inspect access path',initial_impact:2,initial_likelihood:10,residual_impact:1,residual_likelihood:5});
+ fields.steps[0].hazards='Traffic and uneven ground combined';fields.steps[0].controls='Combined controls must not be repeated';
+ await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'SWMS deployment',version:'7.0',status:'Current',can_edit:true,fields,history:[]}}));
+ await p.locator('#swmsRows tr').first().click();await p.locator('#swmsDocumentDialog .swms-risk-table').waitFor();
+ const table=p.locator('#swmsDocumentDialog .swms-risk-table');assert.deepEqual(await table.locator('thead th').allTextContents(),['Step','Hazard','Risk assessment','Controls','Residual risk']);
+ const rows=table.locator('tbody tr');assert.equal(await rows.count(),2);assert.equal(await rows.first().locator('td').first().getAttribute('rowspan'),'2');
+ assert.equal(await rows.first().locator('td').nth(1).innerText(),'Traffic');assert.equal(await rows.first().locator('td').nth(3).innerText(),'Separate work area');
+ assert.equal(await rows.nth(1).locator('td').first().innerText(),'Uneven ground');assert.equal(await rows.nth(1).locator('td').nth(2).innerText(),'Inspect access path');assert.match(await rows.nth(1).locator('td').nth(1).innerText(),/20 · Moderate/);assert.match(await rows.nth(1).locator('td').nth(3).innerText(),/5 · Low/);
+ assert.equal(await p.getByText('Combined controls must not be repeated',{exact:true}).count(),0);if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-risk-grid-preview.png')});
+ await p.getByRole('button',{name:'Edit SWMS',exact:true}).click();const risk=p.locator('.swms-digital-risk').nth(1);
+ assert.equal(await risk.locator('[data-risk=hazards]').inputValue(),'Uneven ground');assert.equal(await risk.locator('[data-risk=controls]').inputValue(),'Inspect access path');
+ if(process.env.VERO_SWMS_SCREENSHOTS){await p.locator('#swmsDocumentDialog .swms-risk-table').scrollIntoViewIfNeeded();await p.screenshot({path:path.join(root,'tests/swms-risk-editor-preview.png')});}await risk.locator('[data-risk=residual_impact]').selectOption('3');assert.match(await risk.locator('output').last().innerText(),/15 · Low/);
+ let posted;await p.route('**/swms/documents/10/revisions',route=>{posted=route.request().postDataJSON();return route.fulfill({status:201,json:{request:{id:88}}});});
+ await p.locator('#swmsDocumentDialog [name=change_reason]').fill('Review each risk separately');await p.locator('#swmsDocumentDialog input[type=checkbox]').check();await p.getByRole('button',{name:'Submit revision for review',exact:true}).click();await p.getByText('Revision submitted for review.',{exact:true}).waitFor();
+ assert.equal(posted.steps.length,1);assert.equal(posted.steps[0].risks.length,2);assert.equal(posted.steps[0].risks[0].controls,'Separate work area');assert.equal(posted.steps[0].risks[1].controls,'Inspect access path');assert.equal(posted.steps[0].risks[1].residual_impact,3);
  }finally{await s.browser.close();}
 });
