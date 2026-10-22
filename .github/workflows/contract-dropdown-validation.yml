@@ -1,0 +1,35 @@
+name: Client contract dropdown validation
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'contract-labels.js'
+      - 'incident-management.js'
+      - 'document-context.js'
+      - 'swms-*.js'
+      - 'take5-work-context.js'
+      - 'tests/contract-dropdowns.cjs'
+      - '.github/workflows/contract-dropdown-validation.yml'
+  pull_request:
+    paths:
+      - 'contract-labels.js'
+      - 'incident-management.js'
+      - 'document-context.js'
+      - 'swms-*.js'
+      - 'take5-work-context.js'
+      - 'tests/contract-dropdowns.cjs'
+      - '.github/workflows/contract-dropdown-validation.yml'
+permissions:
+  contents: read
+jobs:
+  dropdowns:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save jsdom@26.1.0
+      - run: node --test tests/contract-dropdowns.cjs tests/operational-documents.cjs
+      - run: node tests/event-monthly.cjs
+      - run: node tests/take5.cjs
