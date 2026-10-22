@@ -189,3 +189,4 @@ th{background:#f8f7f6;color:#706660;font-size:10px;font-weight:800;text-transfor
 @media(max-width:450px){.system-checklist-heading{grid-template-columns:minmax(0,1fr) 145px;gap:8px}}
 
 .investigation-ai{border-left:3px solid var(--lime,#a8c438);padding-left:14px}.investigation-ai h3 .muted{font-size:.75em;font-weight:400}.investigation-ai .ai-control{padding:10px 0;border-top:1px solid #e6e4e1}.investigation-ai blockquote{margin:8px 0;padding-left:10px;border-left:2px solid #a8c438;white-space:pre-wrap}.investigation-ai button{margin:4px 8px 4px 0}
+#event-contract_name{width:390px;max-width:calc(100vw - 120px)}
