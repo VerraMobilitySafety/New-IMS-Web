@@ -18,14 +18,16 @@ function render(){
  const q=el('swmsSearch').value.trim().toLowerCase(),state=el('swmsStateFilter').value;
  const rows=scoped.filter(x=>(!q||[x.title,x.reference,...(x.document_links||[]).map(l=>l.label)].some(v=>String(v||'').toLowerCase().includes(q)))&&(!state||(state==='pending'?pending(x):state==='due'?due(x):state==='current'?x.kind==='document'&&x.status==='Current':x.status===state)));
  const body=el('swmsRows');body.replaceChildren();el('swmsStatus').textContent=rows.length+' of '+scoped.length+' SWMS';
- if(!rows.length){const tr=node('tr'),td=node('td',scoped.length?'No SWMS match these filters.':'No SWMS saved yet. Generate a SWMS to get started.');td.colSpan=6;tr.append(td);body.append(tr);return;}
+ if(!rows.length){const tr=node('tr'),td=node('td',scoped.length?'No SWMS match these filters.':'No SWMS saved yet. Generate a SWMS to get started.');td.colSpan=5;tr.append(td);body.append(tr);return;}
  for(const item of rows){
   const tr=node('tr'),title=node('td'),a=node('a',item.title||'Untitled SWMS');a.href=item.kind==='document'?'documents.html?'+new URLSearchParams({document:item.id}):'documents.html?'+new URLSearchParams({category:'Operational'});title.append(a,node('small',item.reference||'—'));if(item.category&&item.category!=='Operational')title.append(node('small','Existing '+item.category.toLowerCase()+' classification'));tr.append(title);
   const links=node('td');for(const l of contractLinks(item)){const a=node('a',l.label||'Client service');a.href='maintenance-workspace.html?id='+encodeURIComponent(l.id);links.append(a,node('br'));}if(!links.childNodes.length)links.textContent='No client service linked';tr.append(links);
   const status=node('td'),badge=node('span',item.status||'—');badge.className='swms-badge';status.append(badge);tr.append(status,node('td',item.version||'—'),node('td',item.review_date?new Date(item.review_date.slice(0,10)+'T12:00:00').toLocaleDateString('en-AU'):'—'));
-  const actions=node('td'),open=node('a',item.kind==='document'?'Open document':'Operational Documents');open.href=a.href;actions.append(open);
-  if(item.kind==='request'&&item.file_name){const download=node('button','Download draft');download.type='button';download.className='secondary';download.onclick=()=>downloadDraft(item,download);actions.append(download);}
-  tr.append(actions);body.append(tr);
+  tr.className='swms-clickable-row';tr.tabIndex=0;tr.setAttribute('aria-label','Open '+(item.title||'Untitled SWMS'));
+  tr.addEventListener('click',event=>{if(event.target.closest('a,button,input,select,textarea')||window.getSelection()?.toString())return;a.click();});
+  tr.addEventListener('keydown',event=>{if(event.target===tr&&(event.key==='Enter'||event.key===' ')){event.preventDefault();a.click();}});
+  if(item.kind==='request'&&item.file_name){const download=node('button','Download draft');download.type='button';download.className='secondary';download.onclick=()=>downloadDraft(item,download);title.append(download);}
+  body.append(tr);
  }
 }
 async function downloadDraft(item,button){button.disabled=true;try{

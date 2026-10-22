@@ -108,3 +108,15 @@ test('long conversations scroll inside the chat while composer and controls stay
  }finally{await s.browser.close();}
  }
 });
+
+
+test('SWMS rows open documents by click or keyboard and retain client service links',async()=>{
+ const s=await screen();try{const p=s.page;
+ assert.equal(await p.getByRole('link',{name:'Open document',exact:true}).count(),0);assert.equal(await p.locator('.swms-table th').count(),5);
+ await p.route('**/documents.html?document=*',route=>route.fulfill({contentType:'text/html',body:'<h1>Document details</h1>'}));
+ const row=p.locator('#swmsRows tr').first();await row.locator('td').nth(2).click();await p.waitForURL('**/documents.html?document=10');
+ await p.goBack();await p.locator('#swmsTotal').filter({hasText:'2'}).waitFor();await p.locator('#swmsRows tr').first().focus();await p.keyboard.press('Enter');await p.waitForURL('**/documents.html?document=10');
+ await p.goBack();await p.locator('#swmsTotal').filter({hasText:'2'}).waitFor();await p.route('**/maintenance-workspace.html?id=8',route=>route.fulfill({contentType:'text/html',body:'<h1>Client service</h1>'}));
+ await p.locator('#swmsRows tr').first().getByRole('link',{name:contract.label}).click();await p.waitForURL('**/maintenance-workspace.html?id=8');
+ }finally{await s.browser.close();}
+});
