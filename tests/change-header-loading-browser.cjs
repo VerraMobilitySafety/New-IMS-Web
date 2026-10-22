@@ -3,7 +3,8 @@ const root=path.join(__dirname,'..');
 (async()=>{const chrome='C:/Program Files/Google/Chrome/Application/chrome.exe';const b=await chromium.launch({headless:true,executablePath:process.env.CHROME_PATH||(fs.existsSync(chrome)?chrome:undefined)});try{
 for(const width of [1440,390])for(const failure of ['none','register','auth']){
  const p=await b.newPage({viewport:{width,height:1000}}),errors=[];p.on('pageerror',e=>errors.push(e.message));
- let releaseAuth,releaseRegister,registerStarted=false;
+ let releaseAuth,releaseRegister,markRegisterStarted,registerStarted=false;
+ const registerStart=new Promise(r=>markRegisterStarted=r);
  const authGate=new Promise(r=>releaseAuth=r),registerGate=new Promise(r=>releaseRegister=r);
  await p.addInitScript(()=>localStorage.setItem('vero_session_token','isolated-test'));
  await p.route('**/*',async route=>{const u=new URL(route.request().url());
@@ -11,7 +12,7 @@ for(const width of [1440,390])for(const failure of ['none','register','auth']){
   if(u.hostname!=='verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net')return route.fulfill({body:'',contentType:u.pathname.endsWith('.js')?'application/javascript':'text/css'});
   if(u.pathname.endsWith('/auth/me')){await authGate;return route.fulfill({status:failure==='auth'?503:200,json:{user:{id:7,first_name:'Test',last_name:'Owner',vero_role:'Administrator'}}});}
   if(u.pathname.endsWith('/changes/options'))return route.fulfill({json:{classification_categories:[],classification_relationships:[],users:[],controls:[],documents:[],treatment_owners:[]}});
-  if(u.pathname.endsWith('/changes')){registerStarted=true;await registerGate;return route.fulfill({status:failure==='register'?503:200,json:failure==='register'?{message:'Register temporarily unavailable'}:{changes:[]}});}
+  if(u.pathname.endsWith('/changes')){registerStarted=true;markRegisterStarted();await registerGate;return route.fulfill({status:failure==='register'?503:200,json:failure==='register'?{message:'Register temporarily unavailable'}:{changes:[]}});}
   return route.fulfill({json:{actions:[],documents:[]}});
  });
  await p.goto('https://vero.test/change-management.html');
@@ -21,6 +22,7 @@ for(const width of [1440,390])for(const failure of ['none','register','auth']){
  releaseAuth();
  if(failure!=='auth'){
   await p.waitForFunction(()=>document.getElementById('changeNew').disabled===false);
+  await registerStart;
   assert.equal(registerStarted,true);assert.deepEqual(await geometry(),before,'auth does not move the header');
   assert.equal(await p.locator('#veroPageLoader').isVisible(),true,'loader waits for the register, not just auth');
   assert.equal(await p.locator('#changeContent').isVisible(),false,'unfinished register does not flash');
