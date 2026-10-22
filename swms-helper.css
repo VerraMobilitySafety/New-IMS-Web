@@ -121,3 +121,6 @@
 @media(max-width:600px){.swms-readable-editor .swms-edit-facts,.swms-readable-editor .swms-edit-contact-fields{grid-template-columns:1fr}}
 
 .swms-readable-editor label{font-family:Montserrat,Arial,sans-serif}.swms-document-body .swms-readable-editor :is(input,textarea,select){font-family:Montserrat,Arial,sans-serif;font-weight:400}
+
+.swms-high-risk-choices{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;margin-top:16px}.swms-high-risk-choices label{display:flex!important;align-items:flex-start;gap:8px;font-weight:400!important;margin:4px 0!important}.swms-high-risk-choices input{flex:none;width:auto!important;margin-top:5px!important}.swms-high-risk-picker legend{font:700 14px Montserrat,Arial,sans-serif}select[multiple][name=consultation]{min-height:165px}@media(max-width:600px){.swms-high-risk-choices{grid-template-columns:1fr}}
+.swms-readable-editor .swms-arrangements-grid{grid-template-columns:1fr}
