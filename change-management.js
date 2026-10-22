@@ -27,6 +27,7 @@ el('changeBack').hidden=Boolean(current?.version)||aiDraft;el('changeBack').disa
 const host=el('changeApproval');host.replaceChildren();
 host.append(node('p',state==='Draft'?'Submitting creates a linked draft in the Master Risk Register and sends this change to the Risk Manager. Implementation requires approval.':state==='Submitted'?'Awaiting Risk Manager approval. Implementation is blocked.':state==='Approved'?'Approved by the Risk Manager. The linked risk is active and implementation can start.':state==='Rejected'?'Rejected. Implementation is not authorised. Create a new change to propose revised arrangements.':state==='In progress'?'Implementation is in progress.':'This change is closed.'));
 if(current?.risk_id){const link=node('a','Open linked Master Risk record');link.href='risk.html?risk_id='+encodeURIComponent(current.risk_id);host.append(link);}
+if(current?.record_id){const link=node('a','Open linked Records Management entry');link.href='records.html?record_id='+encodeURIComponent(current.record_id);host.append(link);}
 if(current?.decision_reason)host.append(node('p','Risk Manager decision: '+current.decision_reason+(current.decision_at?' · '+new Date(current.decision_at).toLocaleString('en-AU'):'')));
 if(current?.can_approve){const label=node('label','Decision reason *'),input=node('textarea');input.id='changeDecisionReason';input.maxLength=4000;input.value=previousReason;input.disabled=busy;label.append(input);host.append(label);}
 }
