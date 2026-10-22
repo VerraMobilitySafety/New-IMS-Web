@@ -115,6 +115,8 @@ test('long conversations scroll inside the chat while composer and controls stay
 
 test('compact SWMS rows open the digital drawer by click or keyboard without hyperlinks or metadata lines',async()=>{
  const s=await screen();try{const p=s.page;
+ await p.route(/\/swms(?:\?|$)/,route=>route.fulfill({json:{items:initial.map((item,index)=>({...item,title:'Maintenance, Inspection, Cleaning and Calibration Activities, '+(index?'Low Risk':'Waterview Tunnel')}))}}));await p.locator('#swmsRefresh').click();await p.getByRole('button',{name:'Maintenance, Inspection, Cleaning and Calibration Activities, Waterview Tunnel',exact:true}).waitFor();
+ const ending=p.locator('#swmsRows tr').first().locator('.swms-title-ending');assert.equal(await ending.innerText(),'Waterview Tunnel');assert.equal(await ending.evaluate(e=>e.scrollWidth<=e.clientWidth),true);
  await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'SWMS deployment',reference:'S10',version:'7.0',status:'Current',can_edit:false,fields:digitalFields(),history:[{version:'7.0',status:'Current'}]}}));
  assert.equal(await p.getByRole('link',{name:'Open document',exact:true}).count(),0);assert.equal(await p.locator('.swms-table th').count(),5);
  await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.locator('#swmsDocumentDialog').waitFor({state:'visible'});await p.getByText('Only users with the HSEQ role can edit a current SWMS.',{exact:true}).waitFor();assert.match(p.url(),/safe-work-method-statement/);

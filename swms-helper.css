@@ -47,3 +47,7 @@
 #swmsRows .swms-row-title{display:flex;align-items:center;gap:10px;min-width:0}
 #swmsRows td .swms-title-button{display:block;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:none;border:0;padding:0;margin:0;text-align:left;color:inherit;text-decoration:none;font:inherit;cursor:pointer}
 #swmsRows .swms-row-title>.secondary{flex:none}
+
+#swmsRows td .swms-title-button{display:flex;align-items:baseline;gap:3px}
+#swmsRows .swms-title-prefix{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#swmsRows .swms-title-ending{flex:none;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
