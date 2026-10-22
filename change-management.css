@@ -104,3 +104,8 @@
 #changeDrawer .change-risk-suggestion input[type=checkbox]{width:auto;margin:0}
 #changeDrawer .change-risk-ai>button{margin:8px 8px 0 0}
 @media(max-width:650px){#changeDrawer .risk-worksheet.risk-compact .risk-compact-actions .fields{grid-template-columns:1fr 1fr}#changeDrawer .risk-worksheet.risk-compact .risk-compact-actions .fields>div:first-child{grid-column:1/-1}}
+
+#changeDrawer .risk-worksheet.risk-compact .risk-compact-existing{grid-template-columns:1fr}
+#changeDrawer .risk-compact-control-notes{margin-top:10px;font-size:11px}
+#changeDrawer .risk-compact-control-notes>summary{cursor:pointer}
+#changeDrawer .risk-compact-control-notes[open]>div{padding-top:8px}
