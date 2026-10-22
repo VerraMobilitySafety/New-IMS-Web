@@ -1,7 +1,7 @@
 /* Guided intake, source visibility, and review before the existing DMS submit. */
 window.VeroSwmsAssistant=(()=>{'use strict';
  const el=id=>document.getElementById(id),API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
- const first='What work are you planning, where will it be done, and which state or country applies? Include any known site conditions, traffic, equipment or other people working nearby.';
+ const first='What work are you planning?';
  let messages=[{role:'assistant',content:first}],result=null,active=false,ticket=0,controller=null;
  const node=(tag,text)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;return n;};
  function renderChat(){const log=el('swmsConversation');log.replaceChildren();for(const m of messages){const item=node('article'),label=node('strong',m.role==='assistant'?'Vero':'You'),text=node('p',m.content);item.className='swms-chat-message '+m.role;item.append(label,text);log.append(item);}}

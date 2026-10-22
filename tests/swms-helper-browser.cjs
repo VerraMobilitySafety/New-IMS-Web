@@ -4,7 +4,8 @@ const root=path.join(__dirname,'..');
 const contract={type:'Contract',id:8,label:'C8 · Roadside Services',client:'Client A'};
 const initial=[{kind:'document',id:10,title:'SWMS — Deployment',reference:'848-1503',status:'Current',version:'7.0',review_date:'2020-01-01',document_links:[contract]},
  {kind:'document',id:11,title:'SWMS — Old deployment',reference:'848-1503',status:'Superseded',version:'6.0',document_links:[contract]}];
-async function screen(width=1440){
+async function screen(width=1440,holdAuth=false){
+ let releaseAuth;const authGate=new Promise(resolve=>releaseAuth=resolve);if(!holdAuth)releaseAuth();
  const options={headless:true};if(process.env.VERO_CHROME_PATH)options.executablePath=process.env.VERO_CHROME_PATH;
  const browser=await chromium.launch(options),page=await browser.newPage({viewport:{width,height:1000}});let items=[...initial],posted,failList=false,assistCalls=0,failAi=false;
  await page.addInitScript(()=>localStorage.setItem('vero_session_token','test'));
@@ -13,7 +14,7 @@ async function screen(width=1440){
    const file=path.join(root,u.pathname.slice(1));if(!fs.existsSync(file))return route.fulfill({status:404,body:''});
    const type=file.endsWith('.html')?'text/html':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'image/png';return route.fulfill({body:fs.readFileSync(file),contentType:type});
   }
-  if(u.pathname.endsWith('/auth/me'))return route.fulfill({json:{user:{id:3,first_name:'Sam',last_name:'Taylor',vero_role:'Administrator'}}});
+  if(u.pathname.endsWith('/auth/me')){await authGate;return route.fulfill({json:{user:{id:3,first_name:'Sam',last_name:'Taylor',vero_role:'Administrator'}}});}
   if(u.pathname.endsWith('/documents/link-options'))return route.fulfill({json:{options:[contract]}});
   if(u.pathname.endsWith('/swms/assist')){
    assistCalls++;if(failAi)return route.fulfill({status:503,json:{message:'AI temporarily unavailable.'}});
@@ -29,8 +30,8 @@ async function screen(width=1440){
   if(u.pathname.endsWith('/my-actions'))return route.fulfill({json:{actions:[]}});
   return route.abort();
  });
- await page.goto('https://vero.test/safe-work-method-statement.html?contract_id=8');await page.locator('#swmsTotal').filter({hasText:'2'}).waitFor();
- return {browser,page,get posted(){return posted;},fail:()=>failList=true,failAi:()=>failAi=true,get assistCalls(){return assistCalls;}};
+ await page.goto('https://vero.test/safe-work-method-statement.html?contract_id=8');if(!holdAuth)await page.locator('#swmsTotal').filter({hasText:'2'}).waitFor();
+ return {browser,page,releaseAuth,get posted(){return posted;},fail:()=>failList=true,failAi:()=>failAi=true,get assistCalls(){return assistCalls;}};
 }
 test('desktop generation saves to the selected service; summaries, search, links and failures work',async()=>{
  const s=await screen();try{const p=s.page;
@@ -74,4 +75,18 @@ test('AI failure retains the answer and permits manual drafting without creating
  const s=await screen();try{const p=s.page;s.failAi();await p.locator('#swmsGenerate').click();await p.locator('#swmsAnswer').fill('Work description retained');await p.locator('#swmsAsk').click();await p.getByText(/AI temporarily unavailable/).waitFor();
  assert.equal(await p.locator('#swmsAnswer').inputValue(),'Work description retained');assert.equal(s.posted,undefined);await p.locator('#swmsManual').click();assert.equal(await p.locator('#swmsForm').isVisible(),true);assert.equal(await p.locator('#swmsAiReviewLabel').isVisible(),false);
  }finally{await s.browser.close();}
+});
+
+
+test('header is visible while sign-in is pending and workspace stays gated',async()=>{
+ const s=await screen(1440,true);try{const p=s.page;
+ await p.locator('.global-hero').waitFor({state:'visible'});
+ assert.equal(await p.locator('.global-hero h1').textContent(),'Safe Work Method Statements');
+ assert.equal(await p.locator('#swmsGenerate').isVisible(),false);
+ assert.equal(await p.locator('.hero-tools').isVisible(),false);
+ const hero=await p.locator('.global-hero').boundingBox();
+ const loader=await p.locator('#veroPageLoader').boundingBox();assert.ok(loader.y>=hero.y+hero.height-1);
+ s.releaseAuth();await p.locator('#swmsTotal').filter({hasText:'2'}).waitFor();await p.locator('#swmsGenerate').waitFor({state:'visible'});
+ assert.equal(await p.locator('#heights-auth-status').isVisible(),false);
+ }finally{s.releaseAuth();await s.browser.close();}
 });
