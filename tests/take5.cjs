@@ -18,7 +18,7 @@ async function test(preReady=false){
   if(url.endsWith('/1/sites'))return{ok:true,json:async()=>({sites:[{id:11,site_code:'S-11',site_name:'Test site'}]})};
   if(url.endsWith('/2/sites'))return{ok:true,json:async()=>({sites:[{id:22,site_code:'S-22',site_name:'Different site'}]})};
   if(url.includes('/site-context?'))return{ok:true,json:async()=>({site:{site:'S-11 · Test site'},risks:[{id:7,code:'R-7',title:'Known vehicle movement',score:60}],events:[{id:'e1',title:'Previous near miss',date:'2026-09-01',status:'Complete'}],event_total:1})};
-  if(init.method==='PUT'){if(fail)return{ok:false,json:async()=>({message:'Save unavailable'})};const body=JSON.parse(init.body);saved={id:url.split('/').pop(),version:body.version+1,status:body.submit?'Submitted':'Draft',payload:body.payload};return{ok:true,json:async()=>({assessment:saved})};}
+  if(init.method==='PUT'){if(fail)return{ok:false,json:async()=>({message:'Save unavailable'})};const body=JSON.parse(init.body);saved={id:url.split('/').pop(),version:body.version+1,status:body.submit?'Submitted':'Draft',record_id:body.submit?91:null,payload:body.payload};return{ok:true,json:async()=>({assessment:saved})};}
   if(url.endsWith('/take5'))return{ok:true,json:async()=>({assessments:saved?[{...saved,task:saved.payload.task,site:saved.payload.site,updated_at:'2026-10-22T00:00:00Z'}]:[]})};
   return{ok:true,json:async()=>({assessment:saved})};
  };

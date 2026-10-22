@@ -3997,6 +3997,7 @@ body[data-records-manager="false"]
  }
 
  async function openRecordDrawer(recordId){
+ document.getElementById('take5OutcomeLink')?.setAttribute('hidden','');
   const modal = document.getElementById('recordModal');
   if(!modal) return;
 
@@ -4264,6 +4265,17 @@ body[data-records-manager="false"]
    ).catch(error=>{
     console.error('Unable to load viewing permissions',error);
    });
+
+   let take5OutcomeLink=document.getElementById('take5OutcomeLink');
+   if(!take5OutcomeLink){
+    take5OutcomeLink=document.createElement('a');
+    take5OutcomeLink.id='take5OutcomeLink';
+    take5OutcomeLink.className='btn primary';
+    take5OutcomeLink.textContent='Open completed Take 5';
+    document.getElementById('viewRecordBtn').parentElement.prepend(take5OutcomeLink);
+   }
+   take5OutcomeLink.hidden=!(r.source_module==='Take 5' && r.source_entity_type==='Take 5 Assessment' && r.status!=='Disposed');
+   take5OutcomeLink.href='take-5.html?record_id='+encodeURIComponent(r.id);
 
    closeControlledPreview();
 
