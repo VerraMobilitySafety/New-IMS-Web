@@ -4,6 +4,7 @@ const VeroDocumentContext=(()=>{
  const style=document.createElement('style');style.textContent='#reqCategory,#reqLinks,#reqLinkSearch{box-sizing:border-box;width:100%;border:1px solid #d7d3d0;border-radius:7px;padding:10px;background:#fff;font:13px Montserrat,Verdana,Arial,sans-serif;margin-bottom:8px}#documentCategoryFilter,#documentLinkFilter{max-width:250px;min-height:36px;border:1px solid #d7d3d0;border-radius:7px;padding:7px;background:#fff;font:inherit}#requestLinksField[hidden]{display:none}#documentContextDetails p{font-size:12px;overflow-wrap:anywhere}';document.head.append(style);
  const params=new URLSearchParams(location.search);
  let options=[],optionsLoaded=false,optionsPromise=null;
+ const contextLabel=x=>x.type==='Contract'?(window.VeroContractLabels?.label(x.label)??x.label):x.label;
  const key=x=>JSON.stringify([x.type,x.type==='Client'?x.name:x.id]);
  const category=()=>byId('reqCategory').value;
  const selectedLinks=()=>Array.from(byId('reqLinks').selectedOptions).map(o=>JSON.parse(o.value));
@@ -29,7 +30,7 @@ const VeroDocumentContext=(()=>{
    for(const item of options.filter(x=>x.type===type)){
     const clean={type:item.type,label:item.label};
     if(type==='Client')clean.name=item.name;else clean.id=item.id;
-    const option=document.createElement('option');option.value=JSON.stringify(clean);option.textContent=item.label;
+    const option=document.createElement('option');option.value=JSON.stringify(clean);option.textContent=contextLabel(item);
     option.selected=selectedKeys.has(key(clean));group.append(option);
    }
    select.append(group);
@@ -86,7 +87,7 @@ const VeroDocumentContext=(()=>{
   const links=new Map();for(const d of liveDocuments)for(const l of d.documentLinks)links.set(key(l),l);
   const target=urlLink();if(target&&!links.has(key(target)))links.set(key(target),{...target,label:params.get('link_label')||String(target.name||target.id)});
   select.replaceChildren(new Option('All clients and jobs',''));
-  for(const [value,item] of [...links].sort((a,b)=>String(a[1].label).localeCompare(String(b[1].label))))select.add(new Option(item.type+': '+item.label,value));
+  for(const [value,item] of [...links].sort((a,b)=>String(a[1].label).localeCompare(String(b[1].label))))select.add(new Option(item.type+': '+contextLabel(item),value));
   select.value=previous||(target?key(target):'');
   if(params.get('category')==='Operational')byId('documentCategoryFilter').value='Operational';
  }

@@ -35,9 +35,9 @@ window.VeroTake5WorkContext=function({request,changed,getAssessment,readonly,imp
    if(data.event_total>events.length)root.append(node('p','Showing the latest '+events.length+' of '+data.event_total+' accessible events.'));
   }catch(e){if(ticket===contextTicket){root.replaceChildren(node('p','Unable to load site history: '+e.message),retry('Retry site history',context));}}
  }
- function render(){task();const p=getAssessment().payload,items=contracts.map(c=>[c.contract_name,c.id]);let cid=p.contract_id;
-  if(cid&&!items.some(x=>String(x[1])===String(cid)))items.push([p.contract||'Saved contract',cid]);
-  if(!cid&&p.contract){items.push([p.contract,'legacy']);cid='legacy';}
+ function render(){task();const p=getAssessment().payload,items=contracts.map(c=>[window.VeroContractLabels?.record(c)||c.contract_name,c.id]);let cid=p.contract_id;
+  if(cid&&!items.some(x=>String(x[1])===String(cid)))items.push([window.VeroContractLabels?.label(p.contract)||p.contract||'Saved contract',cid]);
+  if(!cid&&p.contract){items.push([window.VeroContractLabels?.label(p.contract)||p.contract,'legacy']);cid='legacy';}
   fill($('take5_contract'),items,cid,'Select a contract…');void loadSites(p.contract_id,p.site_id);void context();}
  async function load(){try{const data=await Promise.all([request('/swms'),request('/maintenance-contracts')]);swms=(data[0].items||[]).filter(d=>d.kind==='document'&&d.status==='Current');contracts=data[1].contracts||[];$('take5WorkStatus').textContent='';render();}
   catch(e){$('take5SourcesStatus').replaceChildren(node('span','Unable to load work choices: '+e.message+' '),retry('Retry work choices',load));}}
