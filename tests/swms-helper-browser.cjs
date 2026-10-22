@@ -176,10 +176,12 @@ test('SWMS drawer aligns each hazard with its own initial rating, controls and r
  await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'SWMS deployment',version:'7.0',status:'Current',can_edit:true,fields,history:[]}}));
  await p.locator('#swmsRows tr').first().click();await p.locator('#swmsDocumentDialog .swms-risk-table').waitFor();
  assert.equal(await p.locator('.swms-requirements').isVisible(),true);assert.match(await p.locator('.swms-requirements').innerText(),/Competency requirements[\s\S]*White Card[\s\S]*PPE requirements[\s\S]*Hi-vis/);
+ assert.equal(await p.getByText('Recorded scope',{exact:true}).isVisible(),true);assert.equal(await p.getByText('Recorded emergency',{exact:true}).isVisible(),true);assert.equal(await p.locator('.swms-section-heading').count(),6);
  const table=p.locator('#swmsDocumentDialog .swms-risk-table');assert.deepEqual(await table.locator('thead th').allTextContents(),['Step','Hazard','Risk assessment','Controls','Residual risk']);
  const rows=table.locator('tbody tr');assert.equal(await rows.count(),2);assert.equal(await rows.first().locator('td').first().getAttribute('rowspan'),'2');
  assert.equal(await rows.first().locator('td').nth(1).innerText(),'Traffic');assert.equal(await rows.first().locator('td').nth(3).innerText(),'Separate work area');
  assert.equal(await rows.nth(1).locator('td').first().innerText(),'Uneven ground');assert.equal(await rows.nth(1).locator('td').nth(2).innerText(),'Inspect access path');assert.match(await rows.nth(1).locator('td').nth(1).innerText(),/20 · Moderate/);assert.match(await rows.nth(1).locator('td').nth(3).innerText(),/5 · Low/);
+ await p.setViewportSize({width:390,height:1000});assert.ok(await p.locator('#swmsDocumentDialog').evaluate(e=>e.scrollWidth<=e.clientWidth+1));assert.equal(await p.locator('.swms-requirements').isVisible(),true);if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-readable-mobile.png')});await p.setViewportSize({width:1440,height:1000});
  assert.equal(await p.getByText('Combined controls must not be repeated',{exact:true}).count(),0);if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-risk-grid-preview.png')});
  await p.getByRole('button',{name:'Edit SWMS',exact:true}).click();const risk=p.locator('.swms-digital-risk').nth(1);
  assert.equal(await risk.locator('[data-risk=hazards]').inputValue(),'Uneven ground');assert.equal(await risk.locator('[data-risk=controls]').inputValue(),'Inspect access path');
