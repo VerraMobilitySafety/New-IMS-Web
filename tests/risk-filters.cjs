@@ -383,3 +383,16 @@ test('direct contract and linked Site applicability share one risk row and each 
  await settle();app.change('veroContextTypeFilter','Contract');await settle();app.change('veroApplicationFilter',15);await settle();
  assert.equal((app.table().match(/Beta/g)||[]).length,1);assert.equal(app.el('veroMatrixStatus').textContent,'1');
 });
+
+test('hierarchy and tier summary retain Site context when browsing classifications',async()=>{
+ const app=setup(route=>{
+  if(route==='/risk/operational-contexts')return response({...contexts,context_types:['Site'],sites:[{id:4944,name:'D33'}]});
+  if(route==='/risk/tier-assessment-summary')return response({summaries:[]});
+ });
+ await settle();app.change('veroContextTypeFilter','Site');await settle();app.change('veroApplicationFilter',4944);await settle();
+ app.document.dispatchEvent(new CustomEvent('vero-risk-hierarchy-render',{detail:{showRisks:false}}));await settle();
+ for(const path of ['/risk/hierarchical-register','/risk/tier-assessment-summary']){
+  const call=app.calls.filter(c=>c.route===path).at(-1);assert.ok(call,path);
+  assert.equal(call.url.searchParams.get('context_type'),'Site');assert.equal(call.url.searchParams.get('context_id'),'4944');
+ }
+});
