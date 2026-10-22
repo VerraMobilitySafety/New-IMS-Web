@@ -3,10 +3,11 @@
 const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api',el=id=>document.getElementById(id);
 const fields=['title','reason','scope','affected','planned_date','implementation','consultation','rollback'];
 let options,records=[],current=null,editor=null,messages=[],busy=false,abort=null,aiDraft=false,dirty=false;
+let contributors=new Set();
 const first='What change are you proposing, and what is prompting it?';
 function node(tag,text,cls){const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n;}
 async function api(path,method='GET',body,signal){const r=await fetch(API+path,{method,signal,cache:'no-store',headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});let d;try{d=await r.json();}catch{throw Error('The server response could not be read. Your work is retained.');}if(!r.ok)throw Error(d.message||'Unable to complete this request.');return d;}
-function setBusy(value){busy=value;for(const id of ['changeClose','changeSend','changeManual','changeDraft','changeSubmit','changeBack','changeApprove','changeReject'])el(id).disabled=value;editor?.setBusy(value);el('changeAnswer').disabled=value;}
+function setBusy(value){busy=value;for(const id of ['changeClose','changeSend','changeManual','changeDraft','changeSubmit','changeBack','changeApprove','changeReject'])el(id).disabled=value;editor?.setBusy(value);el('changeAnswer').disabled=value;updateContributorState();}
 function riskBand(r){if(!r)return 'Not assessed';const bands=[['Low','Low','Low','Moderate','Moderate'],['Low','Moderate','Moderate','Moderate','High'],['Low','Moderate','High','High','Significant'],['Moderate','Moderate','High','Significant','Significant'],['Moderate','High','Significant','Significant','Significant']];return bands[r.likelihood-1]?.[r.impact-1]||'Not assessed';}
 function worstRisk(payload){const risks=payload.risks?.map(e=>e.assessment)||[payload.risk];return risks.map(r=>r?.residual).filter(Boolean).sort((a,b)=>(b.likelihood*b.impact)-(a.likelihood*a.impact))[0];}
 function render(){const query=el('changeSearch').value.toLowerCase(),status=el('changeFilter').value;const shown=records.filter(r=>(!status||r.status===status)&&[r.payload.title,r.payload.scope,r.payload.affected].join(' ').toLowerCase().includes(query));
@@ -15,14 +16,28 @@ const host=el('changeRecords');host.replaceChildren();for(const r of shown){cons
 if(!shown.length){const row=node('tr'),cell=node('td',records.length?'No changes match these filters.':'No changes yet. Select New change to get started.','t5-register-empty');cell.colSpan=6;row.append(cell);host.append(row);}el('changeCount').textContent=shown.length+' of '+records.length+' changes';}
 async function load(){el('changeRegisterStatus').textContent='Loading changes…';try{records=(await api('/changes')).changes;render();el('changeRegisterStatus').textContent='';}catch(e){el('changeRegisterStatus').replaceChildren(node('span',e.message));const retry=node('button','Retry','secondary');retry.onclick=load;el('changeRegisterStatus').append(retry);}}
 function chat(){const log=el('changeConversation');log.replaceChildren();for(const m of messages){const a=node('article',null,'change-message '+m.role);a.append(node('strong',m.role==='assistant'?'Vero':'You'),node('p',m.content));log.append(a);}requestAnimationFrame(()=>log.scrollTop=log.scrollHeight);}
-function formValue(){const result={risk:editor.getValue(),risks:editor.getRisks(),review_confirmed:el('changeConfirmed').checked};for(const key of fields)result[key]=el('change_'+key).value.trim();return result;}
-function showForm(d={}){el('changeIntake').hidden=true;el('changeDetails').hidden=false;for(const key of fields)el('change_'+key).value=d[key]||'';editor?.destroy();editor=window.VeroChangeRiskList.mount(el('changeRisk'),{options,changeId:current.id,initial:d.risks?.map((e,i)=>({...e,id:i===0&&!current.version?current.id:e.id}))||[{id:current.id,assessment:d.risk||{}}],linkedRisks:current.linked_risks||[],getContext:()=>Object.fromEntries(fields.map(k=>[k,el('change_'+k).value])),assist:(body,signal)=>api('/changes/assist','POST',body,signal),setBusy,onDirty:()=>{dirty=true;el('changeConfirmed').checked=false;}});el('changeConfirmed').checked=false;el('changeDetails').querySelector('input').focus();updateButtons();}
+function formValue(){const result={risk:editor.getValue(),risks:editor.getRisks(),contributor_user_ids:[...contributors].sort((a,b)=>a-b),review_confirmed:el('changeConfirmed').checked};for(const key of fields)result[key]=el('change_'+key).value.trim();return result;}
+function showForm(d={}){contributors=new Set(d.contributor_user_ids||[]);el('changeContributorsSearch').value='';renderContributors();el('changeIntake').hidden=true;el('changeDetails').hidden=false;for(const key of fields)el('change_'+key).value=d[key]||'';editor?.destroy();editor=window.VeroChangeRiskList.mount(el('changeRisk'),{options,changeId:current.id,initial:d.risks?.map((e,i)=>({...e,id:i===0&&!current.version?current.id:e.id}))||[{id:current.id,assessment:d.risk||{}}],linkedRisks:current.linked_risks||[],getContext:()=>Object.fromEntries(fields.map(k=>[k,el('change_'+k).value])),assist:(body,signal)=>api('/changes/assist','POST',body,signal),setBusy,onDirty:()=>{dirty=true;el('changeConfirmed').checked=false;}});el('changeConfirmed').checked=false;el('changeDetails').querySelector('input').focus();updateButtons();}
+function updateContributorState(){
+ const allowed=!busy&&(!current?.status||current.status==='Draft')&&current?.can_manage_contributors!==false;
+ el('changeContributorsOptions').querySelectorAll('input').forEach(input=>input.disabled=!allowed);
+ el('changeContributorsSearch').disabled=busy;
+}
+function renderContributors(){
+ const query=el('changeContributorsSearch').value.toLowerCase(),host=el('changeContributorsOptions');host.replaceChildren();
+ const users=[...(options?.users||[])];for(const id of contributors)if(!users.some(u=>u.id===id))users.push({id,name:'Unavailable user #'+id,email:''});
+ for(const user of users.filter(u=>(u.name+' '+u.email).toLowerCase().includes(query))){const label=node('label'),input=node('input');input.type='checkbox';input.value=String(user.id);input.checked=contributors.has(user.id);input.onchange=()=>{if(input.checked)contributors.add(user.id);else contributors.delete(user.id);dirty=true;el('changeConfirmed').checked=false;renderContributors();};label.append(input,node('span',user.name+(user.email?' · '+user.email:'')));host.append(label);}
+ if(!host.childNodes.length)host.append(node('p','No matching active users.'));
+ el('changeContributorsSummary').textContent=contributors.size?contributors.size+' contributor'+(contributors.size===1?'':'s')+' selected':'Select contributors';
+ el('changeContributorsSelected').textContent=[...contributors].map(id=>users.find(u=>u.id===id)?.name||'User #'+id).join(', ');updateContributorState();
+}
+el('changeContributorsSearch').oninput=renderContributors;
 function updateButtons(){
-const previousReason=el('changeDecisionReason')?.value||'';const state=current?.status||'Draft',locked=state!=='Draft';
+const previousReason=el('changeDecisionReason')?.value||'';const state=current?.status||'Draft',locked=state!=='Draft'||current?.can_edit===false;
 el('changeDetails').querySelectorAll('input,textarea,select,button').forEach(n=>n.disabled=locked||busy);editor?.setLocked(locked);editor?.setBusy(locked||busy);
 el('changeDraft').hidden=locked;el('changeDraft').disabled=busy;
 el('changeSubmit').textContent=state==='Approved'?'Start implementation':state==='In progress'?'Close change':'Submit for approval';
-el('changeSubmit').hidden=!(state==='Draft'||current?.can_implement||current?.can_close);el('changeSubmit').disabled=busy;
+el('changeSubmit').hidden=!((state==='Draft'&&current?.can_submit!==false)||current?.can_implement||current?.can_close);el('changeSubmit').disabled=busy;updateContributorState();
 for(const id of ['changeApprove','changeReject']){el(id).hidden=!current?.can_approve;el(id).disabled=busy;}
 el('changeBack').hidden=Boolean(current?.version)||aiDraft;el('changeBack').disabled=busy;el('changeState').textContent=state==='Submitted'?'Awaiting Risk Manager approval':state;
 const host=el('changeApproval');host.replaceChildren();

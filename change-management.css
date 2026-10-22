@@ -109,3 +109,11 @@
 #changeDrawer .risk-compact-control-notes{margin-top:10px;font-size:11px}
 #changeDrawer .risk-compact-control-notes>summary{cursor:pointer}
 #changeDrawer .risk-compact-control-notes[open]>div{padding-top:8px}
+
+#changeDrawer .change-contributors{padding:12px;border:1px solid #d5d2cc}
+#changeDrawer #changeContributorsPicker{background:#fff;border:1px solid #d5d2cc;padding:9px}
+#changeDrawer #changeContributorsPicker>summary{cursor:pointer;font-size:12px;font-weight:600}
+#changeDrawer #changeContributorsOptions{max-height:230px;overflow:auto}
+#changeDrawer #changeContributorsOptions>label{display:flex;align-items:center;gap:8px;padding:8px 2px;font-size:12px;font-weight:400}
+#changeDrawer #changeContributorsOptions input{width:auto;margin:0}
+#changeDrawer #changeContributorsSelected{font-size:12px;margin:8px 0}
