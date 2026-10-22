@@ -37,7 +37,7 @@ async function screen(width=1440,holdAuth=false){
 test('desktop generation saves to the selected service; summaries, search, links and failures work',async()=>{
  const s=await screen();try{const p=s.page;
  assert.equal(await p.locator('#swmsCurrent').textContent(),'1');assert.equal(await p.locator('#swmsDue').textContent(),'1');
- assert.equal(await p.locator('#swmsRows a[href="maintenance-workspace.html?id=8"]').count(),2);
+ assert.equal(await p.locator('#swmsRows a').count(),0);assert.equal(await p.locator('#swmsRows tr').first().locator('td').nth(1).innerText(),contract.label);
  await p.locator('#swmsGenerate').click();await p.locator('#swmsDialog').waitFor({state:'visible'});const rect=await p.locator('#swmsDialog').boundingBox();assert.equal(rect.x+rect.width,1440);assert.equal(rect.y,0);assert.equal(rect.height,1000);if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-drawer-desktop.png')});await p.locator('#swmsManual').click();assert.equal(await p.locator('#swmsContract').inputValue(),'8');
  for(const [name,value] of Object.entries({title:'Camera maintenance',location:'Eastern Creek',responsible_person:'Site supervisor',scope:'Maintain camera system',high_risk_work:'Work near traffic — NSW',site_conditions:'Live road and public interface',consultation:'Crew briefing 22 October',resources:'Authorised crew and equipment',emergency:'Site emergency plan and first aid',monitoring:'Supervisor checks before and during work'}))await p.locator('[name="'+name+'"]').fill(value);
  for(const input of await p.locator('.swms-step [data-field]').all())await input.fill('Site-specific '+await input.getAttribute('data-field'));
@@ -113,15 +113,18 @@ test('long conversations scroll inside the chat while composer and controls stay
 });
 
 
-test('SWMS rows open the digital drawer by click or keyboard and retain client service links',async()=>{
+test('compact SWMS rows open the digital drawer by click or keyboard without hyperlinks or metadata lines',async()=>{
  const s=await screen();try{const p=s.page;
  await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'SWMS deployment',reference:'S10',version:'7.0',status:'Current',can_edit:false,fields:digitalFields(),history:[{version:'7.0',status:'Current'}]}}));
  assert.equal(await p.getByRole('link',{name:'Open document',exact:true}).count(),0);assert.equal(await p.locator('.swms-table th').count(),5);
  await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.locator('#swmsDocumentDialog').waitFor({state:'visible'});await p.getByText('Only users with the HSEQ role can edit a current SWMS.',{exact:true}).waitFor();assert.match(p.url(),/safe-work-method-statement/);
  const rect=await p.locator('#swmsDocumentDialog').boundingBox();assert.equal(rect.x+rect.width,1440);assert.equal(rect.y,0);assert.equal(rect.height,1000);
  await p.getByRole('button',{name:'Close SWMS',exact:true}).click();await p.locator('#swmsRows tr').first().focus();await p.keyboard.press('Enter');await p.locator('#swmsDocumentDialog').waitFor({state:'visible'});
- await p.getByRole('button',{name:'Close SWMS',exact:true}).click();await p.route('**/maintenance-workspace.html?id=8',route=>route.fulfill({contentType:'text/html',body:'<h1>Client service</h1>'}));
- await p.locator('#swmsRows tr').first().getByRole('link',{name:contract.label}).click();await p.waitForURL('**/maintenance-workspace.html?id=8');
+ await p.getByRole('button',{name:'Close SWMS',exact:true}).click();
+ assert.equal(await p.locator('#swmsRows a,#swmsRows small,#swmsRows br').count(),0);
+ assert.equal(await p.locator('#swmsRows tr').first().locator('td').nth(1).innerText(),contract.label);
+ assert.equal(await p.locator('#swmsRows .swms-title-button').first().evaluate(e=>getComputedStyle(e).textDecorationLine),'none');
+ assert.equal(await p.locator('#swmsRows tr').first().locator('td').first().evaluate(e=>getComputedStyle(e).whiteSpace),'nowrap');
  }finally{await s.browser.close();}
 });
 function digitalFields(){return {...Object.fromEntries(['title','location','responsible_person','scope','high_risk_work','site_conditions','consultation','resources','emergency','monitoring'].map(k=>[k,'Recorded '+k])),ppe:['Hi-vis'],jurisdiction:'NSW',emergency_number:'000',steps:[{activity:'Set up',action:'Set up separation',hazards:'Traffic',controls:'Separate work area',implementation:'Supervisor checks',owner:'Supervisor',risks:[{hazards:'Traffic',controls:'Separate work area',initial_impact:4,initial_likelihood:20,residual_impact:2,residual_likelihood:5}]}]};}
