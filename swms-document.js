@@ -4,7 +4,7 @@ window.VeroSwmsDocument=(()=>{'use strict';
  let dialog,body,status,title,current,version=0,controller,busy=false,refresh;
  const labels={title:'SWMS title',location:'Work location',responsible_person:'Responsible person',scope:'Scope of work',high_risk_work:'High risk work',site_conditions:'Site conditions and interfaces',consultation:'Worker consultation',resources:'Training, equipment and permits',emergency:'Emergency arrangements',monitoring:'Monitoring and review'};
  const isNote=()=>(current?.document_type||current?.fields?.document_type)==='Practice Note';
- const extraLabels={jurisdiction:'Jurisdiction',emergency_number:'Emergency number',non_emergency_number:'Non-emergency number',organisation_address:'Organisation address',organisation_contact_name:'Organisation contact',organisation_contact_phone:'Contact phone',organisation_contact_email:'Contact email',ppe:'PPE (one item per line)',competencies:'Competencies (one item per line)'};
+ const extraLabels={jurisdiction:'Jurisdiction',emergency_number:'Emergency number',non_emergency_number:'Non-emergency number',organisation_address:'Organisation address',organisation_contact_name:'Organisation contact',organisation_contact_phone:'Contact phone',organisation_contact_email:'Contact email',ppe:'PPE requirements (one item per line)',competencies:'Competency requirements (one item per line)'};
  const stepLabels={activity:'Work activity',action:'Action',hazards:'Hazards and associated risks',controls:'Control measures',implementation:'Implementation and monitoring',owner:'Responsible person'};
  async function request(path,options={}){const r=await fetch(API+path,{...options,headers:{Authorization:'Bearer '+localStorage.getItem('vero_session_token'),Accept:'application/json',...options.headers},cache:'no-store'});if(!r.ok){const data=await r.json().catch(()=>({}));throw Error(data.message||'Unable to load SWMS.');}return r;}
  function button(text,action){const b=node('button',text);b.type='button';b.addEventListener('click',action);return b;}
@@ -16,7 +16,9 @@ window.VeroSwmsDocument=(()=>{'use strict';
  function readFields(data){
   const host=node('div'),details=node('details');details.append(node('summary','Document details and arrangements'));host.append(details);
   for(const [key,label] of Object.entries(labels))details.append(node('h3',key==='title'&&isNote()?'Practice Note title':label),node('p',data[key]||'Not recorded'));
-  for(const [key,label] of Object.entries(extraLabels))if(data[key]?.length)details.append(node('h3',label.replace(' (one item per line)','')),node('p',Array.isArray(data[key])?data[key].join(', '):data[key]));
+  for(const [key,label] of Object.entries(extraLabels))if(!['ppe','competencies'].includes(key)&&data[key]?.length)details.append(node('h3',label.replace(' (one item per line)','')),node('p',Array.isArray(data[key])?data[key].join(', '):data[key]));
+  const requirements=node('section');requirements.className='swms-requirements';requirements.setAttribute('aria-label','Competency and PPE requirements');
+  for(const [key,label] of [['competencies','Competency requirements'],['ppe','PPE requirements']]){const section=node('div');section.append(node('h3',label));const values=Array.isArray(data[key])?data[key]:String(data[key]||'').split('\n');const items=values.map(value=>String(value).trim()).filter(Boolean);if(items.length){const list=node('ul');for(const value of items)list.append(node('li',value));section.append(list);}else section.append(node('p','Not recorded'));requirements.append(section);}host.append(requirements);
   host.append(node('h3',isNote()?'Work steps':'Work steps and risk assessment'));
   const matrix=riskTable(isNote()?['Step','Action']:['Step','Hazard','Risk assessment','Controls','Residual risk']);host.append(matrix.wrap);
   for(const [i,step] of (data.steps||[]).entries()){
