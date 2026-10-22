@@ -1,5 +1,11 @@
 #vh{font-family:Montserrat,VeroSidebar,Arial,sans-serif}
 #changeDrawer{width:min(1080px,100vw)}
+#vh #changeDrawer .t5-top{background:#3d3935;color:#fff;border-bottom:3px solid #a9c23f}
+#vh #changeDrawer .t5-top h2,#vh #changeDrawer .t5-close{color:#fff}
+#vh #changeDrawer .t5-top .overline{color:#c8db87}
+#vh #changeDrawer .t5-top p{color:#e5e1de}
+#vh #changeDrawer .primary{background:#a9c23f;border-color:#a9c23f;color:#292725}
+#vh #changeDrawer .primary:hover{background:#bed45a;border-color:#bed45a}
 #changeDrawer .t5-editor{min-height:100%;box-sizing:border-box}
 #changeDrawer .change-intro{font-size:13px;line-height:1.8;color:#625e59;max-width:650px}
 #changeDrawer .change-chat{height:min(47dvh,420px);min-height:180px;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:14px;padding:12px 5px 18px;margin-bottom:18px}
