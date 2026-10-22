@@ -110,13 +110,35 @@ test('long conversations scroll inside the chat while composer and controls stay
 });
 
 
-test('SWMS rows open documents by click or keyboard and retain client service links',async()=>{
+test('SWMS rows open the digital drawer by click or keyboard and retain client service links',async()=>{
  const s=await screen();try{const p=s.page;
+ await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'SWMS deployment',reference:'S10',version:'7.0',status:'Current',can_edit:false,fields:digitalFields(),history:[{version:'7.0',status:'Current'}]}}));
  assert.equal(await p.getByRole('link',{name:'Open document',exact:true}).count(),0);assert.equal(await p.locator('.swms-table th').count(),5);
- await p.route('**/documents.html?document=*',route=>route.fulfill({contentType:'text/html',body:'<h1>Document details</h1>'}));
- const row=p.locator('#swmsRows tr').first();await row.locator('td').nth(2).click();await p.waitForURL('**/documents.html?document=10');
- await p.goBack();await p.locator('#swmsTotal').filter({hasText:'2'}).waitFor();await p.locator('#swmsRows tr').first().focus();await p.keyboard.press('Enter');await p.waitForURL('**/documents.html?document=10');
- await p.goBack();await p.locator('#swmsTotal').filter({hasText:'2'}).waitFor();await p.route('**/maintenance-workspace.html?id=8',route=>route.fulfill({contentType:'text/html',body:'<h1>Client service</h1>'}));
+ await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.locator('#swmsDocumentDialog').waitFor({state:'visible'});await p.getByText('Only HSEQ Managers can edit a current SWMS.',{exact:true}).waitFor();assert.match(p.url(),/safe-work-method-statement/);
+ const rect=await p.locator('#swmsDocumentDialog').boundingBox();assert.equal(rect.x+rect.width,1440);assert.equal(rect.y,0);assert.equal(rect.height,1000);
+ await p.getByRole('button',{name:'Close SWMS',exact:true}).click();await p.locator('#swmsRows tr').first().focus();await p.keyboard.press('Enter');await p.locator('#swmsDocumentDialog').waitFor({state:'visible'});
+ await p.getByRole('button',{name:'Close SWMS',exact:true}).click();await p.route('**/maintenance-workspace.html?id=8',route=>route.fulfill({contentType:'text/html',body:'<h1>Client service</h1>'}));
  await p.locator('#swmsRows tr').first().getByRole('link',{name:contract.label}).click();await p.waitForURL('**/maintenance-workspace.html?id=8');
+ }finally{await s.browser.close();}
+});
+function digitalFields(){return {...Object.fromEntries(['title','location','responsible_person','scope','high_risk_work','site_conditions','consultation','resources','emergency','monitoring'].map(k=>[k,'Recorded '+k])),steps:[{activity:'Set up',hazards:'Traffic',controls:'Separate work area',implementation:'Supervisor checks',owner:'Supervisor'}]};}
+test('HSEQ editing submits a versioned revision and retains changes on failure',async()=>{
+ const s=await screen();try{const p=s.page;let posted,deny=true;
+ await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'SWMS deployment',reference:'S10',version:'7.0',status:'Current',can_edit:true,fields:digitalFields(),history:[]}}));
+ await p.route('**/swms/documents/10/revisions',route=>{posted=route.request().postDataJSON();return route.fulfill(deny?{status:403,json:{message:'Only HSEQ Managers can edit a SWMS.'}}:{status:201,json:{request:{id:88}}});});
+ await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.getByRole('button',{name:'Edit SWMS',exact:true}).click();
+ await p.locator('#swmsDocumentDialog [name=scope]').fill('Updated roadside scope');await p.locator('#swmsDocumentDialog [name=change_reason]').fill('Improve separation controls');await p.locator('#swmsDocumentDialog input[type=checkbox]').check();await p.getByRole('button',{name:'Submit revision for review',exact:true}).click();
+ await p.getByText('Only HSEQ Managers can edit a SWMS. Your changes are retained.',{exact:true}).waitFor();assert.equal(await p.locator('#swmsDocumentDialog [name=scope]').inputValue(),'Updated roadside scope');
+ deny=false;await p.getByRole('button',{name:'Submit revision for review',exact:true}).click();await p.getByText('Revision submitted for review.',{exact:true}).waitFor();assert.equal(posted.expected_version,'7.0');assert.equal(posted.change_reason,'Improve separation controls');assert.equal(posted.review_confirmed,true);
+ }finally{await s.browser.close();}
+});
+test('legacy SWMS has an in-drawer original preview and verified conversion fields',async()=>{
+ const s=await screen(390);try{const p=s.page;
+ await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'Legacy SWMS',version:'7.0',status:'Current',can_edit:true,fields:null,conversion_required:true,history:[]}}));
+ await p.route('**/swms/documents/10/content',route=>route.fulfill({contentType:'application/pdf',body:'%PDF-1.4 example'}));
+ await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.locator('#swmsDocumentDialog iframe').waitFor({state:'attached'});assert.match(p.url(),/safe-work-method-statement/);
+ await p.getByRole('button',{name:'Create digital revision',exact:true}).click();assert.equal(await p.locator('#swmsDocumentDialog input[type=checkbox]').count(),2);assert.equal(await p.locator('#swmsDocumentDialog [name=scope]').inputValue(),'');
+ const rect=await p.locator('#swmsDocumentDialog').boundingBox();assert.equal(rect.x+rect.width,390);assert.equal(rect.height,1000);
+ if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-digital-edit-mobile.png')});
  }finally{await s.browser.close();}
 });
