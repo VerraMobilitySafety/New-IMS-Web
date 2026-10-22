@@ -2952,6 +2952,11 @@ table {
   content.replaceChildren();
   tabs.forEach(t=>t.setAttribute('aria-current',String(t.dataset.riskTab===active)));
   if(!risk)return;
+  if(risk.source_change_id){
+   const sourceCard=card('Linked change',[['Change status',risk.source_change_status]]);
+   const link=document.createElement('a');link.textContent='Open originating change';
+   link.href='change-management.html?change_id='+encodeURIComponent(risk.source_change_id);sourceCard.append(link);content.append(sourceCard);
+  }
   if(active==='overview'){
    content.appendChild(card('Master Risk',[
     ['Description',risk.risk_description],['Status',risk.status],['Register',risk.register_name],
