@@ -54,7 +54,7 @@ window.VeroSwmsAssistant=(()=>{'use strict';
  }
  return {
   init,
-  services(items,selected){el('swmsIntakeContract').replaceChildren(new Option('Select a client service…',''));for(const s of items)el('swmsIntakeContract').add(new Option(s.label+(s.client?' · '+s.client:''),s.id));el('swmsIntakeContract').value=selected;},
+  services(items,selected){el('swmsIntakeContract').replaceChildren(new Option('Select a client service…',''));for(const s of items)el('swmsIntakeContract').add(new Option(window.VeroContractLabels?.choice(s)??(s.label+(s.client?' · '+s.client:'')),s.id));el('swmsIntakeContract').value=selected;},
   append(data){if(active)throw Error('Wait for AI assistance to finish before submitting.');if(result){if(data.contract_id!==result.contractId)throw Error('The client service changed. Return to the questions and prepare a draft for this service.');if(!el('swmsAiConfirmed').checked)throw Error('Review the AI draft and confirm it before submitting.');data.ai_assisted=true;data.ai_review_confirmed=true;data.ai_sources=(result.sources||[]).map(s=>({document_id:s.document_id,version:s.version}));data.ai_gaps=result.gaps||[];}},
   reset(){startAgain();el('swmsForm').hidden=true;el('swmsIntake').hidden=false;el('swmsAiReviewLabel').hidden=true;el('swmsAiConfirmed').required=false;}
  };

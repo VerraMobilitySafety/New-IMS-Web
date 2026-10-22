@@ -11,6 +11,7 @@ async function request(path,options={}){
 }
 const pending=x=>x.kind==='request'&&!['Rejected','Withdrawn','Cancelled'].includes(x.status);
 const due=x=>x.kind==='document'&&x.status==='Current'&&x.review_date&&x.review_date.slice(0,10)<=new Date().toLocaleDateString('en-CA');
+const serviceLabel=l=>{const current=services.find(s=>String(s.id)===String(l.id));const text=current?.label||l.label||'Client service';return window.VeroContractLabels?.label(text)??text;};
 const contractLinks=x=>(x.document_links||[]).filter(l=>l.type==='Contract');
 function render(){
  const scoped=items.filter(x=>!el('swmsServiceFilter').value||contractLinks(x).some(l=>String(l.id)===el('swmsServiceFilter').value));
@@ -21,7 +22,7 @@ function render(){
  if(!rows.length){const tr=node('tr'),td=node('td',scoped.length?'No SWMS match these filters.':'No SWMS saved yet. Generate a SWMS to get started.');td.colSpan=5;tr.append(td);body.append(tr);return;}
  for(const item of rows){
   const tr=node('tr'),title=node('td'),a=node('button',item.title||'Untitled SWMS');a.type='button';a.className='swms-title-button';a.addEventListener('click',event=>{event.preventDefault();window.VeroSwmsDocument.open(item,load);});title.append(a,node('small',item.reference||'—'));if(item.category&&item.category!=='Operational')title.append(node('small','Existing '+item.category.toLowerCase()+' classification'));tr.append(title);
-  const links=node('td');for(const l of contractLinks(item)){const a=node('a',l.label||'Client service');a.href='maintenance-workspace.html?id='+encodeURIComponent(l.id);links.append(a,node('br'));}if(!links.childNodes.length)links.textContent='No client service linked';tr.append(links);
+  const links=node('td');for(const l of contractLinks(item)){const a=node('a',serviceLabel(l));a.href='maintenance-workspace.html?id='+encodeURIComponent(l.id);links.append(a,node('br'));}if(!links.childNodes.length)links.textContent='No client service linked';tr.append(links);
   const status=node('td'),badge=node('span',item.status||'—');badge.className='swms-badge';status.append(badge);tr.append(status,node('td',item.version||'—'),node('td',item.review_date?new Date(item.review_date.slice(0,10)+'T12:00:00').toLocaleDateString('en-AU'):'—'));
   tr.className='swms-clickable-row';tr.tabIndex=0;tr.setAttribute('aria-label','Open '+(item.title||'Untitled SWMS'));
   tr.addEventListener('click',event=>{if(event.target.closest('a,button,input,select,textarea')||window.getSelection()?.toString())return;a.click();});
@@ -38,8 +39,8 @@ async function downloadDraft(item,button){button.disabled=true;try{
 async function load(){
  el('swmsRefresh').disabled=true;el('swmsStatus').textContent='Loading SWMS…';
  try{const data=await request('/swms'+(contextId?'?contract_id='+encodeURIComponent(contextId):''));items=data.items||[];loaded=true;
-  const old=el('swmsServiceFilter').value,seen=new Map(services.map(s=>[String(s.id),s.label]));for(const item of items)for(const l of contractLinks(item))seen.set(String(l.id),l.label);
-  el('swmsServiceFilter').replaceChildren(new Option('All client services',''));for(const [id,label] of [...seen].sort((a,b)=>a[1].localeCompare(b[1])))el('swmsServiceFilter').add(new Option(label,id));el('swmsServiceFilter').value=old||contextId;render();
+  const old=el('swmsServiceFilter').value,seen=new Map(services.map(s=>[String(s.id),s.label]));for(const item of items)for(const l of contractLinks(item)){if(!seen.has(String(l.id)))seen.set(String(l.id),serviceLabel(l));}
+  el('swmsServiceFilter').replaceChildren(new Option('All client services',''));for(const [id,label] of [...seen].sort((a,b)=>a[1].localeCompare(b[1])))el('swmsServiceFilter').add(new Option(window.VeroContractLabels?.label(label)??label,id));el('swmsServiceFilter').value=old||contextId;render();
  }catch(e){loaded=false;el('swmsStatus').textContent=e.message;for(const id of ['swmsTotal','swmsCurrent','swmsPending','swmsDue'])el(id).textContent='—';el('swmsRows').replaceChildren();}
  finally{el('swmsRefresh').disabled=false;}
 }
@@ -70,7 +71,7 @@ el('swmsForm').onsubmit=async event=>{
 };
 el('swmsRefresh').onclick=load;for(const id of ['swmsSearch','swmsServiceFilter','swmsStateFilter'])el(id).addEventListener(id==='swmsSearch'?'input':'change',()=>{if(loaded)render();});
 window.addEventListener('vero-risk-auth-ready',async()=>{
- try{const data=await request('/documents/link-options');services=(data.options||[]).filter(x=>x.type==='Contract');window.VeroSwmsAssistant.services(services,contextId);el('swmsContract').replaceChildren(new Option('Select a client service…',''));for(const s of services)el('swmsContract').add(new Option(s.label+(s.client?' · '+s.client:''),s.id));el('swmsContract').value=contextId;el('swmsGenerate').disabled=!services.length;el('swmsGenerate').title=services.length?'':'No accessible client services are available.';await load();}
+ try{const data=await request('/documents/link-options');services=(data.options||[]).filter(x=>x.type==='Contract');window.VeroSwmsAssistant.services(services,contextId);el('swmsContract').replaceChildren(new Option('Select a client service…',''));for(const s of services)el('swmsContract').add(new Option(window.VeroContractLabels?.choice(s)??(s.label+(s.client?' · '+s.client:'')),s.id));el('swmsContract').value=contextId;el('swmsGenerate').disabled=!services.length;el('swmsGenerate').title=services.length?'':'No accessible client services are available.';await load();}
  catch(e){el('swmsStatus').textContent=e.message;}
  finally{window.dispatchEvent(new Event('vero-risk-resources-settled'));}
 },{once:true});
