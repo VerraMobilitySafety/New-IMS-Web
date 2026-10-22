@@ -93,6 +93,7 @@ el('swmsForm').onsubmit=async event=>{
 el('swmsForm').addEventListener('reset',()=>queueMicrotask(()=>el('swmsForm').elements.namedItem('high_risk_work').swmsSetValue('')));
 el('swmsRefresh').onclick=load;for(const id of ['swmsSearch','swmsServiceFilter','swmsStateFilter'])el(id).addEventListener(id==='swmsSearch'?'input':'change',()=>{if(loaded)render();});
 window.addEventListener('vero-risk-auth-ready',async()=>{
+ window.VeroSwmsDocument.responsiblePicker(el('swmsPicker-responsible_person'),'',true,false,false);
  window.VeroSwmsDocument.responsiblePicker(el('swmsPicker-consultation'),'',true,true,false);
  try{const data=await request('/documents/link-options');services=(data.options||[]).filter(x=>x.type==='Contract');window.VeroSwmsAssistant.services(services,contextId);el('swmsContract').replaceChildren(new Option('Select a client service…',''));for(const s of services)el('swmsContract').add(new Option(window.VeroContractLabels?.choice(s)??(s.label+(s.client?' · '+s.client:'')),s.id));el('swmsContract').value=contextId;el('swmsGenerate').disabled=!services.length;el('swmsGenerate').title=services.length?'':'No accessible client services are available.';await load();}
  catch(e){el('swmsStatus').textContent=e.message;}
