@@ -44,8 +44,8 @@ test('SWMS saved link labels cannot overwrite the current service label',async()
   w.eval(read('contract-labels.js'));w.eval(read('swms-helper.js'));w.dispatchEvent(new w.Event('vero-risk-auth-ready'));
   await wait(()=>d.getElementById('swmsServiceFilter').options.length===2);
   const choice=d.getElementById('swmsServiceFilter').options[1];assert.equal(choice.value,'3');assert.equal(choice.textContent,current.label);
-  assert.equal(d.getElementById('swmsContract').options[1].textContent,current.label);
-  assert.equal(d.getElementById('swmsIntakeContract').options[1].textContent,current.label);
+  assert.equal(d.getElementById('swmsContract').options[1].textContent,'NSW TfNSW Fixed Camera Operations');
+  assert.equal(d.getElementById('swmsIntakeContract').options[1].textContent,'NSW TfNSW Fixed Camera Operations');
   assert.equal(saved.label,'1775M · TfNSW Detection and Enforcement Systems Agreement');
  }finally{w.close();}
 });
