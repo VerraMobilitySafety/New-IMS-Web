@@ -38,7 +38,10 @@
   }
   if(page==='actions'){
    const container=$('.actions-page'),panel=$('.action-list-panel'),bar=$('.action-toolbar'),anchor=document.createElement('div');container.prepend(anchor);
-   contexts(anchor,[['Assigned to you','Your outstanding work'],['Overdue','Filter actions past their due date'],['Source records','Documents, compliance, risks and more'],['Workflow actions','Open an item to review or respond']]);anchor.remove();
+   const row=contexts(anchor,[['—','Outstanding actions'],['—','Overdue'],['—','Due within 7 days'],['—','No due date']]);
+   row.setAttribute('aria-label','Your action totals');
+   [...row.children].forEach((card,i)=>{card.classList.remove('vr-context');card.querySelector('b').id=['actionTotalCount','actionOverdueCount','actionDueSoonCount','actionUndatedCount'][i]});
+   window.renderActionSummary?.();anchor.remove();
    cls(panel,'vr-register');panel.prepend(bar);cls(bar,'vr-toolbar');cls($('#actionSearch'),'vr-search');$('#actionSearch').setAttribute('aria-label','Search actions');
    const group=$('.action-toolbar-filters'),filters=node('div','vr-filters');cls(group,'vr-segments');group.before(filters);filters.append(group);
   }

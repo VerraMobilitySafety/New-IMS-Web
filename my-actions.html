@@ -1197,7 +1197,20 @@ function filteredActions(){
 
  return actions;
 }
+let actionSummaryLoaded=false;
+function renderActionSummary(){
+ const now=Date.now(),week=7*24*60*60*1000;
+ const due=action=>action.due_at?new Date(action.due_at).getTime():NaN;
+ const values=actionSummaryLoaded?[
+  allActions.length,
+  allActions.filter(action=>isInsuranceRenewal(action)?due(action)<=now:due(action)<now).length,
+  allActions.filter(action=>due(action)>=now&&due(action)<=now+week&&!(isInsuranceRenewal(action)&&due(action)===now)).length,
+  allActions.filter(action=>!Number.isFinite(due(action))).length
+ ]:['—','—','—','—'];
+ ['actionTotalCount','actionOverdueCount','actionDueSoonCount','actionUndatedCount'].forEach((id,i)=>{const value=document.getElementById(id);if(value)value.textContent=values[i]});
+}
 function renderActions(){
+ renderActionSummary();
  const list=document.getElementById('fullActionList');
  const visible=filteredActions();
  document.getElementById('actionListCount').textContent=`${visible.length} shown`;
@@ -2741,13 +2754,14 @@ function finishInitialActionsLoad(){window.VeroPageLoader?.ready('actions');}
 async function loadActions(){
  const sequence=++actionLoadSequence;
  const token=localStorage.getItem(TOKEN_KEY), list=document.getElementById('fullActionList');
- if(!token){list.innerHTML='<div class="action-error">Please sign in to view your actions.</div>';finishInitialActionsLoad();return;}
+ if(!token){actionSummaryLoaded=false;allActions=[];renderActionSummary();list.innerHTML='<div class="action-error">Please sign in to view your actions.</div>';finishInitialActionsLoad();return;}
  try{
   const r=await fetch(`${API}/my-actions`,{headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store'});
   const d=await r.json(); if(!r.ok)throw new Error(d.message||'Unable to load actions');
   if(sequence!==actionLoadSequence)return;
   const selectedRiskId=window.VeroRiskActions.isRiskAction(currentAction)?currentAction.id:null;
   allActions=window.VeroRiskActions.normaliseActions(d.actions);
+  actionSummaryLoaded=true;
   renderActions();
   finishInitialActionsLoad();
   if(selectedRiskId){
@@ -2759,6 +2773,7 @@ async function loadActions(){
   if(sequence!==actionLoadSequence)return;
   console.error(e);
   if(window.VeroRiskActions.isRiskAction(currentAction))closeActionDetail();
+  actionSummaryLoaded=false;allActions=[];renderActionSummary();
   list.innerHTML='<div class="action-error">Unable to load your actions right now.</div>';
   document.getElementById('actionListCount').textContent='Unavailable';
   finishInitialActionsLoad();
@@ -2783,7 +2798,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 
-<link rel="stylesheet" href="register-layout.css"><link rel="stylesheet" href="register-operations-layout.css"><script src="register-layout.js"></script><script src="register-operations-layout.js"></script></body></html>
+<link rel="stylesheet" href="register-layout.css"><link rel="stylesheet" href="register-operations-layout.css"><script src="register-layout.js"></script><script src="register-operations-layout.js?v=20261022-action-counts"></script></body></html>
 
 <style>
 #actionDetailAdditional .action-btn-approve{
