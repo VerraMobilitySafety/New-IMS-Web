@@ -125,3 +125,25 @@ test('header sorting covers all pages, resets pagination and remains selected af
  assert.equal(await page.locator('[data-site-open]').first().getAttribute('data-site-open'),'55');
  }finally{await page.close();}
 });
+
+test('a confirmed submission stays visible and opens for review even if refreshing the site fails',async()=>{
+ const {page,errors}=await setup();try{
+ await page.goto('https://vero.test/client-services-site.html?id=123');await page.getByRole('heading',{name:site.site_name}).waitFor();
+ await page.route('**/client-services-sites/123/workspace',route=>route.fulfill({status:503,json:{message:'Temporary refresh failure'}}));
+ await page.evaluate(async()=>{
+  const original=window.VeroSiteRiskCreator.open;let config;
+  window.VeroSiteRiskCreator.open=value=>{config=value;};document.getElementById('siteAssess').click();window.VeroSiteRiskCreator.open=original;
+  await config.onSaved({risk_id:201,site_id:123,risk_code:'SR-TEST'});
+ });
+ await page.getByRole('heading',{name:'Submitted Site Risk',exact:true}).waitFor();
+ assert.match(await page.locator('#siteRiskStatus').innerText(),/Submitted successfully · SR-TEST/);
+ assert.match(await page.locator('#siteRiskStatus').innerText(),/Do not submit it again/);
+ assert.match(await page.locator('#siteRiskStatus').innerText(),/after approval/);
+ assert.match(page.url(),/risk_id=201/);
+ await page.unroute('**/client-services-sites/123/workspace');
+ await page.getByRole('button',{name:'Retry loading site risks',exact:true}).click();
+ await page.getByRole('button',{name:'Retry loading site risks',exact:true}).waitFor({state:'detached'});
+ assert.match(await page.locator('#siteRiskStatus').innerText(),/Submitted successfully/);
+ assert.deepEqual(errors,[]);
+ }finally{await page.close();}
+});

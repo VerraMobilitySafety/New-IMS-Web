@@ -4,6 +4,7 @@ const root=path.join(__dirname,'..');
 const contract={type:'Contract',id:8,label:'C8 · Roadside Services',client:'Client A'};
 const initial=[{kind:'document',id:10,title:'SWMS — Deployment',reference:'848-1503',status:'Current',version:'7.0',review_date:'2020-01-01',document_links:[contract]},
  {kind:'document',id:11,title:'SWMS — Old deployment',reference:'848-1503',status:'Superseded',version:'6.0',document_links:[contract]}];
+async function fillRisk(page){for(const input of await page.locator('.swms-risk textarea').all())if(!await input.inputValue())await input.fill('Work-specific '+await input.getAttribute('data-risk-field'));for(const input of await page.locator('.swms-risk select').all())await input.selectOption((await input.getAttribute('data-risk-field')).endsWith('impact')?'3':'10');}
 async function screen(width=1440,holdAuth=false){
  let releaseAuth;const authGate=new Promise(resolve=>releaseAuth=resolve);if(!holdAuth)releaseAuth();
  const options={headless:true};if(process.env.VERO_CHROME_PATH)options.executablePath=process.env.VERO_CHROME_PATH;
@@ -40,8 +41,10 @@ test('desktop generation saves to the selected service; summaries, search, links
  await p.locator('#swmsGenerate').click();await p.locator('#swmsDialog').waitFor({state:'visible'});const rect=await p.locator('#swmsDialog').boundingBox();assert.equal(rect.x+rect.width,1440);assert.equal(rect.y,0);assert.equal(rect.height,1000);if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-drawer-desktop.png')});await p.locator('#swmsManual').click();assert.equal(await p.locator('#swmsContract').inputValue(),'8');
  for(const [name,value] of Object.entries({title:'Camera maintenance',location:'Eastern Creek',responsible_person:'Site supervisor',scope:'Maintain camera system',high_risk_work:'Work near traffic — NSW',site_conditions:'Live road and public interface',consultation:'Crew briefing 22 October',resources:'Authorised crew and equipment',emergency:'Site emergency plan and first aid',monitoring:'Supervisor checks before and during work'}))await p.locator('[name="'+name+'"]').fill(value);
  for(const input of await p.locator('.swms-step [data-field]').all())await input.fill('Site-specific '+await input.getAttribute('data-field'));
+ await fillRisk(p);await p.locator('[name=ppe][value="Gloves"]').check();assert.match(await p.locator('.swms-risk output').first().textContent(),/30 · Moderate/);
  await p.locator('#swmsReviewConfirmed').check();await p.locator('#swmsSubmit').click();await p.locator('#swmsDialog').waitFor({state:'hidden'});await p.locator('#swmsTotal').filter({hasText:'3'}).waitFor();
  assert.equal(s.posted.contract_id,8);assert.equal(s.posted.steps.length,1);assert.equal(s.posted.review_confirmed,true);
+ assert.equal(s.posted.steps[0].risks[0].initial_impact,3);assert.equal(s.posted.steps[0].risks[0].residual_likelihood,10);assert.deepEqual(s.posted.ppe,['Gloves']);
  assert.equal(await p.locator('#swmsPending').textContent(),'1');assert.match(await p.locator('#swmsSaved').textContent(),/Request #42/);
  await p.locator('#swmsSearch').fill('Camera maintenance');assert.equal(await p.locator('#swmsRows tr').count(),1);
  await p.locator('#swmsSearch').fill('');await p.locator('#swmsStateFilter').selectOption('pending');assert.equal(await p.locator('#swmsRows tr').count(),1);
@@ -63,10 +66,10 @@ test('question-led AI intake prefills only after enough answers, exposes sources
  await p.locator('#swmsAnswer').fill('Replace a roadside camera at Eastern Creek NSW, Australia, next to live traffic.');await p.locator('#swmsAsk').click();
  await p.getByText('Will the work area be separated from live traffic, and who will supervise?',{exact:true}).waitFor();assert.equal(await p.locator('#swmsForm').isVisible(),false);assert.equal(s.posted,undefined);
  await p.locator('#swmsAnswer').fill('Closed work bay with traffic separation, supervised by the site supervisor.');await p.locator('#swmsAsk').click();await p.locator('#swmsForm').waitFor({state:'visible'});
- assert.equal(await p.locator('[name=title]').inputValue(),'Camera replacement');assert.equal(await p.locator('[name=consultation]').inputValue(),'');assert.equal(await p.locator('[data-field=controls]').inputValue(),'Establish separation before work');
+ assert.equal(await p.locator('[name=title]').inputValue(),'Camera replacement');assert.equal(await p.locator('[name=consultation]').inputValue(),'');assert.equal(await p.locator('[data-risk-field=controls]').inputValue(),'Establish separation before work');
  assert.equal(await p.locator('#swmsAiContext a').getAttribute('href'),'documents.html?document=12');await p.getByText('Confirm emergency contacts.',{exact:true}).waitFor();assert.equal(s.posted,undefined);
  if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-ai-review.png'),fullPage:true});
- await p.locator('[name=consultation]').fill('Crew consulted and controls agreed.');await p.locator('#swmsReviewConfirmed').check();await p.locator('#swmsSubmit').click();assert.equal(s.posted,undefined);
+ await p.locator('[name=consultation]').fill('Crew consulted and controls agreed.');await p.locator('[data-field=action]').fill('Access the camera cabinet');await fillRisk(p);await p.locator('#swmsReviewConfirmed').check();await p.locator('#swmsSubmit').click();assert.equal(s.posted,undefined);
  await p.locator('#swmsAiConfirmed').check();await p.locator('#swmsSubmit').click();await p.locator('#swmsDialog').waitFor({state:'hidden'});
  assert.equal(s.posted.ai_assisted,true);assert.equal(s.posted.ai_review_confirmed,true);assert.deepEqual(s.posted.ai_sources,[{document_id:12,version:'2.0'}]);assert.equal(s.assistCalls,2);
  }finally{await s.browser.close();}
