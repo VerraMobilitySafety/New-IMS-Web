@@ -123,7 +123,7 @@ test('compact SWMS rows open the digital drawer by click or keyboard without hyp
  const ending=p.locator('#swmsRows tr').first().locator('.swms-title-ending');assert.equal(await ending.innerText(),'Waterview Tunnel');assert.equal(await ending.evaluate(e=>e.scrollWidth<=e.clientWidth),true);
  await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'SWMS deployment',reference:'S10',version:'7.0',status:'Current',can_edit:false,fields:digitalFields(),history:[{version:'7.0',status:'Current'}]}}));
  assert.equal(await p.getByRole('link',{name:'Open document',exact:true}).count(),0);assert.equal(await p.locator('.swms-table th').count(),5);
- await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.locator('#swmsDocumentDialog').waitFor({state:'visible'});await p.getByText('Only Administrators or users with the HSEQ role can edit a current SWMS.',{exact:true}).waitFor();assert.match(p.url(),/safe-work-method-statement/);
+ await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.locator('#swmsDocumentDialog').waitFor({state:'visible'});await p.getByText('Editing is restricted to Administrators, HSEQ and the assigned Responsible Person.',{exact:true}).waitFor();assert.match(p.url(),/safe-work-method-statement/);
  const rect=await p.locator('#swmsDocumentDialog').boundingBox();assert.equal(rect.x+rect.width,1440);assert.equal(rect.y,0);assert.equal(rect.height,1000);
  await p.getByRole('button',{name:'Close SWMS',exact:true}).click();await p.locator('#swmsRows tr').first().focus();await p.keyboard.press('Enter');await p.locator('#swmsDocumentDialog').waitFor({state:'visible'});
  await p.getByRole('button',{name:'Close SWMS',exact:true}).click();
@@ -213,7 +213,7 @@ test('responsible person uses current users, retains saved names and retries wit
  await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'SWMS deployment',version:'7.0',status:'Current',can_edit:true,fields:digitalFields(),history:[]}}));
  await p.route('**/swms/documents/10/revisions',route=>{posted=route.request().postDataJSON();return route.fulfill({status:201,json:{request:{id:88}}});});
  await p.locator('#swmsRows tr').first().click();await p.getByRole('button',{name:'Edit SWMS',exact:true}).click();
- const picker=p.locator('select[name=responsible_person]');assert.equal(await picker.inputValue(),'Recorded responsible_person');
+ const picker=p.locator('#swmsDocumentDialog select[name=responsible_person]');assert.equal(await picker.inputValue(),'Recorded responsible_person');
  await picker.locator('..').locator('..').getByRole('button',{name:'Retry users',exact:true}).waitFor({state:'visible'});await p.locator('#swmsDocumentDialog [name=scope]').fill('Updated scope remains');
  fail=false;await picker.locator('..').locator('..').getByRole('button',{name:'Retry users',exact:true}).click();await picker.locator('option').filter({hasText:'Casey Lee'}).waitFor({state:'attached'});
  assert.equal(await picker.inputValue(),'Recorded responsible_person');assert.equal(await picker.locator('option').filter({hasText:'Inactive User'}).count(),0);
