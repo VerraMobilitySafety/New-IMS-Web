@@ -123,10 +123,7 @@
     <div class="nav-section">
       <div class="nav-label">Governance Management</div>
 
-      <a id="continualImprovementNav" hidden style="display:none!important" class="${isActive('continual-improvement-management.html') ? 'active' : ''}" href="continual-improvement-management.html" ${isActive('continual-improvement-management.html') ? 'aria-current="page"' : ''}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 0 1 15-6l3 3M21 3v5h-5M21 13a9 9 0 0 1-15 6l-3-3M3 21v-5h5"/></svg>
-        <span>Continual Improvement Management</span>
-      </a>
+
 
       <a class="${isActive('documents.html') ? 'active' : ''}"
          href="documents.html">
@@ -192,6 +189,14 @@
           </a>
         </div>
       </div>
+
+
+
+
+      <a id="continualImprovementNav" hidden style="display:none!important" class="${isActive('continual-improvement-management.html') ? 'active' : ''}" href="continual-improvement-management.html" ${isActive('continual-improvement-management.html') ? 'aria-current="page"' : ''}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><path d="M3 11a9 9 0 0 1 15-6l3 3M21 3v5h-5M21 13a9 9 0 0 1-15 6l-3-3M3 21v-5h5"/></svg>
+        <span>Continual Improvement Management</span>
+      </a>
 
       <a class="placeholder" href="#" onclick="return false">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" aria-hidden="true" focusable="false"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="m9 14 2 2 4-4"></path></svg>
