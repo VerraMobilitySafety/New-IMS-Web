@@ -35,3 +35,15 @@
 
 
 .swms-record-link{display:block;margin:12px 0 18px;color:#53691c;font-weight:600}
+
+/* Compact register rows retain the drawer action without link styling. */
+#vh .swms-table{table-layout:fixed}
+#vh .swms-table th:first-child{width:40%}
+#vh .swms-table th:nth-child(2){width:25%}
+#vh .swms-table th:nth-child(3){width:14%}
+#vh .swms-table th:nth-child(4){width:8%}
+#vh .swms-table th:nth-child(5){width:13%}
+#vh .swms-table td{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal;vertical-align:middle;padding:12px}
+#swmsRows .swms-row-title{display:flex;align-items:center;gap:10px;min-width:0}
+#swmsRows td .swms-title-button{display:block;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:none;border:0;padding:0;margin:0;text-align:left;color:inherit;text-decoration:none;font:inherit;cursor:pointer}
+#swmsRows .swms-row-title>.secondary{flex:none}
