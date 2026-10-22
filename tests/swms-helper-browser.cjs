@@ -145,3 +145,20 @@ test('legacy SWMS shows a controlled-record link without embedding or fetching t
  if(process.env.VERO_SWMS_SCREENSHOTS)await p.screenshot({path:path.join(root,'tests/swms-digital-edit-mobile.png')});
  }finally{await s.browser.close();}
 });
+
+
+test('imported Practice Note opens prefilled in the drawer without requiring invented risks',async()=>{
+ const s=await screen();try{const p=s.page;
+ const fields={...digitalFields(),document_type:'Practice Note',scope:'Existing NZTA maintenance scope',location:'',steps:[{activity:'Pre Start',action:'Notify NZTA before work',hazards:'',controls:'',implementation:'',owner:''}]};
+ await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'NZTA Low Risk',document_type:'Practice Note',version:'0.1',status:'Draft',can_edit:true,fields,conversion_required:true,review_points:['No approval date was recorded in Cognito.'],history:[]}}));
+ await p.locator('#swmsRows tr').first().locator('td').nth(2).click();await p.getByText('No approval date was recorded in Cognito.',{exact:true}).waitFor();await p.getByRole('link',{name:'Open Practice Note record ↗',exact:true}).waitFor();
+ await p.getByRole('button',{name:'Review imported draft',exact:true}).click();
+ assert.equal(await p.locator('#swmsDocumentDialog [name=scope]').inputValue(),'Existing NZTA maintenance scope');
+ assert.equal(await p.locator('#swmsDocumentDialog [name=action]').inputValue(),'Notify NZTA before work');
+ assert.equal(await p.locator('#swmsDocumentDialog [name=location]').getAttribute('required'),null);
+ assert.equal(await p.locator('#swmsDocumentDialog [name=hazards]').getAttribute('required'),null);
+ assert.notEqual(await p.locator('#swmsDocumentDialog [name=action]').getAttribute('required'),null);
+ await p.getByRole('button',{name:'Submit draft for review',exact:true}).waitFor();
+ assert.equal(await p.locator('#swmsDocumentDialog iframe,#swmsDocumentDialog canvas').count(),0);
+ }finally{await s.browser.close();}
+});
