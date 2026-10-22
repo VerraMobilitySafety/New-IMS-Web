@@ -15,7 +15,7 @@ if(p.includes('/changes/')){if(route.request().method()==='PUT'){const b=route.r
 if(p.endsWith('/document-pages'))return route.fulfill({json:{documents:[{id:9,document_number:'PROC-01',document_title:'Change procedure',version_number:'1'}]}});
 return route.fulfill({json:{tasks:[],count:0,user:{vero_role:'Administrator'}}});});
 await page.goto('https://vero.test/change-management.html');await page.locator('#changeNew').waitFor();await page.waitForFunction(()=>!document.getElementById('changeNew').disabled);await page.getByText('No changes yet.',{exact:false}).waitFor();
-assert.equal(await page.locator('.main > .actions #changeNew').count(),1);assert.equal(await page.locator('.main > .actions .vero-related-documents').count(),1);
+assert.equal(await page.locator('.main #changeContent > .actions #changeNew').count(),1);assert.equal(await page.locator('.main #changeContent > .actions .vero-related-documents').count(),1);
 assert.equal(await page.locator('#vero-nav a[href="contractor-management.html"] + a').getAttribute('href'),'change-management.html');
 await page.locator('.vero-related-documents summary').click();await page.getByText('PROC-01 · Change procedure').waitFor();await page.locator('.vero-related-documents summary').click();
 await page.screenshot({path:path.join(out,`register-${width}.png`),fullPage:true});
