@@ -19,8 +19,25 @@ function field(label,value,onchange,{type='text',required=false,choices=null,lis
 function title(n,text,detail){const head=make('div',undefined,'t5-section-head'),number=make('span',n,'t5-number'),copy=make('div');copy.append(make('h3',text),make('p',detail));head.append(number,copy);return head;}
 function button(text,fn,cls='secondary'){const b=make('button',text,cls);b.type='button';b.addEventListener('click',fn);return b;}
 function renderChecks(){const root=$('take5Checks');root.replaceChildren();CHECKS.forEach(([name,checks])=>{const card=make('fieldset',undefined,'t5-check-card');card.append(make('legend',name));checks.forEach(([key,label])=>{const l=make('label',undefined,'t5-check'),input=make('input');input.type='checkbox';input.checked=!!assessment.payload.checks[key];input.required=true;input.addEventListener('change',()=>{assessment.payload.checks[key]=input.checked;changed();});l.append(input,make('span',label));card.append(l);});root.append(card);});}
-function publishedRating(value){const badge=make('span',value,'t5-score t5-published-rating');const match=value.match(/(?:Low|Moderate|High|Significant)$/);if(match)badge.dataset.category=match[0];return badge;}
-function renderSwmsRisks(){const root=$('take5SwmsRisks');root.replaceChildren();const rows=assessment.payload.hazards.filter(h=>h.source_swms);root.hidden=!rows.length;if(!rows.length)return;const details=make('details',undefined,'t5-swms-review');details.append(make('summary','Review SWMS risks ('+rows.length+')'));details.append(make('p','Published steps, hazards and controls. Review these before work. Add any extra hazards found on site below.'));rows.forEach((h,index)=>{const card=make('section',undefined,'t5-swms-risk');card.append(make('h4',(index+1)+'. '+(h.activity||'SWMS work step')),make('strong',h.description),make('p',h.controls));const ratings=make('div',undefined,'t5-published-ratings');(h.source_ratings||'').split(/\n| · (?=SWMS residual risk:)/).filter(Boolean).forEach(value=>ratings.append(publishedRating(value)));card.append(ratings);details.append(card);});root.append(details);}
+function publishedRating(value){const badge=make('span',value.replace(/^SWMS (?:initial|residual) risk:\s*/i,''),'t5-score t5-published-rating');const match=value.match(/(?:Low|Moderate|High|Significant)$/);if(match)badge.dataset.category=match[0];return badge;}
+function renderSwmsRisks(){
+ const root=$('take5SwmsRisks');root.replaceChildren();
+ const rows=assessment.payload.hazards.filter(h=>h.source_swms);root.hidden=!rows.length;if(!rows.length)return;
+ const details=make('details',undefined,'t5-swms-review');details.append(make('summary','Review SWMS risks ('+rows.length+')'));
+ details.append(make('p','Published steps, hazards and controls. Review these before work. Add any extra hazards found on site below.'));
+ rows.forEach((h,index)=>{
+  const card=make('section',undefined,'t5-swms-risk');card.append(make('h4',(index+1)+'. '+(h.activity||'SWMS work step')));
+  const ratings=(h.source_ratings||'').split(/\n| · (?=SWMS residual risk:)/).filter(Boolean);
+  const grid=make('div',undefined,'t5-swms-risk-grid');
+  for(const [label,value,rating] of [
+   ['Hazard',h.description,false],
+   ['Initial Risk',ratings.find(v=>/^SWMS initial risk:/i.test(v)),true],
+   ['Controls',h.controls,false],
+   ['Residual Risk',ratings.find(v=>/^SWMS residual risk:/i.test(v)),true]
+  ]){const cell=make('div',undefined,'t5-swms-risk-cell');cell.append(make('span',label,'t5-swms-column-label'));cell.append(rating?publishedRating(value||'Not scored'):make('p',value||''));grid.append(cell);}
+  card.append(grid);details.append(card);
+ });root.append(details);
+}
 function renderHazards(){renderSwmsRisks();const root=$('take5Hazards');root.replaceChildren();assessment.payload.hazards.forEach((h,index)=>{if(h.source_swms)return;const card=make('section',undefined,'t5-card'),head=make('div',undefined,'t5-card-head');head.append(make('h4','Site hazard '+(assessment.payload.hazards.slice(0,index+1).filter(item=>!item.source_swms).length)));if(!readonly()&&assessment.payload.hazards.length>1)head.append(button('Remove hazard',()=>{if(!confirm('Remove this hazard and its photos?'))return;assessment.payload.hazards.splice(index,1);changed();renderHazards();},'t5-remove'));card.append(head);if(h.source_swms)card.append(make('p',h.source_swms));if(h.source_ratings)card.append(make('p',h.source_ratings));const grid=make('div',undefined,'t5-grid');
 const update=(key,invalidates=true)=>value=>{h[key]=value;changed(invalidates);};
 grid.append(field('Work step / activity',h.activity||'',update('activity'),{type:'textarea'}).wrap);

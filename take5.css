@@ -43,3 +43,11 @@
 #vh .t5-score[data-category=High],#vh #take5Highest[data-category=High]{background:#ed8b23;color:#252321}
 #vh .t5-score[data-category=Significant],#vh #take5Highest[data-category=Significant]{background:#c62828;color:#fff}
 #vh #take5Highest[data-category]{display:inline-block;padding:6px 9px;border-radius:5px}
+
+#vh .t5-swms-risk-grid{display:grid;grid-template-columns:minmax(130px,1.15fr) minmax(105px,.7fr) minmax(220px,2.5fr) minmax(105px,.7fr);gap:0;align-items:stretch;min-width:660px}
+#vh .t5-swms-risk{overflow-x:auto}
+#vh .t5-swms-risk-cell{padding:12px;border:1px solid #e5e1de;min-width:0}
+#vh .t5-swms-risk-cell+.t5-swms-risk-cell{border-left:0}
+#vh .t5-swms-column-label{display:block;font-size:10px;text-transform:uppercase;font-weight:700;margin-bottom:12px;color:#68615b}
+#vh .t5-swms-risk-cell p{margin:0;overflow-wrap:anywhere}
+#vh .t5-swms-risk-cell .t5-published-rating{display:inline-block;padding:9px 10px;white-space:normal;line-height:1.5}
