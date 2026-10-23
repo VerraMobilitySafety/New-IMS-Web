@@ -54,3 +54,14 @@
 
 #vh .t5-swms-repeat-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 #vh .t5-swms-risk-grid+.t5-swms-risk-grid .t5-swms-risk-cell{border-top:0}
+
+#vh .t5-wizard-page[hidden]{display:none!important}
+#vh .t5-page-nav{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0 24px}
+#vh .t5-page-nav button{border:1px solid #d8d4d1;border-radius:6px;background:#fff;color:#3d3935;font:600 11px Montserrat,Arial,sans-serif;padding:10px 12px;cursor:pointer}
+#vh .t5-page-nav button[aria-current=step]{background:#3d3935;color:#fff;border-color:#3d3935;box-shadow:inset 0 -3px #a9c23f}
+#vh .t5-page-controls{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px}
+#vh #take5PageCount{font-size:11px;color:#68615b}
+#vh .t5-wizard-page>.t5-section:first-child{margin-top:0;border-top:0;padding-top:0}
+#vh .t5-wizard-page:focus{outline:none}
+#vh .t5-wizard-page>.t5-section-head{margin-top:8px}
+@media(max-width:600px){#vh .t5-page-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#vh .t5-page-nav button{text-align:left}}
