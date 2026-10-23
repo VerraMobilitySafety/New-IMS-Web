@@ -10,10 +10,10 @@ async function test(preReady=false){
  w.HTMLCanvasElement.prototype.toDataURL=()=> 'data:image/png;base64,iVBORw0KGgo=';
  w.HTMLElement.prototype.scrollIntoView=()=>{};w.confirm=()=>true;w.structuredClone=structuredClone;
  w.localStorage.setItem('vero_session_token','isolated-test');
- let fail=false,importFail=false,saved=null;
+ let fail=false,importFail=false,saved=null,grouped=false;
  w.fetch=async(url,init={})=>{calls.push({url,init});if(url.endsWith('/options'))return{ok:true,json:async()=>({hazard_types:['Traffic <img onerror=alert(1)>','Electrical'],employees:['Test Employee']})};
   if(url.endsWith('/swms'))return{ok:true,json:async()=>({items:[{id:101,kind:'document',status:'Current',reference:'SWMS-01',title:'Inspect road equipment'},{id:102,kind:'request',status:'Draft',title:'Unapproved draft'}]})};
-  if(url.includes('/swms-content?'))return importFail?{ok:false,json:async()=>({message:'SWMS could not be read'})}:{ok:true,json:async()=>({source:{id:101,reference:'SWMS-01',title:'Inspect road equipment',version:'2'},requirements:{ppe:['Safety Boots','Gloves <script>'],competencies:['First Aid']},steps:[{activity:'Inspect cabinet <script>',hazards:'Traffic movement',controls:'Separate work area',implementation:'Check barriers',owner:'Team lead',initial_risk:'75 · Significant',residual_risk:'10 · Low'}]})};
+  if(url.includes('/swms-content?'))return importFail?{ok:false,json:async()=>({message:'SWMS could not be read'})}:{ok:true,json:async()=>({source:{id:101,reference:'SWMS-01',title:'Inspect road equipment',version:'2'},requirements:{ppe:['Safety Boots','Gloves <script>'],competencies:['First Aid']},steps:grouped?[{activity:'Entry to Site',hazards:'Traffic',controls:'Separate work area',initial_risk:'75 · Significant',residual_risk:'20 · Moderate'},{activity:'Entry to Site',hazards:'Uneven ground',controls:'Inspect access path',initial_risk:'30 · Moderate',residual_risk:'10 · Low'},{activity:'Set up equipment',hazards:'Electrical contact',controls:'Isolate supply',initial_risk:'60 · High',residual_risk:'10 · Low'}]:[{activity:'Inspect cabinet <script>',hazards:'Traffic movement',controls:'Separate work area',implementation:'Check barriers',owner:'Team lead',initial_risk:'75 · Significant',residual_risk:'10 · Low'}]})};
   if(url.endsWith('/maintenance-contracts'))return{ok:true,json:async()=>({contracts:[{id:1,contract_name:'Contract One'},{id:2,contract_name:'Contract Two'}]})};
   if(url.endsWith('/1/sites'))return{ok:true,json:async()=>({sites:[{id:11,site_code:'S-11',site_name:'Test site'}]})};
   if(url.endsWith('/2/sites'))return{ok:true,json:async()=>({sites:[{id:22,site_code:'S-22',site_name:'Different site'}]})};
@@ -61,6 +61,14 @@ async function test(preReady=false){
  d.getElementById('take5New').click();assert.equal(d.getElementById('take5Fields').disabled,false);assert.equal(d.getElementById('take5_task').value,'');
  const before=calls.filter(c=>c.init.method==='PUT').length;d.getElementById('take5Form').dispatchEvent(new w.Event('submit',{cancelable:true}));await wait();assert.equal(calls.filter(c=>c.init.method==='PUT').length,before,'incomplete submissions never sent');
  input(d.getElementById('take5_swms'),'other');input(d.getElementById('take5_task'),'Unsaved task');w.confirm=()=>false;d.getElementById('take5Close').click();assert.equal(d.getElementById('take5Drawer').open,true,'cancel preserves unsaved work');w.confirm=()=>true;d.getElementById('take5Drawer').dispatchEvent(new w.Event('cancel',{cancelable:true}));assert.equal(d.getElementById('take5Drawer').open,false,'Escape closes after discard confirmation');
+ grouped=true;d.getElementById('take5New').click();input(d.getElementById('take5_swms'),'101');await wait();
+ assert.deepEqual([...d.querySelectorAll('.t5-swms-risk h4')].map(h=>h.textContent),['1. Entry to Site','2. Set up equipment']);
+ assert.equal(d.querySelectorAll('.t5-swms-risk-grid').length,3,'all hazard rows retained');
+ assert.equal(d.querySelector('.t5-swms-risk').querySelectorAll('.t5-swms-risk-grid').length,2);
+ assert.equal(d.querySelector('.t5-swms-risk-grid').children.length,4);
+ assert.match(d.querySelector('.t5-swms-risk').textContent,/Separate work area/);assert.match(d.querySelector('.t5-swms-risk').textContent,/Inspect access path/);
+ assert.equal(d.querySelector('.t5-swms-review').open,false);d.getElementById('take5Save').click();await wait();
+ assert.equal(saved.payload.hazards.length,3,'grouping preserves saved source rows');
  dom.window.close();console.log('PASS Take 5: auth gate, exact scoring, checks, repeaters, signature invalidation, retry, save, submit, read-only records, required fields and safe text.');
 }
 test().then(()=>test(true)).catch(e=>{console.error(e);process.exitCode=1;});
