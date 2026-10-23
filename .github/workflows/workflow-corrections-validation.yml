@@ -1,7 +1,7 @@
 name: Workflow corrections browser validation
 on:
   pull_request:
-    paths: ['project-management.html', 'project-workspace.html', 'project-request-save.js', 'compliance.html', 'compliance-correction.js', 'my-actions.html', 'tests/workflow-request-save.cjs', 'tests/compliance-correction-browser.cjs', '.github/workflows/workflow-corrections-validation.yml']
+    paths: ['project-management.html', 'project-workspace.html', 'project-request-save.js', 'compliance.html', 'compliance-correction.js', 'my-actions.html', 'tests/workflow-request-save.cjs', 'tests/compliance-correction-browser.cjs', 'tests/build_workflow_recovery.py', 'tests/verify_recovery_package.py', '.github/workflows/workflow-corrections-validation.yml']
 permissions:
   contents: read
 jobs:
