@@ -36,7 +36,7 @@ async function openContract(c){
  if(!c)return openImport();
  if(!workspace){location.href='maintenance-workspace.html?id='+encodeURIComponent(c.id);return;}
  selected=c;contractDetails=null;tab='Overview';document.getElementById('heroName').textContent=c.contract_name;document.title='VERO — '+c.contract_name;document.getElementById('heroCustomer').textContent=[c.contract_code,c.customer_name].filter(Boolean).join(' · ');document.getElementById('contractSummary').innerHTML=[['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Renewal',date(c.expiry_date)],['Linked requirements',c.requirement_count??0]].map(([label,value])=>'<div class="kpi"><b>'+esc(value??'—')+'</b><span>'+label+'</span></div>').join('');drawTab();
- try{const details=await request('/maintenance-contracts/'+c.id+'/details');if(selected?.id===c.id){contractDetails=details;if(!['Documents','Client Documents'].includes(tab))drawTab();}}catch(e){if(selected?.id===c.id){if(['Documents','Client Documents'].includes(tab))return;document.getElementById('tabContent').textContent=e.message;addContractRetry(()=>openContract(c));}}
+ try{const details=await request('/maintenance-contracts/'+c.id+'/details');if(selected?.id===c.id){contractDetails=details;if(!['Documents','Client Documents','Records'].includes(tab))drawTab();}}catch(e){if(selected?.id===c.id){if(['Documents','Client Documents','Records'].includes(tab))return;document.getElementById('tabContent').textContent=e.message;addContractRetry(()=>openContract(c));}}
 }
 function closeContract(){}
 async function editContractOwner(c){
@@ -90,24 +90,26 @@ function drawTab(){
  document.getElementById('tabs').innerHTML=names.map(n=>'<button data-tab="'+n+'" class="'+(tab===n?'active':'')+'">'+n+'</button>').join('');
  document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;drawTab();});
  const el=document.getElementById('tabContent'),c=selected;if(!c)return;
+ if(workspace&&window.VeroMaintenanceAdmin)window.VeroMaintenanceAdmin.toolbar(c,tab,canEditContractOwner,request,refreshMaintenanceWorkspace);
  if(tab==='Risks'){void drawContractRisks(c);return;}
  if(tab==='Sites'){void window.VeroContractActivity.sites(c,el,request);return;}
  if(tab==='Events'){void window.VeroContractActivity.events(c,el,request);return;}
  if(tab==='Documents'){void VeroSwmsService.mount(el,c,API,request);return;}
  if(tab==='Client Documents'){void VeroLinkedDocuments.mount(el,{type:'Client',name:c.customer_name,label:c.customer_name},null,API,request);return;}
  if(tab==='Overview'){
-  el.innerHTML='<div class="fields">'+[['Friendly name',c.friendly_name||c.contract_name],['Full contract name',c.official_contract_name||c.contract_name],['Contract reference',c.contract_code],['Customer',c.customer_name],['Contract type','Customer'],['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Compliance','Not assessed'],['Source files',c.source_count],['Linked requirements',c.requirement_count],['Scope',c.scope],['Notes',c.notes]].map(([label,value])=>'<div class="field"><label>'+esc(label)+'</label><p>'+esc(value||'—')+'</p>'+(label==='Owner'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractOwnerEdit">Edit owner</button>':'')+(label==='Status'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractStatusEdit">Edit status</button>':'')+'</div>').join('')+'</div>';document.getElementById('contractOwnerEdit')?.addEventListener('click',()=>editContractOwner(c));document.getElementById('contractStatusEdit')?.addEventListener('click',()=>editContractStatus(c));return;
+  el.innerHTML='<div class="fields">'+[['Friendly name',c.friendly_name||c.contract_name],['Full contract name',c.official_contract_name||c.contract_name],['Contract reference',c.contract_code],['Customer',c.customer_name],['Contract type','Customer'],['Status',c.status],['Owner',c.owner_name||'Unassigned'],['Start date',date(c.start_date)],['Expiry / renewal',date(c.expiry_date)],['Compliance','Not assessed'],['Source files',c.source_count],['Linked requirements',c.requirement_count],['Scope',c.scope],['Notes',c.notes]].map(([label,value])=>'<div class="field"><label>'+esc(label)+'</label><p>'+esc(value||'—')+'</p>'+(label==='Owner'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractOwnerEdit">Edit owner</button>':'')+(label==='Status'&&canEditContractOwner?'<button type="button" class="btn contract-owner-edit" id="contractStatusEdit">Edit status</button>':'')+'</div>').join('')+'</div>';document.getElementById('contractOwnerEdit')?.addEventListener('click',()=>editContractOwner(c));document.getElementById('contractStatusEdit')?.addEventListener('click',()=>editContractStatus(c));return;
  }
+ if(tab==='Records'&&window.VeroMaintenanceAdmin){void window.VeroMaintenanceAdmin.records(el,c,request,API,canEditContractOwner);return;}
  if(!contractDetails){el.textContent='Loading linked records…';return;}
  if(tab==='Records'){
-  el.innerHTML='<h3>Contract source files</h3>'+contractDetails.sources.map(s=>'<article class="message"><b>'+esc(s.title)+'</b><p>'+esc(s.record_code)+(s.metadata.supporting_only?' · Supporting tender':'')+'</p><button class="btn" data-source="'+s.id+'">Open PDF</button></article>').join('');
+  el.innerHTML='<h3>Contract source files</h3>'+contractDetails.sources.map(s=>'<article class="message"><b>'+esc(s.title)+'</b><p>'+esc(s.record_code)+(s.metadata.supporting_only?' · Supporting tender':'')+'</p><button class="btn" data-source="'+s.id+'">Open PDF</button> <a class="btn" href="records.html?record_id='+encodeURIComponent(s.record_id)+'">'+(canEditContractOwner?'Edit record details':'View record')+'</a></article>').join('');
   document.querySelectorAll('[data-source]').forEach(b=>b.onclick=async()=>{const destination=window.open('about:blank','_blank');try{const blob=await request('/maintenance-contracts/'+c.id+'/sources/'+b.dataset.source);const url=URL.createObjectURL(blob);destination.location=url;setTimeout(()=>URL.revokeObjectURL(url),600000);}catch(e){destination?.close();alert(e.message);}});return;
  }
  drawContractCompliance(c,el);
 }
 
 function drawContractCompliance(c,el){
- const items=(contractDetails.requirements||[]).flatMap(r=>(r.activities||[]).map(a=>({r,a})));
+ const items=(contractDetails.requirements||[]).flatMap(r=>(r.activities||[]).map((a,index)=>({r,a,index})));
  el.innerHTML='<section class="contract-compliance-list"><div class="contract-compliance-tools"><label>Search requirements<input type="search" id="contractComplianceSearch" placeholder="Search requirements, timing or clauses"></label></div><p id="contractComplianceCount" role="status" aria-live="polite"></p><div class="table-wrap"><table><thead><tr><th>Requirement</th><th>Type / applicability</th><th>Timing / trigger</th><th>Source</th><th>Assessment</th></tr></thead><tbody id="contractComplianceRows"></tbody></table></div><div class="contract-compliance-pages"><button type="button" id="contractCompliancePrevious">Previous</button><span id="contractCompliancePage"></span><button type="button" id="contractComplianceNext">Next</button></div></section>';
  const search=el.querySelector('#contractComplianceSearch'),rows=el.querySelector('#contractComplianceRows'),count=el.querySelector('#contractComplianceCount'),previous=el.querySelector('#contractCompliancePrevious'),next=el.querySelector('#contractComplianceNext'),pageLabel=el.querySelector('#contractCompliancePage');
  let page=0;const size=50;
@@ -115,10 +117,11 @@ function drawContractCompliance(c,el){
   const query=search.value.trim().toLowerCase(),filtered=items.filter(({r,a})=>[a.verra_action,a.instance_id,r.title,r.code,a.timing_or_trigger,a.conditions_and_exceptions,a.clause_reference].join(' ').toLowerCase().includes(query));
   page=Math.min(page,Math.max(0,Math.ceil(filtered.length/size)-1));const start=page*size,shown=filtered.slice(start,start+size);
   count.textContent=filtered.length+' requirement'+(filtered.length===1?'':'s')+(filtered.length?' · showing '+(start+1)+'–'+(start+shown.length):'');
-  rows.innerHTML=shown.map(({r,a})=>{
+  rows.innerHTML=shown.map(({r,a,index})=>{
    const href='compliance.html?obligation_id='+encodeURIComponent(r.id);
-   return '<tr><td><a class="contract-compliance-open" href="'+href+'">'+esc(a.verra_action||r.title||'Untitled requirement')+'</a><div class="contract-compliance-reference">'+esc(a.instance_id||r.code||'')+'</div><details><summary>Conditions and shared requirement</summary><p><strong>Common requirement:</strong> '+esc(r.title)+'</p><p><strong>Conditions:</strong> '+esc(a.conditions_and_exceptions||'No additional conditions recorded.')+'</p></details></td><td>Client<br>Maintenance</td><td>'+esc(a.timing_or_trigger||'Ongoing')+'</td><td>'+esc(a.clause_reference||'—')+((a.pdf_pages||[]).length?'<div>PDF pages '+esc(a.pdf_pages.join(', '))+'</div>':'')+'</td><td><a href="'+href+'">Open assessment</a></td></tr>';
+   return '<tr><td>'+(canEditContractOwner?'<button type="button" data-edit-activity="'+r.id+':'+index+'">Edit activity</button> ':'')+'<a class="contract-compliance-open" href="'+href+'">'+esc(a.verra_action||r.title||'Untitled requirement')+'</a><div class="contract-compliance-reference">'+esc(a.instance_id||r.code||'')+'</div><details><summary>Conditions and shared requirement</summary><p><strong>Common requirement:</strong> '+esc(r.title)+'</p><p><strong>Conditions:</strong> '+esc(a.conditions_and_exceptions||'No additional conditions recorded.')+'</p></details></td><td>Client<br>Maintenance</td><td>'+esc(a.timing_or_trigger||'Ongoing')+'</td><td>'+esc(a.clause_reference||'—')+((a.pdf_pages||[]).length?'<div>PDF pages '+esc(a.pdf_pages.join(', '))+'</div>':'')+'</td><td><a href="'+href+'">Open assessment</a></td></tr>';
   }).join('')||'<tr><td colspan="5">'+(items.length?'No requirements match your search.':'No requirements linked to this contract.')+'</td></tr>';
+  rows.querySelectorAll('[data-edit-activity]').forEach(b=>b.onclick=()=>{const [oid,index]=b.dataset.editActivity.split(':').map(Number);const r=contractDetails.requirements.find(r=>Number(r.id)===oid);window.VeroMaintenanceAdmin.editActivity(c,r,index,request,refreshMaintenanceWorkspace);});
   previous.disabled=page===0;next.disabled=start+size>=filtered.length;pageLabel.textContent=filtered.length?'Page '+(page+1)+' of '+Math.ceil(filtered.length/size):'';
  }
  search.oninput=()=>{page=0;renderRequirements();};previous.onclick=()=>{page--;renderRequirements();};next.onclick=()=>{page++;renderRequirements();};renderRequirements();
@@ -161,3 +164,9 @@ const initialContract=new URLSearchParams(location.search).get('contract_id');
 if(initialContract&&!workspace)location.replace('maintenance-workspace.html?id='+encodeURIComponent(initialContract));
 
 
+
+async function refreshMaintenanceWorkspace(){
+ const id=selected?.id,previousTab=tab;const data=await request('/maintenance-contracts');
+ if(selected?.id!==id)return;const c=(data.contracts||[]).find(x=>x.id===id);if(!c)throw Error('Contract no longer available. Reload the register.');
+ canEditContractOwner=data.can_edit_owner===true;await openContract(c);if(selected?.id===id){tab=previousTab;drawTab();}
+}
