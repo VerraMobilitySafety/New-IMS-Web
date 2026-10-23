@@ -23,3 +23,23 @@
 #vh .t5-actions{display:flex;align-items:center;gap:9px;margin:24px 0 20px}#vh .t5-actions .primary{background:#a9c23f;color:#292725;font-weight:700;padding:12px 18px}#vh .t5-register{margin-top:0}
 #vh .t5-site-context{background:#f2f5e9;border:1px solid #dbe3c9;border-radius:8px;padding:18px;font-size:12px}#vh .t5-site-context h3{font-size:15px;margin:0 0 10px}#vh .t5-site-context h4{font-size:12px;margin:16px 0 8px}#vh .t5-site-context p{font-size:11px;line-height:1.7}#vh .t5-site-context ul{padding-left:18px}#vh .t5-site-context li{margin:9px 0}#vh .t5-site-context a{color:#53691c}#vh .t5-site-context small{display:block;color:#625e59;margin-top:4px}#vh #take5WorkStatus{font-size:11px;margin:0}
 #vh #take5WorkStatus:empty,#vh #take5SourcesStatus:empty{display:none}#vh #take5SourcesStatus{font-size:11px;margin:0}
+
+/* VERO branding and clear published risk ratings. */
+#vh .t5-drawer .t5-top{background:#3d3935;color:#fff;border-bottom:3px solid #a9c23f}
+#vh .t5-drawer .t5-top h2,#vh .t5-drawer .t5-close{color:#fff}
+#vh .t5-drawer .t5-top p,#vh .t5-drawer .t5-top .t5-muted{color:#e5e1de}
+#vh .t5-drawer .primary{background:#a9c23f;color:#252321;border-color:#a9c23f}
+#vh .t5-number{background:#a9c23f;color:#252321}
+#vh .t5-stats{background:#f5f4f2}#vh .t5-stats div{border-color:#e5e1de}
+#vh .t5-site-context{background:#f8f7f6;border-color:#e5e1de}
+#vh .t5-swms-review{border:1px solid #d8d4d1;border-radius:8px;margin-bottom:22px;background:#fff}
+#vh .t5-swms-review summary{cursor:pointer;padding:17px 20px;background:#3d3935;color:#fff;border-radius:7px;font-weight:700}
+#vh .t5-swms-review>p{padding:0 20px;line-height:1.7}
+#vh .t5-swms-risk{padding:18px 20px;border-top:1px solid #e5e1de}
+#vh .t5-swms-risk h4{margin:0 0 12px}#vh .t5-swms-risk p{white-space:pre-wrap;line-height:1.7}
+#vh .t5-published-ratings{display:flex;gap:10px;flex-wrap:wrap}#vh .t5-published-rating{margin:0}
+#vh .t5-score[data-category=Low],#vh #take5Highest[data-category=Low]{background:#a9c23f;color:#252321}
+#vh .t5-score[data-category=Moderate],#vh #take5Highest[data-category=Moderate]{background:#f4d35e;color:#252321}
+#vh .t5-score[data-category=High],#vh #take5Highest[data-category=High]{background:#ed8b23;color:#252321}
+#vh .t5-score[data-category=Significant],#vh #take5Highest[data-category=Significant]{background:#c62828;color:#fff}
+#vh #take5Highest[data-category]{display:inline-block;padding:6px 9px;border-radius:5px}
