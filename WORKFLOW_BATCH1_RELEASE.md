@@ -28,3 +28,5 @@ node tests/project-documents-browser.cjs
 Requires Playwright, a test Chromium executable and jsdom for the existing document UI tests. Local jsdom was installed in the task's temporary folder, not added as a production dependency. Browser scripts were run with the installed Chrome executable in headless test profiles.
 
 Release remains blocked on real PostgreSQL migration/concurrency verification and an isolated Web-to-API role acceptance run. Coordinate schema/API/Web release; cached old forms require refresh. Do not blindly roll back to an API that includes archived milestone rows. Retain audit tables on rollback; no destructive rollback is authorised.
+
+Publication update: API draft PR #197 and Web draft PR #288 are open. The user explicitly authorised existing Risk/SWMS regression tests on synthetic data; the earlier testing exclusion and pre-publication permission blocker are superseded for tests only. Risk/SWMS code changes remain excluded. CI results are pending; no deployment workflow was dispatched.
