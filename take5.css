@@ -51,3 +51,6 @@
 #vh .t5-swms-column-label{display:block;font-size:10px;text-transform:uppercase;font-weight:700;margin-bottom:12px;color:#68615b}
 #vh .t5-swms-risk-cell p{margin:0;overflow-wrap:anywhere}
 #vh .t5-swms-risk-cell .t5-published-rating{display:inline-block;padding:9px 10px;white-space:normal;line-height:1.5}
+
+#vh .t5-swms-repeat-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#vh .t5-swms-risk-grid+.t5-swms-risk-grid .t5-swms-risk-cell{border-top:0}
