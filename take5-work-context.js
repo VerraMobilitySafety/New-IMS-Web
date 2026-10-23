@@ -4,11 +4,13 @@ window.VeroTake5WorkContext=function({request,changed,getAssessment,readonly,imp
  let swms=[],contracts=[],siteTicket=0,contextTicket=0,cache=new Map();
  function fill(select,items,value,placeholder){select.replaceChildren(new Option(placeholder,''));items.forEach(([label,id])=>select.append(new Option(label,String(id))));select.value=value==null?'':String(value);}
  const label=d=>[d.reference,d.title].filter(Boolean).join(' · ');
- function task(){const p=getAssessment().payload,select=$('take5_swms'),items=swms.map(d=>[label(d),d.id]);
-  if(p.swms_id&&!items.some(x=>String(x[1])===String(p.swms_id)))items.push([p.task||'Saved SWMS',p.swms_id]);
+ const linked=(d,cid)=>!!cid&&(d.document_links||[]).some(link=>link.type==='Contract'&&String(link.id)===String(cid));
+ function clearReview(){getAssessment().payload.checks.reviewed=false;const check=document.querySelector('#take5SwmsChecks input');if(check)check.checked=false;}
+ function task(){const p=getAssessment().payload,select=$('take5_swms'),items=swms.filter(d=>linked(d,p.contract_id)).map(d=>[label(d),d.id]);
+  if(readonly()&&p.swms_id&&!items.some(x=>String(x[1])===String(p.swms_id)))items.push([p.task||'Saved SWMS',p.swms_id]);
   let selected=p.task_other?'other':p.swms_id;
-  if(!selected&&p.task){items.push([p.task,'legacy']);selected='legacy';}
-  items.push(['Other','other']);fill(select,items,selected,'Select a SWMS…');
+  if(readonly()&&!selected&&p.task){items.push([p.task,'legacy']);selected='legacy';}
+  if(p.contract_id)items.push(['Other','other']);fill(select,items,selected,p.contract_id?'Select a SWMS…':'Select a contract first');select.disabled=!p.contract_id;
   $('take5_other_task').hidden=!p.task_other;$('take5_task').value=p.task_other?p.task:'';$('take5_task').required=!!p.task_other;
  }
  function sites(cid,selected){const items=(cache.get(String(cid))||[]).map(s=>[[s.site_code,s.site_name].filter(Boolean).join(' · '),s.id]);const p=getAssessment().payload;
@@ -41,8 +43,8 @@ window.VeroTake5WorkContext=function({request,changed,getAssessment,readonly,imp
   fill($('take5_contract'),items,cid,'Select a contract…');void loadSites(p.contract_id,p.site_id);void context();}
  async function load(){try{const data=await Promise.all([request('/swms'),request('/maintenance-contracts')]);swms=(data[0].items||[]).filter(d=>d.kind==='document'&&d.status==='Current');contracts=data[1].contracts||[];$('take5WorkStatus').textContent='';render();}
   catch(e){$('take5SourcesStatus').replaceChildren(node('span','Unable to load work choices: '+e.message+' '),retry('Retry work choices',load));}}
- $('take5_swms').addEventListener('change',()=>{const p=getAssessment().payload,v=$('take5_swms').value;if(v==='legacy')return;const wasOther=p.task_other;p.task_other=v==='other';p.swms_id=v&&v!=='other'?Number(v):null;p.task=p.task_other?(wasOther?p.task:''):(swms.find(d=>String(d.id)===v)?label(swms.find(d=>String(d.id)===v)):'');delete p.swms_source;delete p.swms_requirements;changed();task();void importSwms(p.swms_id);});
- $('take5_contract').addEventListener('change',()=>{const p=getAssessment().payload,v=$('take5_contract').value;if(v==='legacy')return;p.contract_id=v?Number(v):null;p.contract=contracts.find(c=>String(c.id)===v)?.contract_name||'';p.site_id=null;p.site='';contextTicket++;$('take5SiteContext').hidden=true;$('take5SiteContext').replaceChildren();changed();void loadSites(p.contract_id,null);});
+ $('take5_swms').addEventListener('change',()=>{const p=getAssessment().payload,v=$('take5_swms').value;if(v==='legacy')return;const wasOther=p.task_other;p.task_other=v==='other';p.swms_id=v&&v!=='other'?Number(v):null;p.task=p.task_other?(wasOther?p.task:''):(swms.find(d=>String(d.id)===v)?label(swms.find(d=>String(d.id)===v)):'');delete p.swms_source;delete p.swms_requirements;clearReview();changed();task();void importSwms(p.swms_id);});
+ $('take5_contract').addEventListener('change',()=>{const p=getAssessment().payload,v=$('take5_contract').value;if(v==='legacy')return;p.contract_id=v?Number(v):null;p.contract=contracts.find(c=>String(c.id)===v)?.contract_name||'';if(p.swms_id&&!swms.some(d=>String(d.id)===String(p.swms_id)&&linked(d,p.contract_id))){p.swms_id=null;p.task='';p.task_other=false;delete p.swms_source;delete p.swms_requirements;void importSwms(null);}if(!p.contract_id){p.task_other=false;p.task='';}clearReview();task();p.site_id=null;p.site='';contextTicket++;$('take5SiteContext').hidden=true;$('take5SiteContext').replaceChildren();changed();void loadSites(p.contract_id,null);});
  $('take5_site').addEventListener('change',()=>{const p=getAssessment().payload,v=$('take5_site').value;if(v==='legacy')return;p.site_id=v?Number(v):null;const site=(cache.get(String(p.contract_id))||[]).find(s=>String(s.id)===v);p.site=site?[site.site_code,site.site_name].filter(Boolean).join(' · '):'';changed();void context();});
  return {render,load};
 };
