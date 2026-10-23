@@ -1084,7 +1084,7 @@
 const API='https://verra-ims-api-dev-eegmeab6c5haetdv.westus3-01.azurewebsites.net/api';
 const TOKEN_KEY='vero_session_token', USER_KEY='vero_current_user';
 let allActions=[], currentFilter='all', currentAction=null;
-let actionLoadSequence=0;
+let actionLoadSequence=0,documentRequestOpened=false;
 
 function updateGreeting(firstName){
  const hour=new Date().getHours();
@@ -2827,6 +2827,13 @@ async function loadActions(){
   actionSummaryLoaded=true;
   renderActions();
   finishInitialActionsLoad();
+  const requestedDocument=new URLSearchParams(location.search).get('document_request');
+  if(!documentRequestOpened&&/^[1-9]\d*$/.test(requestedDocument||'')){
+   documentRequestOpened=true;
+   const index=allActions.findIndex(action=>action.source==='Documents'&&String(action.source_id)===requestedDocument);
+   if(index>=0)openActionDetail(index);
+   else{const message=document.createElement('p');message.setAttribute('role','status');message.textContent='Request #'+requestedDocument+' is not currently assigned to you. Check the assigned reviewer shown in the SWMS request.';list.prepend(message);}
+  }
   if(selectedRiskId){
    const selectedIndex=allActions.findIndex(action=>action.id===selectedRiskId);
    if(selectedIndex<0)closeActionDetail();

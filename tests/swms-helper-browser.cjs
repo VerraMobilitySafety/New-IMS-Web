@@ -243,3 +243,30 @@ test('draft submit exposes missing fields in closed dropdowns, then submits the 
  assert.equal(calls,1);assert.equal(posted.consultation,'Casey Lee');assert.equal(posted.high_risk_work,'Falls over 2 metres');assert.equal(posted.expected_version,'0.1');assert.equal(posted.review_confirmed,true);assert.equal(posted.steps[0].risks[0].hazards,'Traffic');
  }finally{await s.browser.close();}
 });
+
+
+test('imported source opens its existing request and identifies the assigned reviewer',async()=>{
+ const s=await screen();try{const p=s.page;
+ await p.route('**/swms/documents/10',route=>route.fulfill({json:{id:10,title:'Imported SWMS',version:'0.1',status:'Draft',can_edit:false,fields:digitalFields(),pending_request:{id:89,status:'Governance Review',assigned_to:'Reviewer Smith'},history:[]}}));
+ await p.route('**/swms/requests/89',route=>route.fulfill({json:{id:89,kind:'request',title:'Imported SWMS',version:'Draft',status:'Governance Review',can_edit:false,assigned_to:'Reviewer Smith',fields:digitalFields(),history:[]}}));
+ await p.locator('#swmsRows tr').first().locator('td').nth(2).click();
+ await p.getByRole('heading',{name:'Already submitted · Request #89',exact:true}).waitFor();
+ assert.match(await p.locator('.swms-pending-request').innerText(),/Reviewer Smith/);
+ assert.equal(await p.getByRole('button',{name:'Edit draft',exact:true}).count(),0);
+ await p.getByRole('button',{name:'Open Request #89',exact:true}).click();
+ await p.getByRole('link',{name:'Open review task in My Actions',exact:true}).waitFor();
+ assert.equal(await p.getByRole('link',{name:'Open review task in My Actions',exact:true}).getAttribute('href'),'my-actions.html?document_request=89');
+ assert.match(await p.locator('.swms-document-body').innerText(),/Request #89 · Governance Review · Assigned to: Reviewer Smith/);
+ }finally{await s.browser.close();}
+});
+
+
+test('request link opens an assigned task and explains when the task belongs to another reviewer',async()=>{
+ const s=await screen();try{const p=s.page;let assigned=true;
+ await p.route('**/api/my-actions',route=>route.fulfill({json:{actions:assigned?[{id:'document-request-89',source:'Documents',source_id:89,action_type:'Document Request',request_type:'New Document',title:'Review document request',description:'Imported SWMS',status:'Governance Review',assigned_to:'Reviewer Smith'}]:[]}}));
+ await p.route('**/document-requests/89/context',route=>route.fulfill({json:{entity_type:'Governance',document_links:[]}}));
+ await p.goto('https://vero.test/my-actions.html?document_request=89');
+ await p.waitForFunction(()=>typeof currentAction!=='undefined'&&currentAction?.id==='document-request-89');
+ assigned=false;await p.reload();await p.getByText('Request #89 is not currently assigned to you. Check the assigned reviewer shown in the SWMS request.',{exact:true}).waitFor();
+ }finally{await s.browser.close();}
+});
