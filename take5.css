@@ -67,3 +67,5 @@
 @media(max-width:600px){#vh .t5-page-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#vh .t5-page-nav button{text-align:left}}
 
 #vh .t5-page-checks{margin-top:22px}#vh #take5Checks{grid-template-columns:1fr}
+
+#vh .t5-score-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
