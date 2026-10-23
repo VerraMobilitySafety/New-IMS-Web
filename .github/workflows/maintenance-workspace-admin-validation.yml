@@ -1,0 +1,18 @@
+name: Maintenance workspace administrator controls
+on:
+  pull_request:
+    paths: ['maintenance-workspace-admin.js', 'customer-contracts.js', 'maintenance-workspace.html', 'tests/maintenance-workspace-admin.cjs', '.github/workflows/maintenance-workspace-admin-validation.yml']
+permissions:
+  contents: read
+jobs:
+  workspace-admin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.62.1
+      - run: npx playwright install --with-deps chromium
+      - run: node --test tests/maintenance-workspace-admin.cjs tests/contract-site-row-edit.cjs tests/maintenance-contract-activity.cjs
