@@ -808,6 +808,7 @@
        <select id="publicationDocumentOwner" style="width:100%;box-sizing:border-box;border:1px solid #d8d4d1;border-radius:7px;padding:9px;background:#fff">
         <option value="">Select owner…</option>
        </select>
+       <button type="button" id="publicationOwnerRetry" hidden>Retry loading owners</button>
       </div>
      </div>
 
@@ -1998,7 +1999,7 @@ function openActionDetail(index){
    document.getElementById('publicationDocumentType').value=
     action.document_type||action.existing_document_type||'';
 
-   populatePublicationOwnerUsers(
+   loadPublicationOwnerUsers(
     action.document_owner_user_id||
     action.existing_document_owner_user_id||
     null
@@ -2719,13 +2720,13 @@ function filterDocumentApprovers(){
  });
 }
 
-function populatePublicationOwnerUsers(selectedUserId=null){
+function populatePublicationOwnerUsers(selectedUserId=null,users=documentApproverUsers){
  const select=document.getElementById('publicationDocumentOwner');
  if(!select)return;
 
  select.innerHTML=
   '<option value="">Select owner…</option>'+
-  documentApproverUsers.map(u=>{
+  users.map(u=>{
    const name=[u.first_name,u.last_name]
     .filter(Boolean)
     .join(' ')||u.email;
@@ -2735,6 +2736,37 @@ function populatePublicationOwnerUsers(selectedUserId=null){
 
  if(selectedUserId!==null&&selectedUserId!==undefined){
   select.value=String(selectedUserId);
+ }
+}
+
+let publicationOwnerLoadSequence=0;
+async function loadPublicationOwnerUsers(selectedUserId=null){
+ const select=document.getElementById('publicationDocumentOwner');
+ const retry=document.getElementById('publicationOwnerRetry');
+ if(!select)return;
+ const sequence=++publicationOwnerLoadSequence;
+ select.disabled=true;
+ select.innerHTML='<option value="">Loading owners…</option>';
+ retry.hidden=true;
+ retry.onclick=()=>loadPublicationOwnerUsers(selectedUserId);
+ try{
+  const token=localStorage.getItem(TOKEN_KEY);
+  if(!token)throw new Error('Please sign in to load document owners.');
+  const response=await fetch(`${API}/users/lookup`,{
+   headers:{Authorization:'Bearer '+token,Accept:'application/json'},cache:'no-store'
+  });
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.message||'Unable to load document owners.');
+  if(sequence!==publicationOwnerLoadSequence)return;
+  const users=data.users||[];
+  if(!users.length)throw new Error('No active document owners are available.');
+  populatePublicationOwnerUsers(selectedUserId,users);
+  select.disabled=false;
+ }catch(error){
+  if(sequence!==publicationOwnerLoadSequence)return;
+  select.innerHTML='<option value="">Unable to load owners</option>';
+  retry.hidden=false;
+  retry.title=error.message;
  }
 }
 
@@ -2758,7 +2790,6 @@ async function loadDocumentApprovers(){
    u=>u.active&&u.account_status==='Active'
   );
 
-  populatePublicationOwnerUsers();
 
   list.innerHTML=documentApproverUsers.map(u=>{
    const name=[u.first_name,u.last_name].filter(Boolean).join(' ')||u.email;
