@@ -29,7 +29,7 @@ function renderSwmsRisks(){
  rows.forEach(h=>{const key=JSON.stringify([h.source_swms,h.activity||'SWMS work step']);if(!groups.has(key))groups.set(key,{activity:h.activity||'SWMS work step',rows:[]});groups.get(key).rows.push(h);});
  [...groups.values()].forEach((group,index)=>{
   const card=make('section',undefined,'t5-swms-risk');card.append(make('h4',(index+1)+'. '+group.activity));
-  group.rows.forEach((h,rowIndex)=>{ 
+  group.rows.forEach((h,rowIndex)=>{
   const ratings=(h.source_ratings||'').split(/\n| · (?=SWMS residual risk:)/).filter(Boolean);
   const grid=make('div',undefined,'t5-swms-risk-grid');
   for(const [label,value,rating] of [
