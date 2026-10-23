@@ -28,7 +28,7 @@ test('maintenance Documents tab combines accessible contract, client, site docum
   await page.getByRole('cell',{name:'OP40 · Site safety plan',exact:true}).waitFor();
   assert.equal(await page.locator('.maintenance-documents tbody tr').count(),3);
   assert.equal(await page.getByRole('link',{name:'Generate or view SWMS'}).getAttribute('href'),'safe-work-method-statement.html?contract_id=4');
-  await page.getByText('Request #42 · SWMS — Roadside work · Submitted').waitFor();
+  await page.getByText('Request #42 · SWMS — Roadside work · SWMS · Submitted').waitFor();
   assert.equal(await page.getByRole('link',{name:'View record',exact:true}).getAttribute('href'),'records.html?record_id=22');
   await page.getByRole('searchbox',{name:'Search linked documents'}).fill('Nine');
   assert.equal(await page.locator('.maintenance-documents tbody tr').count(),1);
