@@ -25,6 +25,7 @@
      const wrap=node('label',label);wrap.style.cssText='display:block;margin:14px 0';
      const input=node(key==='proposed_frequency'?'select':key==='proposed_title'||key==='proposed_source_name'?'input':'textarea');
      input.style.cssText='display:block;width:100%;padding:8px;box-sizing:border-box';input.name=key;
+     if(['proposed_title','proposed_source_name','proposed_source_reference'].includes(key))input.maxLength=255;
      if(key==='proposed_frequency')for(const value of new Set([data.item[key]||'',...frequencies]))input.append(new Option(value||'Not specified',value));
      input.value=data.item[key]||'';input.required=key==='proposed_title';input.oninput=()=>{dirty=true;};inputs[key]=input;wrap.append(input);form.insertBefore(wrap,buttons);
     }

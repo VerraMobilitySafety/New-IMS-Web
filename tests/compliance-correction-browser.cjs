@@ -23,12 +23,16 @@ const script=fs.readFileSync(path.join(__dirname,'../compliance-correction.js'),
    return route.abort();
   });
   await page.goto('https://vero.test/compliance.html?correct=1');
+  const reference=page.getByLabel('Source reference',{exact:true});
+  assert.equal(await reference.getAttribute('maxlength'),'255');
+  await reference.fill('x'.repeat(255));
   await page.getByLabel('Requirement title',{exact:true}).fill('Corrected requirement');
   await page.getByRole('button',{name:'Save correction draft'}).click();
   await page.getByRole('status').filter({hasText:'Synthetic temporary failure'}).waitFor();
   await page.getByRole('button',{name:'Save correction draft'}).click();
   await page.getByRole('status').filter({hasText:'Correction draft saved'}).waitFor();
   assert.equal(writes[0].operation_id,writes[1].operation_id);assert.equal(writes[1].expected_revision,7);
+  assert.equal(writes[1].item.proposed_source_reference.length,255);
   await page.getByRole('button',{name:'Close',exact:true}).click();
   await page.reload();await page.getByLabel('Requirement title',{exact:true}).waitFor();
   assert.equal(await page.getByLabel('Requirement title',{exact:true}).inputValue(),'Corrected requirement');
