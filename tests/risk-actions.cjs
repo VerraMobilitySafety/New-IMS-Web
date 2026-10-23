@@ -222,3 +222,40 @@ test('asset type review opens only the server-assigned assessment with validated
  assert.equal(api.destination(action).href,'asset-management.html?assessment=7');
  for(const id of [null,0,-1,true,'7&admin=1','https://unsafe.example'])assert.equal(api.destination({...action,assessment_id:id}),null);
 });
+
+test('publication loads active owner choices independently of the administrator approver list',async()=>{
+ const {context,elements}=setup();
+ const requests=[];
+ context.fetch=async(url,options)=>{requests.push({url,options});return {ok:true,json:async()=>({users:[{id:7,first_name:'Alex',last_name:'Owner',email:'alex@example.test'}]})};};
+ await vm.runInContext('loadPublicationOwnerUsers(7)',context);
+ const select=elements.get('publicationDocumentOwner');
+ assert.match(requests[0].url,/\/users\/lookup$/);
+ assert.equal(requests[0].options.headers.Authorization,'Bearer test-token');
+ assert.match(select.innerHTML,/value="7">Alex Owner/);
+ assert.equal(select.value,'7');assert.equal(select.disabled,false);
+ assert.equal(elements.get('publicationOwnerRetry').hidden,true);
+ assert.match(html,/loadPublicationOwnerUsers\(\s*action.document_owner_user_id/);
+});
+
+test('publication owner lookup failure can be retried without reopening the action',async()=>{
+ const {context,elements}=setup();let fail=true;
+ context.fetch=async()=>({ok:!fail,json:async()=>fail?{message:'Service unavailable'}:{users:[{id:9,email:'owner@example.test'}]}});
+ await vm.runInContext('loadPublicationOwnerUsers()',context);
+ const select=elements.get('publicationDocumentOwner'),retry=elements.get('publicationOwnerRetry');
+ assert.equal(select.disabled,true);assert.equal(retry.hidden,false);
+ assert.match(select.innerHTML,/Unable to load owners/);
+ fail=false;await retry.onclick();
+ assert.equal(select.disabled,false);assert.equal(retry.hidden,true);
+ assert.match(select.innerHTML,/owner@example.test/);
+});
+
+test('late owner responses do not replace the newly opened action owner',async()=>{
+ const {context,elements}=setup();let finishFirst;
+ context.fetch=()=>new Promise(resolve=>{finishFirst=resolve;});
+ const first=vm.runInContext('loadPublicationOwnerUsers(7)',context);
+ context.fetch=async()=>({ok:true,json:async()=>({users:[{id:9,email:'new@example.test'}]})});
+ await vm.runInContext('loadPublicationOwnerUsers(9)',context);
+ finishFirst({ok:true,json:async()=>({users:[{id:7,email:'old@example.test'}]})});await first;
+ assert.equal(elements.get('publicationDocumentOwner').value,'9');
+ assert.doesNotMatch(elements.get('publicationDocumentOwner').innerHTML,/old@example.test/);
+});
