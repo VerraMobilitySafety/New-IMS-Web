@@ -65,3 +65,5 @@
 #vh .t5-wizard-page:focus{outline:none}
 #vh .t5-wizard-page>.t5-section-head{margin-top:8px}
 @media(max-width:600px){#vh .t5-page-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}#vh .t5-page-nav button{text-align:left}}
+
+#vh .t5-page-checks{margin-top:22px}#vh #take5Checks{grid-template-columns:1fr}
