@@ -1,0 +1,38 @@
+name: Workflow corrections browser validation
+on:
+  pull_request:
+    paths: ['project-management.html', 'project-workspace.html', 'project-request-save.js', 'compliance.html', 'compliance-correction.js', 'my-actions.html', 'tests/workflow-request-save.cjs', 'tests/compliance-correction-browser.cjs', 'tests/build_workflow_recovery.py', 'tests/verify_recovery_package.py', '.github/workflows/workflow-corrections-validation.yml']
+permissions:
+  contents: read
+jobs:
+  corrections:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.15'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps chromium
+      - run: node --test tests/workflow-request-save.cjs tests/project-first-fixes.cjs tests/project-execution-initialization.cjs
+      - run: node tests/compliance-correction-browser.cjs
+      - name: Build and verify compatibility recovery package
+        run: |
+          python tests/build_workflow_recovery.py --role web --baseline 1cbfe7a8834e7c51d925c1e10ba438609fc9cae8 --output recovery/workflow-web.zip
+          python tests/build_workflow_recovery.py --role web --baseline 1cbfe7a8834e7c51d925c1e10ba438609fc9cae8 --output recovery/repeat.zip
+          cmp recovery/workflow-web.zip recovery/repeat.zip
+          python tests/verify_recovery_package.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: workflow-recovery-web-${{ github.event.pull_request.head.sha }}
+          path: |
+            recovery/workflow-web.zip
+            recovery/workflow-web.sha256
+          retention-days: 30

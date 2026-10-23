@@ -1424,7 +1424,7 @@ function openActionDetail(index){
 
  const isCompliance=
   action.source==='Compliance' &&
-  action.action_type==='Compliance Review';
+  ['Compliance Review','Compliance Correction'].includes(action.action_type);
 
  const isComplianceActivity=
   action.source==='Compliance' &&
@@ -1753,7 +1753,7 @@ function openActionDetail(index){
    `<button class="action-btn-approve"
             type="button"
             onclick="openComplianceAction()">
-      Review Compliance Requirement →
+      ${action.action_type==='Compliance Correction'?'Correct Returned Requirement':'Review Compliance Requirement'} →
     </button>`;
 
  }else{
@@ -2127,7 +2127,7 @@ function openComplianceAction(){
  if(!currentAction)return;
 
  location.href=
-  `compliance.html?request=${encodeURIComponent(currentAction.source_id)}`;
+  `compliance.html?${currentAction.action_type==='Compliance Correction'?'correct':'request'}=${encodeURIComponent(currentAction.source_id)}`;
 }
 
 function openRecordFromAction(){
