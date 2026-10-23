@@ -3577,7 +3577,8 @@ document.addEventListener('keydown',e=>{
 
 
 <script src="compliance-contract-links.js"></script>
-<link rel="stylesheet" href="register-layout.css"><script src="register-layout.js"></script><script src="page-related-documents.js?v=20261022-placement"></script></body>
+<link rel="stylesheet" href="register-layout.css"><script src="register-layout.js"></script><script src="page-related-documents.js?v=20261022-placement"></script><script src="compliance-correction.js"></script>
+</body>
 </html>
 
 <style>
@@ -4490,6 +4491,7 @@ async function openComplianceRequestFromAction(requestId){
   const item=(data.items||[])[0];
 
   currentComplianceReview=item;
+  modal.dataset.requestRevision=String(request.revision);
 
   if(!item){
    throw new Error('No compliance requirement was found in this request.');
@@ -4637,6 +4639,7 @@ async function controllerDecision(decision){
     },
     body:JSON.stringify({
      decision:decision,
+     expected_revision:Number(document.getElementById('controllerModal').dataset.requestRevision),
      controller_notes:controllerNotes,
      rejection_reason:rejectionReason,
      compliance_owner_user_id:complianceOwnerUserId
@@ -4876,6 +4879,7 @@ async function submitComplianceAmendment(){
     },
     body:JSON.stringify({
      decision:'Approved with Amendments',
+     expected_revision:Number(document.getElementById('controllerModal').dataset.requestRevision),
      controller_notes:controllerNotes,
      amendments:amendments
     })
@@ -5336,6 +5340,7 @@ async function submitLinkExisting(){
     },
     body:JSON.stringify({
      decision:'Linked Existing',
+     expected_revision:Number(document.getElementById('controllerModal').dataset.requestRevision),
      controller_notes:controllerNotes,
      existing_obligation_id:
       selectedExistingObligationId
