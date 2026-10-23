@@ -8,12 +8,13 @@ test('customer satisfaction tasks, notes, prepared answers and resources work on
   await page.addInitScript(()=>localStorage.setItem('vero_session_token','fixture-only'));
   await page.route('**/*',async route=>{const u=new URL(route.request().url());
    if(u.pathname.endsWith('/auth/me'))return route.fulfill({json:{user:{first_name:'Alex',last_name:'Reviewer',vero_role:'User'}}});
+   if(u.pathname.endsWith('/customer-surveys'))return route.fulfill({json:{can_manage:false,customers:[],contacts:[],rounds:[],invitations:[],units:[],owners:[],as_of:'2026-10-23'}});
    if(u.hostname!=='vero.test')return route.request().resourceType()==='script'?route.abort():route.fulfill({json:{actions:[],can_manage:false}});
    const file=path.resolve(root,'.'+u.pathname);if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404});
    return route.fulfill({contentType:({'.html':'text/html','.js':'application/javascript','.css':'text/css','.png':'image/png'})[path.extname(file)]||'application/octet-stream',body:fs.readFileSync(file)});
   });
   await page.goto('https://vero.test/customer-satisfaction-risk-management.html');
-  await page.locator('#risk-page-body').waitFor();await page.waitForFunction(()=>!document.documentElement.hasAttribute('data-vero-loading'));
+  await page.getByText('Customer satisfaction guidance',{exact:true}).click();await page.locator('#risk-page-body').waitFor();await page.waitForFunction(()=>!document.documentElement.hasAttribute('data-vero-loading'));
   assert.equal(await page.locator('#risk-tasks button').count(),4);
   assert.match(await page.locator('#risk-metadata').textContent(),/Draft guidance/);
   await page.getByRole('button',{name:'Review feedback and complaints',exact:false}).click();

@@ -5,7 +5,7 @@
  function init(){
   const main=document.querySelector('main');if(!main)return;
   const page=location.pathname.split('/').pop()||'index.html';
-  const targets={'change-management.html':'#changeContent > .actions','continual-improvement-management.html':'.improvement-actions','documents.html':'.document-actions','records.html':'.records-toolbar','risk.html':'.vero-risk-primary-actions','incident-management.html':'#new-report'};
+  const targets={'customer-satisfaction-risk-management.html':'#csActions','change-management.html':'#changeContent > .actions','continual-improvement-management.html':'.improvement-actions','documents.html':'.document-actions','records.html':'.records-toolbar','risk.html':'.vero-risk-primary-actions','incident-management.html':'#new-report'};
   Object.assign(targets,{'project-management.html':'.project-toolbar','maintenance-management.html':'.project-toolbar','asset-management.html':'#assetAdd','client-services-sites.html':'.site-register-actions'});
   let row=targets[page]?main.querySelector(targets[page]):main.querySelector(':scope > .actions');
   if(page==='incident-management.html')row=row?.closest('.toolbar');
